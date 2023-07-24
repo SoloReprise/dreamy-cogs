@@ -24,6 +24,7 @@ ASPECT_RATIO = (21, 9)
 class Generator(MixinMeta, ABC):
     def generate_profile(
         self,
+        member: Member,  # Add discord.Member parameter
         bg_image: str = None,
         profile_image: str = "https://i.imgur.com/sUYWCve.png",
         level: int = 1,
@@ -32,7 +33,6 @@ class Generator(MixinMeta, ABC):
         next_xp: int = 100,
         user_position: str = "1",
         user_name: str = "Unknown#0117",
-        display_name: Optional[str] = None,  # Add the display_name parameter
         user_status: str = "online",
         colors: dict = None,
         messages: str = "0",
@@ -54,7 +54,8 @@ class Generator(MixinMeta, ABC):
             profile = Image.open(profile_bytes)
         else:
             profile = Image.open(self.default_pfp)
-
+        # Get the user's display name from the discord.Member object
+        user_name = member.display_name
         # Get background
         if bg_image and bg_image != "random":
             bgpath = os.path.join(self.path, "backgrounds")
@@ -75,7 +76,7 @@ class Generator(MixinMeta, ABC):
             .convert("RGBA")
             .resize((1050, 450), Image.Resampling.LANCZOS)
         )
-        name_text = display_name if display_name else user_name
+
         # Colors
         # Sample colors from profile pic to use for default colors
         rgbs = self.get_img_colors(profile, 8)
@@ -311,7 +312,7 @@ class Generator(MixinMeta, ABC):
             name_emoji_y = name_bbox[3] - name_size
             pilmoji.text(
                 (bar_start + 10, name_y),
-                name_text,
+                user_name,
                 namecolor,
                 font=name_font,
                 # anchor="lt",
