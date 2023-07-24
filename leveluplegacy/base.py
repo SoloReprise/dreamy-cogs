@@ -166,60 +166,65 @@ class UserCommands(MixinMeta, ABC):
 
 @commands.command(name="stars", aliases=["givestar", "addstar", "thanks", "gg"])
 @commands.guild_only()
-async def give_stars(self, ctx: commands.Context, *users: discord.Member):
+async def give_star(self, ctx: commands.Context, *users: discord.Member):
     """
     Reward good noodles
-    Give stars to users for being good noodles
+    Give stars to user(s) for being a good noodle
     """
     now = datetime.datetime.now()
     star_giver = str(ctx.author.id)
     guild_id = ctx.guild.id
     if guild_id not in self.data:
         return await ctx.send(_("Cache not loaded yet, wait a few more seconds."))
-    if star_giver in users:
+
+    if not users:
+        return await ctx.send(_("Please mention the user(s) you want to give stars to."))
+
+    if ctx.author in users:
         return await ctx.send(_("You can't give stars to yourself!"))
-    bots = [user for user in users if user.bot]
-    if bots:
-        return await ctx.send(_("You can't give stars to bots!"))
-    
+
+    if any(user.bot for user in users):
+        return await ctx.send(_("You can't give stars to a bot!"))
+
     if guild_id not in self.stars:
         self.stars[guild_id] = {}
 
-    stars_given = 0
-    for user in users:
-        user_id = str(user.id)
-        if star_giver not in self.stars[guild_id]:
+    if star_giver not in self.stars[guild_id]:
+        self.stars[guild_id][star_giver] = now
+    else:
+        cooldown = self.data[guild_id]["starcooldown"]
+        lastused = self.stars[guild_id][star_giver]
+        td = now - lastused
+        td = td.total_seconds()
+        if td > cooldown:
             self.stars[guild_id][star_giver] = now
         else:
-            cooldown = self.data[guild_id]["starcooldown"]
-            lastused = self.stars[guild_id][star_giver]
-            td = now - lastused
-            td = td.total_seconds()
-            if td <= cooldown:
-                time_left = cooldown - td
-                tstring = time_formatter(time_left)
-                msg = (
-                    _("You need to wait ")
-                    + f"**{tstring}**"
-                    + _(" before you can give more stars!")
-                )
-                return await ctx.send(msg)
-        
-        mention = self.data[guild_id]["mention"]
-        users_data = self.data[guild_id]["users"]
-        if user_id in users_data:
+            time_left = cooldown - td
+            tstring = time_formatter(time_left)
+            msg = (
+                _("You need to wait ")
+                + f"**{tstring}**"
+                + _(" before you can give more stars!")
+            )
+            return await ctx.send(msg)
+
+    mention = self.data[guild_id]["mention"]
+    users_data = self.data[guild_id]["users"]
+
+    for user in users:
+        user_id = str(user.id)
+        if user_id not in users_data:
+            await ctx.send(_("No data available for {} yet!").format(user.mention if mention else f"**{user.name}**"))
+        else:
             users_data[user_id]["stars"] += 1
-            stars_given += 1
             if self.data[guild_id]["weekly"]["on"]:
                 if guild_id not in self.data[guild_id]["weekly"]["users"]:
                     self.init_user_weekly(guild_id, user_id)
                 self.data[guild_id]["weekly"]["users"][user_id]["stars"] += 1
 
-    if stars_given == 0:
-        return await ctx.send(_("No data available for the given users yet!"))
+            name = user.mention if mention else f"**{user.name}**"
+            await ctx.send(_("You just gave a star to {}!").format(name))
 
-    await ctx.send(_("You just gave stars to {} users!").format(stars_given))
-    
     # For testing purposes
     @commands.command(name="mocklvl", hidden=True)
     async def get_lvl_test(self, ctx, *, user: discord.Member = None):
