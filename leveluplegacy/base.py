@@ -164,7 +164,7 @@ class UserCommands(MixinMeta, ABC):
             banner_url = f"https://cdn.discordapp.com/banners/{user.id}/{banner_id}?size=1024"
             return banner_url
 
-    @commands.command(name="stars", aliases=["givestar", "addstar", "thanks"])
+    @commands.command(name="stars", aliases=["givestar", "addstar", "thanks","gg"])
     @commands.guild_only()
     async def give_star(self, ctx: commands.Context, *, user: discord.Member):
         """
