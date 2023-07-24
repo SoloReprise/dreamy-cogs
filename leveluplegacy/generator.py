@@ -633,6 +633,8 @@ class Generator(MixinMeta, ABC):
             name += _(" - Prestige ") + str(prestige)
         stars = str(stars)
 
+        display_name = user.display_name
+        generate_profile(display_name=display_name, ...other_parameters)
         base_font = self.font
         if font_name:
             fontfile = os.path.join(self.fonts, font_name)
