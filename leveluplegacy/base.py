@@ -164,48 +164,57 @@ class UserCommands(MixinMeta, ABC):
             banner_url = f"https://cdn.discordapp.com/banners/{user.id}/{banner_id}?size=1024"
             return banner_url
 
-    @commands.command(name="stars", aliases=["givestar", "addstar", "thanks","gg"])
-    @commands.guild_only()
-    async def give_star(self, ctx: commands.Context, *, user: discord.Member):
-        """
-        Reward a good noodle
-        Give a star to a user for being a good noodle
-        """
-        now = datetime.datetime.now()
-        user_id = str(user.id)
-        star_giver = str(ctx.author.id)
-        guild_id = ctx.guild.id
-        if guild_id not in self.data:
-            return await ctx.send(_("Cache not loaded yet, wait a few more seconds."))
-        if ctx.author == user:
-            return await ctx.send(_("You can't give stars to yourself!"))
+@commands.command(name="stars", aliases=["givestar", "addstar", "thanks", "gg"])
+@commands.guild_only()
+async def give_stars(self, ctx: commands.Context, *users: discord.Member):
+    """
+    Reward good noodles
+    Give stars to users for being good noodles
+    """
+    now = datetime.datetime.now()
+    star_giver = ctx.author
+    guild_id = ctx.guild.id
+
+    if guild_id not in self.data:
+        return await ctx.send(_("Cache not loaded yet, wait a few more seconds."))
+
+    if len(users) == 0:
+        return await ctx.send(_("Please mention the users you want to give stars to!"))
+
+    for user in users:
+        if user == star_giver:
+            await ctx.send(_("You can't give stars to yourself!"))
+            continue
+
         if user.bot:
-            return await ctx.send(_("You can't give stars to a bot!"))
+            await ctx.send(_("You can't give stars to a bot!"))
+            continue
+
+        user_id = str(user.id)
         if guild_id not in self.stars:
             self.stars[guild_id] = {}
-        if star_giver not in self.stars[guild_id]:
-            self.stars[guild_id][star_giver] = now
+
+        if str(star_giver.id) not in self.stars[guild_id]:
+            self.stars[guild_id][str(star_giver.id)] = now
         else:
             cooldown = self.data[guild_id]["starcooldown"]
-            lastused = self.stars[guild_id][star_giver]
+            lastused = self.stars[guild_id][str(star_giver.id)]
             td = now - lastused
             td = td.total_seconds()
-            if td > cooldown:
-                self.stars[guild_id][star_giver] = now
-            else:
+            if td <= cooldown:
                 time_left = cooldown - td
                 tstring = time_formatter(time_left)
-                msg = (
-                    _("You need to wait ")
-                    + f"**{tstring}**"
-                    + _(" before you can give more stars!")
-                )
-                return await ctx.send(msg)
+                msg = (_("You need to wait ") + f"**{tstring}**" + _(" before you can give more stars!"))
+                await ctx.send(msg)
+                continue
+
         mention = self.data[guild_id]["mention"]
-        users = self.data[guild_id]["users"]
-        if user_id not in users:
-            return await ctx.send(_("No data available for that user yet!"))
-        self.data[guild_id]["users"][user_id]["stars"] += 1
+        users_data = self.data[guild_id]["users"]
+        if user_id not in users_data:
+            await ctx.send(_("No data available for that user yet!"))
+            continue
+
+        users_data[user_id]["stars"] += 1
         if self.data[guild_id]["weekly"]["on"]:
             if guild_id not in self.data[guild_id]["weekly"]["users"]:
                 self.init_user_weekly(guild_id, user_id)
