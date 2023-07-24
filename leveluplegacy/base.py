@@ -164,41 +164,25 @@ class UserCommands(MixinMeta, ABC):
             banner_url = f"https://cdn.discordapp.com/banners/{user.id}/{banner_id}?size=1024"
             return banner_url
 
-@commands.command(name="stars", aliases=["givestar", "addstar", "thanks", "gg"])
-@commands.guild_only()
-async def give_star(self, ctx: commands.Context, *users: Union[discord.Member, int]):
-    """
-    Reward good noodles
-    Give stars to users for being good noodles
-    """
-    now = datetime.datetime.now()
-    star_giver = ctx.author.id
-    guild_id = ctx.guild.id
-    if guild_id not in self.data:
-        return await ctx.send(_("Cache not loaded yet, wait a few more seconds."))
-
-    if not users:
-        return await ctx.send(_("You need to mention at least one user to give stars!"))
-
-    mentioned_users = []
-    for user in users:
-        if isinstance(user, int):  # If the user is mentioned using ID
-            user = ctx.guild.get_member(user)
-        if not user:
-            return await ctx.send(_("User not found!"))
-        mentioned_users.append(user)
-
-    if ctx.author in mentioned_users:
-        return await ctx.send(_("You can't give stars to yourself!"))
-
-    if any(user.bot for user in mentioned_users):
-        return await ctx.send(_("You can't give stars to a bot!"))
-
-    if guild_id not in self.stars:
-        self.stars[guild_id] = {}
-
-    for user in mentioned_users:
+    @commands.command(name="stars", aliases=["givestar", "addstar", "thanks","gg"])
+    @commands.guild_only()
+    async def give_star(self, ctx: commands.Context, *, user: discord.Member):
+        """
+        Reward a good noodle
+        Give a star to a user for being a good noodle
+        """
+        now = datetime.datetime.now()
         user_id = str(user.id)
+        star_giver = str(ctx.author.id)
+        guild_id = ctx.guild.id
+        if guild_id not in self.data:
+            return await ctx.send(_("Cache not loaded yet, wait a few more seconds."))
+        if ctx.author == user:
+            return await ctx.send(_("You can't give stars to yourself!"))
+        if user.bot:
+            return await ctx.send(_("You can't give stars to a bot!"))
+        if guild_id not in self.stars:
+            self.stars[guild_id] = {}
         if star_giver not in self.stars[guild_id]:
             self.stars[guild_id][star_giver] = now
         else:
@@ -206,7 +190,9 @@ async def give_star(self, ctx: commands.Context, *users: Union[discord.Member, i
             lastused = self.stars[guild_id][star_giver]
             td = now - lastused
             td = td.total_seconds()
-            if td <= cooldown:
+            if td > cooldown:
+                self.stars[guild_id][star_giver] = now
+            else:
                 time_left = cooldown - td
                 tstring = time_formatter(time_left)
                 msg = (
@@ -215,15 +201,11 @@ async def give_star(self, ctx: commands.Context, *users: Union[discord.Member, i
                     + _(" before you can give more stars!")
                 )
                 return await ctx.send(msg)
-            self.stars[guild_id][star_giver] = now
-
-        user_id = str(user.id)
         mention = self.data[guild_id]["mention"]
-        users_data = self.data[guild_id]["users"]
-        if user_id not in users_data:
+        users = self.data[guild_id]["users"]
+        if user_id not in users:
             return await ctx.send(_("No data available for that user yet!"))
-
-        users_data[user_id]["stars"] += 1
+        self.data[guild_id]["users"][user_id]["stars"] += 1
         if self.data[guild_id]["weekly"]["on"]:
             if guild_id not in self.data[guild_id]["weekly"]["users"]:
                 self.init_user_weekly(guild_id, user_id)
@@ -231,7 +213,7 @@ async def give_star(self, ctx: commands.Context, *users: Union[discord.Member, i
 
         name = user.mention if mention else f"**{user.name}**"
         await ctx.send(_("You just gave a star to {}!").format(name))
-        
+
     # For testing purposes
     @commands.command(name="mocklvl", hidden=True)
     async def get_lvl_test(self, ctx, *, user: discord.Member = None):
