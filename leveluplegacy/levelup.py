@@ -1096,18 +1096,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         """Access LevelUp setting commands"""
         pass
 
-    @lvl_group.command(name="setbackground")
-    @commands.has_permissions(administrator=True)
-    async def set_background(self, ctx: commands.Context, user: discord.Member, image_url: str = None):
-        """Set a background for a user's profile"""
-        # The implementation of this command from the previous response.
-
-    @lvl_group.command(name="removebackground")
-    @commands.has_permissions(administrator=True)
-    async def remove_background(self, ctx: commands.Context, user: discord.Member):
-        """Remove the background for a user's profile"""
-        # The implementation of this command from the previous response.
-        
     @lvl_group.command(name="view")
     @commands.bot_has_permissions(embed_links=True)
     async def view_settings(self, ctx: commands.Context):
@@ -2170,78 +2158,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             self.data[ctx.guild.id]["invisible"] = True
             await ctx.send(_("Invisible users can no longer gain XP while in a voice channel"))
         await self.save_cache(ctx.guild)
-        
-@lvl_group.command(name="setbackground")
-async def set_background(
-    self,
-    ctx: commands.Context,
-    user: discord.Member,
-    image_url: str = None
-):
-    """Set a background for a user's profile"""
-    if not self.data[ctx.guild.id]["usepics"]:
-        return await ctx.send(
-            _("Image profiles are disabled on this server, this setting has no effect")
-        )
-
-    user_id = str(user.id)
-    if user_id not in self.data[ctx.guild.id]["users"]:
-        self.init_user(ctx.guild.id, user_id)
-
-    backgrounds = os.path.join(self.path, "backgrounds")
-
-    # If image url is given, run some checks
-    filepath = None
-    if image_url and image_url != "random":
-        # Check if they specified a default background filename
-        for filename in os.listdir(backgrounds):
-            if image_url.lower() in filename.lower():
-                image_url = filename
-                filepath = os.path.join(backgrounds, filename)
-                break
-        else:
-            if not await self.valid_url(ctx, image_url):
-                return
-    else:
-        if ctx.message.attachments:
-            image_url = ctx.message.attachments[0].url
-            if not await self.valid_url(ctx, image_url):
-                return
-
-    if image_url:
-        self.data[ctx.guild.id]["users"][user_id]["background"] = image_url
-        if image_url == "random":
-            await ctx.send(
-                f"The profile background for {user.mention} will be randomized each time they run the profile command!"
-            )
-        else:
-            # Either a valid url or a specified default file
-            if filepath:
-                file = discord.File(filepath)
-                await ctx.send(f"The background image for {user.mention} has been set!", file=file)
-            else:
-                await ctx.send(f"The background image for {user.mention} has been set!")
-    else:
-        self.data[ctx.guild.id]["users"][user_id]["background"] = None
-        await ctx.send(f"The background for {user.mention} has been removed since you did not specify a url!")
-
-    await self.save_cache(ctx.guild)
-
-@lvl_group.command(name="removebackground")
-async def remove_background(
-    self,
-    ctx: commands.Context,
-    user: discord.Member
-):
-    """Remove the background for a user's profile"""
-    user_id = str(user.id)
-    if user_id in self.data[ctx.guild.id]["users"]:
-        self.data[ctx.guild.id]["users"][user_id]["background"] = None
-        await ctx.send(f"The background for {user.mention} has been removed.")
-        await self.save_cache(ctx.guild)
-    else:
-        await ctx.send(f"No background set for {user.mention}.")
-
 
     @lvl_group.command(name="addxp")
     async def add_xp(
