@@ -1096,6 +1096,18 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         """Access LevelUp setting commands"""
         pass
 
+    @lvl_group.command(name="setbackground")
+    @commands.has_permissions(administrator=True)
+    async def set_background(self, ctx: commands.Context, user: discord.Member, image_url: str = None):
+        """Set a background for a user's profile"""
+        # The implementation of this command from the previous response.
+
+    @lvl_group.command(name="removebackground")
+    @commands.has_permissions(administrator=True)
+    async def remove_background(self, ctx: commands.Context, user: discord.Member):
+        """Remove the background for a user's profile"""
+        # The implementation of this command from the previous response.
+        
     @lvl_group.command(name="view")
     @commands.bot_has_permissions(embed_links=True)
     async def view_settings(self, ctx: commands.Context):
