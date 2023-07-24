@@ -609,7 +609,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         if not member:
             return
         mentionuser = member.mention
-        name = member.display_name
+        name = member.name
         pfp = None
         try:
             if self.dpy2:
@@ -1143,7 +1143,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                     updated_count += 1
             await ctx.send(_("Updated backgrounds for {} users with the {} role.").format(updated_count, user_or_role.name))
         await self.save_cache(ctx.guild)
-
+        
     @lvl_group.command(name="view")
     @commands.bot_has_permissions(embed_links=True)
     async def view_settings(self, ctx: commands.Context):
