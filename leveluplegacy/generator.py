@@ -162,12 +162,7 @@ class Generator(MixinMeta, ABC):
             if iters > 20:
                 # iters = 0
                 break
-
-        # Place semi-transparent box over right side
-        blank = Image.new("RGBA", card.size, (255, 255, 255, 0))
-        transparent_box = Image.new("RGBA", card.size, (0, 0, 0, 100))
-        blank.paste(transparent_box, (bar_start - 20, 0))
-
+                
         # Make the semi-transparent box area blurry
         if blur:
             blurred = card.filter(ImageFilter.GaussianBlur(3))
@@ -407,7 +402,7 @@ class Generator(MixinMeta, ABC):
         # pfp border - draw at 4x and resample down to 1x for nice smooth circles then paste to the image
         circle_img = Image.new("RGBA", (1600, 1600))
         pfp_border = ImageDraw.Draw(circle_img)
-        pfp_border.ellipse([4, 4, 1596, 1596], fill=(15, 25, 30, 0), outline=base, width=20)
+        pfp_border.ellipse([4, 4, 1596, 1596], fill=(255, 255, 255, 0), outline=base, width=20)
         circle_img = circle_img.resize((330, 330), Image.Resampling.LANCZOS)
         final.paste(circle_img, (circle_x - 15, circle_y - 15), circle_img)
 
