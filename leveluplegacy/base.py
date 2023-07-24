@@ -143,10 +143,14 @@ class UserCommands(MixinMeta, ABC):
 
         if not img:
             return None
+
+        # Get the user's nickname on the server (if available), else use their display name.
+        nickname = user.nick if user.nick else user.display_name
+
         animated = getattr(img, "is_animated", False)
         ext = "GIF" if animated else "WEBP"
         buffer = BytesIO()
-        buffer.name = f"{user.id}.{ext.lower()}"
+        buffer.name = f"{nickname}.{ext.lower()}"
         img.save(buffer, save_all=True, format=ext)
         buffer.seek(0)
         return discord.File(buffer, filename=buffer.name)
