@@ -19,13 +19,11 @@ log = logging.getLogger("red.vrt.levelup.generator")
 _ = Translator("LevelUp", __file__)
 ASPECT_RATIO = (21, 9)
 
-import discord
 
 @cog_i18n(_)
 class Generator(MixinMeta, ABC):
     def generate_profile(
         self,
-        member: discord.Member,  # Use discord.Member here
         bg_image: str = None,
         profile_image: str = "https://i.imgur.com/sUYWCve.png",
         level: int = 1,
@@ -55,8 +53,7 @@ class Generator(MixinMeta, ABC):
             profile = Image.open(profile_bytes)
         else:
             profile = Image.open(self.default_pfp)
-        # Get the user's display name from the discord.Member object
-        user_name = member.display_name
+
         # Get background
         if bg_image and bg_image != "random":
             bgpath = os.path.join(self.path, "backgrounds")
