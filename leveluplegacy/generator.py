@@ -210,10 +210,10 @@ class Generator(MixinMeta, ABC):
         final = Image.alpha_composite(final, progress_bar)
 
         # Stat strings
-        rank = _("Rank: #") + str(user_position)
-        leveltxt = _("Level: ") + str(level)
+        rank = _("Rango: #") + str(user_position)
+        leveltxt = _("Nivel: ") + str(level)
         exp = (
-            _("Exp: ")
+            _("Experiencia: ")
             + f"{humanize_number(user_xp_progress)}/{humanize_number(next_xp_diff)} ({humanize_number(user_xp)} total)"
         )
         message_count = _("Messages: ") + messages
