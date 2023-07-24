@@ -171,8 +171,6 @@ async def give_star(self, ctx: commands.Context, *users: discord.Member):
     Reward good noodles
     Give a star to one or multiple users for being good noodles
     """
-    now = datetime.datetime.now()
-    guild_id = ctx.guild.id
     if not users:
         return await ctx.send(_("Please mention the user(s) you want to give stars to!"))
 
