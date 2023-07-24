@@ -1096,6 +1096,54 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         """Access LevelUp setting commands"""
         pass
 
+    @lvl_group.command(name="removebg", aliases=["clearbg"])
+    async def remove_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role]):
+        """Remove the background of a user or role."""
+        gid = ctx.guild.id
+        if not user_or_role:
+            return await ctx.send(_("I cannot find that user or role"))
+        
+        if isinstance(user_or_role, discord.Member):
+            uid = str(user_or_role.id)
+            if uid in self.data[gid]["users"]:
+                self.data[gid]["users"][uid]["background"] = None
+                await ctx.send(_("The background for {} has been removed.").format(user_or_role.name))
+            else:
+                await ctx.send(_("{} does not have a custom background.").format(user_or_role.name))
+        else:
+            users_with_role = [str(user.id) for user in ctx.guild.members if not user.bot and user_or_role in user.roles]
+            removed_count = 0
+            for uid in users_with_role:
+                if uid in self.data[gid]["users"]:
+                    self.data[gid]["users"][uid]["background"] = None
+                    removed_count += 1
+            await ctx.send(_("Removed backgrounds for {} users with the {} role.").format(removed_count, user_or_role.name))
+        await self.save_cache(ctx.guild)
+
+    @lvl_group.command(name="editbg")
+    async def edit_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role], image_url: str):
+        """Edit the background of a user or role."""
+        # Validate the image URL and perform necessary checks similar to the set_user_background function
+        # ... Your code to validate the URL ...
+
+        gid = ctx.guild.id
+        if isinstance(user_or_role, discord.Member):
+            uid = str(user_or_role.id)
+            if uid in self.data[gid]["users"]:
+                self.data[gid]["users"][uid]["background"] = image_url
+                await ctx.send(_("The background for {} has been updated.").format(user_or_role.name))
+            else:
+                await ctx.send(_("{} does not have a custom background.").format(user_or_role.name))
+        else:
+            users_with_role = [str(user.id) for user in ctx.guild.members if not user.bot and user_or_role in user.roles]
+            updated_count = 0
+            for uid in users_with_role:
+                if uid in self.data[gid]["users"]:
+                    self.data[gid]["users"][uid]["background"] = image_url
+                    updated_count += 1
+            await ctx.send(_("Updated backgrounds for {} users with the {} role.").format(updated_count, user_or_role.name))
+        await self.save_cache(ctx.guild)
+        
     @lvl_group.command(name="view")
     @commands.bot_has_permissions(embed_links=True)
     async def view_settings(self, ctx: commands.Context):
