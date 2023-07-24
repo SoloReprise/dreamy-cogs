@@ -21,6 +21,7 @@ ASPECT_RATIO = (21, 9)
 
 
 @cog_i18n(_)
+from discord import Member
 class Generator(MixinMeta, ABC):
     def generate_profile(
         self,
