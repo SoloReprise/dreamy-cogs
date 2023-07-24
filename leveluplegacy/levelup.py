@@ -1096,54 +1096,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         """Access LevelUp setting commands"""
         pass
 
-    @lvl_group.command(name="removebg", aliases=["clearbg"])
-    async def remove_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role]):
-        """Remove the background of a user or role."""
-        gid = ctx.guild.id
-        if not user_or_role:
-            return await ctx.send(_("I cannot find that user or role"))
-        
-        if isinstance(user_or_role, discord.Member):
-            uid = str(user_or_role.id)
-            if uid in self.data[gid]["users"]:
-                self.data[gid]["users"][uid]["background"] = None
-                await ctx.send(_("The background for {} has been removed.").format(user_or_role.name))
-            else:
-                await ctx.send(_("{} does not have a custom background.").format(user_or_role.name))
-        else:
-            users_with_role = [str(user.id) for user in ctx.guild.members if not user.bot and user_or_role in user.roles]
-            removed_count = 0
-            for uid in users_with_role:
-                if uid in self.data[gid]["users"]:
-                    self.data[gid]["users"][uid]["background"] = None
-                    removed_count += 1
-            await ctx.send(_("Removed backgrounds for {} users with the {} role.").format(removed_count, user_or_role.name))
-        await self.save_cache(ctx.guild)
-
-    @lvl_group.command(name="editbg")
-    async def edit_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role], image_url: str):
-        """Edit the background of a user or role."""
-        # Validate the image URL and perform necessary checks similar to the set_user_background function
-        # ... Your code to validate the URL ...
-
-        gid = ctx.guild.id
-        if isinstance(user_or_role, discord.Member):
-            uid = str(user_or_role.id)
-            if uid in self.data[gid]["users"]:
-                self.data[gid]["users"][uid]["background"] = image_url
-                await ctx.send(_("The background for {} has been updated.").format(user_or_role.name))
-            else:
-                await ctx.send(_("{} does not have a custom background.").format(user_or_role.name))
-        else:
-            users_with_role = [str(user.id) for user in ctx.guild.members if not user.bot and user_or_role in user.roles]
-            updated_count = 0
-            for uid in users_with_role:
-                if uid in self.data[gid]["users"]:
-                    self.data[gid]["users"][uid]["background"] = image_url
-                    updated_count += 1
-            await ctx.send(_("Updated backgrounds for {} users with the {} role.").format(updated_count, user_or_role.name))
-        await self.save_cache(ctx.guild)
-        
     @lvl_group.command(name="view")
     @commands.bot_has_permissions(embed_links=True)
     async def view_settings(self, ctx: commands.Context):
@@ -2218,33 +2170,55 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         gid = ctx.guild.id
         if not user_or_role:
             return await ctx.send(_("I cannot find that user or role"))
-        if isinstance(user_or_role, discord.Member):
-            uid = str(user_or_role.id)
-            if uid not in self.data[gid]["users"]:
-                self.init_user(gid, uid)
-            self.data[gid]["users"][uid]["xp"] += xp
-            txt = str(xp) + _("xp has been added to ") + user_or_role.name
-            await ctx.send(txt)
-        else:
-            users = []
-            for user in ctx.guild.members:
-                if user.bot:
-                    continue
-                if user_or_role in user.roles:
-                    users.append(str(user.id))
-            for uid in users:
+        
+        # Check if the user_or_role is a role and if the role is the designated background role
+        if isinstance(user_or_role, discord.Role) and user_or_role.id == self.data[gid].get("bg_role"):
+            # Add XP to users with the designated background role
+            users_with_role = [str(user.id) for user in ctx.guild.members if not user.bot and user_or_role in user.roles]
+            for uid in users_with_role:
                 if uid not in self.data[gid]["users"]:
                     self.init_user(gid, uid)
                 self.data[gid]["users"][uid]["xp"] += xp
+                # Trigger background update for the user who gains the background role
+                await self.update_user_background(gid, uid, "new_background_url_here")
+
             txt = (
                 _("Added ")
                 + str(xp)
                 + _(" xp to ")
-                + humanize_number(len(users))
+                + humanize_number(len(users_with_role))
                 + _(" users that had the ")
+                + user_or_role.name
+                + _(" role")
             )
-            txt += user_or_role.name + _("role")
             await ctx.send(txt)
+        else:
+            # Add XP to individual users
+            if isinstance(user_or_role, discord.Member):
+                uid = str(user_or_role.id)
+                if uid not in self.data[gid]["users"]:
+                    self.init_user(gid, uid)
+                self.data[gid]["users"][uid]["xp"] += xp
+                txt = str(xp) + _("xp has been added to ") + user_or_role.name
+                await ctx.send(txt)
+            else:
+                # Handle adding XP to multiple users with a specific role (similar to your original code)
+                users_with_role = [str(user.id) for user in ctx.guild.members if not user.bot and user_or_role in user.roles]
+                for uid in users_with_role:
+                    if uid not in self.data[gid]["users"]:
+                        self.init_user(gid, uid)
+                    self.data[gid]["users"][uid]["xp"] += xp
+                txt = (
+                    _("Added ")
+                    + str(xp)
+                    + _(" xp to ")
+                    + humanize_number(len(users_with_role))
+                    + _(" users that had the ")
+                    + user_or_role.name
+                    + _(" role")
+                )
+                await ctx.send(txt)
+
         await self.save_cache(ctx.guild)
 
     @lvl_group.command(name="setlevel")
