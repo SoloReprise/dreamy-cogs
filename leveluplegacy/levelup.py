@@ -3097,7 +3097,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         }
         await cog.register_function("LevelUp", schema)
 
-    async def get_user_profile(self, user: ,discord.Member *args, **kwargs):
+    async def get_user_profile(self, user: discord.Member, *args, **kwargs):
         if user.guild.id not in self.data:
             return "The LevelUp cog has been loaded but doesnt have any data yet"
         self.init_user(user.guild.id, str(user.id))
