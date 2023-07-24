@@ -228,9 +228,9 @@ async def give_star(self, ctx: commands.Context, *users: discord.Member):
 
     name_mentions = [user.mention if mention else f"**{user.name}**" for user in users]
     if star_count > 0:
-        await ctx.send(_("You just gave stars to {}!").format(", ".join(name_mentions)))
+    await ctx.send(_("You just gave stars to {}!").format(", ".join(name_mentions)))
 
-
+    
     # For testing purposes
     @commands.command(name="mocklvl", hidden=True)
     async def get_lvl_test(self, ctx, *, user: discord.Member = None):
