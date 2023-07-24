@@ -24,6 +24,7 @@ ASPECT_RATIO = (21, 9)
 class Generator(MixinMeta, ABC):
     def generate_profile(
         self,
+        user: User,  # Pass the Discord user object here
         bg_image: str = None,
         profile_image: str = "https://i.imgur.com/sUYWCve.png",
         level: int = 1,
@@ -46,6 +47,7 @@ class Generator(MixinMeta, ABC):
         render_gifs: bool = False,
         blur: bool = False,
     ):
+        user_name = user.display_name
         # get profile pic
         if profile_image:
             pfp_image = self.get_image_content_from_url(str(profile_image))
