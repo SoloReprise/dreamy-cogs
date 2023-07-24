@@ -857,9 +857,9 @@ class UserCommands(MixinMeta, ABC):
                 em.add_field(name=_("Progress"), value=box(lvlbar, "py"))
                 txt = _("Profile")
                 if role_icon:
-                    em.set_author(name=f"{user.name}'s {txt}", icon_url=role_icon)
+                    em.set_author(name=f"{user.display_name}'s {txt}", icon_url=role_icon)
                 else:
-                    em.set_author(name=f"{user.name}'s {txt}")
+                    em.set_author(name=f"{user.display_name}'s {txt}")
                 if pfp:
                     em.set_thumbnail(url=pfp)
                 try:
@@ -885,7 +885,7 @@ class UserCommands(MixinMeta, ABC):
                     "user_xp": xp,  # User current xp
                     "next_xp": xp_needed,  # xp required for next level
                     "user_position": position,  # User position in leaderboard
-                    "user_name": user.name,  # username with discriminator
+                    "user_name": user.display_name,  # username with discriminator
                     "user_status": str(
                         user.status
                     ).strip(),  # User status eg. online, offline, idle, streaming, dnd
@@ -1081,7 +1081,7 @@ class UserCommands(MixinMeta, ABC):
                 uid = sorted_users[i][0]
                 user = ctx.guild.get_member(int(uid))
                 if user:
-                    user = user.name
+                    user = user.display_name
                 else:
                     user = uid
                 stars = sorted_users[i][1]
