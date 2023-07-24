@@ -857,9 +857,9 @@ class UserCommands(MixinMeta, ABC):
                 em.add_field(name=_("Progress"), value=box(lvlbar, "py"))
                 txt = _("Profile")
                 if role_icon:
-                    em.set_author(name=f"{user.display_name}'s {txt}", icon_url=role_icon)
+                    em.set_author(name=f"{user.display_name} ({ctx.guild.name})'s {txt}", icon_url=role_icon)
                 else:
-                    em.set_author(name=f"{user.display_name}'s {txt}")
+                    em.set_author(name=f"{user.display_name} ({ctx.guild.name})'s {txt}")
                 if pfp:
                     em.set_thumbnail(url=pfp)
                 try:
