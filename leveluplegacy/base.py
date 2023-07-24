@@ -307,19 +307,6 @@ class UserCommands(MixinMeta, ABC):
         txt = _("Your default background folder path is \n")
         await ctx.send(f"{txt}`{bgpath}`")
 
-    @lvl_group.command(name="setbgrole")
-    async def set_bg_role(self, ctx: commands.Context, background_role: discord.Role):
-        """Set the role that will change the background for users who win it."""
-        gid = ctx.guild.id
-        self.data[gid]["bg_role"] = background_role.id
-        await ctx.send(_("The background role has been set to {}.").format(background_role.name))
-        await self.save_cache(ctx.guild)
-
-    async def update_user_background(self, guild_id, user_id, new_background):
-        """Update the background of a user."""
-        if user_id in self.data[guild_id]["users"]:
-            self.data[guild_id]["users"][user_id]["background"] = new_background
-
     @set_profile.command(name="addbackground")
     @commands.is_owner()
     async def add_background(self, ctx: commands.Context, preferred_filename: str = None):
@@ -870,9 +857,9 @@ class UserCommands(MixinMeta, ABC):
                 em.add_field(name=_("Progress"), value=box(lvlbar, "py"))
                 txt = _("Profile")
                 if role_icon:
-                    em.set_author(name=f"{user.display_name}'s {txt}", icon_url=role_icon)
+                    em.set_author(name=f"{user.name}'s {txt}", icon_url=role_icon)
                 else:
-                    em.set_author(name=f"{user.display_name}'s {txt}")
+                    em.set_author(name=f"{user.name}'s {txt}")
                 if pfp:
                     em.set_thumbnail(url=pfp)
                 try:
@@ -898,7 +885,7 @@ class UserCommands(MixinMeta, ABC):
                     "user_xp": xp,  # User current xp
                     "next_xp": xp_needed,  # xp required for next level
                     "user_position": position,  # User position in leaderboard
-                    "user_name": user.display_name,  # username with discriminator
+                    "user_name": user.name,  # username with discriminator
                     "user_status": str(
                         user.status
                     ).strip(),  # User status eg. online, offline, idle, streaming, dnd
@@ -1094,7 +1081,7 @@ class UserCommands(MixinMeta, ABC):
                 uid = sorted_users[i][0]
                 user = ctx.guild.get_member(int(uid))
                 if user:
-                    user = user.display_name
+                    user = user.name
                 else:
                     user = uid
                 stars = sorted_users[i][1]
