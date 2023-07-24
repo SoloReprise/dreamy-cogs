@@ -162,7 +162,12 @@ class Generator(MixinMeta, ABC):
             if iters > 20:
                 # iters = 0
                 break
-                
+
+        # Place semi-transparent box over right side
+        blank = Image.new("RGBA", card.size, (255, 255, 255, 0))
+        transparent_box = Image.new("RGBA", card.size, (0, 0, 0, 0))
+        blank.paste(transparent_box, (bar_start - 20, 0))
+
         # Make the semi-transparent box area blurry
         if blur:
             blurred = card.filter(ImageFilter.GaussianBlur(3))
