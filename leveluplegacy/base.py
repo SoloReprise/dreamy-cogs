@@ -164,9 +164,9 @@ class UserCommands(MixinMeta, ABC):
             banner_url = f"https://cdn.discordapp.com/banners/{user.id}/{banner_id}?size=1024"
             return banner_url
 
-    @commands.command(name="stars", aliases=["givestar", "addstar", "thanks", "gg"])
-    @commands.guild_only()
-    async def give_star(self, ctx: commands.Context, *users: discord.Member):
+@commands.command(name="stars", aliases=["givestar", "addstar", "thanks", "gg"])
+@commands.guild_only()
+async def give_star(self, ctx: commands.Context, *users: discord.Member):
     """
     Reward good noodles
     Give stars to one or multiple users for being good noodles
@@ -228,7 +228,8 @@ class UserCommands(MixinMeta, ABC):
 
     name_mentions = [user.mention if mention else f"**{user.name}**" for user in users]
     if star_count > 0:
-    await ctx.send(_("You just gave stars to {}!").format(", ".join(name_mentions)))
+        await ctx.send(_("You just gave stars to {}!").format(", ".join(name_mentions)))
+
 
     # For testing purposes
     @commands.command(name="mocklvl", hidden=True)
