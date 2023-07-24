@@ -232,12 +232,12 @@ class Generator(MixinMeta, ABC):
         # Setup font sizes
         name_size = 60
         name_font = ImageFont.truetype(base_font, name_size)
-        while (name_font.getlength(user_name) + bar_start + 20) > 900:
+        while (name_font.getlength(display_name) + bar_start + 20) > 900:
             name_size -= 1
             name_font = ImageFont.truetype(base_font, name_size)
             name_y += 0.1
         name_y = round(name_y)
-        nameht = name_font.getbbox(user_name)
+        nameht = name_font.getbbox(display_name)
         name_y = name_y - int(nameht[1] * 0.6)
 
         emoji_scale = 1.2
