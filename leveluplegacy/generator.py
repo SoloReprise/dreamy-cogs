@@ -232,12 +232,12 @@ class Generator(MixinMeta, ABC):
         # Setup font sizes
         name_size = 60
         name_font = ImageFont.truetype(base_font, name_size)
-        while (name_font.getlength(display_name) + bar_start + 20) > 900:
+        while (name_font.getlength(user_name) + bar_start + 20) > 900:
             name_size -= 1
             name_font = ImageFont.truetype(base_font, name_size)
             name_y += 0.1
         name_y = round(name_y)
-        nameht = name_font.getbbox(display_name)
+        nameht = name_font.getbbox(user_name)
         name_y = name_y - int(nameht[1] * 0.6)
 
         emoji_scale = 1.2
@@ -446,7 +446,7 @@ class Generator(MixinMeta, ABC):
                 # Profile image is on the background tile now
                 pre = Image.alpha_composite(final, pfp_composite_holder)
                 # Paste status over profile ring
-                blank = Image.new("RGBA", card.size, (255, 255, 255, 0))
+                blank = Image.new("RGBA", card.size, (55, 255, 255, 0))
                 blank.paste(status, (circle_x + 230, circle_y + 240))
                 pre = Image.alpha_composite(pre, blank)
                 frames.append(pre)
@@ -633,8 +633,6 @@ class Generator(MixinMeta, ABC):
             name += _(" - Prestige ") + str(prestige)
         stars = str(stars)
 
-        display_name = user.display_name
-        generate_profile(display_name=display_name, ...other_parameters)
         base_font = self.font
         if font_name:
             fontfile = os.path.join(self.fonts, font_name)

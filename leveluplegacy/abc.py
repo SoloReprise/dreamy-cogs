@@ -38,7 +38,6 @@ class MixinMeta(ABC):
         next_xp: int = 100,
         user_position: str = "1",
         user_name: str = "Unknown#0117",
-        display_name: str = "Unknown#0117",  # Add the display_name parameter here
         user_status: str = "online",
         colors: dict = None,
         messages: str = "0",
