@@ -19,6 +19,7 @@ log = logging.getLogger("red.vrt.levelup.generator")
 _ = Translator("LevelUp", __file__)
 ASPECT_RATIO = (21, 9)
 
+import discord
 
 @cog_i18n(_)
 class Generator(MixinMeta, ABC):
