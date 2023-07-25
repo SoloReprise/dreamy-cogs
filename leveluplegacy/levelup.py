@@ -119,7 +119,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             "ignoredusers": [],  # Ignored users won't gain XP
             "prestige": 0,  # Level required to prestige, 0 is disabled
             "prestigedata": {},  # Prestige tiers, the role associated with them, and emoji for them
-            "role_backgrounds": {},
             "xp": [3, 6],  # Min/Max XP per message
             "voicexp": 2,  # XP per minute in voice
             "rolebonuses": {
@@ -173,9 +172,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             "cache_seconds": 15,
             "render_gifs": False,
         }
-        # Check if the guild data contains the 'role_backgrounds' key
-        if "role_backgrounds" not in default_guild:
-            default_guild["role_backgrounds"] = {}  # Initialize the 'role_backgrounds' dictionary
         self.config.register_guild(**default_guild)
         self.config.register_global(**default_global)
 
@@ -2204,57 +2200,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         await self.save_cache(ctx.guild)
 
     """COMANDOS NUEVOS""" 
-    @lvl_group.command(name="set_role_background", aliases=["set_role_bg"])
-    @commands.has_permissions(administrator=True)
-    async def set_role_background(
-        self,
-        ctx: commands.Context,
-        role: discord.Role,
-        image_url: str
-    ):
-        """Set a personalized background for a role"""
-        gid = ctx.guild.id
-        role_id = str(role.id)
-        if gid not in self.data or "role_backgrounds" not in self.data[gid]:
-            self.data[gid]["role_backgrounds"] = {}
-        self.data[gid]["role_backgrounds"][role_id] = image_url
-        await self.save_cache(ctx.guild)
-        await ctx.send(_("Personalized background set for ") + role.name)
-
-    @commands.Cog.listener()
-    async def on_member_update(self, before: discord.Member, after: discord.Member):
-        gid = after.guild.id
-        if gid not in self.data or "role_backgrounds" not in self.data[gid]:
-            return
-
-        if before.roles == after.roles:
-            return
-
-        uid = str(after.id)
-        if uid not in self.data[gid]["users"]:
-            self.init_user(gid, uid)
-
-        roles_after = set(after.roles)
-        highest_role = max(roles_after, key=lambda r: r.position)
-        highest_role_id = str(highest_role.id)
-
-        # Check if the user already has a personalized background
-        if self.data[gid]["users"][uid]["background"] is not None:
-            user_background_role_id = self.data[gid]["users"][uid]["background_role"]
-            # Check if the highest hierarchy role has a personalized background for the user
-            if user_background_role_id == highest_role_id:
-                return
-
-        role_backgrounds = self.data[gid]["role_backgrounds"]
-        if highest_role_id in role_backgrounds:
-            self.data[gid]["users"][uid]["background"] = role_backgrounds[highest_role_id]
-            self.data[gid]["users"][uid]["background_role"] = highest_role_id
-        else:
-            self.data[gid]["users"][uid]["background"] = None
-            self.data[gid]["users"][uid]["background_role"] = None
-
-        await self.save_cache(after.guild)
-
     @lvl_group.command(name="remove_background", aliases=["rem_bg"])
     async def remove_background(
         self,
