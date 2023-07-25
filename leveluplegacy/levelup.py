@@ -173,6 +173,9 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             "cache_seconds": 15,
             "render_gifs": False,
         }
+        # Check if the guild data contains the 'role_backgrounds' key
+        if "role_backgrounds" not in default_guild:
+            default_guild["role_backgrounds"] = {}  # Initialize the 'role_backgrounds' dictionary
         self.config.register_guild(**default_guild)
         self.config.register_global(**default_global)
 
