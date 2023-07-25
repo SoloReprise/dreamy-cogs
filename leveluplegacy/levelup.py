@@ -2270,11 +2270,11 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
             if superior_role:
                 self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][str(superior_role.id)]
-                await self.save_cache(member.guild)
             else:
                 # If no role with custom background was found, reset to default
                 self.data[gid]["users"][uid]["background"] = None
-                await self.save_cache(member.guild)
+
+            await self.save_cache(member.guild)
 
     # Check for role updates and update backgrounds accordingly
     @commands.Cog.listener()
@@ -2286,7 +2286,28 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
     @commands.Cog.listener()
     async def on_member_update_roles(self, member: discord.Member, before: List[discord.Role], after: List[discord.Role]):
         if before != after:
-            await self.update_user_background(member)
+            gid = member.guild.id
+            uid = str(member.id)
+
+            # Check if user has lost all roles with personalized backgrounds
+            has_custom_bg_role = any(str(role.id) in self.data[gid]["role_backgrounds"] for role in after)
+            if not has_custom_bg_role:
+                self.data[gid]["users"][uid]["background"] = None
+            else:
+                # Find the superior role the user gained (highest position)
+                superior_role = None
+                for role in after:
+                    if "role_backgrounds" in self.data[gid] and str(role.id) in self.data[gid]["role_backgrounds"]:
+                        if superior_role is None or role.position > superior_role.position:
+                            superior_role = role
+
+                if superior_role:
+                    self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][str(superior_role.id)]
+                else:
+                    # If no role with custom background was found, reset to default
+                    self.data[gid]["users"][uid]["background"] = None
+
+            await self.save_cache(member.guild)
 
     @lvl_group.command(name="removebg", aliases=["clearbg"])
     async def remove_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role]):
