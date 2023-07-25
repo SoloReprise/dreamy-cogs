@@ -2259,10 +2259,9 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         if uid in self.data[gid]["users"]:
             user_data = self.data[gid]["users"][uid]
             max_bg_role_id = user_data.get("max_bg_role", None)
-            has_personalized_bg = user_data.get("has_personalized_background", False)
 
             # Check if the user has a personalized background
-            if has_personalized_bg or user_data["background"] is not None:
+            if user_data["background"] is not None and not user_data.get("has_role_bg", False):
                 return
 
             # Find the highest role the user gained (highest position) with a background
@@ -2278,9 +2277,11 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 user_data["max_bg_role"] = new_max_bg_role_id
                 if new_max_bg_role_id is not None:
                     self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][str(new_max_bg_role_id)]
+                    self.data[gid]["users"][uid]["has_role_bg"] = True
                 else:
                     # If no role with custom background was found, reset to default
                     self.data[gid]["users"][uid]["background"] = None
+                    self.data[gid]["users"][uid]["has_role_bg"] = False
 
                 await self.save_cache(member.guild)
 
@@ -2298,14 +2299,13 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             uid = str(member.id)
 
             # Check if user has lost all roles with personalized backgrounds
-            has_personalized_bg = any(str(role.id) in self.data[gid]["role_backgrounds"] for role in after)
-            if not has_personalized_bg:
+            has_custom_bg_role = any(str(role.id) in self.data[gid]["role_backgrounds"] for role in after)
+            if not has_custom_bg_role:
                 # Reset to default background if the user has no roles with backgrounds
                 self.data[gid]["users"][uid]["background"] = None
-                self.data[gid]["users"][uid]["has_personalized_background"] = False
+                self.data[gid]["users"][uid]["has_role_bg"] = False
                 self.data[gid]["users"][uid].pop("max_bg_role", None)
             else:
-                self.data[gid]["users"][uid]["has_personalized_background"] = True
                 await self.update_user_background(member)
 
             await self.save_cache(member.guild)
