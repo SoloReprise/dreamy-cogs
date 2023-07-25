@@ -180,23 +180,18 @@ class UserCommands(MixinMeta, ABC):
         if guild_id not in self.data:
             return await ctx.send(_("Cache not loaded yet, wait a few more seconds."))
 
-        mentioned_users = []
         for user in users:
+            user_id = str(user.id)
             if ctx.author == user:
                 await ctx.send(_("You can't give stars to yourself!"))
+                continue
             elif user.bot:
                 await ctx.send(_("You can't give stars to a bot!"))
-            else:
-                mentioned_users.append(user)
+                continue
 
-        if not mentioned_users:
-            return
+            if guild_id not in self.stars:
+                self.stars[guild_id] = {}
 
-        if guild_id not in self.stars:
-            self.stars[guild_id] = {}
-
-        for user in mentioned_users:
-            user_id = str(user.id)
             if star_giver not in self.stars[guild_id]:
                 self.stars[guild_id][star_giver] = now
             else:
@@ -219,7 +214,7 @@ class UserCommands(MixinMeta, ABC):
             users_data = self.data[guild_id]["users"]
             if user_id not in users_data:
                 await ctx.send(_("No data available for that user yet!"))
-                return
+                continue
 
             users_data[user_id]["stars"] += 1
 
@@ -230,7 +225,7 @@ class UserCommands(MixinMeta, ABC):
 
             name = user.mention if user_mention else f"**{user.name}**"
             await ctx.send(_("You just gave a star to {}!").format(name))
-                        
+
     # For testing purposes
     @commands.command(name="mocklvl", hidden=True)
     async def get_lvl_test(self, ctx, *, user: discord.Member = None):
