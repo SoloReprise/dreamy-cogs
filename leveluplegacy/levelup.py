@@ -2170,57 +2170,35 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         gid = ctx.guild.id
         if not user_or_role:
             return await ctx.send(_("I cannot find that user or role"))
-        
-        # Check if the user_or_role is a role and if the role is the designated background role
-        if isinstance(user_or_role, discord.Role) and user_or_role.id == self.data[gid].get("bg_role"):
-            # Add XP to users with the designated background role
-            users_with_role = [str(user.id) for user in ctx.guild.members if not user.bot and user_or_role in user.roles]
-            for uid in users_with_role:
+        if isinstance(user_or_role, discord.Member):
+            uid = str(user_or_role.id)
+            if uid not in self.data[gid]["users"]:
+                self.init_user(gid, uid)
+            self.data[gid]["users"][uid]["xp"] += xp
+            txt = str(xp) + _("xp has been added to ") + user_or_role.name
+            await ctx.send(txt)
+        else:
+            users = []
+            for user in ctx.guild.members:
+                if user.bot:
+                    continue
+                if user_or_role in user.roles:
+                    users.append(str(user.id))
+            for uid in users:
                 if uid not in self.data[gid]["users"]:
                     self.init_user(gid, uid)
                 self.data[gid]["users"][uid]["xp"] += xp
-                # Trigger background update for the user who gains the background role
-                await self.update_user_background(gid, uid, "new_background_url_here")
-
             txt = (
                 _("Added ")
                 + str(xp)
                 + _(" xp to ")
-                + humanize_number(len(users_with_role))
+                + humanize_number(len(users))
                 + _(" users that had the ")
-                + user_or_role.name
-                + _(" role")
             )
+            txt += user_or_role.name + _("role")
             await ctx.send(txt)
-        else:
-            # Add XP to individual users
-            if isinstance(user_or_role, discord.Member):
-                uid = str(user_or_role.id)
-                if uid not in self.data[gid]["users"]:
-                    self.init_user(gid, uid)
-                self.data[gid]["users"][uid]["xp"] += xp
-                txt = str(xp) + _("xp has been added to ") + user_or_role.name
-                await ctx.send(txt)
-            else:
-                # Handle adding XP to multiple users with a specific role (similar to your original code)
-                users_with_role = [str(user.id) for user in ctx.guild.members if not user.bot and user_or_role in user.roles]
-                for uid in users_with_role:
-                    if uid not in self.data[gid]["users"]:
-                        self.init_user(gid, uid)
-                    self.data[gid]["users"][uid]["xp"] += xp
-                txt = (
-                    _("Added ")
-                    + str(xp)
-                    + _(" xp to ")
-                    + humanize_number(len(users_with_role))
-                    + _(" users that had the ")
-                    + user_or_role.name
-                    + _(" role")
-                )
-                await ctx.send(txt)
-
         await self.save_cache(ctx.guild)
-
+        
     @lvl_group.command(name="setlevel")
     async def set_user_level(self, ctx: commands.Context, user: discord.Member, level: int):
         """Set a user to a specific level"""
