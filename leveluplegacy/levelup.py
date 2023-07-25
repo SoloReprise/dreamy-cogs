@@ -2159,7 +2159,47 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             await ctx.send(_("Invisible users can no longer gain XP while in a voice channel"))
         await self.save_cache(ctx.guild)
 
-"""COMMANDOS AÑADIDOS""" 
+    @lvl_group.command(name="addxp")
+    async def add_xp(
+        self,
+        ctx: commands.Context,
+        user_or_role: Union[discord.Member, discord.Role],
+        xp: int,
+    ):
+        """Add XP to a user or role"""
+        gid = ctx.guild.id
+        if not user_or_role:
+            return await ctx.send(_("I cannot find that user or role"))
+        if isinstance(user_or_role, discord.Member):
+            uid = str(user_or_role.id)
+            if uid not in self.data[gid]["users"]:
+                self.init_user(gid, uid)
+            self.data[gid]["users"][uid]["xp"] += xp
+            txt = str(xp) + _("xp has been added to ") + user_or_role.name
+            await ctx.send(txt)
+        else:
+            users = []
+            for user in ctx.guild.members:
+                if user.bot:
+                    continue
+                if user_or_role in user.roles:
+                    users.append(str(user.id))
+            for uid in users:
+                if uid not in self.data[gid]["users"]:
+                    self.init_user(gid, uid)
+                self.data[gid]["users"][uid]["xp"] += xp
+            txt = (
+                _("Added ")
+                + str(xp)
+                + _(" xp to ")
+                + humanize_number(len(users))
+                + _(" users that had the ")
+            )
+            txt += user_or_role.name + _("role")
+            await ctx.send(txt)
+        await self.save_cache(ctx.guild)
+
+"""COMANDOS AÑADIDOS""" 
     @lvl_group.command(name="remove_background", aliases=["rem_bg"])
     async def remove_background(
         self,
@@ -2260,46 +2300,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 + _(" users that had the ")
             )
             txt += user_or_role.name + _("role and set back to default")
-            await ctx.send(txt)
-        await self.save_cache(ctx.guild)
-
-    @lvl_group.command(name="addxp")
-    async def add_xp(
-        self,
-        ctx: commands.Context,
-        user_or_role: Union[discord.Member, discord.Role],
-        xp: int,
-    ):
-        """Add XP to a user or role"""
-        gid = ctx.guild.id
-        if not user_or_role:
-            return await ctx.send(_("I cannot find that user or role"))
-        if isinstance(user_or_role, discord.Member):
-            uid = str(user_or_role.id)
-            if uid not in self.data[gid]["users"]:
-                self.init_user(gid, uid)
-            self.data[gid]["users"][uid]["xp"] += xp
-            txt = str(xp) + _("xp has been added to ") + user_or_role.name
-            await ctx.send(txt)
-        else:
-            users = []
-            for user in ctx.guild.members:
-                if user.bot:
-                    continue
-                if user_or_role in user.roles:
-                    users.append(str(user.id))
-            for uid in users:
-                if uid not in self.data[gid]["users"]:
-                    self.init_user(gid, uid)
-                self.data[gid]["users"][uid]["xp"] += xp
-            txt = (
-                _("Added ")
-                + str(xp)
-                + _(" xp to ")
-                + humanize_number(len(users))
-                + _(" users that had the ")
-            )
-            txt += user_or_role.name + _("role")
             await ctx.send(txt)
         await self.save_cache(ctx.guild)
 
