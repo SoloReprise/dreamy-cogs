@@ -166,7 +166,7 @@ class UserCommands(MixinMeta, ABC):
 
     @commands.command(name="stars", aliases=["givestar", "addstar", "thanks", "gg"])
     @commands.guild_only()
-    async def give_star(self, ctx: commands.Context, *, users: commands.Greedy[discord.Member]):
+    async def give_star(self, ctx: commands.Context, *users: discord.Member):
         """
         Reward good noodles
         Give a star to each mentioned user for being a good noodle
@@ -230,7 +230,7 @@ class UserCommands(MixinMeta, ABC):
 
             name = user.mention if user_mention else f"**{user.name}**"
             await ctx.send(_("You just gave a star to {}!").format(name))
-            
+                        
     # For testing purposes
     @commands.command(name="mocklvl", hidden=True)
     async def get_lvl_test(self, ctx, *, user: discord.Member = None):
