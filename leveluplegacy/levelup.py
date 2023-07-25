@@ -129,7 +129,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 "msg": {},
                 "voice": {},
             },  # ChannelID keys, list values for bonus xp range
-            "role_backgrounds": {},  # Add this line to store role backgrounds
             "streambonus": [],  # Bonus voice XP for streaming in voice
             "cooldown": 60,  # Only gives XP every 30 seconds
             "base": 100,  # Base denominator for level algorithm, higher takes longer to level
@@ -419,102 +418,93 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             log.info("Config initialized")
         self.first_run = False
 
-@staticmethod
-def cleanup(data: dict) -> tuple:
-    conf = data.copy()
-    if isinstance(conf["channelbonuses"]["msg"], list):
-        conf["channelbonuses"]["msg"] = {}
-    if isinstance(conf["channelbonuses"]["voice"], list):
-        conf["channelbonuses"]["voice"] = {}
-    cleaned = []
-    # Check prestige data
-    if conf["prestigedata"]:
-        for prestige_level, prestige_data in conf["prestigedata"].items():
-            # Make sure emoji data is a dict
-            if isinstance(prestige_data["emoji"], dict):
+    @staticmethod
+    def cleanup(data: dict) -> tuple:
+        conf = data.copy()
+        if isinstance(conf["channelbonuses"]["msg"], list):
+            conf["channelbonuses"]["msg"] = {}
+        if isinstance(conf["channelbonuses"]["voice"], list):
+            conf["channelbonuses"]["voice"] = {}
+        cleaned = []
+        # Check prestige data
+        if conf["prestigedata"]:
+            for prestige_level, prestige_data in conf["prestigedata"].items():
+                # Make sure emoji data is a dict
+                if isinstance(prestige_data["emoji"], dict):
+                    continue
+                # Fix old string emoji data
+                conf["prestigedata"][prestige_level]["emoji"] = {
+                    "str": prestige_data["emoji"],
+                    "url": None,
+                }
+                t = "prestige data fix"
+                if t not in cleaned:
+                    cleaned.append(t)
+
+        # Check players
+        for uid, user in conf["users"].items():
+            # Fix any missing keys
+            if "full" not in user:
+                conf["users"][uid]["full"] = True
+                cleaned.append("background not in playerstats")
+            if "background" not in user:
+                conf["users"][uid]["background"] = None
+                cleaned.append("background not in playerstats")
+            if "stars" not in user:
+                conf["users"][uid]["stars"] = 0
+                cleaned.append("stars not in playerstats")
+            if "colors" not in user:
+                conf["users"][uid]["colors"] = {
+                    "name": None,
+                    "stat": None,
+                    "levelbar": None,
+                }
+                cleaned.append("colors not in playerstats")
+            if "levelbar" not in conf["users"][uid]["colors"]:
+                conf["users"][uid]["colors"]["levelbar"] = None
+                cleaned.append("levelbar not in colors")
+            if "font" not in user:
+                conf["users"][uid]["font"] = None
+                cleaned.append("font not in user")
+            if "blur" not in user:
+                conf["users"][uid]["blur"] = False
+                cleaned.append("blur not in user")
+
+            # Make sure all related stats are not strings
+            for k, v in user.items():
+                skip = ["background", "emoji", "full", "colors", "font"]
+                if k in skip:
+                    continue
+                if isinstance(v, int) or isinstance(v, float):
+                    continue
+                conf["users"][uid][k] = int(v) if v is not None else 0
+                cleaned.append(f"{k} stat should be int")
+
+            # Check prestige settings
+            if not user["prestige"]:
                 continue
-            # Fix old string emoji data
-            conf["prestigedata"][prestige_level]["emoji"] = {
-                "str": prestige_data["emoji"],
-                "url": None,
-            }
-            t = "prestige data fix"
-            if t not in cleaned:
-                cleaned.append(t)
-
-    # Check role backgrounds data
-    if "role_backgrounds" in conf:
-        for uid, role_background in conf["role_backgrounds"].items():
-            try:
-                int(uid)  # Check if the uid is an integer
-            except ValueError:
-                del conf["role_backgrounds"][uid]  # Remove the invalid entry
-
-    # Check players
-    for uid, user in conf["users"].items():
-        # Fix any missing keys
-        if "full" not in user:
-            conf["users"][uid]["full"] = True
-            cleaned.append("background not in playerstats")
-        if "background" not in user:
-            conf["users"][uid]["background"] = None
-            cleaned.append("background not in playerstats")
-        if "stars" not in user:
-            conf["users"][uid]["stars"] = 0
-            cleaned.append("stars not in playerstats")
-        if "colors" not in user:
-            conf["users"][uid]["colors"] = {
-                "name": None,
-                "stat": None,
-                "levelbar": None,
-            }
-            cleaned.append("colors not in playerstats")
-        if "levelbar" not in conf["users"][uid]["colors"]:
-            conf["users"][uid]["colors"]["levelbar"] = None
-            cleaned.append("levelbar not in colors")
-        if "font" not in user:
-            conf["users"][uid]["font"] = None
-            cleaned.append("font not in user")
-        if "blur" not in user:
-            conf["users"][uid]["blur"] = False
-            cleaned.append("blur not in user")
-
-        # Make sure all related stats are not strings
-        for k, v in user.items():
-            skip = ["background", "emoji", "full", "colors", "font"]
-            if k in skip:
+            if user["emoji"] is None:
                 continue
-            if isinstance(v, int) or isinstance(v, float):
+            # Fix profiles with the old prestige emoji string
+            if isinstance(user["emoji"], str):
+                conf["users"][uid]["emoji"] = {
+                    "str": user["emoji"],
+                    "url": None,
+                }
+                cleaned.append("old emoji schema in profile")
+            prest_key = str(user["prestige"])
+            if prest_key not in data["prestigedata"]:
                 continue
-            conf["users"][uid][k] = int(v) if v is not None else 0
-            cleaned.append(f"{k} stat should be int")
-
-        # Check prestige settings
-        if not user["prestige"]:
-            continue
-        if user["emoji"] is None:
-            continue
-        # Fix profiles with the old prestige emoji string
-        if isinstance(user["emoji"], str):
-            conf["users"][uid]["emoji"] = {
-                "str": user["emoji"],
-                "url": None,
-            }
-            cleaned.append("old emoji schema in profile")
-        prest_key = str(user["prestige"])
-        if prest_key not in data["prestigedata"]:
-            continue
-        # See if there are updated prestige settings to get the new url from
-        if (
-            conf["users"][uid]["emoji"]["url"]
-            != data["prestigedata"][prest_key]["emoji"]["url"]
-        ):
-            conf["users"][uid]["emoji"]["url"] = data["prestigedata"][prest_key]["emoji"][
-                "url"
-            ]
-            cleaned.append("updated profile emoji url")
-    return cleaned, data
-
+            # See if there are updated prestige settings to get the new url from
+            if (
+                conf["users"][uid]["emoji"]["url"]
+                != data["prestigedata"][prest_key]["emoji"]["url"]
+            ):
+                conf["users"][uid]["emoji"]["url"] = data["prestigedata"][prest_key]["emoji"][
+                    "url"
+                ]
+                cleaned.append("updated profile emoji url")
+        return cleaned, data
 
     async def save_cache(self, target_guild: discord.Guild = None):
         if not target_guild:
@@ -2207,124 +2197,6 @@ def cleanup(data: dict) -> tuple:
             )
             txt += user_or_role.name + _("role")
             await ctx.send(txt)
-        await self.save_cache(ctx.guild)
-
-    # Command to reset role backgrounds for users
-    @lvl_group.command(name="reset_role_backgrounds")
-    @commands.is_owner()  # Adjust this decorator based on who can use this command
-    async def reset_role_backgrounds(self, ctx: commands.Context):
-        gid = ctx.guild.id
-        role_backgrounds = await self.config.guild(ctx.guild).role_backgrounds()
-        if role_backgrounds:
-            # Reset all role backgrounds to None for users
-            for uid, background in role_backgrounds.items():
-                member = ctx.guild.get_member(int(uid))
-                if member:
-                    self.data[gid]["users"][uid]["background"] = background
-            await self.save_cache(ctx.guild)
-            await ctx.send("Role backgrounds have been reset for all users.")
-        else:
-            await ctx.send("Role backgrounds data does not exist.")
-
-    @lvl_group.command(name="changerolebg", aliases=["crolebg"])
-    async def change_role_background(self, ctx: commands.Context, role: discord.Role, image_url: str):
-        """
-        Change the background to a specific role.
-
-        This command sets the background image for all users who have the specified role.
-        Whenever someone receives this role, their background will be automatically updated.
-        """
-        # Validate the image URL and perform necessary checks similar to the set_user_background function
-        # ... Your code to validate the URL ...
-
-        gid = ctx.guild.id
-
-        if "role_backgrounds" not in self.data[gid]:
-            self.data[gid]["role_backgrounds"] = {}
-
-        role_id = str(role.id)
-
-        if role_id not in self.data[gid]["role_backgrounds"]:
-            self.data[gid]["role_backgrounds"][role_id] = image_url
-            await ctx.send(_("The background for users with the {} role has been set.").format(role.name))
-        else:
-            self.data[gid]["role_backgrounds"][role_id] = image_url
-            await ctx.send(_("The background for users with the {} role has been updated.").format(role.name))
-
-        await self.save_cache(ctx.guild)
-
-    # Function to handle role updates and change backgrounds accordingly
-    async def on_member_update_roles(self, member: discord.Member, before: List[discord.Role], after: List[discord.Role]):
-        if not self.data[member.guild.id]["usepics"]:
-            return
-
-        gid = member.guild.id
-        uid = str(member.id)
-
-        # Find the added roles by comparing before and after lists
-        added_roles = set(after) - set(before)
-
-        for role in added_roles:
-            role_id = str(role.id)
-            if "role_backgrounds" in self.data[gid] and role_id in self.data[gid]["role_backgrounds"]:
-                self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][role_id]
-                await self.save_cache(member.guild)
-                break
-        else:
-            # If no role with custom background was found among the added roles, check if any other role grants a background
-            for role in member.roles:
-                role_id = str(role.id)
-                if "role_backgrounds" in self.data[gid] and role_id in self.data[gid]["role_backgrounds"]:
-                    self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][role_id]
-                    await self.save_cache(member.guild)
-                    break
-
-    @lvl_group.command(name="removebg", aliases=["clearbg"])
-    async def remove_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role]):
-        """Remove the background of a user or role."""
-        gid = ctx.guild.id
-        if not user_or_role:
-            return await ctx.send(_("I cannot find that user or role"))
-        
-        if isinstance(user_or_role, discord.Member):
-            uid = str(user_or_role.id)
-            if uid in self.data[gid]["users"]:
-                self.data[gid]["users"][uid]["background"] = None
-                await ctx.send(_("The background for {} has been removed.").format(user_or_role.name))
-            else:
-                await ctx.send(_("{} does not have a custom background.").format(user_or_role.name))
-        else:
-            users_with_role = [str(user.id) for user in ctx.guild.members if not user.bot and user_or_role in user.roles]
-            removed_count = 0
-            for uid in users_with_role:
-                if uid in self.data[gid]["users"]:
-                    self.data[gid]["users"][uid]["background"] = None
-                    removed_count += 1
-            await ctx.send(_("Removed backgrounds for {} users with the {} role.").format(removed_count, user_or_role.name))
-        await self.save_cache(ctx.guild)
-
-    @lvl_group.command(name="editbg")
-    async def edit_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role], image_url: str):
-        """Edit the background of a user or role."""
-        # Validate the image URL and perform necessary checks similar to the set_user_background function
-        # ... Your code to validate the URL ...
-
-        gid = ctx.guild.id
-        if isinstance(user_or_role, discord.Member):
-            uid = str(user_or_role.id)
-            if uid in self.data[gid]["users"]:
-                self.data[gid]["users"][uid]["background"] = image_url
-                await ctx.send(_("The background for {} has been updated.").format(user_or_role.name))
-            else:
-                await ctx.send(_("{} does not have a custom background.").format(user_or_role.name))
-        else:
-            users_with_role = [str(user.id) for user in ctx.guild.members if not user.bot and user_or_role in user.roles]
-            updated_count = 0
-            for uid in users_with_role:
-                if uid in self.data[gid]["users"]:
-                    self.data[gid]["users"][uid]["background"] = image_url
-                    updated_count += 1
-            await ctx.send(_("Updated backgrounds for {} users with the {} role.").format(updated_count, user_or_role.name))
         await self.save_cache(ctx.guild)
 
     @lvl_group.command(name="setlevel")
