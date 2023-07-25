@@ -418,28 +418,38 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             log.info("Config initialized")
         self.first_run = False
 
-    @staticmethod
-    def cleanup(data: dict) -> tuple:
-        conf = data.copy()
-        if isinstance(conf["channelbonuses"]["msg"], list):
-            conf["channelbonuses"]["msg"] = {}
-        if isinstance(conf["channelbonuses"]["voice"], list):
-            conf["channelbonuses"]["voice"] = {}
-        cleaned = []
-        # Check prestige data
-        if conf["prestigedata"]:
-            for prestige_level, prestige_data in conf["prestigedata"].items():
-                # Make sure emoji data is a dict
-                if isinstance(prestige_data["emoji"], dict):
-                    continue
-                # Fix old string emoji data
-                conf["prestigedata"][prestige_level]["emoji"] = {
-                    "str": prestige_data["emoji"],
-                    "url": None,
-                }
-                t = "prestige data fix"
-                if t not in cleaned:
-                    cleaned.append(t)
+@staticmethod
+def cleanup(data: dict) -> tuple:
+    conf = data.copy()
+    if isinstance(conf["channelbonuses"]["msg"], list):
+        conf["channelbonuses"]["msg"] = {}
+    if isinstance(conf["channelbonuses"]["voice"], list):
+        conf["channelbonuses"]["voice"] = {}
+    cleaned = []
+    # Check prestige data
+    if conf["prestigedata"]:
+        for prestige_level, prestige_data in conf["prestigedata"].items():
+            # Make sure emoji data is a dict
+            if isinstance(prestige_data["emoji"], dict):
+                continue
+            # Fix old string emoji data
+            conf["prestigedata"][prestige_level]["emoji"] = {
+                "str": prestige_data["emoji"],
+                "url": None,
+            }
+            t = "prestige data fix"
+            if t not in cleaned:
+                cleaned.append(t)
+
+    # Additional check to avoid converting URLs to integers
+    for uid, user_data in conf["users"].items():
+        for k, v in user_data.items():
+            if k == "background" and isinstance(v, str) and (v.startswith("http://") or v.startswith("https://")):
+                # Skip converting URL background values
+                continue
+            conf["users"][uid][k] = int(v) if v is not None else 0
+
+    return cleaned, conf
 
         # Check players
         for uid, user in conf["users"].items():
