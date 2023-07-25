@@ -263,7 +263,7 @@ class Generator(MixinMeta, ABC):
             stats_size -= 1
             stats_font = ImageFont.truetype(base_font, stats_size)
 
-        star_fontsize = 60
+        star_fontsize = 75
         star_font = ImageFont.truetype(base_font, star_fontsize)
         while (star_font.getlength(stars) + star_text_x) > final.width - 10:
             star_fontsize -= 1
