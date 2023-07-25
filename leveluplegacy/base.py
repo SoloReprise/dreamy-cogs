@@ -196,7 +196,6 @@ class UserCommands(MixinMeta, ABC):
             self.stars[guild_id] = {}
 
         recipients = []
-        cooldown_detected = False
 
         for user in mentioned_users:
             user_id = str(user.id)
@@ -208,7 +207,7 @@ class UserCommands(MixinMeta, ABC):
                 td = now - lastused
                 td = td.total_seconds()
                 if td <= cooldown:
-                    cooldown_detected = True
+                    recipients.append(user.mention)
                 else:
                     self.stars[guild_id][star_giver] = now
 
@@ -228,20 +227,9 @@ class UserCommands(MixinMeta, ABC):
             name = user.mention if user_mention else f"**{user.name}**"
             recipients.append(name)
 
-        if cooldown_detected:
-            cooldown = self.data[guild_id]["starcooldown"]
-            time_left = cooldown - td
-            tstring = time_formatter(time_left)
-            msg = (
-                _("You need to wait ")
-                + f"**{tstring}**"
-                + _(" before you can give more stars!")
-            )
-            await ctx.send(msg)
-        else:
-            recipients_str = ", ".join(recipients)
-            await ctx.send(_("You just gave a star to {}!").format(recipients_str))
-                        
+        recipients_str = ", ".join(recipients)
+        await ctx.send(_("You just gave a star to {}!").format(recipients_str))
+                                
     # For testing purposes
     @commands.command(name="mocklvl", hidden=True)
     async def get_lvl_test(self, ctx, *, user: discord.Member = None):
