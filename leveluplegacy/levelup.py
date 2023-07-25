@@ -419,105 +419,102 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             log.info("Config initialized")
         self.first_run = False
 
-    @staticmethod
-    def cleanup(data: dict) -> tuple:
-        conf = data.copy()
-        if isinstance(conf["channelbonuses"]["msg"], list):
-            conf["channelbonuses"]["msg"] = {}
-        if isinstance(conf["channelbonuses"]["voice"], list):
-            conf["channelbonuses"]["voice"] = {}
-        cleaned = []
-        # Check prestige data
-        if conf["prestigedata"]:
-            for prestige_level, prestige_data in conf["prestigedata"].items():
-                # Make sure emoji data is a dict
-                if isinstance(prestige_data["emoji"], dict):
-                    continue
-                # Fix old string emoji data
-                conf["prestigedata"][prestige_level]["emoji"] = {
-                    "str": prestige_data["emoji"],
-                    "url": None,
-                }
-                t = "prestige data fix"
-                if t not in cleaned:
-                    cleaned.append(t)
-
-        # Check players
-        for uid, user in conf["users"].items():
-            # Fix any missing keys
-            if "full" not in user:
-                conf["users"][uid]["full"] = True
-                cleaned.append("background not in playerstats")
-            if "background" not in user:
-                conf["users"][uid]["background"] = None
-                cleaned.append("background not in playerstats")
-            if "stars" not in user:
-                conf["users"][uid]["stars"] = 0
-                cleaned.append("stars not in playerstats")
-            if "colors" not in user:
-                conf["users"][uid]["colors"] = {
-                    "name": None,
-                    "stat": None,
-                    "levelbar": None,
-                }
-                cleaned.append("colors not in playerstats")
-            if "levelbar" not in conf["users"][uid]["colors"]:
-                conf["users"][uid]["colors"]["levelbar"] = None
-                cleaned.append("levelbar not in colors")
-            if "font" not in user:
-                conf["users"][uid]["font"] = None
-                cleaned.append("font not in user")
-            if "blur" not in user:
-                conf["users"][uid]["blur"] = False
-                cleaned.append("blur not in user")
-
-            # Make sure all related stats are not strings
-            for k, v in user.items():
-                skip = ["background", "emoji", "full", "colors", "font"]
-                if k in skip:
-                    continue
-                if isinstance(v, int) or isinstance(v, float):
-                    continue
-                try:
-                    conf["users"][uid][k] = int(v) if v is not None else 0
-                except ValueError:
-                    pass  # Ignore non-integer values
-                cleaned.append(f"{k} stat should be int")
-
-            # Check prestige settings
-            if not user["prestige"]:
+@staticmethod
+def cleanup(data: dict) -> tuple:
+    conf = data.copy()
+    if isinstance(conf["channelbonuses"]["msg"], list):
+        conf["channelbonuses"]["msg"] = {}
+    if isinstance(conf["channelbonuses"]["voice"], list):
+        conf["channelbonuses"]["voice"] = {}
+    cleaned = []
+    # Check prestige data
+    if conf["prestigedata"]:
+        for prestige_level, prestige_data in conf["prestigedata"].items():
+            # Make sure emoji data is a dict
+            if isinstance(prestige_data["emoji"], dict):
                 continue
-            if user["emoji"] is None:
-                continue
-            # Fix profiles with the old prestige emoji string
-            if isinstance(user["emoji"], str):
-                conf["users"][uid]["emoji"] = {
-                    "str": user["emoji"],
-                    "url": None,
-                }
-                cleaned.append("old emoji schema in profile")
-            prest_key = str(user["prestige"])
-            if prest_key not in data["prestigedata"]:
-                continue
-            # See if there are updated prestige settings to get the new url from
-            if (
-                conf["users"][uid]["emoji"]["url"]
-                != data["prestigedata"][prest_key]["emoji"]["url"]
-            ):
-                conf["users"][uid]["emoji"]["url"] = data["prestigedata"][prest_key]["emoji"][
-                    "url"
-                ]
-                cleaned.append("updated profile emoji url")
+            # Fix old string emoji data
+            conf["prestigedata"][prestige_level]["emoji"] = {
+                "str": prestige_data["emoji"],
+                "url": None,
+            }
+            t = "prestige data fix"
+            if t not in cleaned:
+                cleaned.append(t)
 
-        # Check role backgrounds data
-        if conf.get("role_backgrounds"):
-            for uid, role_background in conf["role_backgrounds"].items():
-                try:
-                    int(uid)  # Check if the uid is an integer
-                except ValueError:
-                    del conf["role_backgrounds"][uid]  # Remove the invalid entry
+    # Check role backgrounds data
+    if conf.get("role_backgrounds"):
+        for uid, role_background in conf["role_backgrounds"].items():
+            try:
+                int(uid)  # Check if the uid is an integer
+            except ValueError:
+                del conf["role_backgrounds"][uid]  # Remove the invalid entry
 
-        return cleaned, conf
+    # Check players
+    for uid, user in conf["users"].items():
+        # Fix any missing keys
+        if "full" not in user:
+            conf["users"][uid]["full"] = True
+            cleaned.append("background not in playerstats")
+        if "background" not in user:
+            conf["users"][uid]["background"] = None
+            cleaned.append("background not in playerstats")
+        if "stars" not in user:
+            conf["users"][uid]["stars"] = 0
+            cleaned.append("stars not in playerstats")
+        if "colors" not in user:
+            conf["users"][uid]["colors"] = {
+                "name": None,
+                "stat": None,
+                "levelbar": None,
+            }
+            cleaned.append("colors not in playerstats")
+        if "levelbar" not in conf["users"][uid]["colors"]:
+            conf["users"][uid]["colors"]["levelbar"] = None
+            cleaned.append("levelbar not in colors")
+        if "font" not in user:
+            conf["users"][uid]["font"] = None
+            cleaned.append("font not in user")
+        if "blur" not in user:
+            conf["users"][uid]["blur"] = False
+            cleaned.append("blur not in user")
+
+        # Make sure all related stats are not strings
+        for k, v in user.items():
+            skip = ["background", "emoji", "full", "colors", "font"]
+            if k in skip:
+                continue
+            if isinstance(v, int) or isinstance(v, float):
+                continue
+            conf["users"][uid][k] = int(v) if v is not None else 0
+            cleaned.append(f"{k} stat should be int")
+
+        # Check prestige settings
+        if not user["prestige"]:
+            continue
+        if user["emoji"] is None:
+            continue
+        # Fix profiles with the old prestige emoji string
+        if isinstance(user["emoji"], str):
+            conf["users"][uid]["emoji"] = {
+                "str": user["emoji"],
+                "url": None,
+            }
+            cleaned.append("old emoji schema in profile")
+        prest_key = str(user["prestige"])
+        if prest_key not in data["prestigedata"]:
+            continue
+        # See if there are updated prestige settings to get the new url from
+        if (
+            conf["users"][uid]["emoji"]["url"]
+            != data["prestigedata"][prest_key]["emoji"]["url"]
+        ):
+            conf["users"][uid]["emoji"]["url"] = data["prestigedata"][prest_key]["emoji"][
+                "url"
+            ]
+            cleaned.append("updated profile emoji url")
+    return cleaned, data
+
 
     async def save_cache(self, target_guild: discord.Guild = None):
         if not target_guild:
