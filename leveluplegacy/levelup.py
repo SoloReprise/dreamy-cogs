@@ -2261,7 +2261,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             max_bg_role_id = user_data.get("max_bg_role", None)
 
             # Check if the user has a personalized background
-            if user_data["background"] is not None and not user_data.get("has_role_bg", False):
+            if user_data["personal_background"] is not None:
                 return
 
             # Find the highest role the user gained (highest position) with a background
@@ -2277,11 +2277,9 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 user_data["max_bg_role"] = new_max_bg_role_id
                 if new_max_bg_role_id is not None:
                     self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][str(new_max_bg_role_id)]
-                    self.data[gid]["users"][uid]["has_role_bg"] = True
                 else:
                     # If no role with custom background was found, reset to default
                     self.data[gid]["users"][uid]["background"] = None
-                    self.data[gid]["users"][uid]["has_role_bg"] = False
 
                 await self.save_cache(member.guild)
 
@@ -2303,7 +2301,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             if not has_custom_bg_role:
                 # Reset to default background if the user has no roles with backgrounds
                 self.data[gid]["users"][uid]["background"] = None
-                self.data[gid]["users"][uid]["has_role_bg"] = False
                 self.data[gid]["users"][uid].pop("max_bg_role", None)
             else:
                 await self.update_user_background(member)
