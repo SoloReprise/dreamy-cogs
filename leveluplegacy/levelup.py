@@ -2258,13 +2258,16 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
         if uid in self.data[gid]["users"]:
             user_data = self.data[gid]["users"][uid]
-            max_bg_role_id = user_data.get("max_bg_role", None)
+            personal_background = user_data.get("personal_background", None)
 
             # Check if the user has a personalized background
-            if user_data["personal_background"] is not None:
+            if personal_background is not None:
+                self.data[gid]["users"][uid]["background"] = personal_background
+                await self.save_cache(member.guild)
                 return
 
             # Find the highest role the user gained (highest position) with a background
+            max_bg_role_id = user_data.get("max_bg_role", None)
             new_max_bg_role_id = None
             for role in member.roles:
                 role_id = str(role.id)
@@ -2306,6 +2309,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 await self.update_user_background(member)
 
             await self.save_cache(member.guild)
+
 
     @lvl_group.command(name="removebg", aliases=["clearbg"])
     async def remove_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role]):
