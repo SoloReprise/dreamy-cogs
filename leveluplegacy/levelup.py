@@ -2261,23 +2261,20 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             if self.data[gid]["users"][uid]["background"] is not None:
                 return
 
-            # Get the highest role position among the user's roles
-            highest_role_position = max(role.position for role in member.roles)
-
+            # Find the superior role the user gained (highest position)
+            superior_role = None
             for role in member.roles:
-                role_id = str(role.id)
-                if (
-                    "role_backgrounds" in self.data[gid]
-                    and role_id in self.data[gid]["role_backgrounds"]
-                    and role.position == highest_role_position  # Only change background for the highest role
-                ):
-                    self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][role_id]
-                    await self.save_cache(member.guild)
-                    return
+                if "role_backgrounds" in self.data[gid] and str(role.id) in self.data[gid]["role_backgrounds"]:
+                    if superior_role is None or role.position > superior_role.position:
+                        superior_role = role
 
-            # If no role with custom background was found for the highest role, reset to default
-            self.data[gid]["users"][uid]["background"] = None
-            await self.save_cache(member.guild)
+            if superior_role:
+                self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][str(superior_role.id)]
+                await self.save_cache(member.guild)
+            else:
+                # If no role with custom background was found, reset to default
+                self.data[gid]["users"][uid]["background"] = None
+                await self.save_cache(member.guild)
 
     # Check for role updates and update backgrounds accordingly
     @commands.Cog.listener()
