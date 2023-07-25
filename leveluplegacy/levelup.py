@@ -2204,7 +2204,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
     @commands.is_owner()  # Adjust this decorator based on who can use this command
     async def reset_role_backgrounds(self, ctx: commands.Context):
         gid = ctx.guild.id
-        if "role_backgrounds" in self.data[gid]:
+        if gid in self.data and "role_backgrounds" in self.data[gid]:
             # Reset all role backgrounds to None for users
             for uid, user_data in self.data[gid]["users"].items():
                 user_data["background"] = None
