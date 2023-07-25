@@ -237,10 +237,10 @@ class UserCommands(MixinMeta, ABC):
                 + f"**{tstring}**"
                 + _(" before you can give more stars!")
             )
-            return await ctx.send(msg)
-
-        recipients_str = ", ".join(recipients)
-        await ctx.send(_("You just gave a star to {}!").format(recipients_str))
+            await ctx.send(msg)
+        else:
+            recipients_str = ", ".join(recipients)
+            await ctx.send(_("You just gave a star to {}!").format(recipients_str))
                         
     # For testing purposes
     @commands.command(name="mocklvl", hidden=True)
