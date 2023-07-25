@@ -478,7 +478,10 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                     continue
                 if isinstance(v, int) or isinstance(v, float):
                     continue
-                conf["users"][uid][k] = int(v) if v is not None else 0
+                try:
+                    conf["users"][uid][k] = int(v) if v is not None else 0
+                except ValueError:
+                    pass  # Ignore non-integer values
                 cleaned.append(f"{k} stat should be int")
 
             # Check prestige settings
@@ -505,7 +508,16 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                     "url"
                 ]
                 cleaned.append("updated profile emoji url")
-        return cleaned, data
+
+        # Check role backgrounds data
+        if conf.get("role_backgrounds"):
+            for uid, role_background in conf["role_backgrounds"].items():
+                try:
+                    int(uid)  # Check if the uid is an integer
+                except ValueError:
+                    del conf["role_backgrounds"][uid]  # Remove the invalid entry
+
+        return cleaned, conf
 
     async def save_cache(self, target_guild: discord.Guild = None):
         if not target_guild:
