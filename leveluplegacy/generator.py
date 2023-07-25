@@ -230,7 +230,7 @@ class Generator(MixinMeta, ABC):
                 base_font = fontfile
         # base_font = self.get_random_font()
         # Setup font sizes
-        name_size = 75
+        name_size = 65
         name_font = ImageFont.truetype(base_font, name_size)
         while (name_font.getlength(user_name) + bar_start + 20) > 900:
             name_size -= 1
@@ -263,7 +263,7 @@ class Generator(MixinMeta, ABC):
             stats_size -= 1
             stats_font = ImageFont.truetype(base_font, stats_size)
 
-        star_fontsize = 75
+        star_fontsize = 65
         star_font = ImageFont.truetype(base_font, star_fontsize)
         while (star_font.getlength(stars) + star_text_x) > final.width - 10:
             star_fontsize -= 1
