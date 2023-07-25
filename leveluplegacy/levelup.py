@@ -2226,24 +2226,31 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
         await self.save_cache(ctx.guild)
 
-    # Function to check for role changes and update backgrounds
-    async def on_member_update(self, before: discord.Member, after: discord.Member):
-        if not self.data[after.guild.id]["usepics"]:
+    # Function to handle role updates and change backgrounds accordingly
+    async def on_member_update_roles(self, member: discord.Member, before: List[discord.Role], after: List[discord.Role]):
+        if not self.data[member.guild.id]["usepics"]:
             return
 
-        gid = after.guild.id
-        uid = str(after.id)
+        gid = member.guild.id
+        uid = str(member.id)
 
-        for role in after.roles:
+        # Find the added roles by comparing before and after lists
+        added_roles = set(after) - set(before)
+
+        for role in added_roles:
             role_id = str(role.id)
             if "role_backgrounds" in self.data[gid] and role_id in self.data[gid]["role_backgrounds"]:
                 self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][role_id]
-                await self.save_cache(after.guild)
+                await self.save_cache(member.guild)
                 break
         else:
-            # If the loop completed without breaking, the user no longer has any role with a custom background.
-            # You may want to decide what to do in this case. For example, set a default background.
-            pass
+            # If no role with custom background was found among the added roles, check if any other role grants a background
+            for role in member.roles:
+                role_id = str(role.id)
+                if "role_backgrounds" in self.data[gid] and role_id in self.data[gid]["role_backgrounds"]:
+                    self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][role_id]
+                    await self.save_cache(member.guild)
+                    break
 
     @lvl_group.command(name="removebg", aliases=["clearbg"])
     async def remove_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role]):
