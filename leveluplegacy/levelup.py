@@ -541,7 +541,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 "name": "#FFFFFF",    # Default value for 'name'
                 "stat": "#FFFFFF",    # Default value for 'stat'
                 "levelbar": "#FFFFFF" # Default value for 'levelbar'
-            }
+            },
             "font": None,
             "blur": False,
         }
