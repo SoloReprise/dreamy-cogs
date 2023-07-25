@@ -2266,31 +2266,15 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                     custom_background_role = role
                     break
 
-            if custom_background_role and not self.data[gid]["users"][uid]["background"]:
-                self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][str(custom_background_role.id)]
-            elif not custom_background_role:
+            if custom_background_role:
+                if not self.data[gid]["users"][uid]["background"]:
+                    # Update background only if the user doesn't have a custom background already
+                    self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][str(custom_background_role.id)]
+            else:
+                # Reset background to default if the user loses the role with a custom background
                 self.data[gid]["users"][uid]["background"] = None
 
             await self.save_cache(after.guild)
-
-    # Function to handle role removal and update backgrounds accordingly
-    async def on_member_update_roles(self, member: discord.Member, before: List[discord.Role], after: List[discord.Role]):
-        if not self.data[member.guild.id]["usepics"]:
-            return
-
-        gid = member.guild.id
-        uid = str(member.id)
-
-        # Check for removed roles
-        removed_roles = set(before) - set(after)
-
-        for role in removed_roles:
-            role_id = str(role.id)
-            if "role_backgrounds" in self.data[gid] and role_id in self.data[gid]["role_backgrounds"]:
-                if not any(str(role.id) in self.data[gid]["role_backgrounds"] for role in member.roles):
-                    self.data[gid]["users"][uid]["background"] = None
-                    await self.save_cache(member.guild)
-                return
 
     @lvl_group.command(name="removebg", aliases=["clearbg"])
     async def remove_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role]):
