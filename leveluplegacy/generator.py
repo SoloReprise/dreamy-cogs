@@ -230,7 +230,7 @@ class Generator(MixinMeta, ABC):
                 base_font = fontfile
         # base_font = self.get_random_font()
         # Setup font sizes
-        name_size = 60
+        name_size = 75
         name_font = ImageFont.truetype(base_font, name_size)
         while (name_font.getlength(user_name) + bar_start + 20) > 900:
             name_size -= 1
