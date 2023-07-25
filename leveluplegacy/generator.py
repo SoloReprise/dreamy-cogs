@@ -216,8 +216,8 @@ class Generator(MixinMeta, ABC):
             _("Experiencia: ")
             + f"{humanize_number(user_xp_progress)}/{humanize_number(next_xp_diff)} ({humanize_number(user_xp)} total)"
         )
-        message_count = _("Messages: ") + messages
-        voice = _("Voice: ") + voice
+        # message_count = _("Messages: ") + messages
+        # voice = _("Voice: ") + voice
         stars = str(stars)
         bal = _("Balance: ") + f"{humanize_number(balance)} {currency}"
         prestige_str = _("Prestige ") + str(prestige)
