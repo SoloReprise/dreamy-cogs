@@ -129,6 +129,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 "msg": {},
                 "voice": {},
             },  # ChannelID keys, list values for bonus xp range
+            "role_backgrounds": {}  # Add this line to store role backgrounds
             "streambonus": [],  # Bonus voice XP for streaming in voice
             "cooldown": 60,  # Only gives XP every 30 seconds
             "base": 100,  # Base denominator for level algorithm, higher takes longer to level
@@ -2204,15 +2205,18 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
     @commands.is_owner()  # Adjust this decorator based on who can use this command
     async def reset_role_backgrounds(self, ctx: commands.Context):
         gid = ctx.guild.id
-        if gid in self.data and "role_backgrounds" in self.data[gid]:
+        role_backgrounds = await self.config.guild(ctx.guild).role_backgrounds()
+        if role_backgrounds:
             # Reset all role backgrounds to None for users
-            for uid, user_data in self.data[gid]["users"].items():
-                user_data["background"] = None
+            for uid, background in role_backgrounds.items():
+                member = ctx.guild.get_member(int(uid))
+                if member:
+                    self.data[gid]["users"][uid]["background"] = background
             await self.save_cache(ctx.guild)
             await ctx.send("Role backgrounds have been reset for all users.")
         else:
             await ctx.send("Role backgrounds data does not exist.")
-            
+
     @lvl_group.command(name="changerolebg", aliases=["crolebg"])
     async def change_role_background(self, ctx: commands.Context, role: discord.Role, image_url: str):
         """
