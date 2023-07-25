@@ -2240,6 +2240,10 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][role_id]
                 await self.save_cache(after.guild)
                 break
+        else:
+            # If the loop completed without breaking, the user no longer has any role with a custom background.
+            # You may want to decide what to do in this case. For example, set a default background.
+            pass
 
     @lvl_group.command(name="removebg", aliases=["clearbg"])
     async def remove_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role]):
