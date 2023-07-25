@@ -2257,6 +2257,10 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             return
 
         if uid in self.data[gid]["users"]:
+            # Check if the user already has a personalized background
+            if self.data[gid]["users"][uid]["background"] is not None:
+                return
+
             for role in member.roles:
                 role_id = str(role.id)
                 if "role_backgrounds" in self.data[gid] and role_id in self.data[gid]["role_backgrounds"]:
