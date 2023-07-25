@@ -2204,7 +2204,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
     @commands.is_owner()  # Adjust this decorator based on who can use this command
     async def delete_role_backgrounds(self, ctx: commands.Context):
         gid = ctx.guild.id
-        if "role_backgrounds" in self.data[gid]:
+        if gid in self.data and "role_backgrounds" in self.data[gid]:
             del self.data[gid]["role_backgrounds"]
             await self.save_cache(ctx.guild)
             await ctx.send("role_backgrounds data has been deleted.")
