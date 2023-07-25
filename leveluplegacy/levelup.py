@@ -443,7 +443,7 @@ def cleanup(data: dict) -> tuple:
                 cleaned.append(t)
 
     # Check role backgrounds data
-    if conf.get("role_backgrounds"):
+    if "role_backgrounds" in conf:
         for uid, role_background in conf["role_backgrounds"].items():
             try:
                 int(uid)  # Check if the uid is an integer
