@@ -2257,7 +2257,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             return
 
         if uid in self.data[gid]["users"]:
-            # Check if the user already has a personalized background
+            # If the user already has a non-default background, do not change it
             if self.data[gid]["users"][uid]["background"] is not None:
                 return
 
