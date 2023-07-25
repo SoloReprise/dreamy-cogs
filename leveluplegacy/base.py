@@ -196,6 +196,8 @@ class UserCommands(MixinMeta, ABC):
             self.stars[guild_id] = {}
 
         recipients = []
+        cooldown_detected = False
+
         for user in mentioned_users:
             user_id = str(user.id)
             if star_giver not in self.stars[guild_id]:
@@ -206,15 +208,9 @@ class UserCommands(MixinMeta, ABC):
                 td = now - lastused
                 td = td.total_seconds()
                 if td <= cooldown:
-                    time_left = cooldown - td
-                    tstring = time_formatter(time_left)
-                    msg = (
-                        _("You need to wait ")
-                        + f"**{tstring}**"
-                        + _(" before you can give more stars!")
-                    )
-                    await ctx.send(msg)
-                    return
+                    cooldown_detected = True
+                else:
+                    self.stars[guild_id][star_giver] = now
 
             user_mention = self.data[guild_id]["mention"]
             users_data = self.data[guild_id]["users"]
@@ -231,6 +227,17 @@ class UserCommands(MixinMeta, ABC):
 
             name = user.mention if user_mention else f"**{user.name}**"
             recipients.append(name)
+
+        if cooldown_detected:
+            cooldown = self.data[guild_id]["starcooldown"]
+            time_left = cooldown - td
+            tstring = time_formatter(time_left)
+            msg = (
+                _("You need to wait ")
+                + f"**{tstring}**"
+                + _(" before you can give more stars!")
+            )
+            return await ctx.send(msg)
 
         recipients_str = ", ".join(recipients)
         await ctx.send(_("You just gave a star to {}!").format(recipients_str))
