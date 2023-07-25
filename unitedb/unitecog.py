@@ -89,7 +89,6 @@ class UniteCog(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(administrator=True)
     async def unitedb(self, ctx, action = None, *, args = None):
-        print("hi")
         if action is None:
             emb = discord.Embed(title="UniteDB Help", description=unitedbtext, colour=discord.Colour.blue())
             await ctx.reply(embed=emb)
@@ -156,6 +155,9 @@ class UniteCog(commands.Cog):
                     if ".png" or ".jpg" or ".jpeg" or ".webp" in i.proxy_url:
                         image = i.proxy_url
                         break
+
+                if image is None:
+                    image = ""
                 
                 query = f"""INSERT INTO callers(name, category, text, image) VALUES('{name}', '{category}', '{text}', '{image}')"""
                 curs.execute(query)
