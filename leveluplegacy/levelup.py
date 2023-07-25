@@ -2199,17 +2199,19 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             await ctx.send(txt)
         await self.save_cache(ctx.guild)
 
-    # Command to delete role_backgrounds data
-    @lvl_group.command(name="delete_role_backgrounds")
+    # Command to reset role backgrounds for users
+    @lvl_group.command(name="reset_role_backgrounds")
     @commands.is_owner()  # Adjust this decorator based on who can use this command
-    async def delete_role_backgrounds(self, ctx: commands.Context):
+    async def reset_role_backgrounds(self, ctx: commands.Context):
         gid = ctx.guild.id
-        if gid in self.data and "role_backgrounds" in self.data[gid]:
-            del self.data[gid]["role_backgrounds"]
+        if "role_backgrounds" in self.data[gid]:
+            # Reset all role backgrounds to None for users
+            for uid, user_data in self.data[gid]["users"].items():
+                user_data["background"] = None
             await self.save_cache(ctx.guild)
-            await ctx.send("role_backgrounds data has been deleted.")
+            await ctx.send("Role backgrounds have been reset for all users.")
         else:
-            await ctx.send("role_backgrounds data does not exist.")
+            await ctx.send("Role backgrounds data does not exist.")
             
     @lvl_group.command(name="changerolebg", aliases=["crolebg"])
     async def change_role_background(self, ctx: commands.Context, role: discord.Role, image_url: str):
@@ -2264,18 +2266,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                     await self.save_cache(member.guild)
                     break
 
-    # Command to delete all cache from the cog
-    @lvl_group.command(name="delete_cache")
-    @commands.is_owner()  # Adjust this decorator based on who can use this command
-    async def delete_cache(self, ctx: commands.Context):
-        gid = ctx.guild.id
-        if gid in self.data:
-            self.data[gid]["users"] = {}  # Reset all user data
-            await self.save_cache(ctx.guild)
-            await ctx.send("Cache has been deleted for the cog.")
-        else:
-            await ctx.send("Cache does not exist for the cog.")
-            
     @lvl_group.command(name="removebg", aliases=["clearbg"])
     async def remove_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role]):
         """Remove the background of a user or role."""
