@@ -455,13 +455,13 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 cleaned.append("stars not in playerstats")
             if "colors" not in user:
                 conf["users"][uid]["colors"] = {
-                    "name": None,
-                    "stat": None,
-                    "levelbar": None,
+                    "name": "#FFFFFF",
+                    "stat": "#FFFFFF",
+                    "levelbar": "#FFFFFF",
                 }
                 cleaned.append("colors not in playerstats")
             if "levelbar" not in conf["users"][uid]["colors"]:
-                conf["users"][uid]["colors"]["levelbar"] = None
+                conf["users"][uid]["colors"]["levelbar"] = "#FFFFFF"
                 cleaned.append("levelbar not in colors")
             if "font" not in user:
                 conf["users"][uid]["font"] = None
