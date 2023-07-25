@@ -9,7 +9,7 @@ from redbot.core.utils import get_end_user_data_statement
 from .levelup import LevelUp
 
 __red_end_user_data_statement__ = get_end_user_data_statement(__file__)
-log = logging.getLogger("red.vrt.levelup")
+log = logging.getLogger("red.vrt.leveluplegacy")
 
 
 async def setup(bot: Red):
