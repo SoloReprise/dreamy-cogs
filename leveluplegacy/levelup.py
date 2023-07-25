@@ -2248,37 +2248,30 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
         await self.save_cache(ctx.guild)
 
-    # Function to update user background based on their roles
-    async def update_user_background(self, member: discord.Member):
-        gid = member.guild.id
-        uid = str(member.id)
-
-        if not self.data[gid]["usepics"]:
+    # Function to handle role updates and change backgrounds accordingly
+    async def on_member_update(self, before: discord.Member, after: discord.Member):
+        if not self.data[after.guild.id]["usepics"]:
             return
 
-        if uid in self.data[gid]["users"]:
-            for role in member.roles:
+        gid = after.guild.id
+        uid = str(after.id)
+
+        # Check if roles list has changed
+        if before.roles != after.roles:
+            custom_background_role = None
+
+            for role in after.roles:
                 role_id = str(role.id)
                 if "role_backgrounds" in self.data[gid] and role_id in self.data[gid]["role_backgrounds"]:
-                    self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][role_id]
-                    await self.save_cache(member.guild)
-                    return
+                    custom_background_role = role
+                    break
 
-            # If no role with custom background was found, reset to default
-            self.data[gid]["users"][uid]["background"] = None
-            await self.save_cache(member.guild)
+            if custom_background_role:
+                self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][str(custom_background_role.id)]
+            else:
+                self.data[gid]["users"][uid]["background"] = None
 
-    # Check for role updates and update backgrounds accordingly
-    @commands.Cog.listener()
-    async def on_member_update(self, before: discord.Member, after: discord.Member):
-        if before.roles != after.roles:
-            await self.update_user_background(after)
-
-    # Function to handle role additions and update user background
-    @commands.Cog.listener()
-    async def on_member_update_roles(self, member: discord.Member, before: List[discord.Role], after: List[discord.Role]):
-        if before != after:
-            await self.update_user_background(member)
+            await self.save_cache(after.guild)
 
     @lvl_group.command(name="removebg", aliases=["clearbg"])
     async def remove_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role]):
