@@ -2159,6 +2159,110 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             await ctx.send(_("Invisible users can no longer gain XP while in a voice channel"))
         await self.save_cache(ctx.guild)
 
+"""COMMANDOS AÑADIDOS""" 
+    @lvl_group.command(name="remove_background", aliases=["rem_bg"])
+    async def remove_background(
+        self,
+        ctx: commands.Context,
+        user_or_role: Union[discord.Member, discord.Role]
+    ):
+        """Remove the background from a user or role"""
+        gid = ctx.guild.id
+        if isinstance(user_or_role, discord.Member):
+            uid = str(user_or_role.id)
+            if uid not in self.data[gid]["users"]:
+                self.init_user(gid, uid)
+            self.data[gid]["users"][uid]["background"] = None
+            await ctx.send(_("Background removed from ") + user_or_role.name)
+        else:
+            users = []
+            for user in ctx.guild.members:
+                if user.bot:
+                    continue
+                if user_or_role in user.roles:
+                    users.append(str(user.id))
+            for uid in users:
+                if uid not in self.data[gid]["users"]:
+                    self.init_user(gid, uid)
+                self.data[gid]["users"][uid]["background"] = None
+            txt = (
+                _("Background cleared for ")
+                + humanize_number(len(users))
+                + _(" users that had the ")
+            )
+            txt += user_or_role.name + _("role")
+            await ctx.send(txt)
+        await self.save_cache(ctx.guild)
+
+    @lvl_group.command(name="edit_background", aliases=["edit_bg"])
+    async def edit_background(
+        self,
+        ctx: commands.Context,
+        user_or_role: Union[discord.Member, discord.Role],
+        image_url: str
+    ):
+        """Edit the background for a user or role"""
+        gid = ctx.guild.id
+        if isinstance(user_or_role, discord.Member):
+            uid = str(user_or_role.id)
+            if uid not in self.data[gid]["users"]:
+                self.init_user(gid, uid)
+            self.data[gid]["users"][uid]["background"] = image_url
+            await ctx.send(_("Background edited for ") + user_or_role.name)
+        else:
+            users = []
+            for user in ctx.guild.members:
+                if user.bot:
+                    continue
+                if user_or_role in user.roles:
+                    users.append(str(user.id))
+            for uid in users:
+                if uid not in self.data[gid]["users"]:
+                    self.init_user(gid, uid)
+                self.data[gid]["users"][uid]["background"] = image_url
+            txt = (
+                _("Background edited for ")
+                + humanize_number(len(users))
+                + _(" users that had the ")
+            )
+            txt += user_or_role.name + _("role")
+            await ctx.send(txt)
+        await self.save_cache(ctx.guild)
+
+    @lvl_group.command(name="clear_background", aliases=["clear_bg"])
+    async def clear_background(
+        self,
+        ctx: commands.Context,
+        user_or_role: Union[discord.Member, discord.Role]
+    ):
+        """Clear the background for a user or role and set it back to default"""
+        gid = ctx.guild.id
+        if isinstance(user_or_role, discord.Member):
+            uid = str(user_or_role.id)
+            if uid not in self.data[gid]["users"]:
+                self.init_user(gid, uid)
+            self.data[gid]["users"][uid]["background"] = None
+            await ctx.send(_("Background cleared for ") + user_or_role.name + _(" and set back to default"))
+        else:
+            users = []
+            for user in ctx.guild.members:
+                if user.bot:
+                    continue
+                if user_or_role in user.roles:
+                    users.append(str(user.id))
+            for uid in users:
+                if uid not in self.data[gid]["users"]:
+                    self.init_user(gid, uid)
+                self.data[gid]["users"][uid]["background"] = None
+            txt = (
+                _("Background cleared for ")
+                + humanize_number(len(users))
+                + _(" users that had the ")
+            )
+            txt += user_or_role.name + _("role and set back to default")
+            await ctx.send(txt)
+        await self.save_cache(ctx.guild)
+
     @lvl_group.command(name="addxp")
     async def add_xp(
         self,
