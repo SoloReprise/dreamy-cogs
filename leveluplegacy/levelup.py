@@ -2199,7 +2199,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             await ctx.send(txt)
         await self.save_cache(ctx.guild)
 
-"""COMANDOS AÑADIDOS""" 
+    """COMANDOS NUEVOS""" 
     @lvl_group.command(name="remove_background", aliases=["rem_bg"])
     async def remove_background(
         self,
