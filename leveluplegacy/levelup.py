@@ -202,7 +202,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         self.cache_seconds = 15
         self.render_gifs = False
 
-        self.user_backgrounds = {}  # Add this line to store user-specific backgrounds
         # Keep background compilation cached
         self.bgdata = {"img": None, "names": []}
         # Keep font compilation cached
@@ -2200,20 +2199,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             await ctx.send(txt)
         await self.save_cache(ctx.guild)
 
-        # Add these functions here
-        def get_user_personal_background(self, user_id):
-            """Get the personalized background of a user"""
-            return self.user_backgrounds.get(user_id)
-
-        def update_user_background(self, user_id, background_url):
-            """Update the personalized background of a user"""
-            self.user_backgrounds[user_id] = background_url
-
-        def remove_user_background(self, user_id):
-            """Remove the personalized background of a user"""
-            if user_id in self.user_backgrounds:
-                del self.user_backgrounds[user_id]
-
     """COMANDOS NUEVOS""" 
     @lvl_group.command(name="remove_background", aliases=["rem_bg"])
     async def remove_background(
@@ -2228,7 +2213,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             if uid not in self.data[gid]["users"]:
                 self.init_user(gid, uid)
             self.data[gid]["users"][uid]["background"] = None
-            self.remove_user_background(uid)  # Remove the user-specific background
             await ctx.send(_("Background removed from ") + user_or_role.name)
         else:
             users = []
@@ -2264,7 +2248,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             if uid not in self.data[gid]["users"]:
                 self.init_user(gid, uid)
             self.data[gid]["users"][uid]["background"] = image_url
-            self.user_backgrounds[uid] = image_url  # Store the user-specific background
             await ctx.send(_("Background edited for ") + user_or_role.name)
         else:
             users = []
@@ -2299,10 +2282,8 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             if uid not in self.data[gid]["users"]:
                 self.init_user(gid, uid)
             self.data[gid]["users"][uid]["background"] = None
-            self.remove_user_background(uid)  # Clear the user-specific background
             await ctx.send(_("Background cleared for ") + user_or_role.name + _(" and set back to default"))
         else:
-        # Existing code for role-based backgrounds...
             users = []
             for user in ctx.guild.members:
                 if user.bot:
@@ -2321,6 +2302,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             txt += user_or_role.name + _("role and set back to default")
             await ctx.send(txt)
         await self.save_cache(ctx.guild)
+
 
     @lvl_group.command(name="setlevel")
     async def set_user_level(self, ctx: commands.Context, user: discord.Member, level: int):
