@@ -2199,6 +2199,131 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             await ctx.send(txt)
         await self.save_cache(ctx.guild)
 
+    # Command to delete role_backgrounds data
+    @lvl_group.command(name="delete_role_backgrounds")
+    @commands.is_owner()  # Adjust this decorator based on who can use this command
+    async def delete_role_backgrounds(self, ctx: commands.Context):
+        gid = ctx.guild.id
+        if gid in self.data and "role_backgrounds" in self.data[gid]:
+            del self.data[gid]["role_backgrounds"]
+            await self.save_cache(ctx.guild)
+            await ctx.send("role_backgrounds data has been deleted.")
+        else:
+            await ctx.send("role_backgrounds data does not exist.")
+            
+    @lvl_group.command(name="changerolebg", aliases=["crolebg"])
+    async def change_role_background(self, ctx: commands.Context, role: discord.Role, image_url: str):
+        """
+        Change the background to a specific role.
+
+        This command sets the background image for all users who have the specified role.
+        Whenever someone receives this role, their background will be automatically updated.
+        """
+        # Validate the image URL and perform necessary checks similar to the set_user_background function
+        # ... Your code to validate the URL ...
+
+        gid = ctx.guild.id
+
+        if "role_backgrounds" not in self.data[gid]:
+            self.data[gid]["role_backgrounds"] = {}
+
+        role_id = str(role.id)
+
+        if role_id not in self.data[gid]["role_backgrounds"]:
+            self.data[gid]["role_backgrounds"][role_id] = image_url
+            await ctx.send(_("The background for users with the {} role has been set.").format(role.name))
+        else:
+            self.data[gid]["role_backgrounds"][role_id] = image_url
+            await ctx.send(_("The background for users with the {} role has been updated.").format(role.name))
+
+        await self.save_cache(ctx.guild)
+
+    # Function to handle role updates and change backgrounds accordingly
+    async def on_member_update_roles(self, member: discord.Member, before: List[discord.Role], after: List[discord.Role]):
+        if not self.data[member.guild.id]["usepics"]:
+            return
+
+        gid = member.guild.id
+        uid = str(member.id)
+
+        # Find the added roles by comparing before and after lists
+        added_roles = set(after) - set(before)
+
+        for role in added_roles:
+            role_id = str(role.id)
+            if "role_backgrounds" in self.data[gid] and role_id in self.data[gid]["role_backgrounds"]:
+                self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][role_id]
+                await self.save_cache(member.guild)
+                break
+        else:
+            # If no role with custom background was found among the added roles, check if any other role grants a background
+            for role in member.roles:
+                role_id = str(role.id)
+                if "role_backgrounds" in self.data[gid] and role_id in self.data[gid]["role_backgrounds"]:
+                    self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][role_id]
+                    await self.save_cache(member.guild)
+                    break
+
+    # Command to delete all cache from the cog
+    @lvl_group.command(name="delete_cache")
+    @commands.is_owner()  # Adjust this decorator based on who can use this command
+    async def delete_cache(self, ctx: commands.Context):
+        gid = ctx.guild.id
+        if gid in self.data:
+            self.data[gid]["users"] = {}  # Reset all user data
+            await self.save_cache(ctx.guild)
+            await ctx.send("Cache has been deleted for the cog.")
+        else:
+            await ctx.send("Cache does not exist for the cog.")
+            
+    @lvl_group.command(name="removebg", aliases=["clearbg"])
+    async def remove_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role]):
+        """Remove the background of a user or role."""
+        gid = ctx.guild.id
+        if not user_or_role:
+            return await ctx.send(_("I cannot find that user or role"))
+        
+        if isinstance(user_or_role, discord.Member):
+            uid = str(user_or_role.id)
+            if uid in self.data[gid]["users"]:
+                self.data[gid]["users"][uid]["background"] = None
+                await ctx.send(_("The background for {} has been removed.").format(user_or_role.name))
+            else:
+                await ctx.send(_("{} does not have a custom background.").format(user_or_role.name))
+        else:
+            users_with_role = [str(user.id) for user in ctx.guild.members if not user.bot and user_or_role in user.roles]
+            removed_count = 0
+            for uid in users_with_role:
+                if uid in self.data[gid]["users"]:
+                    self.data[gid]["users"][uid]["background"] = None
+                    removed_count += 1
+            await ctx.send(_("Removed backgrounds for {} users with the {} role.").format(removed_count, user_or_role.name))
+        await self.save_cache(ctx.guild)
+
+    @lvl_group.command(name="editbg")
+    async def edit_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role], image_url: str):
+        """Edit the background of a user or role."""
+        # Validate the image URL and perform necessary checks similar to the set_user_background function
+        # ... Your code to validate the URL ...
+
+        gid = ctx.guild.id
+        if isinstance(user_or_role, discord.Member):
+            uid = str(user_or_role.id)
+            if uid in self.data[gid]["users"]:
+                self.data[gid]["users"][uid]["background"] = image_url
+                await ctx.send(_("The background for {} has been updated.").format(user_or_role.name))
+            else:
+                await ctx.send(_("{} does not have a custom background.").format(user_or_role.name))
+        else:
+            users_with_role = [str(user.id) for user in ctx.guild.members if not user.bot and user_or_role in user.roles]
+            updated_count = 0
+            for uid in users_with_role:
+                if uid in self.data[gid]["users"]:
+                    self.data[gid]["users"][uid]["background"] = image_url
+                    updated_count += 1
+            await ctx.send(_("Updated backgrounds for {} users with the {} role.").format(updated_count, user_or_role.name))
+        await self.save_cache(ctx.guild)
+
     @lvl_group.command(name="setlevel")
     async def set_user_level(self, ctx: commands.Context, user: discord.Member, level: int):
         """Set a user to a specific level"""
