@@ -2199,6 +2199,28 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             await ctx.send(txt)
         await self.save_cache(ctx.guild)
 
+    @lvl_group.command(name="resetbg")
+    async def reset_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role]):
+        """Reset the background to default for a user or role."""
+        gid = ctx.guild.id
+
+        if isinstance(user_or_role, discord.Member):
+            uid = str(user_or_role.id)
+            if uid in self.data[gid]["users"]:
+                self.data[gid]["users"][uid]["background"] = None
+                await ctx.send(_("The background for {} has been reset to default.").format(user_or_role.name))
+            else:
+                await ctx.send(_("{} does not have a custom background to reset.").format(user_or_role.name))
+        else:
+            users_with_role = [str(user.id) for user in ctx.guild.members if not user.bot and user_or_role in user.roles]
+            reset_count = 0
+            for uid in users_with_role:
+                if uid in self.data[gid]["users"]:
+                    self.data[gid]["users"][uid]["background"] = None
+                    reset_count += 1
+            await ctx.send(_("Reset backgrounds to default for {} users with the {} role.").format(reset_count, user_or_role.name))
+        await self.save_cache(ctx.guild)
+        
     @lvl_group.command(name="changerolebg", aliases=["crolebg"])
     async def change_role_background(self, ctx: commands.Context, role: discord.Role, image_url: str):
         """
