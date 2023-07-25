@@ -129,7 +129,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 "msg": {},
                 "voice": {},
             },  # ChannelID keys, list values for bonus xp range
-            "role_backgrounds": {}  # Add this line to store role backgrounds
+            "role_backgrounds": {},  # Add this line to store role backgrounds
             "streambonus": [],  # Bonus voice XP for streaming in voice
             "cooldown": 60,  # Only gives XP every 30 seconds
             "base": 100,  # Base denominator for level algorithm, higher takes longer to level
