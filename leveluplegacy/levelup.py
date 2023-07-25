@@ -2272,15 +2272,15 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 return
 
             # Find the superior role the user gained (highest position) with a background
-            superior_role = None
+            superior_role_id = None
             for role in member.roles:
                 if "role_backgrounds" in self.data[gid] and str(role.id) in self.data[gid]["role_backgrounds"]:
-                    if superior_role is None or role.position > superior_role.position:
-                        superior_role = role
+                    if superior_role_id is None or role.position > discord.utils.get(member.guild.roles, id=superior_role_id).position:
+                        superior_role_id = str(role.id)
 
-            if superior_role:
-                self.data[gid]["users"][uid]["role_based_background"] = self.data[gid]["role_backgrounds"][str(superior_role.id)]
-                self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][str(superior_role.id)]
+            if superior_role_id:
+                self.data[gid]["users"][uid]["role_based_background"] = self.data[gid]["role_backgrounds"][superior_role_id]
+                self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][superior_role_id]
                 await self.save_cache(member.guild)
             else:
                 # If no role with custom background was found, reset to default
@@ -2298,6 +2298,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
     async def on_member_update_roles(self, member: discord.Member, before: List[discord.Role], after: List[discord.Role]):
         if before != after:
             await self.update_user_background(member)
+
 
     @lvl_group.command(name="removebg", aliases=["clearbg"])
     async def remove_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role]):
