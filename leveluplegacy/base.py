@@ -18,7 +18,7 @@ from redbot.core import VersionInfo, bank, commands, version_info
 from redbot.core.i18n import Translator, cog_i18n
 from redbot.core.utils.chat_formatting import box, humanize_list, humanize_number
 
-from levelup.utils.formatter import (
+from leveluplegacy.utils.formatter import (
     get_attachments,
     get_bar,
     get_content_from_url,
@@ -229,7 +229,7 @@ class UserCommands(MixinMeta, ABC):
 
         recipients_str = ", ".join(recipients)
         await ctx.send(_("You just gave a star to {}!").format(recipients_str))
-                                
+
     # For testing purposes
     @commands.command(name="mocklvl", hidden=True)
     async def get_lvl_test(self, ctx, *, user: discord.Member = None):

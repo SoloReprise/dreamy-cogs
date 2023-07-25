@@ -36,7 +36,7 @@ from tenacity import (
     wait_random_exponential,
 )
 
-from levelup.utils.formatter import (
+from leveluplegacy.utils.formatter import (
     get_attachments,
     get_content_from_url,
     get_level,
