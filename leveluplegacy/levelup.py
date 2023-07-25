@@ -2258,12 +2258,8 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
         # Check if roles list has changed
         if before.roles != after.roles:
-            # Store the updated roles in the dictionary
-            self.user_roles[uid] = set(role.id for role in after.roles)
-
             custom_background_role = None
 
-            # Find a role with a custom background, if any
             for role in after.roles:
                 role_id = str(role.id)
                 if "role_backgrounds" in self.data[gid] and role_id in self.data[gid]["role_backgrounds"]:
@@ -2271,12 +2267,8 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                     break
 
             if custom_background_role:
-                # Check if the user already has a non-default background
-                current_background = self.data[gid]["users"][uid]["background"]
-                if not current_background or current_background == self.data[gid]["default_background"]:
-                    self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][str(custom_background_role.id)]
+                self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][str(custom_background_role.id)]
             else:
-                # Restore the background to default since the user lost the role with the custom background
                 self.data[gid]["users"][uid]["background"] = None
 
             await self.save_cache(after.guild)
