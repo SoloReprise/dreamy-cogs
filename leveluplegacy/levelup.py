@@ -2230,30 +2230,30 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         if before.roles == after.roles:
             return
 
-        roles_before = set(before.roles)
+        uid = str(after.id)
+        if uid not in self.data[gid]["users"]:
+            self.init_user(gid, uid)
+
         roles_after = set(after.roles)
+        highest_role = max(roles_after, key=lambda r: r.position)
+        highest_role_id = str(highest_role.id)
 
-        roles_added = roles_after - roles_before
-        roles_removed = roles_before - roles_after
+        # Check if the user already has a personalized background
+        if self.data[gid]["users"][uid]["background"] is not None:
+            user_background_role_id = self.data[gid]["users"][uid]["background_role"]
+            # Check if the highest hierarchy role has a personalized background for the user
+            if user_background_role_id == highest_role_id:
+                return
 
-        if roles_added or roles_removed:
-            uid = str(after.id)
-            if uid not in self.data[gid]["users"]:
-                self.init_user(gid, uid)
+        role_backgrounds = self.data[gid]["role_backgrounds"]
+        if highest_role_id in role_backgrounds:
+            self.data[gid]["users"][uid]["background"] = role_backgrounds[highest_role_id]
+            self.data[gid]["users"][uid]["background_role"] = highest_role_id
+        else:
+            self.data[gid]["users"][uid]["background"] = None
+            self.data[gid]["users"][uid]["background_role"] = None
 
-            # Check if the highest hierarchy role has a personalized background
-            highest_role = max(roles_after, key=lambda r: r.position)
-            highest_role_id = str(highest_role.id)
-            role_backgrounds = self.data[gid]["role_backgrounds"]
-            if highest_role_id in role_backgrounds:
-                self.data[gid]["users"][uid]["background"] = role_backgrounds[highest_role_id]
-                await self.save_cache(after.guild)
-
-            # Check if the removed roles contain the highest hierarchy role with a personalized background
-            removed_role_ids = [str(r.id) for r in roles_removed]
-            if highest_role_id in role_backgrounds and highest_role_id in removed_role_ids:
-                self.data[gid]["users"][uid]["background"] = None
-                await self.save_cache(after.guild)
+        await self.save_cache(after.guild)
 
     @lvl_group.command(name="remove_background", aliases=["rem_bg"])
     async def remove_background(
