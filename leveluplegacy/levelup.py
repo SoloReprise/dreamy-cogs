@@ -418,38 +418,28 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             log.info("Config initialized")
         self.first_run = False
 
-@staticmethod
-def cleanup(data: dict) -> tuple:
-    conf = data.copy()
-    if isinstance(conf["channelbonuses"]["msg"], list):
-        conf["channelbonuses"]["msg"] = {}
-    if isinstance(conf["channelbonuses"]["voice"], list):
-        conf["channelbonuses"]["voice"] = {}
-    cleaned = []
-    # Check prestige data
-    if conf["prestigedata"]:
-        for prestige_level, prestige_data in conf["prestigedata"].items():
-            # Make sure emoji data is a dict
-            if isinstance(prestige_data["emoji"], dict):
-                continue
-            # Fix old string emoji data
-            conf["prestigedata"][prestige_level]["emoji"] = {
-                "str": prestige_data["emoji"],
-                "url": None,
-            }
-            t = "prestige data fix"
-            if t not in cleaned:
-                cleaned.append(t)
-
-    # Additional check to avoid converting URLs to integers
-    for uid, user_data in conf["users"].items():
-        for k, v in user_data.items():
-            if k == "background" and isinstance(v, str) and (v.startswith("http://") or v.startswith("https://")):
-                # Skip converting URL background values
-                continue
-            conf["users"][uid][k] = int(v) if v is not None else 0
-
-    return cleaned, conf
+    @staticmethod
+    def cleanup(data: dict) -> tuple:
+        conf = data.copy()
+        if isinstance(conf["channelbonuses"]["msg"], list):
+            conf["channelbonuses"]["msg"] = {}
+        if isinstance(conf["channelbonuses"]["voice"], list):
+            conf["channelbonuses"]["voice"] = {}
+        cleaned = []
+        # Check prestige data
+        if conf["prestigedata"]:
+            for prestige_level, prestige_data in conf["prestigedata"].items():
+                # Make sure emoji data is a dict
+                if isinstance(prestige_data["emoji"], dict):
+                    continue
+                # Fix old string emoji data
+                conf["prestigedata"][prestige_level]["emoji"] = {
+                    "str": prestige_data["emoji"],
+                    "url": None,
+                }
+                t = "prestige data fix"
+                if t not in cleaned:
+                    cleaned.append(t)
 
         # Check players
         for uid, user in conf["users"].items():
@@ -2258,7 +2248,7 @@ def cleanup(data: dict) -> tuple:
 
         await self.save_cache(ctx.guild)
 
-    # Function to update user background based on their roles and personalized backgrounds
+    # Function to update user background based on their roles
     async def update_user_background(self, member: discord.Member):
         gid = member.guild.id
         uid = str(member.id)
@@ -2267,35 +2257,16 @@ def cleanup(data: dict) -> tuple:
             return
 
         if uid in self.data[gid]["users"]:
-            user_data = self.data[gid]["users"][uid]
-            personalized_background = user_data.get("personal_background", None)
-            role_based_background = user_data.get("role_based_background", None)
-
-            # Check if the user has a personalized background
-            if personalized_background is not None:
-                self.data[gid]["users"][uid]["background"] = personalized_background
-                await self.save_cache(member.guild)
-                return
-
-            # If the user already has a non-default background from a role, do not change it
-            if role_based_background is not None:
-                return
-
-            # Find the superior role the user gained (highest position) with a background
-            superior_role_id = None
             for role in member.roles:
-                if "role_backgrounds" in self.data[gid] and str(role.id) in self.data[gid]["role_backgrounds"]:
-                    if superior_role_id is None or role.position > discord.utils.get(member.guild.roles, id=superior_role_id).position:
-                        superior_role_id = str(role.id)
+                role_id = str(role.id)
+                if "role_backgrounds" in self.data[gid] and role_id in self.data[gid]["role_backgrounds"]:
+                    self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][role_id]
+                    await self.save_cache(member.guild)
+                    return
 
-            if superior_role_id:
-                self.data[gid]["users"][uid]["role_based_background"] = self.data[gid]["role_backgrounds"][superior_role_id]
-                self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][superior_role_id]
-                await self.save_cache(member.guild)
-            else:
-                # If no role with custom background was found, reset to default
-                self.data[gid]["users"][uid]["background"] = None
-                await self.save_cache(member.guild)
+            # If no role with custom background was found, reset to default
+            self.data[gid]["users"][uid]["background"] = None
+            await self.save_cache(member.guild)
 
     # Check for role updates and update backgrounds accordingly
     @commands.Cog.listener()
@@ -2308,7 +2279,6 @@ def cleanup(data: dict) -> tuple:
     async def on_member_update_roles(self, member: discord.Member, before: List[discord.Role], after: List[discord.Role]):
         if before != after:
             await self.update_user_background(member)
-
 
     @lvl_group.command(name="removebg", aliases=["clearbg"])
     async def remove_background(self, ctx: commands.Context, user_or_role: Union[discord.Member, discord.Role]):
