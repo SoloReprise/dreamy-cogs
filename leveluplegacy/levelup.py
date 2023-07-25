@@ -2258,20 +2258,20 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
         if uid in self.data[gid]["users"]:
             user_data = self.data[gid]["users"][uid]
-            personal_background = user_data.get("personal_background", None)
+            personalized_background = user_data.get("personal_background", None)
+            role_based_background = user_data.get("role_based_background", None)
 
             # Check if the user has a personalized background
-            if personal_background is not None:
-                # If the user has a personalized background, use it
-                self.data[gid]["users"][uid]["background"] = personal_background
+            if personalized_background is not None:
+                self.data[gid]["users"][uid]["background"] = personalized_background
                 await self.save_cache(member.guild)
                 return
 
             # If the user already has a non-default background from a role, do not change it
-            if self.data[gid]["users"][uid]["background"] is not None:
+            if role_based_background is not None:
                 return
 
-            # Find the superior role the user gained (highest position)
+            # Find the superior role the user gained (highest position) with a background
             superior_role = None
             for role in member.roles:
                 if "role_backgrounds" in self.data[gid] and str(role.id) in self.data[gid]["role_backgrounds"]:
@@ -2279,6 +2279,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                         superior_role = role
 
             if superior_role:
+                self.data[gid]["users"][uid]["role_based_background"] = self.data[gid]["role_backgrounds"][str(superior_role.id)]
                 self.data[gid]["users"][uid]["background"] = self.data[gid]["role_backgrounds"][str(superior_role.id)]
                 await self.save_cache(member.guild)
             else:
