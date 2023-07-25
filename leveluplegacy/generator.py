@@ -216,8 +216,8 @@ class Generator(MixinMeta, ABC):
             _("Experiencia: ")
             + f"{humanize_number(user_xp_progress)}/{humanize_number(next_xp_diff)} ({humanize_number(user_xp)} total)"
         )
-        # message_count = _("Messages: ") + messages
-        # voice = _("Voice: ") + voice
+        message_count = _("Messages: ") + messages
+        voice = _("Voice: ") + voice
         stars = str(stars)
         bal = _("Balance: ") + f"{humanize_number(balance)} {currency}"
         prestige_str = _("Prestige ") + str(prestige)
@@ -249,10 +249,10 @@ class Generator(MixinMeta, ABC):
             emoji_scale += 0.1
             stats_font = ImageFont.truetype(base_font, stats_size)
         # Also check message box
-        # while (stats_font.getlength(message_count) + bar_start + 220) > final.width - 10:
-        #    stats_size -= 1
-        #    emoji_scale += 0.1
-        #   stats_font = ImageFont.truetype(base_font, stats_size)
+        while (stats_font.getlength(message_count) + bar_start + 220) > final.width - 10:
+            stats_size -= 1
+            emoji_scale += 0.1
+            stats_font = ImageFont.truetype(base_font, stats_size)
         # And rank box
         while (stats_font.getlength(rank) + bar_start + 10) > bar_start + 210:
             stats_size -= 1
@@ -367,7 +367,7 @@ class Generator(MixinMeta, ABC):
         # Messages
         draw.text(
             (bar_start + 220, stats_y),
-            # message_count,
+            message_count,
             statcolor,
             font=stats_font,
             stroke_width=stroke_width,
@@ -376,7 +376,7 @@ class Generator(MixinMeta, ABC):
         # Voice
         draw.text(
             (bar_start + 220, stats_y + stat_offset),
-            # voice,
+            voice,
             statcolor,
             font=stats_font,
             stroke_width=stroke_width,
