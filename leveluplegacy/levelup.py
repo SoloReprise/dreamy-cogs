@@ -2199,6 +2199,18 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             await ctx.send(txt)
         await self.save_cache(ctx.guild)
 
+    # Command to delete role_backgrounds data
+    @lvl_group.command(name="delete_role_backgrounds")
+    @commands.is_owner()  # Adjust this decorator based on who can use this command
+    async def delete_role_backgrounds(self, ctx: commands.Context):
+        gid = ctx.guild.id
+        if "role_backgrounds" in self.data[gid]:
+            del self.data[gid]["role_backgrounds"]
+            await self.save_cache(ctx.guild)
+            await ctx.send("role_backgrounds data has been deleted.")
+        else:
+            await ctx.send("role_backgrounds data does not exist.")
+            
     @lvl_group.command(name="changerolebg", aliases=["crolebg"])
     async def change_role_background(self, ctx: commands.Context, role: discord.Role, image_url: str):
         """
