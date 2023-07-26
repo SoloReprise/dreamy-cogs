@@ -674,7 +674,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                     except discord.Forbidden:
                         pass
                 elif all(perms) and channel:
-                    txt = _("**{user} just leveled up!**").format(
+                    txt = _("**¡Titirití! ¡{user} ha subido de nivel!**").format(
                         user=mentionuser if mention else name
                     )
                     await channel.send(txt, file=file)
