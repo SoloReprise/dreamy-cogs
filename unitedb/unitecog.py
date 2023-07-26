@@ -16,7 +16,7 @@ class UniteCog(commands.Cog):
                 "/home/unitedlegacy/.local/share/Red-DiscordBot/data/Spribotito/cogs/CogManager/cogs/unitedb/callers.db"
             )
             curs = conn.cursor()
-            run = "CREATE TABLE IF NOT EXISTS callers (name varchar PRIMARY KEY, category varchar, text varchar, image varchar);"
+            run = "CREATE TABLE IF NOT EXISTS callers (name varchar, category varchar, text varchar, image varchar, PRIMARY KEY (name, category));"
             curs.execute(run)
             conn.commit()
             return conn, curs
