@@ -21,7 +21,11 @@ class UniteCog(commands.Cog):
 
     def connect(self):
         try:
-            conn = sqlite3.connect(f"SPRI_DB_PATH")
+            db_path = os.getenv("SPRI_DB_PATH")
+            if db_path is None:
+                raise ValueError("SPRI_DB_PATH environment variable is not set.")
+            
+            conn = sqlite3.connect(db_path)
             curs = conn.cursor()
             run = "CREATE TABLE IF NOT EXISTS callers (name varchar PRIMARY KEY, category varchar, text varchar, image varchar);"
             curs.execute(run)
