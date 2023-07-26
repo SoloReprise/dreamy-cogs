@@ -80,7 +80,7 @@ class UniteCog(commands.Cog):
         name, category, text, image = records[0]
         name = name.replace("''", "'")
 
-        emb = discord.Embed(description=text, colour=discord.Colour.green())
+        emb = discord.Embed(title=name, description=text, colour=discord.Colour.green())
         emb.set_thumbnail(url=image)
         await ctx.reply(embed=emb)
         return
