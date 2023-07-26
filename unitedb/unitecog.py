@@ -124,11 +124,6 @@ class UniteCog(commands.Cog):
                     await result.reply("Invalid text for caller, cancelled")
                     return
 
-                result1 = self.fetch_caller(category, name)
-                if result1:
-                    await result.reply("A caller with this name and category already exists.")
-                    return
-
                 text = text.replace("'", "''")
 
                 image = next(
@@ -156,8 +151,11 @@ class UniteCog(commands.Cog):
                     emb.add_field(name="Reply Text", value=text, inline=False)
                     await result.reply(embed=emb)
 
-                except sqlite3.IntegrityError:
-                    await result.reply("A caller with this name and category already exists.")
+                except sqlite3.IntegrityError as e:
+                    if "UNIQUE constraint failed: callers.name" in str(e):
+                        await result.reply("A caller with this name and category already exists.")
+                    else:
+                        await result.reply("An error occurred while creating the caller.")
                 finally:
                     conn.close()
 
@@ -218,8 +216,8 @@ class UniteCog(commands.Cog):
                     emb.add_field(name="Reply Text", value=text, inline=False)
                     await result.reply(embed=emb)
 
-                except sqlite3.IntegrityError:
-                    await result.reply("A caller with this name and category already exists.")
+                except Exception as exc:
+                    await result.reply("An error occurred while editing the caller.")
                 finally:
                     conn.close()
 
@@ -267,7 +265,7 @@ class UniteCog(commands.Cog):
                     await ctx.reply(embed=emb)
 
                 except Exception as exc:
-                    print(exc)
+                    await ctx.reply("An error occurred while deleting the caller.")
                 finally:
                     conn.close()
 
