@@ -23,6 +23,3 @@ class Meta(commands.Cog):
             await ctx.send(mention)
         else:
             await ctx.send(f"Sorry, I couldn't find the thread ID for {pokemon_name}.")
-
-def setup(bot):
-    bot.add_cog(Meta(bot))
