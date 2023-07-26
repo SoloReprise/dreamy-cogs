@@ -139,7 +139,6 @@ class UniteCog(commands.Cog):
                     query = f"""INSERT INTO callers (name, category, text, image) VALUES (?, ?, ?, ?)"""
                     curs.execute(query, (name, category, text, image))
                     conn.commit()
-                    conn.close()
 
                     name = name.replace("''", "'")
                     text = text.replace("''", "'")
@@ -205,7 +204,6 @@ class UniteCog(commands.Cog):
                     query = f"""UPDATE callers SET text=? WHERE name=? COLLATE NOCASE AND category=?"""
                     curs.execute(query, (text, name, category))
                     conn.commit()
-                    conn.close()
 
                     name = name.replace("''", "'")
                     text = text.replace("''", "'")
@@ -254,7 +252,6 @@ class UniteCog(commands.Cog):
                     query = f"""DELETE FROM callers WHERE name=? COLLATE NOCASE AND category=?"""
                     curs.execute(query, (name, category))
                     conn.commit()
-                    conn.close()
 
                     name = name.replace("''", "'")
 
