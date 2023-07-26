@@ -21,7 +21,7 @@ class UniteCog(commands.Cog):
 
     def connect(self):
         try:
-            conn = sqlite3.connect(f"/home/unitedlegacy/.local/share/Red-DiscordBot/data/Spribotito/cogs/CogManager/cogs/unitedb/callers.db")
+            conn = sqlite3.connect(f"SPRI_DB_PATH")
             curs = conn.cursor()
             run = "CREATE TABLE IF NOT EXISTS callers (name varchar PRIMARY KEY, category varchar, text varchar, image varchar);"
             curs.execute(run)
