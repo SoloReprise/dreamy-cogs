@@ -140,21 +140,26 @@ class UniteCog(commands.Cog):
                 if not conn:
                     return
 
-                query = f"""INSERT INTO callers (name, category, text, image) VALUES (?, ?, ?, ?)"""
-                curs.execute(query, (name, category, text, image))
-                conn.commit()
-                conn.close()
+                try:
+                    query = f"""INSERT INTO callers (name, category, text, image) VALUES (?, ?, ?, ?)"""
+                    curs.execute(query, (name, category, text, image))
+                    conn.commit()
+                    conn.close()
 
-                name = name.replace("''", "'")
-                text = text.replace("''", "'")
+                    name = name.replace("''", "'")
+                    text = text.replace("''", "'")
 
-                emb = discord.Embed(title="Caller Created", colour=discord.Colour.green())
-                emb.set_thumbnail(url=image)
-                emb.add_field(name="Name", value=name, inline=False)
-                emb.add_field(name="Category", value=category.capitalize(), inline=False)
-                emb.add_field(name="Reply Text", value=text, inline=False)
-                await result.reply(embed=emb)
-                return
+                    emb = discord.Embed(title="Caller Created", colour=discord.Colour.green())
+                    emb.set_thumbnail(url=image)
+                    emb.add_field(name="Name", value=name, inline=False)
+                    emb.add_field(name="Category", value=category.capitalize(), inline=False)
+                    emb.add_field(name="Reply Text", value=text, inline=False)
+                    await result.reply(embed=emb)
+
+                except sqlite3.IntegrityError:
+                    await result.reply("A caller with this name and category already exists.")
+                finally:
+                    conn.close()
 
             elif action == "edit":
                 try:
@@ -198,20 +203,25 @@ class UniteCog(commands.Cog):
                 if not conn:
                     return
 
-                query = f"""UPDATE callers SET text=? WHERE name=? COLLATE NOCASE AND category=?"""
-                curs.execute(query, (text, name, category))
-                conn.commit()
-                conn.close()
+                try:
+                    query = f"""UPDATE callers SET text=? WHERE name=? COLLATE NOCASE AND category=?"""
+                    curs.execute(query, (text, name, category))
+                    conn.commit()
+                    conn.close()
 
-                name = name.replace("''", "'")
-                text = text.replace("''", "'")
+                    name = name.replace("''", "'")
+                    text = text.replace("''", "'")
 
-                emb = discord.Embed(title="Caller Edited", colour=discord.Colour.green())
-                emb.add_field(name="Name", value=name, inline=False)
-                emb.add_field(name="Category", value=category.capitalize(), inline=False)
-                emb.add_field(name="Reply Text", value=text, inline=False)
-                await result.reply(embed=emb)
-                return
+                    emb = discord.Embed(title="Caller Edited", colour=discord.Colour.green())
+                    emb.add_field(name="Name", value=name, inline=False)
+                    emb.add_field(name="Category", value=category.capitalize(), inline=False)
+                    emb.add_field(name="Reply Text", value=text, inline=False)
+                    await result.reply(embed=emb)
+
+                except sqlite3.IntegrityError:
+                    await result.reply("A caller with this name and category already exists.")
+                finally:
+                    conn.close()
 
             elif action == "delete":
                 try:
@@ -242,25 +252,30 @@ class UniteCog(commands.Cog):
                 if not conn:
                     return
 
-                query = f"""DELETE FROM callers WHERE name=? COLLATE NOCASE AND category=?"""
-                curs.execute(query, (name, category))
-                conn.commit()
-                conn.close()
+                try:
+                    query = f"""DELETE FROM callers WHERE name=? COLLATE NOCASE AND category=?"""
+                    curs.execute(query, (name, category))
+                    conn.commit()
+                    conn.close()
 
-                name = name.replace("''", "'")
+                    name = name.replace("''", "'")
 
-                emb = discord.Embed(title="Caller Deleted", colour=discord.Colour.red())
-                emb.add_field(name="Name", value=name, inline=False)
-                emb.add_field(name="Category", value=category.capitalize(), inline=False)
-                emb.add_field(name="Reply Text", value=text, inline=False)
-                await ctx.reply(embed=emb)
-                return
+                    emb = discord.Embed(title="Caller Deleted", colour=discord.Colour.red())
+                    emb.add_field(name="Name", value=name, inline=False)
+                    emb.add_field(name="Category", value=category.capitalize(), inline=False)
+                    emb.add_field(name="Reply Text", value=text, inline=False)
+                    await ctx.reply(embed=emb)
+
+                except Exception as exc:
+                    print(exc)
+                finally:
+                    conn.close()
 
             else:
                 emb = discord.Embed(
                     title="UniteDB Help", description=unitedbtext, colour=discord.Colour.blue()
                 )
                 await ctx.reply(embed=emb)
-                return
+
         except Exception as exc:
             print(exc)
