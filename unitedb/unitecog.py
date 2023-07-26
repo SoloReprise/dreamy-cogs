@@ -111,6 +111,11 @@ class UniteCog(commands.Cog):
                     await ctx.reply("Invalid category")
                     return
 
+                records = self.fetch_caller(category, name)
+                if records:
+                    await ctx.reply("A caller with this name and category already exists.")
+                    return
+
                 await ctx.reply("Please reply with the caller text")
 
                 try:
@@ -139,6 +144,7 @@ class UniteCog(commands.Cog):
                     query = f"""INSERT INTO callers (name, category, text, image) VALUES (?, ?, ?, ?)"""
                     curs.execute(query, (name, category, text, image))
                     conn.commit()
+                    conn.close()
 
                     name = name.replace("''", "'")
                     text = text.replace("''", "'")
@@ -204,6 +210,7 @@ class UniteCog(commands.Cog):
                     query = f"""UPDATE callers SET text=? WHERE name=? COLLATE NOCASE AND category=?"""
                     curs.execute(query, (text, name, category))
                     conn.commit()
+                    conn.close()
 
                     name = name.replace("''", "'")
                     text = text.replace("''", "'")
@@ -252,6 +259,7 @@ class UniteCog(commands.Cog):
                     query = f"""DELETE FROM callers WHERE name=? COLLATE NOCASE AND category=?"""
                     curs.execute(query, (name, category))
                     conn.commit()
+                    conn.close()
 
                     name = name.replace("''", "'")
 
