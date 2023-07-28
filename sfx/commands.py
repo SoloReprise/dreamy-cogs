@@ -84,10 +84,10 @@ class TTSConverter(Converter):
                 "Victor", "Yolanda"
             ]
 
-            embed = discord.Embed(title="Available TTS Voices", color=await ctx.embed_color())
+            embed = discord.Embed(title="Voces disponibles", color=await ctx.embed_color())
             embed.description = (
                 f"{ctx.clean_prefix}mytts voice <voz>\n\n"
-                "Nombres de las voces disponibles: " + ", ".join(available_voices) + "."
+                "**Nombres de las voces disponibles**: " + ", ".join(available_voices) + "."
             )
 
             await ctx.send(embed=embed)

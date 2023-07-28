@@ -21,7 +21,7 @@ class MyTTSCommand(MixinMeta):
     async def voice(self, ctx: Context, voice: Optional[str] = None):
         """
         Cambia tu voz de TTS.
-        Escribe {ctx.clean_prefix}tts --voices para ver las voces disponibles.
+        Usa el comando "tts --voices" para ver las voces disponibles.
         Si no tienes voces personalizadas, te enseñará la voz por defecto.
         """
 
