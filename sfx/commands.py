@@ -81,34 +81,33 @@ class TTSConverter(Converter):
                 )
                 return
 
-                for chunk in divided:
-                    embed = discord.Embed(color=await ctx.embed_color())
-                    for voice in chunk:
-                        if "Google" in voice['source'] and "Spanish" in voice['language']['name']:
-                            url = ctx.cog.generate_url(
-                                voice["name"],
-                                False,
-                                f"Hi, I'm {voice['name']}, nice to meet you.",
-                                1.0,
-                                "mp3",
-                            )
-                            m = f"""
-                            Example: [Click Here]({url})
-                            • Gender: {voice['gender']}
-                            • Language: {voice['language']['name']}
-                            • Source: {voice['source']}
-                            """
-                            embed.add_field(name=voice["name"], value=m)
-                    pages.append(embed)
+            for chunk in divided:
+                embed = discord.Embed(color=await ctx.embed_color())
+                for voice in chunk:
+                    if "Google" in voice['source'] and "Spanish" in voice['language']['name']:
+                        url = ctx.cog.generate_url(
+                            voice["name"],
+                            False,
+                            f"Hi, I'm {voice['name']}, nice to meet you.",
+                            1.0,
+                            "mp3",
+                        )
+                        m = f"""
+                        Example: [Click Here]({url})
+                        • Gender: {voice['gender']}
+                        • Language: {voice['language']['name']}
+                        • Source: {voice['source']}
+                        """
+                        embed.add_field(name=voice["name"], value=m)
+                pages.append(embed)
 
-                for index, embed in enumerate(pages):
-                    embed.set_footer(
-                        text=f"Page {index + 1}/{len(pages)} | {len(ctx.cog.voices)} voices"
-                    )
+            for index, embed in enumerate(pages):
+                embed.set_footer(
+                    text=f"Page {index + 1}/{len(pages)} | {len(ctx.cog.voices)} voices"
+                )
 
-                asyncio.create_task(menu(ctx, pages, DEFAULT_CONTROLS))
-                return
-
+            asyncio.create_task(menu(ctx, pages, DEFAULT_CONTROLS))
+            return
 
         return values
 
