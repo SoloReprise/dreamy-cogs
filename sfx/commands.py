@@ -84,21 +84,20 @@ class TTSConverter(Converter):
             for chunk in divided:
                 embed = discord.Embed(color=await ctx.embed_color())
                 for voice in chunk:
-                    if "Google" in voice['source'] and "Spanish" in voice['language']['name']:
-                        url = ctx.cog.generate_url(
-                            voice["name"],
-                            False,
-                            f"Hi, I'm {voice['name']}, nice to meet you.",
-                            1.0,
-                            "mp3",
-                        )
-                        m = f"""
-                        Example: [Click Here]({url})
-                        • Gender: {voice['gender']}
-                        • Language: {voice['language']['name']}
-                        • Source: {voice['source']}
-                        """
-                        embed.add_field(name=voice["name"], value=m)
+                    url = ctx.cog.generate_url(
+                        voice["name"],
+                        False,
+                        f"Hi, I'm {voice['name']}, nice to meet you.",
+                        1.0,
+                        "mp3",
+                    )
+                    m = f"""
+                    Example: [Click Here]({url})
+                    • Gender: {voice['gender']}
+                    • Language: {voice['language']['name']}
+                    • Source: {voice['source']}
+                    """
+                    embed.add_field(name=voice["name"], value=m)
                 pages.append(embed)
 
             for index, embed in enumerate(pages):
