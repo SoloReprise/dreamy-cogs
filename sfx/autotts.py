@@ -9,26 +9,29 @@ from .abc import MixinMeta
 
 
 class AutoTTSMixin(MixinMeta):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.autotts_channels = {}
+
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     async def autotts(self, ctx: Context):
         """
         Activa el comando para enviar mensajes TTS automáticamente.
 
-        Si no está activado a nivel servidor, lo activará para ti.
+        Si no está activado a nivel de canal, lo activará para el canal actual.
         """
-        toggle = await self.config.guild(ctx.guild).allow_autotts()
-        if ctx.author.id in self.autotts:
-            self.autotts.remove(ctx.author.id)
-            await ctx.send("Auto-TTS desactivado.")
+        channel_id = ctx.channel.id
+        toggle = self.autotts_channels.get(channel_id, None)
+        if toggle:
+            self.autotts_channels[channel_id] = False
+            await ctx.send("Auto-TTS desactivado para este canal.")
         else:
-            if not toggle:
-                await ctx.send("AutoTTS is disallowed on this server.")
-                return
-            self.autotts.append(ctx.author.id)
-            await ctx.send("Auto-TTS activado.")
+            if channel_id not in self.autotts_channels:
+                self.autotts_channels[channel_id] = True
+            await ctx.send("Auto-TTS activado para este canal.")
 
-    @autotts.command(name="server")
+    @commands.command(name="autotts_server")
     @commands.admin_or_permissions(manage_guild=True)
     @commands.guild_only()
     async def autotts_server(self, ctx: Context):
@@ -54,6 +57,7 @@ class AutoTTSMixin(MixinMeta):
             or not message.author.voice.channel
             or not message.author.voice.channel.permissions_for(message.author).speak
             or not await self.can_tts(message)
+            or self.autotts_channels.get(message.channel.id, None) is False
         ):
             return
 
