@@ -9,28 +9,26 @@ from .abc import MixinMeta
 
 
 class AutoTTSMixin(MixinMeta):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.autotts_channels = {}  # Initialize autotts_channels dictionary
-
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     async def autotts(self, ctx: Context):
         """
         Activa el comando para enviar mensajes TTS automáticamente.
 
-        Si no está activado a nivel de canal, lo activará para el canal actual.
+        Si no está activado a nivel servidor, lo activará para ti.
         """
-        channel_id = ctx.channel.id
-        toggle = await self.config.channel(ctx.channel).allow_autotts()
-        if toggle:
-            await self.config.channel(ctx.channel).allow_autotts.set(False)
-            await ctx.send("Auto-TTS desactivado para este canal.")
+        toggle = await self.config.guild(ctx.guild).allow_autotts()
+        if ctx.author.id in self.autotts:
+            self.autotts.remove(ctx.author.id)
+            await ctx.send("Auto-TTS desactivado.")
         else:
-            await self.config.channel(ctx.channel).allow_autotts.set(True)
-            await ctx.send("Auto-TTS activado para este canal.")
+            if not toggle:
+                await ctx.send("AutoTTS is disallowed on this server.")
+                return
+            self.autotts.append(ctx.author.id)
+            await ctx.send("Auto-TTS activado.")
 
-    @commands.command(name="autotts_server")
+    @autotts.command(name="server")
     @commands.admin_or_permissions(manage_guild=True)
     @commands.guild_only()
     async def autotts_server(self, ctx: Context):
@@ -56,7 +54,6 @@ class AutoTTSMixin(MixinMeta):
             or not message.author.voice.channel
             or not message.author.voice.channel.permissions_for(message.author).speak
             or not await self.can_tts(message)
-            or not await self.config.channel(message.channel).allow_autotts()  # Use channel config
         ):
             return
 
@@ -82,14 +79,14 @@ class AutoTTSMixin(MixinMeta):
             or member.id not in self.autotts
         ):
             return
-        if before and not after:
+        if before.channel and not after.channel:
             self.autotts.remove(member.id)
             embed = discord.Embed(
                 title="AutoTTS Disabled",
                 color=await self.bot.get_embed_color(member.guild),
             )
             embed.description = (
-                f"You have left {before.mention} and therefore AutoTTS has been disabled.\n\n"
+                f"You have left {before.channel.mention} and therefore AutoTTS has been disabled.\n\n"
                 f"If you would like to re-enable AutoTTS, please join a voice channel and rerun the autotts command."
             )
             with contextlib.suppress(discord.HTTPException):
