@@ -73,39 +73,24 @@ class TTSConverter(Converter):
             )[0][0]
 
         if values["voices"]:
-            pages = []
-            divided = self.divide_chunks(ctx.cog.voices, 12)
-            if not divided:
-                await ctx.send(
-                    "Something is going wrong with the TTS API, please try again later."
-                )
-                return
+            available_voices = [
+                "Alejandra", "Alex", "Alonso", "Alvaro", "Anastasia", "Andrea", "Andres",
+                "Belkys", "Carmen", "Concha", "Conchita", "Dalia", "Dolores", "Elvira",
+                "Emilio", "Emperatriz", "Enric", "Enrique", "Federico", "Felicia", "Gilberta",
+                "Gonzalo", "Jorge", "Justo", "Julieta", "Karina", "Karla", "Lorena", "Luis",
+                "Marcelo", "Maria", "Mario", "Marta", "Marti", "Mateo", "Mauricio", "Mauro",
+                "Miguel", "Paloma", "Pascual", "Paulina", "Penelope", "Ramona", "Roberto",
+                "Rodrigo", "Rosa", "Rosalinda", "Sabela", "Salome", "Tania", "Teresa", "Tomas",
+                "Victor", "Yolanda"
+            ]
 
-            for chunk in divided:
-                embed = discord.Embed(color=await ctx.embed_color())
-                for voice in chunk:
-                    url = ctx.cog.generate_url(
-                        voice["name"],
-                        False,
-                        f"Hi, I'm {voice['name']}, nice to meet you.",
-                        1.0,
-                        "mp3",
-                    )
-                    m = f"""
-                    Example: [Click Here]({url})
-                    • Gender: {voice['gender']}
-                    • Language: {voice['language']['name']}
-                    • Source: {voice['source']}
-                    """
-                    embed.add_field(name=voice["name"], value=m)
-                pages.append(embed)
+            embed = discord.Embed(title="Available TTS Voices", color=await ctx.embed_color())
+            embed.description = (
+                f"{ctx.clean_prefix}mytts voice <voz>\n\n"
+                "Nombres de las voces disponibles: " + ", ".join(available_voices) + "."
+            )
 
-            for index, embed in enumerate(pages):
-                embed.set_footer(
-                    text=f"Page {index + 1}/{len(pages)} | {len(ctx.cog.voices)} voices"
-                )
-
-            asyncio.create_task(menu(ctx, pages, DEFAULT_CONTROLS))
+            await ctx.send(embed=embed)
             return
 
         return values

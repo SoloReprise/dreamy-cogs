@@ -13,20 +13,20 @@ class AutoTTSMixin(MixinMeta):
     @commands.guild_only()
     async def autotts(self, ctx: Context):
         """
-        Toggles the AutoTTS feature.
+        Activa el comando para enviar mensajes TTS automáticamente.
 
-        If the server subcommand isn't used, it will toggle it for yourself.
+        Si no está activado a nivel servidor, lo activará para ti.
         """
         toggle = await self.config.guild(ctx.guild).allow_autotts()
         if ctx.author.id in self.autotts:
             self.autotts.remove(ctx.author.id)
-            await ctx.send("I will no longer automatically say your messages as TTS.")
+            await ctx.send("Auto-TTS desactivado.")
         else:
             if not toggle:
                 await ctx.send("AutoTTS is disallowed on this server.")
                 return
             self.autotts.append(ctx.author.id)
-            await ctx.send("I will now automatically say your messages as TTS.")
+            await ctx.send("Auto-TTS activado.")
 
     @autotts.command(name="server")
     @commands.admin_or_permissions(manage_guild=True)
