@@ -9,6 +9,10 @@ from .abc import MixinMeta
 
 
 class AutoTTSMixin(MixinMeta):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.autotts_channels = {}  # Initialize autotts_channels dictionary
+
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     async def autotts(self, ctx: Context):
@@ -52,7 +56,7 @@ class AutoTTSMixin(MixinMeta):
             or not message.author.voice.channel
             or not message.author.voice.channel.permissions_for(message.author).speak
             or not await self.can_tts(message)
-            or not await self.config.channel(message.channel).allow_autotts()
+            or not await self.config.channel(message.channel).allow_autotts()  # Use channel config
         ):
             return
 
