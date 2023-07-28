@@ -9,10 +9,6 @@ from .abc import MixinMeta
 
 
 class AutoTTSMixin(MixinMeta):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.autotts_channels = {}
-
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     async def autotts(self, ctx: Context):
@@ -22,13 +18,12 @@ class AutoTTSMixin(MixinMeta):
         Si no está activado a nivel de canal, lo activará para el canal actual.
         """
         channel_id = ctx.channel.id
-        toggle = self.autotts_channels.get(channel_id, None)
+        toggle = await self.config.channel(ctx.channel).allow_autotts()
         if toggle:
-            self.autotts_channels[channel_id] = False
+            await self.config.channel(ctx.channel).allow_autotts.set(False)
             await ctx.send("Auto-TTS desactivado para este canal.")
         else:
-            if channel_id not in self.autotts_channels:
-                self.autotts_channels[channel_id] = True
+            await self.config.channel(ctx.channel).allow_autotts.set(True)
             await ctx.send("Auto-TTS activado para este canal.")
 
     @commands.command(name="autotts_server")
@@ -57,7 +52,7 @@ class AutoTTSMixin(MixinMeta):
             or not message.author.voice.channel
             or not message.author.voice.channel.permissions_for(message.author).speak
             or not await self.can_tts(message)
-            or self.autotts_channels.get(message.channel.id, None) is False
+            or not await self.config.channel(message.channel).allow_autotts()
         ):
             return
 
@@ -83,14 +78,14 @@ class AutoTTSMixin(MixinMeta):
             or member.id not in self.autotts
         ):
             return
-        if before.channel and not after.channel:
+        if before and not after:
             self.autotts.remove(member.id)
             embed = discord.Embed(
                 title="AutoTTS Disabled",
                 color=await self.bot.get_embed_color(member.guild),
             )
             embed.description = (
-                f"You have left {before.channel.mention} and therefore AutoTTS has been disabled.\n\n"
+                f"You have left {before.mention} and therefore AutoTTS has been disabled.\n\n"
                 f"If you would like to re-enable AutoTTS, please join a voice channel and rerun the autotts command."
             )
             with contextlib.suppress(discord.HTTPException):
