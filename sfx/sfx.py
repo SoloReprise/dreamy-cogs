@@ -47,7 +47,7 @@ class SFX(
         self.config = Config.get_conf(self, identifier=134621854878007296)
         self.session = aiohttp.ClientSession()
         user_config = {
-            "voice": "Christopher",
+            "voice": "Belkys",
             "translate": False,
             "join_sound": "",
             "leave_sound": "",
