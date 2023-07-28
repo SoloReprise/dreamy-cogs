@@ -14,6 +14,9 @@ class Meta(commands.Cog):
 
     @commands.command()
     async def meta(self, ctx, *, pokemon_name):
+        """
+        Encuentra el hilo del pokémon buscado en el foro de meta.
+        """
         # Get the corresponding thread ID from the dictionary
         thread_id = self.pokemon_threads.get(pokemon_name.capitalize())
 

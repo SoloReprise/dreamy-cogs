@@ -164,15 +164,14 @@ class UserCommands(MixinMeta, ABC):
             banner_url = f"https://cdn.discordapp.com/banners/{user.id}/{banner_id}?size=1024"
             return banner_url
 
-    @commands.command(name="stars", aliases=["givestar", "addstar", "thanks", "gg"])
+    @commands.command(name="gg", aliases=["givestar", "addstar", "thanks", "stars"])
     @commands.guild_only()
     async def give_star(self, ctx: commands.Context, *users: discord.Member):
         """
-        Reward good noodles
-        Give a star to each mentioned user for being a good noodle
+        ¡Dile a otros jugadores lo bien que han jugado!
         """
         if not users:
-            return await ctx.send(_("You need to mention at least one user!"))
+            return await ctx.send(_("¡Tienes que mencionar al menos a un usuario!"))
 
         now = datetime.datetime.now()
         star_giver = str(ctx.author.id)
@@ -183,9 +182,9 @@ class UserCommands(MixinMeta, ABC):
         mentioned_users = []
         for user in users:
             if ctx.author == user:
-                await ctx.send(_("You can't give stars to yourself!"))
+                await ctx.send(_("¡No puedes decirte gg a ti misme!"))
             elif user.bot:
-                await ctx.send(_("You can't give stars to a bot!"))
+                await ctx.send(_("¡No puedes decirle gg a un bot!"))
             else:
                 mentioned_users.append(user)
 
@@ -228,7 +227,7 @@ class UserCommands(MixinMeta, ABC):
             recipients.append(name)
 
         recipients_str = ", ".join(recipients)
-        await ctx.send(_("You just gave a star to {}!").format(recipients_str))
+        await ctx.send(_("¡Bien jugado, {}!").format(recipients_str))
 
     # For testing purposes
     @commands.command(name="mocklvl", hidden=True)

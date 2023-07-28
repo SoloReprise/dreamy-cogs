@@ -34,7 +34,9 @@ class UniteCog(commands.Cog):
 
     @commands.command()
     async def unite(self, ctx, *, args = None):
-        
+        """
+        Busca por pokemon/emblem/move/hold-item/battle-item
+        """
         cats = ["pokemon", "emblem", "move", "hold-item", "battle-item"]
 
         if args is not None:
