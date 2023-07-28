@@ -11,13 +11,17 @@ from .abc import MixinMeta
 class AutoTTSMixin(MixinMeta):
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
-    async def autotts(self, ctx: Context):
+    async def autotts(self, ctx: Context, channel: Optional[discord.TextChannel] = None):
         """
         Activa el comando para enviar mensajes TTS automáticamente.
 
         Si no está activado a nivel servidor, lo activará para ti.
         """
         toggle = await self.config.guild(ctx.guild).allow_autotts()
+        if channel:
+            await self.config.channel(channel).allow_autotts.set(True)
+            await channel.send("Auto-TTS activado para este canal.")
+            return
         if ctx.author.id in self.autotts:
             self.autotts.remove(ctx.author.id)
             await ctx.send("Auto-TTS desactivado.")
@@ -44,8 +48,7 @@ class AutoTTSMixin(MixinMeta):
     @commands.Cog.listener(name="on_message_without_command")
     async def autotts_message_listener(self, message: discord.Message):
         if (
-            message.author.id not in self.autotts
-            or not message.guild
+            not message.guild
             or message.author.bot
             or not await self.bot.allowed_by_whitelist_blacklist(who=message.author)
             or await self.bot.cog_disabled_in_guild(self, message.guild)
@@ -55,6 +58,10 @@ class AutoTTSMixin(MixinMeta):
             or not message.author.voice.channel.permissions_for(message.author).speak
             or not await self.can_tts(message)
         ):
+            return
+
+        channel_id = await self.config.channel(message.channel).allow_autotts()
+        if not channel_id or channel_id != message.channel.id:
             return
 
         await self.play_tts(
