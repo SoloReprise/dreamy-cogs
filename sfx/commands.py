@@ -84,7 +84,7 @@ class TTSConverter(Converter):
             for chunk in divided:
                 embed = discord.Embed(color=await ctx.embed_color())
                 for voice in chunk:
-                    if voice['source'] == 'Google Translate':  # Check if the voice's source is "Google Translate"
+                    if 'Google' in voice['source'] and 'Spanish' in voice['language']['name']:
                         url = ctx.cog.generate_url(
                             voice["name"],
                             False,
@@ -99,8 +99,7 @@ class TTSConverter(Converter):
                         • Source: {voice['source']}
                         """
                         embed.add_field(name=voice["name"], value=m)
-                if len(embed.fields) > 0:  # Add the embed to pages only if there are fields in it (voices from Google Translate)
-                    pages.append(embed)
+                pages.append(embed)
 
             for index, embed in enumerate(pages):
                 embed.set_footer(
