@@ -95,10 +95,12 @@ class TTSConverter(Converter):
                     Example: [Click Here]({url})
                     • Gender: {voice['gender']}
                     • Language: {voice['language']['name']}
-                    • Source: {voice['source']}
                     """
+                    if voice['source'] == 'Google Translate':
+                        m += f"\n• Source: {voice['source']}"
                     embed.add_field(name=voice["name"], value=m)
                 pages.append(embed)
+
 
             for index, embed in enumerate(pages):
                 embed.set_footer(
