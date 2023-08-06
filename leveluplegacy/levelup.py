@@ -1012,11 +1012,8 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         total_voicetime = time_formatter(sum(v["voice"] for v in users.values()))
         total_stars = humanize_number(sum(v["stars"] for v in users.values()))
 
-        title = _("Top Weekly Exp Earners")
-        desc = _("`Total Exp:      `") + total_xp + "\n"
-        desc += _("`Total Messages: `") + total_messages + "\n"
-        desc += _("`Total Stars:    `") + total_stars + "\n"
-        desc += _("`Total Voice:    `") + total_voicetime
+        title = _("Mejores jugadores de la semana")
+        desc = _("`GGs totales:    `") + total_stars + "\n"
         em = discord.Embed(title=title, description=desc, color=discord.Color.green())
 
         if ctx:
@@ -1035,15 +1032,9 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             user: discord.Member = i[0]
             d: dict = i[1]
 
-            xp = humanize_number(round(d["xp"]))
-            msg = humanize_number(d["messages"])
             stars = humanize_number(d["stars"])
-            voice = time_formatter(d["voice"])
 
-            value = _("`Exp:      `") + xp + "\n"
-            value += _("`Messages: `") + msg + "\n"
-            value += _("`Stars:    `") + stars + "\n"
-            value += _("`Voice:    `") + voice
+            value += _("`GGs:    `") + stars + "\n"
             em.add_field(name=f"#{place}. {user.name}", value=value, inline=False)
             top_uids.append(str(user.id))
 
