@@ -998,7 +998,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         users = {
             guild.get_member(int(k)): v
             for k, v in w["users"].items()
-            if (v["xp"] > 0 and guild.get_member(int(k)))
+            if (v["stars"] > 0 and guild.get_member(int(k)))
         }
         channel = guild.get_channel(w["channel"]) if w["channel"] else None
         if not users:
@@ -1007,9 +1007,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             self.data[guild.id]["weekly"]["last_reset"] = int(datetime.utcnow().timestamp())
             return
 
-        total_xp = humanize_number(round(sum(v["xp"] for v in users.values())))
-        total_messages = humanize_number(sum(v["messages"] for v in users.values()))
-        total_voicetime = time_formatter(sum(v["voice"] for v in users.values()))
         total_stars = humanize_number(sum(v["stars"] for v in users.values()))
 
         title = _("Mejores jugadores de la semana")
@@ -1023,7 +1020,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         else:
             em.set_thumbnail(url=guild.icon_url)
 
-        sorted_users = sorted(users.items(), key=lambda x: x[1]["xp"], reverse=True)
+        sorted_users = sorted(users.items(), key=lambda x: x[1]["stars"], reverse=True)
         top_uids = []
         for index, i in enumerate(sorted_users):
             place = index + 1
