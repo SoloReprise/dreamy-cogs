@@ -1034,7 +1034,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
             stars = humanize_number(d["stars"])
 
-            value += _("`GGs:    `") + stars + "\n"
+            value = _("`GGs:    `") + stars + "\n"
             em.add_field(name=f"#{place}. {user.name}", value=value, inline=False)
             top_uids.append(str(user.id))
 
