@@ -9,10 +9,6 @@ from .abc import MixinMeta
 
 
 class AutoTTSMixin(MixinMeta):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.autotts_channels = {}  # A dictionary to store user -> voice channel mappings    
-    
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     async def autotts(self, ctx: Context):
