@@ -12,12 +12,8 @@ class AutoTTSMixin(MixinMeta):
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     async def autotts(self, ctx: Context):
-        """
-        Activa el comando para enviar mensajes TTS automáticamente.
-
-        Si no está activado a nivel servidor, lo activará para ti.
-        """
         toggle = await self.config.guild(ctx.guild).allow_autotts()
+
         if ctx.author.id in self.autotts_channels:
             del self.autotts_channels[ctx.author.id]
             await ctx.send("Auto-TTS desactivado.")
@@ -25,7 +21,10 @@ class AutoTTSMixin(MixinMeta):
             if not toggle:
                 await ctx.send("AutoTTS is disallowed on this server.")
                 return
-            self.autotts_channels[ctx.author.id] = ctx.author.voice.channel
+
+            # Store the voice channel where the command was used
+            voice_channel = ctx.author.voice.channel
+            self.autotts_channels[ctx.author.id] = voice_channel
             await ctx.send("Auto-TTS activado.")
 
     @autotts.command(name="server")
@@ -58,7 +57,7 @@ class AutoTTSMixin(MixinMeta):
             return
 
         voice_channel = self.autotts_channels.get(message.author.id)
-        if voice_channel:
+        if voice_channel == message.author.voice.channel:  # Check if the channels match
             await self.play_tts(
                 message.author,
                 voice_channel,  # Send the TTS message to the saved voice channel
@@ -66,7 +65,7 @@ class AutoTTSMixin(MixinMeta):
                 "autotts",
                 message.clean_content,
             )
-
+            
     @commands.Cog.listener(name="on_voice_state_update")
     async def autotts_voice_listener(
         self,
