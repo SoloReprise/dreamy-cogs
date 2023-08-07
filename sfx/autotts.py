@@ -14,22 +14,17 @@ class AutoTTSMixin(MixinMeta):
     async def autotts(self, ctx: Context):
         toggle = await self.config.guild(ctx.guild).allow_autotts()
 
-        if ctx.author.id in self.autotts_channels:
-            del self.autotts_channels[ctx.author.id]
+        if ctx.author.id in self.autotts_channel_map:
+            del self.autotts_channel_map[ctx.author.id]
             await ctx.send("Auto-TTS desactivado.")
         else:
             if not toggle:
                 await ctx.send("AutoTTS is disallowed on this server.")
                 return
 
-            # Store the voice channel where the command was used
-            if ctx.author.voice:
-                voice_channel = ctx.author.voice.channel
-                print(f"User {ctx.author} is in voice channel {voice_channel}")
-                self.autotts_channels[ctx.author.id] = voice_channel
-                await ctx.send("Auto-TTS activado.")
-            else:
-                await ctx.send("You are not in a voice channel.")
+            # Store the text channel where the command was used
+            self.autotts_channel_map[ctx.author.id] = ctx.channel
+            await ctx.send("Auto-TTS activado.")
 
     @autotts.command(name="server")
     @commands.admin_or_permissions(manage_guild=True)
@@ -47,7 +42,7 @@ class AutoTTSMixin(MixinMeta):
     @commands.Cog.listener(name="on_message_without_command")
     async def autotts_message_listener(self, message: discord.Message):
         if (
-            message.author.id not in self.autotts_channels
+            message.author.id not in self.autotts_channel_map
             or not message.guild
             or message.author.bot
             or not await self.bot.allowed_by_whitelist_blacklist(who=message.author)
@@ -60,16 +55,16 @@ class AutoTTSMixin(MixinMeta):
         ):
             return
 
-        voice_channel = self.autotts_channels.get(message.author.id)
-        if voice_channel == message.author.voice.channel:  # Check if the channels match
+        text_channel = self.autotts_channel_map.get(message.author.id)
+        if text_channel == message.channel:  # Check if the channels match
             await self.play_tts(
                 message.author,
-                voice_channel,  # Send the TTS message to the saved voice channel
-                message.channel,
+                message.author.voice.channel,
+                text_channel,
                 "autotts",
                 message.clean_content,
             )
-
+            
     @commands.Cog.listener(name="on_voice_state_update")
     async def autotts_voice_listener(
         self,
