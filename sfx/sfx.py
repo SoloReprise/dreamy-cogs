@@ -71,6 +71,7 @@ class SFX(
         self.repeat_state = {}
         self.voices = []
         self.autotts = []
+        self.autotts_channel_map = {}  # User -> TextChannel dictionary
         self.autotts_channels = {}  # Initialize the attribute
 
     def cog_unload(self):
