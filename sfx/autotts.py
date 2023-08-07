@@ -23,9 +23,13 @@ class AutoTTSMixin(MixinMeta):
                 return
 
             # Store the voice channel where the command was used
-            voice_channel = ctx.author.voice.channel
-            self.autotts_channels[ctx.author.id] = voice_channel
-            await ctx.send("Auto-TTS activado.")
+            if ctx.author.voice:
+                voice_channel = ctx.author.voice.channel
+                print(f"User {ctx.author} is in voice channel {voice_channel}")
+                self.autotts_channels[ctx.author.id] = voice_channel
+                await ctx.send("Auto-TTS activado.")
+            else:
+                await ctx.send("You are not in a voice channel.")
 
     @autotts.command(name="server")
     @commands.admin_or_permissions(manage_guild=True)
@@ -65,7 +69,7 @@ class AutoTTSMixin(MixinMeta):
                 "autotts",
                 message.clean_content,
             )
-            
+
     @commands.Cog.listener(name="on_voice_state_update")
     async def autotts_voice_listener(
         self,
