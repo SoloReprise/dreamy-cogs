@@ -1030,7 +1030,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
             user = ctx.guild.get_member(uid)
             if user:
-                user_name = user.display_name
+                user_name = user.name
             else:
                 user_name = str(uid)
 
