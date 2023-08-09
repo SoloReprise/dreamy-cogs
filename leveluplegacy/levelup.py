@@ -1023,23 +1023,16 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         sorted_users = sorted(users.items(), key=lambda x: x[1]["stars"], reverse=True)
         top_uids = []
         table = []
-
-        # Get the winner's data
-        winner_uid, winner_data = sorted_users[0]
-        winner = ctx.guild.get_member(int(winner_uid))
-        winner_mention = winner.mention if winner else f"<@{winner_uid}>"
-
-        # Mention the winner before the embed
-        winner_message = f"¡Ya tenemos MVP de la semana! ¡Enhorabuena, {winner_mention}!"
-
         for index, (uid, data) in enumerate(sorted_users):
             place = index + 1
             if place > w["count"]:
                 break
+
+            user = ctx.guild.get_member(uid)
             if user:
-                user_name = user.nick or user.name  # Use nickname if available, else use username
+                user_name = user.name
             else:
-                user_name = uid
+                user_name = str(uid)
 
             stars = humanize_number(data["stars"])
             stars_formatted = f"{stars} ⭐"
@@ -1049,14 +1042,11 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
         data = tabulate.tabulate(table, headers=["#", "User", "Stars"], tablefmt="presto")
 
-        # Send the winner message
-        if ctx:
-            await ctx.send(winner_message)
-
         em = discord.Embed(
             title=_("Leaderboard"),
             description=box(data, lang="python"),
             color=discord.Color(0x70b139),  # Set the embed color to #70b139
+            thumbnail=_(url=guild.icon)
         )
 
         ignore = [discord.HTTPException, discord.Forbidden, discord.NotFound]
