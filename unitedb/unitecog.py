@@ -2,7 +2,8 @@ import discord
 from redbot.core import commands
 import sqlite3
 import asyncio
-
+import unicodedata
+from unidecode import unidecode
 
 unitetext = f"""
 Placeholder
