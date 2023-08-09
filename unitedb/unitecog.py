@@ -8,7 +8,7 @@ from unidecode import unidecode
 unitetext = f"""
 Placeholder
 """
-
+excluded_words = ["Cinderace", "Wigglytuff", "Duraludon"]  # Add other excluded words here
 
 unitedbtext = f"""
 Placeholder
@@ -86,11 +86,16 @@ class UniteCog(commands.Cog):
         name, category, text, image = matching_records[0]
         name = name.replace("''", "'")
 
-        emb = discord.Embed(title=name, description=text, colour=discord.Colour.green())
+        # Create the embed title without the excluded words
+        words = name.split()
+        embed_title_words = [word for word in words if word not in excluded_words]
+        embed_title = " ".join(embed_title_words)
+
+        emb = discord.Embed(title=embed_title, description=text, colour=discord.Colour.green())
         emb.set_thumbnail(url=image)
         await ctx.reply(embed=emb)
-        return        
-
+        return
+    
     @commands.command()
     @commands.has_guild_permissions(administrator=True)
     async def unitedb(self, ctx, action = None, *, args = None):
