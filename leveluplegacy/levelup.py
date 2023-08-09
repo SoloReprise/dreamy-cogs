@@ -1051,9 +1051,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
         data = tabulate.tabulate(table, headers=["#", "User", "Stars"], tablefmt="presto")
 
-        # Construct the winner message
-        winner_message = f"¡Ya tenemos MVP de la semana! ¡Enhorabuena, {winner_mention}!"
-
         # Send the winner message
         if ctx:
             await ctx.send(winner_message)
