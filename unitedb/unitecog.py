@@ -86,9 +86,6 @@ class UniteCog(commands.Cog):
                 if word.startswith(normalized_keywords):
                     matching_records.append(record)
                     break  # Stop checking other words in the record
-            
-            if match_found:
-                matching_records.append(record)
 
         if len(matching_records) == 0:
             await ctx.reply("A caller with this name and category does not exist.")
