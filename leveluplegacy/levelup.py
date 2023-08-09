@@ -1030,7 +1030,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
             user = ctx.guild.get_member(uid)
             if user:
-                user_name = user.name
+                user_name = user.display_name
             else:
                 user_name = str(uid)
 
@@ -1040,7 +1040,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             table.append([place, user_name, stars_formatted])
             top_uids.append(str(uid))
 
-        data = tabulate.tabulate(table, headers=["#", "User", "Stars"], tablefmt="presto")
+        data = tabulate.tabulate(table, headers=["#", "Usuario", "GGs"], tablefmt="presto")
 
         em = discord.Embed(
             title=_("Leaderboard"),
