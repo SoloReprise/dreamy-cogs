@@ -54,7 +54,7 @@ class UniteCog(commands.Cog):
         try:
             parts = args.split(" ")
             category = parts[0].lower()
-            name = " ".join(parts[1:])
+            name_keywords = " ".join(parts[1:])
         except Exception as exc:
             emb = discord.Embed(title="Unite Help", description=unitetext, colour=discord.Colour.blue())
             await ctx.reply(embed=emb)
@@ -74,14 +74,14 @@ class UniteCog(commands.Cog):
         all_records = curs.fetchall()
         conn.close()
 
-        normalized_name = unidecode(name).lower()
+        normalized_keywords = unidecode(name_keywords).lower()
 
         matching_records = []
 
         for record in all_records:
             record_name = record[0]
             normalized_record_name = unidecode(record_name).lower()
-            if normalized_name in normalized_record_name:
+            if normalized_keywords in normalized_record_name:
                 matching_records.append(record)
 
         if len(matching_records) == 0:
@@ -91,17 +91,17 @@ class UniteCog(commands.Cog):
         name, category, text, image = matching_records[0]
         name = name.replace("''", "'")
 
-        # Construct the embed title without excluded words
+        # Construct the embed title without excluded keywords
         embed_title = name
-        for excluded_word in excluded_words:
-            if excluded_word in name:
-                embed_title = embed_title.replace(excluded_word, "")
+        for excluded_keyword in excluded_keywords:
+            if excluded_keyword in name_keywords:
+                embed_title = embed_title.replace(excluded_keyword, "")
 
         emb = discord.Embed(title=embed_title, description=text, colour=discord.Colour.green())
         emb.set_thumbnail(url=image)
         await ctx.reply(embed=emb)
         return
-        
+            
     @commands.command()
     @commands.has_guild_permissions(administrator=True)
     async def unitedb(self, ctx, action = None, *, args = None):
