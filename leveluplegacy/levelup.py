@@ -1040,6 +1040,10 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
             table.append([place, user_name, stars_formatted])
             top_uids.append(str(uid))
+
+            table.append([place, user_name, stars_formatted])
+            top_uids.append(str(uid))
+
         data = tabulate.tabulate(table, headers=["#", "Usuario", "GGs"], tablefmt="presto")
 
         # Get the top-ranked user's ID for mentioning
