@@ -91,16 +91,16 @@ class UniteCog(commands.Cog):
         name, category, text, image = matching_records[0]
         name = name.replace("''", "'")
 
-        # Create the embed title without the excluded words
-        words = name.split()
-        embed_title_words = [word for word in words if word not in excluded_words]
-        embed_title = " ".join(embed_title_words)
+        # Create the embed title
+        embed_title = name
+        for excluded_word in excluded_words:
+            embed_title = embed_title.replace(excluded_word, "")
 
         emb = discord.Embed(title=embed_title, description=text, colour=discord.Colour.green())
         emb.set_thumbnail(url=image)
         await ctx.reply(embed=emb)
         return
-    
+        
     @commands.command()
     @commands.has_guild_permissions(administrator=True)
     async def unitedb(self, ctx, action = None, *, args = None):
