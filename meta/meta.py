@@ -73,9 +73,11 @@ class Meta(commands.Cog):
         """
         Encuentra el hilo del pokémon buscado en el foro de meta.
         """
+        # Modify the input name to match dictionary key format
+        modified_name = pokemon_name.title()
+
         # Get the corresponding thread ID from the dictionary
-        pokemon_name = ' '.join(word.capitalize() for word in pokemon_name.split())
-        thread_id = self.pokemon_threads.get(pokemon_name)
+        thread_id = self.pokemon_threads.get(modified_name)
 
         if thread_id:
             # Construct a mention for the thread ID
