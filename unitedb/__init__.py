@@ -1,4 +1,5 @@
 from .unitecog import UniteCog
+import unicodedata
 
 
 async def setup(bot):

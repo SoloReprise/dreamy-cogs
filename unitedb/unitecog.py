@@ -33,7 +33,7 @@ class UniteCog(commands.Cog):
         
 
     @commands.command()
-    async def unite(self, ctx, *, args = None):
+    async def unite(self, ctx, *, args=None):
         """
         Busca por pokemon/emblem/move/hold-item/battle-item
         """
@@ -48,12 +48,7 @@ class UniteCog(commands.Cog):
         try:
             parts = args.split(" ")
             category = parts[0].lower()
-            name = ""
-            for p in parts[1:]:
-                if name == "":
-                    name = name + p
-                else:
-                    name = name + f" {p}"
+            name = " ".join(parts[1:])
         except Exception as exc:
             emb = discord.Embed(title="Unite Help", description=unitetext, colour=discord.Colour.blue())
             await ctx.reply(embed=emb)
@@ -67,10 +62,11 @@ class UniteCog(commands.Cog):
         if result is None:
             return
         
-        name = name.replace("'", "''")
+        # Normalize the input name by removing accent marks and converting to lowercase
+        name_normalized = unicodedata.normalize("NFKD", name).encode("ASCII", "ignore").decode("utf-8").lower()
         
         conn, curs = result
-        query = f"""SELECT * FROM callers WHERE name='{name}' COLLATE NOCASE AND category='{category}'"""
+        query = f"""SELECT * FROM callers WHERE name_normalized='{name_normalized}' AND category='{category}'"""
         curs.execute(query)
         records = curs.fetchall()
         conn.close()
