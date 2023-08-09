@@ -1028,10 +1028,10 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             if place > w["count"]:
                 break
 
-            user_member = ctx.guild.get_member(uid)
-            if user_member:
+            user = ctx.guild.get_member(uid)
+            if user:
                 # Get the user's nickname on the server (if available), else use their display name.
-                user_name = user_member.nick if user_member.nick else user_member.display_name
+                user_name = user.display_name if user.display_name != user.name else user.name
             else:
                 user_name = str(uid)
 
