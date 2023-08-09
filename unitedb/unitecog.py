@@ -38,6 +38,10 @@ class UniteCog(commands.Cog):
             return None
         
 
+class UniteCog(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
     @commands.command()
     async def unite(self, ctx, *, args=None):
         """
@@ -91,10 +95,11 @@ class UniteCog(commands.Cog):
         name, category, text, image = matching_records[0]
         name = name.replace("''", "'")
 
-        # Create the embed title
+        # Construct the embed title without excluded words
         embed_title = name
         for excluded_word in excluded_words:
-            embed_title = embed_title.replace(excluded_word, "")
+            if excluded_word in name:
+                embed_title = embed_title.replace(excluded_word, "")
 
         emb = discord.Embed(title=embed_title, description=text, colour=discord.Colour.green())
         emb.set_thumbnail(url=image)
