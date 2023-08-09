@@ -1029,33 +1029,31 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 break
 
             user = ctx.guild.get_member(uid)
-        if user:
-            user_name = user.nick if user.nick else user.display_name
-        else:
-            user_name = str(uid)
+            if user:
+                user_name = user.nick if user.nick else user.display_name
+            else:
+                user_name = str(uid)
 
             stars = humanize_number(data["stars"])
             stars_formatted = f"{stars} ⭐"
 
-            table.append([place, user_name, stars_formatted])
+            table.append([place, user.display_name, stars_formatted])  # Use user.display_name here
             top_uids.append(str(uid))
 
         data = tabulate.tabulate(table, headers=["#", "Usuario", "GGs"], tablefmt="presto")
 
-        # Get the top-ranked user's ID for mentioning
-        top_user_id = top_uids[0]  # Assuming top_uids is not empty
-
-        # Get the top-ranked user's member object for pinging
-        top_user_member = discord.utils.get(ctx.guild.members, name=top_user_id.split("#")[0], discriminator=top_user_id.split("#")[1])
         # Send the message mentioning the top user
+        top_user_id = top_uids[0]
+        top_user_member = discord.utils.get(ctx.guild.members, id=int(top_user_id))
         await ctx.send(f"¡El MVP de esta semana es {top_user_member.mention}! ¡Enhorabuena!")
-        
-        em = discord.Embed(
-            title=_("Mejores jugadores de la semana"),
-            description=box(data, lang="python"),
-            color=discord.Color(0x70b139),  # Set the embed color to #70b139
-        )
-        em.set_thumbnail(url=guild.icon)
+
+# Now proceed with creating the embed
+em = discord.Embed(
+    title=_("Mejores jugadores de la semana"),
+    description=box(data, lang="python"),
+    color=discord.Color(0x70b139),
+)
+em.set_thumbnail(url=guild.icon)
 
         ignore = [discord.HTTPException, discord.Forbidden, discord.NotFound]
         if ctx:
