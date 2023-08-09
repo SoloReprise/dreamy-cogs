@@ -1031,29 +1031,27 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             user = ctx.guild.get_member(uid)
             if user:
                 user_name = user.nick if user.nick else user.display_name
+
                 stars = humanize_number(data["stars"])
                 stars_formatted = f"{stars} ⭐"
-                table.append([place, user.display_name, stars_formatted])
+
+                table.append([place, user.display_name, stars_formatted])  # Use user.display_name here
                 top_uids.append(str(uid))
 
-        if table:
-            data = tabulate.tabulate(table, headers=["#", "Usuario", "GGs"], tablefmt="presto")
-            # Rest of the code for sending the embed
-
         # Send the message mentioning the top user
-        if top_uids:
-            top_user_id = top_uids[0]
-            top_user_member = discord.utils.get(ctx.guild.members, id=int(top_user_id))
-            if top_user_member:
-                await ctx.send(f"¡El MVP de esta semana es {top_user_member.mention}! ¡Enhorabuena!")
+        top_user_id = top_uids[0]
+        top_user_member = discord.utils.get(ctx.guild.members, id=int(top_user_id))
+        await ctx.send(f"¡El MVP de esta semana es {top_user_member.mention}! ¡Enhorabuena!")
 
-                # Now proceed with creating the embed
-                em = discord.Embed(
-                    title=_("Mejores jugadores de la semana"),
-                    description=box(data, lang="python"),
-                    color=discord.Color(0x70b139),
-                )
-                em.set_thumbnail(url=guild.icon)
+        # Now proceed with creating the embed
+        data = tabulate.tabulate(table, headers=["#", "Usuario", "GGs"], tablefmt="presto")
+
+        em = discord.Embed(
+            title=_("Mejores jugadores de la semana"),
+            description=box(data, lang="python"),
+            color=discord.Color(0x70b139),
+        )
+        em.set_thumbnail(url=guild.icon)
 
         ignore = [discord.HTTPException, discord.Forbidden, discord.NotFound]
         if ctx:
