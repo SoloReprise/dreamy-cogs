@@ -1032,19 +1032,19 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             if user:
                 user_name = user.nick or user.name  # Use nickname if available, else use username
             else:
-                user_name = str(uid)
+                user_name = "Unknown User"  # Handle missing user information
 
             stars = humanize_number(data["stars"])
             stars_formatted = f"{stars} ⭐"
 
             table.append([place, user_name, stars_formatted])
-            top_uids.append(str(uid))
+            top_uids.append(uid)  # Store user IDs as strings, not with str()
 
         data = tabulate.tabulate(table, headers=["#", "User", "Stars"], tablefmt="presto")
 
         # Find the winner
         if top_uids:
-            winner_id = int(top_uids[0])
+            winner_id = top_uids[0]
             winner_user = ctx.guild.get_member(winner_id)
             if winner_user:
                 winner_mention = winner_user.mention
