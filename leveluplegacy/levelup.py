@@ -1026,8 +1026,8 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
         # Get the winner's data
         winner_uid, winner_data = sorted_users[0]
-        winner = ctx.guild.get_member(winner_uid)
-        winner_mention = winner.mention if winner else "User not found"
+        winner = ctx.guild.get_member(int(winner_uid))
+        winner_mention = winner.mention if winner else f"<@{winner_uid}>"
 
         # Mention the winner before the embed
         winner_message = f"¡Ya tenemos MVP de la semana! ¡Enhorabuena, {winner_mention}!"
