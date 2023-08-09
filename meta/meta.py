@@ -64,7 +64,7 @@ class Meta(commands.Cog):
         'Pikachu': '1127772842893778985',
         'Blastoise': '1127772248762224680',
         'Charizard': '1127772018494931014',
-        'Venusaur': '1127771637056540744'
+        'Venusaur': '1127771637056540744',
         # Add more Pokémon and their thread IDs as needed
     }
 
