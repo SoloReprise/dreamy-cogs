@@ -81,10 +81,10 @@ class UniteCog(commands.Cog):
         for record in all_records:
             record_name = record[0]
             normalized_record_name = unidecode(record_name).lower()
-            record_name_words = normalized_record_name.split()  # Split record name into individual words
-            keyword_words = normalized_keywords.split()  # Split user input keywords into individual words
-            
-            if all(keyword in record_name_words for keyword in keyword_words):
+            if normalized_keywords == normalized_record_name:
+                matching_records = [record]
+                break
+            elif normalized_keywords in normalized_record_name:
                 matching_records.append(record)
 
         if len(matching_records) == 0:
