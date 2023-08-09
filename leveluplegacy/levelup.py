@@ -1047,13 +1047,13 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         top_user_member = discord.utils.get(ctx.guild.members, id=int(top_user_id))
         await ctx.send(f"¡El MVP de esta semana es {top_user_member.mention}! ¡Enhorabuena!")
 
-# Now proceed with creating the embed
-em = discord.Embed(
-    title=_("Mejores jugadores de la semana"),
-    description=box(data, lang="python"),
-    color=discord.Color(0x70b139),
-)
-em.set_thumbnail(url=guild.icon)
+        # Now proceed with creating the embed
+        em = discord.Embed(
+            title=_("Mejores jugadores de la semana"),
+            description=box(data, lang="python"),
+            color=discord.Color(0x70b139),
+        )
+        em.set_thumbnail(url=guild.icon)
 
         ignore = [discord.HTTPException, discord.Forbidden, discord.NotFound]
         if ctx:
