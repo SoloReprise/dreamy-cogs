@@ -47,7 +47,7 @@ class UniteCog(commands.Cog):
 
         if args is not None:
             if args.lower().startswith("help"):
-                emb = discord.Embed(title="Unite Help", description=unitetext, color=0x70b139)
+                emb = discord.Embed(title="Ayuda !unite", description=unitetext, color=0x70b139)
                 await ctx.reply(embed=emb)
                 return
 
@@ -56,12 +56,12 @@ class UniteCog(commands.Cog):
             category = parts[0].lower()
             name_keywords = " ".join(parts[1:])
         except Exception as exc:
-            emb = discord.Embed(title="Unite Help", description=unitetext, color=0x70b139)
+            emb = discord.Embed(title="Ayuda !unite", description=unitetext, color=0x70b139)
             await ctx.reply(embed=emb)
             return
 
         if category not in cats:
-            await ctx.reply("Invalid category")
+            await ctx.reply("Categoría incorrecta")
             return
 
         result = UniteCog.connect(self)
@@ -88,7 +88,7 @@ class UniteCog(commands.Cog):
                 matching_records.append(record)
 
         if len(matching_records) == 0:
-            await ctx.reply("A caller with this name and category does not exist.")
+            await ctx.reply("Lo que estás buscando no existe.")
             return
 
         name, category, text, image = matching_records[0]
