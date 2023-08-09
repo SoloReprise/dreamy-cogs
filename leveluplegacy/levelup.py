@@ -1030,14 +1030,14 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
             user = ctx.guild.get_member(uid)
             if user:
-                nickname = user.nick if user.nick else user.display_name
+                user_name = user.display_name  # Use the nickname if available
             else:
-                nickname = str(uid)
+                user_name = str(uid)
 
             stars = humanize_number(data["stars"])
             stars_formatted = f"{stars} ⭐"
 
-            table.append([place, nickname, stars_formatted])
+            table.append([place, user_name, stars_formatted])
             top_uids.append(str(uid))
 
         data = tabulate.tabulate(table, headers=["#", "Usuario", "GGs"], tablefmt="presto")
