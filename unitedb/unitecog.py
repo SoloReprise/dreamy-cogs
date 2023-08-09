@@ -76,17 +76,20 @@ class UniteCog(commands.Cog):
 
         normalized_keywords = unidecode(name_keywords).lower()
 
-        matching_records = []
+    matching_records = []
 
-        for record in all_records:
-            record_name = record[0]
-            normalized_record_name = unidecode(record_name).lower()
-            if normalized_keywords in normalized_record_name:
-                matching_records.append(record)
+    for record in all_records:
+        record_name = record[0]
+        normalized_record_name = unidecode(record_name).lower()
+        record_name_parts = normalized_record_name.split()
 
-        if len(matching_records) == 0:
-            await ctx.reply("A caller with this name and category does not exist.")
-            return
+        # Check if all normalized keywords are present as separate words in the record name
+        if all(keyword in record_name_parts for keyword in normalized_keywords.split()):
+            matching_records.append(record)
+
+    if len(matching_records) == 0:
+        await ctx.reply("A caller with this name and category does not exist.")
+        return
 
         name, category, text, image = matching_records[0]
         name = name.replace("''", "'")
