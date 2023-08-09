@@ -1036,8 +1036,16 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         data = tabulate.tabulate(table, headers=["Rank", "Username", "Stars"], tablefmt="presto", colalign=("right",))
         embed = discord.Embed(
             description=f"Rank Table:\n{box(data, lang='python')}",
-            color=discord.Color.random(),
+            color=0x70b139,  # Set the embed color to #70b139
         )
+        embed.set_thumbnail(url=ctx.guild.icon_url)  # Set the server icon as the thumbnail
+
+        ignore = [discord.HTTPException, discord.Forbidden, discord.NotFound]
+        if ctx:
+            await ctx.send(embed=embed)
+        elif channel:
+            with contextlib.suppress(*ignore):
+                await channel.send(embed=embed)
 
         ignore = [discord.HTTPException, discord.Forbidden, discord.NotFound]
         if ctx:
