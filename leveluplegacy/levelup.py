@@ -1021,29 +1021,39 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             em.set_thumbnail(url=guild.icon_url)
 
         sorted_users = sorted(users.items(), key=lambda x: x[1]["stars"], reverse=True)
-        title = "Rank Table\n\n"
+        top_uids = []
         table = []
-        
-        for index, (uid, user_data) in enumerate(sorted_users, start=1):
-            if index > w["count"]:
+        for index, (uid, data) in enumerate(sorted_users):
+            place = index + 1
+            if place > w["count"]:
                 break
-            
-            user = ctx.guild.get_member(int(uid))
+
+            user = ctx.guild.get_member(uid)
             if user:
-                username = user.name
+                user_name = user.name
             else:
-                username = uid
-            
-            stars = f"{user_data['stars']} ⭐"
-            table.append([index, username, stars])
-        
-        data = tabulate.tabulate(table, headers=["Rank", "User", "Stars"], tablefmt="presto")
-        embed = discord.Embed(
-            description=f"{title}{box(dedent(data), lang='python')}",
-            color=discord.Color(0x70b139)
+                user_name = str(uid)
+
+            stars = humanize_number(data["stars"])
+            stars_formatted = f"{stars} ⭐"
+
+            table.append([place, user_name, stars_formatted])
+            top_uids.append(str(uid))
+
+        data = tabulate.tabulate(table, headers=["#", "User", "Stars"], tablefmt="presto")
+
+        em = discord.Embed(
+            title=_("Leaderboard"),
+            description=box(data, lang="python"),
+            color=discord.Color(0x70b139),  # Set the embed color to #70b139
         )
-        
-        await ctx.send(embed=embed)
+
+        ignore = [discord.HTTPException, discord.Forbidden, discord.NotFound]
+        if ctx:
+            await ctx.send(embed=em)
+        elif channel:
+            with contextlib.suppress(*ignore):
+                await channel.send(embed=em)
 
         top = sorted_users[: int(w["count"])]
         if w["role_all"]:
