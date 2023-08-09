@@ -47,7 +47,7 @@ class UniteCog(commands.Cog):
 
         if args is not None:
             if args.lower().startswith("help"):
-                emb = discord.Embed(title="Unite Help", description=unitetext, colour=discord.Colour.blue())
+                emb = discord.Embed(title="Unite Help", description=unitetext)
                 await ctx.reply(embed=emb)
                 return
 
@@ -56,7 +56,7 @@ class UniteCog(commands.Cog):
             category = parts[0].lower()
             name_keywords = " ".join(parts[1:])
         except Exception as exc:
-            emb = discord.Embed(title="Unite Help", description=unitetext, colour=discord.Colour.blue())
+            emb = discord.Embed(title="Unite Help", description=unitetext)
             await ctx.reply(embed=emb)
             return
 
@@ -100,7 +100,7 @@ class UniteCog(commands.Cog):
             if excluded_keyword in embed_title:
                 embed_title = embed_title.replace(excluded_keyword, "")
 
-        emb = discord.Embed(title=embed_title, description=text, colour=discord.Colour.green())
+        emb = discord.Embed(title=embed_title, description=text)
         emb.set_thumbnail(url=image)
         await ctx.reply(embed=emb)
         return
@@ -109,7 +109,7 @@ class UniteCog(commands.Cog):
     @commands.has_guild_permissions(administrator=True)
     async def unitedb(self, ctx, action = None, *, args = None):
         if action is None:
-            emb = discord.Embed(title="UniteDB Help", description=unitedbtext, colour=discord.Colour.blue())
+            emb = discord.Embed(title="UniteDB Help", description=unitedbtext)
             await ctx.reply(embed=emb)
             return
         
@@ -131,7 +131,7 @@ class UniteCog(commands.Cog):
                         else:
                             name = name + f" {p}"
                 except Exception as exc:
-                    emb = discord.Embed(title="UniteDB Help", description=unitedbtext, colour=discord.Colour.blue())
+                    emb = discord.Embed(title="UniteDB Help", description=unitedbtext)
                     await ctx.reply(embed=emb)
                     return
                 
@@ -186,7 +186,7 @@ class UniteCog(commands.Cog):
                 name = name.replace("''", "'")
                 text = text.replace("''", "'")
 
-                emb = discord.Embed(title="Caller Created", colour=discord.Colour.green())
+                emb = discord.Embed(title="Caller Created")
                 emb.set_thumbnail(url=image)
                 emb.add_field(name="Name", value=name, inline=False)
                 emb.add_field(name="Category", value=category.capitalize(), inline=False)
@@ -205,7 +205,7 @@ class UniteCog(commands.Cog):
                         else:
                             name = name + f" {p}"
                 except Exception as exc:
-                    emb = discord.Embed(title="UniteDB Help", description=unitedbtext, colour=discord.Colour.blue())
+                    emb = discord.Embed(title="UniteDB Help", description=unitedbtext)
                     await ctx.reply(embed=emb)
                     return
                 
@@ -251,7 +251,7 @@ class UniteCog(commands.Cog):
                 name = name.replace("''", "'")
                 text = text.replace("''", "'")
 
-                emb = discord.Embed(title="Caller Edited", colour=discord.Colour.green())
+                emb = discord.Embed(title="Caller Edited")
                 emb.add_field(name="Name", value=name, inline=False)
                 emb.add_field(name="Category", value=category.capitalize(), inline=False)
                 emb.add_field(name="Reply Text", value=text, inline=False)
@@ -269,7 +269,7 @@ class UniteCog(commands.Cog):
                         else:
                             name = name + f" {p}"
                 except Exception as exc:
-                    emb = discord.Embed(title="UniteDB Help", description=unitedbtext, colour=discord.Colour.blue())
+                    emb = discord.Embed(title="UniteDB Help", description=unitedbtext)
                     await ctx.reply(embed=emb)
                     return
                 
@@ -309,7 +309,7 @@ class UniteCog(commands.Cog):
                 return
             
             else:
-                emb = discord.Embed(title="UniteDB Help", description=unitedbtext, colour=discord.Colour.blue())
+                emb = discord.Embed(title="UniteDB Help", description=unitedbtext)
                 await ctx.reply(embed=emb)
                 return
         except Exception as exc:
