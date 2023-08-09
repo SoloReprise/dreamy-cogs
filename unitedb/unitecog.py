@@ -63,19 +63,27 @@ class UniteCog(commands.Cog):
         if result is None:
             return
 
-        normalized_name = unidecode(name).lower()  # Remove accents and convert to lowercase
-
         conn, curs = result
-        query = f"""SELECT * FROM callers WHERE unidecode(name) COLLATE NOCASE LIKE '{normalized_name}%' AND category='{category}'"""
+        query = f"""SELECT * FROM callers WHERE category='{category}'"""
         curs.execute(query)
-        records = curs.fetchall()
+        all_records = curs.fetchall()
         conn.close()
 
-        if len(records) == 0:
+        normalized_name = unidecode(name).lower()
+
+        matching_records = []
+
+        for record in all_records:
+            record_name = record[0]
+            normalized_record_name = unidecode(record_name).lower()
+            if normalized_name in normalized_record_name:
+                matching_records.append(record)
+
+        if len(matching_records) == 0:
             await ctx.reply("A caller with this name and category does not exist.")
             return
 
-        name, category, text, image = records[0]
+        name, category, text, image = matching_records[0]
         name = name.replace("''", "'")
 
         emb = discord.Embed(title=name, description=text, colour=discord.Colour.green())
