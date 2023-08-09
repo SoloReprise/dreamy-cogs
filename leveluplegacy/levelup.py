@@ -1038,7 +1038,10 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             stars = humanize_number(data["stars"])
             stars_formatted = f"{stars} ⭐"
 
-            table.append([place, user_name, stars_formatted])
+            # Add a mention to the username
+            user_mention = user.mention if user else user_name
+
+            table.append([place, user_mention, stars_formatted])
             top_uids.append(str(uid))
 
         data = tabulate.tabulate(table, headers=["#", "Usuario", "GGs"], tablefmt="presto")
