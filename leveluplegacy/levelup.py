@@ -1028,18 +1028,15 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             if place > w["count"]:
                 break
 
-            user = ctx.guild.get_member(uid)
-            if user:
+            user_member = ctx.guild.get_member(uid)
+            if user_member:
                 # Get the user's nickname on the server (if available), else use their display name.
-                user_name = user.nick if user.nick else user.display_name
+                user_name = user_member.nick if user_member.nick else user_member.display_name
             else:
                 user_name = str(uid)
 
             stars = humanize_number(data["stars"])
             stars_formatted = f"{stars} ⭐"
-
-            table.append([place, user_name, stars_formatted])
-            top_uids.append(str(uid))
 
             table.append([place, user_name, stars_formatted])
             top_uids.append(str(uid))
