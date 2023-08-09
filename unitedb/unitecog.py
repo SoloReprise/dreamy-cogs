@@ -74,19 +74,19 @@ class UniteCog(commands.Cog):
         all_records = curs.fetchall()
         conn.close()
 
-        normalized_keywords = unidecode(name_keywords).lower()
+        normalized_name_keywords = unidecode(name_keywords).lower()
+        normalized_name_keywords_list = normalized_name_keywords.split()
 
         matching_records = []
 
         for record in all_records:
             record_name = record[0]
             normalized_record_name = unidecode(record_name).lower()
-            record_name_parts = normalized_record_name.split()
-
-            # Check if all normalized keywords are present as separate words in the record name
-            if all(keyword in record_name_parts for keyword in normalized_keywords.split()):
+            normalized_record_name_list = normalized_record_name.split()
+            
+            if all(keyword in normalized_record_name_list for keyword in normalized_name_keywords_list):
                 matching_records.append(record)
-
+                
         if len(matching_records) == 0:
             await ctx.reply("A caller with this name and category does not exist.")
             return
