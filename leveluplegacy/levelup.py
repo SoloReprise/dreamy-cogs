@@ -1046,9 +1046,19 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         # Assuming top_uids contains usernames (or user identifiers)
         top_username = top_uids[0]  # Assuming top_uids is not empty
 
+        # Find the member by username
+        top_user_member = discord.utils.get(ctx.guild.members, name=top_username)
+
+        if top_user_member:
+            # Mention the top user
+            mention = top_user_member.mention
+        else:
+            # If the member is not found, just use the username
+            mention = top_username
+
         # Send the message mentioning the top user
-        await ctx.send(f"¡El MVP de esta semana es {top_username}! ¡Enhorabuena!")
-        
+        await ctx.send(f"¡El MVP de esta semana es {mention}! ¡Enhorabuena!")
+
         em = discord.Embed(
             title=_("Mejores jugadores de la semana"),
             description=box(data, lang="python"),
