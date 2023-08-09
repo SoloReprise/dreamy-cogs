@@ -1021,38 +1021,26 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             em.set_thumbnail(url=guild.icon_url)
 
         sorted_users = sorted(users.items(), key=lambda x: x[1]["stars"], reverse=True)
-
-        table = []
-        for index, (user, data) in enumerate(sorted_users):
+        top_uids = []
+        for index, i in enumerate(sorted_users):
             place = index + 1
             if place > w["count"]:
                 break
-            
-            stars = humanize_number(data["stars"])
-            value = _("`GGs:    `") + stars
-            table.append([f"#{place}", user.name, value])
+            user: discord.Member = i[0]
+            d: dict = i[1]
 
-        # Creating the rank table
-        data = tabulate.tabulate(table, headers=["Rank", "Username", "Stars"], tablefmt="presto", colalign=("right",))
-        embed = discord.Embed(
-            description=f"Rank Table:\n{box(data, lang='python')}",
-            color=0x70b139,  # Set the embed color to #70b139
-        )
-        embed.set_thumbnail(url=ctx.guild.icon)  # Set the server icon as the thumbnail
+            stars = humanize_number(d["stars"])
+
+            value = _("`GGs:    `") + stars + "\n"
+            em.add_field(name=f"#{place}. {user.name}", value=value, inline=False)
+            top_uids.append(str(user.id))
 
         ignore = [discord.HTTPException, discord.Forbidden, discord.NotFound]
         if ctx:
-            await ctx.send(embed=embed)
+            await ctx.send(embed=em)
         elif channel:
             with contextlib.suppress(*ignore):
-                await channel.send(embed=embed)
-
-        ignore = [discord.HTTPException, discord.Forbidden, discord.NotFound]
-        if ctx:
-            await ctx.send(embed=embed)
-        elif channel:
-            with contextlib.suppress(*ignore):
-                await channel.send(embed=embed)
+                await channel.send(embed=em)
 
         top = sorted_users[: int(w["count"])]
         if w["role_all"]:
