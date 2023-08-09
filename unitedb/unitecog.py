@@ -6,7 +6,7 @@ import unicodedata
 from unidecode import unidecode
 
 unitetext = f"""
-Placeholder
+!unite pokemon/emblem/move/hold-item/battle-item <nombre>
 """
 excluded_keywords = ["Absol", "Aegislash", "Azumarill", "Blastoise", "Blaziken", "Blissey", "Buzzwole", "Chandelure", "Charizard", "Cinderace", 
                   "Clefable", "Comfey", "Cramorant", "Decidueye", "Delphox", "Dodrio", "Dragapult", "Dragonite", "Duraludon", "Eldegoss", "Espeon", 
