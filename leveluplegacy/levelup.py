@@ -1021,7 +1021,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             em.set_thumbnail(url=guild.icon_url)
 
         sorted_users = sorted(users.items(), key=lambda x: x[1]["stars"], reverse=True)
-        top_uids = []
         table = []
         for index, (uid, data) in enumerate(sorted_users):
             place = index + 1
@@ -1035,23 +1034,28 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 stars = humanize_number(data["stars"])
                 stars_formatted = f"{stars} ⭐"
 
-                table.append([place, user.display_name, stars_formatted])  # Use user.display_name here
-                top_uids.append(str(uid))
+                table.append([place, user.display_name, stars_formatted])
 
-        # Send the message mentioning the top user
-        top_user_id = top_uids[0]
-        top_user_member = discord.utils.get(ctx.guild.members, id=int(top_user_id))
-        await ctx.send(f"¡El MVP de esta semana es {top_user_member.mention}! ¡Enhorabuena!")
+        if table:
+            # Send the message mentioning the top user
+            top_user_id = str(table[0][0])  # Assuming the first element of the table contains the place
+            top_user_member = discord.utils.get(ctx.guild.members, id=int(top_user_id))
+            await ctx.send(f"¡El MVP de esta semana es {top_user_member.mention}! ¡Enhorabuena!")
 
-        # Now proceed with creating the embed
-        data = tabulate.tabulate(table, headers=["#", "Usuario", "GGs"], tablefmt="presto")
+            # Now proceed with creating the embed
+            data = tabulate.tabulate(table, headers=["#", "Usuario", "GGs"], tablefmt="presto")
 
-        em = discord.Embed(
-            title=_("Mejores jugadores de la semana"),
-            description=box(data, lang="python"),
-            color=discord.Color(0x70b139),
-        )
-        em.set_thumbnail(url=guild.icon)
+            em = discord.Embed(
+                title=_("Mejores jugadores de la semana"),
+                description=box(data, lang="python"),
+                color=discord.Color(0x70b139),
+            )
+            em.set_thumbnail(url=guild.icon)
+
+            # Send the embed
+            await ctx.send(embed=em)
+        else:
+            await ctx.send("No se encontraron usuarios para mostrar.")
 
         ignore = [discord.HTTPException, discord.Forbidden, discord.NotFound]
         if ctx:
