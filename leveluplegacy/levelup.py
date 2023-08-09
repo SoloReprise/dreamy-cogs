@@ -1050,7 +1050,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         top_user_member = discord.utils.get(ctx.guild.members, name=top_username)
 
         if top_user_member:
-            # Mention the top user
+            # Mention the top user with discriminator if available, otherwise without
             mention = top_user_member.mention
         else:
             # If the member is not found, just use the username
