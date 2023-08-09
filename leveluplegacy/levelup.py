@@ -1041,7 +1041,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             if user:
                 user_name = user.nick or user.name  # Use nickname if available, else use username
             else:
-                user_name = str(uid)
+                user_name = uid
 
             stars = humanize_number(data["stars"])
             stars_formatted = f"{stars} ⭐"
