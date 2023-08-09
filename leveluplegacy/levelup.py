@@ -1032,9 +1032,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             if user:
                 # Get the user's nickname on the server (if available), else use their display name.
                 user_name = user.nick if user.nick else user.display_name
-                # Remove the discriminator from the user's name
-                user_name = user_name.split('#')[0]
-                user_name = discord.utils.escape_markdown(user_name)  # Escape any markdown
             else:
                 user_name = str(uid)
 
