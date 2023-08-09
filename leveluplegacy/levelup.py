@@ -1029,17 +1029,17 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 break
 
             user = ctx.guild.get_member(uid)
-        if user:
-            user_name = user.nick if user.nick else user.display_name
-        else:
-            user_name = str(uid)
+            if user:
+                # Get the user's nickname on the server (if available), else use their display name.
+                user_name = user.nick if user.nick else user.display_name
+            else:
+                user_name = str(uid)
 
             stars = humanize_number(data["stars"])
             stars_formatted = f"{stars} ⭐"
 
             table.append([place, user_name, stars_formatted])
             top_uids.append(str(uid))
-
         data = tabulate.tabulate(table, headers=["#", "Usuario", "GGs"], tablefmt="presto")
 
         # Get the top-ranked user's ID for mentioning
