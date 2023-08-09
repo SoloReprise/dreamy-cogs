@@ -1030,46 +1030,39 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
             user = ctx.guild.get_member(uid)
             if user:
-                user_name = user.nick or user.name  # Use nickname if available, else use username
+                user_nickname = user.nick or user.name  # Use nickname if available, else use username
             else:
-                user_name = "Unknown User"  # Handle missing user information
+                user_nickname = str(uid)
 
             stars = humanize_number(data["stars"])
             stars_formatted = f"{stars} ⭐"
 
-            table.append([place, user_name, stars_formatted])
-            top_uids.append(uid)  # Store user IDs as strings, not with str()
+            table.append([place, user_nickname, stars_formatted])
+            top_uids.append(str(uid))
+
+        winner = sorted_users[0][0]  # Get the winner's UID
+        winner_user = ctx.guild.get_member(winner)
+        if winner_user:
+            winner_mention = winner_user.mention
+        else:
+            winner_mention = f"<@{winner}>"
+
+        winner_message = f"¡Ya tenemos MVP de la semana! ¡Enhorabuena, {winner_mention}!"
 
         data = tabulate.tabulate(table, headers=["#", "User", "Stars"], tablefmt="presto")
 
-        # Find the winner
-        if top_uids:
-            winner_id = top_uids[0]
-            winner_user = ctx.guild.get_member(winner_id)
-            if winner_user:
-                winner_mention = winner_user.mention
-                mvp_message = f"¡Ya tenemos MVP de la semana! ¡Enhorabuena, {winner_mention}!"
-            else:
-                mvp_message = "¡Ya tenemos MVP de la semana! ¡Enhorabuena!"
-        else:
-            mvp_message = "No hay ganador esta semana."
-
-        # Create the embed
         em = discord.Embed(
             title=_("Leaderboard"),
-            description=box(data, lang="python"),
+            description=f"{winner_message}\n\n{box(data, lang='python')}",
             color=discord.Color(0x70b139),  # Set the embed color to #70b139
         )
 
-        # Send MVP message before the embed
+        ignore = [discord.HTTPException, discord.Forbidden, discord.NotFound]
         if ctx:
-            await ctx.send(mvp_message)
-        if channel:
-            await channel.send(mvp_message)
-
-        # Send the embed
-        with contextlib.suppress(*ignore):
             await ctx.send(embed=em)
+        elif channel:
+            with contextlib.suppress(*ignore):
+                await channel.send(embed=em)
 
         top = sorted_users[: int(w["count"])]
         if w["role_all"]:
