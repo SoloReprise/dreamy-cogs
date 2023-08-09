@@ -1021,26 +1021,29 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             em.set_thumbnail(url=guild.icon_url)
 
         sorted_users = sorted(users.items(), key=lambda x: x[1]["stars"], reverse=True)
-        top_uids = []
-        for index, i in enumerate(sorted_users):
-            place = index + 1
-            if place > w["count"]:
-                break
-            user: discord.Member = i[0]
-            d: dict = i[1]
 
-            stars = humanize_number(d["stars"])
+        title = "Rank Table\n"
+        start = 0
+        stop = len(sorted_users)
 
-            value = _("`GGs:    `") + stars + "\n"
-            em.add_field(name=f"#{place}. {user.name}", value=value, inline=False)
-            top_uids.append(str(user.id))
+        table = []
+        for i in range(start, stop):
+            uid = sorted_users[i][0]
+            user = ctx.guild.get_member(int(uid))
+            if user:
+                user = user.name
+            else:
+                user = uid
+            stars = sorted_users[i][1]["stars"]
+            stars = f"{stars} ⭐"
+            table.append([stars, user])
 
-        ignore = [discord.HTTPException, discord.Forbidden, discord.NotFound]
-        if ctx:
-            await ctx.send(embed=em)
-        elif channel:
-            with contextlib.suppress(*ignore):
-                await channel.send(embed=em)
+        data = tabulate.tabulate(table, tablefmt="presto", colalign=("right",))
+        embed = discord.Embed(
+            title=title,
+            description=f"```\n{data}\n```",
+            color=discord.Color(0x70b139),  # Set the embed color to #70b139
+        )
 
         top = sorted_users[: int(w["count"])]
         if w["role_all"]:
