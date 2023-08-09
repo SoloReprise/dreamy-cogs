@@ -1047,7 +1047,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         top_user_id = int(top_uids[0])  # Assuming top_uids is not empty  # Assuming top_uids is not empty
 
         # Get the top-ranked user's member object for pinging
-        top_user_member = ctx.guild.get_member(top_user_id)
+        top_user_member = discord.utils.get(ctx.guild.members, name=top_username)
         # Send the message mentioning the top user
         await ctx.send(f"¡El MVP de esta semana es {top_user_member.mention}! ¡Enhorabuena!")
         
