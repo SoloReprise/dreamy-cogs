@@ -1044,10 +1044,10 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         data = tabulate.tabulate(table, headers=["#", "Usuario", "GGs"], tablefmt="presto")
 
         # Get the top-ranked user's ID for mentioning
-        top_user_id = top_uids[0]  # Assuming top_uids is not empty
+        top_user_id = int(top_uids[0])  # Assuming top_uids is not empty  # Assuming top_uids is not empty
 
         # Get the top-ranked user's member object for pinging
-        top_user_member = discord.utils.get(ctx.guild.members, name=top_user_id.split("#")[0], discriminator=top_user_id.split("#")[1])
+        top_user_member = ctx.guild.get_member(top_user_id)
         # Send the message mentioning the top user
         await ctx.send(f"¡El MVP de esta semana es {top_user_member.mention}! ¡Enhorabuena!")
         
