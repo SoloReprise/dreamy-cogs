@@ -1046,8 +1046,8 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             title=_("Leaderboard"),
             description=box(data, lang="python"),
             color=discord.Color(0x70b139),  # Set the embed color to #70b139
-            thumbnail=_(url=guild.icon)
         )
+        em.set_thumbnail(url=guild.icon)
 
         ignore = [discord.HTTPException, discord.Forbidden, discord.NotFound]
         if ctx:
