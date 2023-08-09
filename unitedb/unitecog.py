@@ -91,7 +91,7 @@ class UniteCog(commands.Cog):
         name, category, text, image = matching_records[0]
         name = name.replace("''", "'")
 
-        # Construct the embed title without excluded keywords
+        # Construct the embed title without excluded keywords (if they exist)
         embed_title = name
         for excluded_keyword in excluded_keywords:
             if excluded_keyword in name_keywords:
