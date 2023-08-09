@@ -8,7 +8,7 @@ from unidecode import unidecode
 unitetext = f"""
 Placeholder
 """
-excluded_words = ["Absol", "Aegislash", "Azumarill", "Blastoise", "Blaziken", "Blissey", "Buzzwole", "Chandelure", "Charizard", "Cinderace", 
+excluded_keywords = ["Absol", "Aegislash", "Azumarill", "Blastoise", "Blaziken", "Blissey", "Buzzwole", "Chandelure", "Charizard", "Cinderace", 
                   "Clefable", "Comfey", "Cramorant", "Decidueye", "Delphox", "Dodrio", "Dragapult", "Dragonite", "Duraludon", "Eldegoss", "Espeon", 
                   "Garchomp", "Gardevoir", "Gengar", "Glaceon", "Goodra", "Greedent", "Greninja", "Hoopa", "Inteleon", "Lapras", "Leafeon", "Lucario", 
                   "Machamp", "Mamoswine", "Meowscarada", "Metagross", "Mew", "Mewtwo X", "Mewtwo Y", "Mimikyu", "Mr Mime", "Ninetales", "Pikachu", 
