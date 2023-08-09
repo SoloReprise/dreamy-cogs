@@ -81,13 +81,11 @@ class UniteCog(commands.Cog):
         for record in all_records:
             record_name = record[0]
             normalized_record_name = unidecode(record_name).lower()
-            record_tokens = normalized_record_name.split()  # Tokenize the record name
-
-            match_found = False
-            for keyword in normalized_keywords.split():
-                if keyword in record_tokens:
-                    match_found = True
-                    break
+            words_in_record = normalized_record_name.split()  # Split the record name into individual words
+            for word in words_in_record:
+                if word.startswith(normalized_keywords):
+                    matching_records.append(record)
+                    break  # Stop checking other words in the record
             
             if match_found:
                 matching_records.append(record)
