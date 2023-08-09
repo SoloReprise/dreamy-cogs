@@ -97,7 +97,7 @@ class UniteCog(commands.Cog):
         # Construct the embed title without excluded keywords (if they exist)
         embed_title = name
         for excluded_keyword in excluded_keywords:
-            if excluded_keyword in name_keywords:
+            if excluded_keyword in embed_title:
                 embed_title = embed_title.replace(excluded_keyword, "")
 
         emb = discord.Embed(title=embed_title, description=text, colour=discord.Colour.green())
