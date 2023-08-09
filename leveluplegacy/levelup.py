@@ -1031,12 +1031,12 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             uid = sorted_users[i][0]
             user = ctx.guild.get_member(int(uid))
             if user:
-                user = user.name
+                user_name = user.name
             else:
-                user = uid
+                user_name = uid
             stars = sorted_users[i][1]["stars"]
             stars = f"{stars} ⭐"
-            table.append([stars, user])
+            table.append([stars, user_name])
 
         data = tabulate.tabulate(table, tablefmt="presto", colalign=("right",))
         embed = discord.Embed(
