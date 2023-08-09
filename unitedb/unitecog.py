@@ -54,7 +54,7 @@ class UniteCog(commands.Cog):
             emb = discord.Embed(title="Unite Help", description=unitetext, colour=discord.Colour.blue())
             await ctx.reply(embed=emb)
             return
-        
+
         if category not in cats:
             await ctx.reply("Invalid category")
             return
@@ -62,28 +62,26 @@ class UniteCog(commands.Cog):
         result = UniteCog.connect(self)
         if result is None:
             return
-        
-        # Normalize the input name by removing accent marks and converting to lowercase
-        name_normalized = unicodedata.normalize("NFKD", name).encode("ASCII", "ignore").decode("utf-8").lower()
-        
+
+        normalized_name = unidecode(name).lower()  # Remove accents and convert to lowercase
+
         conn, curs = result
-        query = f"""SELECT * FROM callers WHERE name_normalized='{name_normalized}' AND category='{category}'"""
+        query = f"""SELECT * FROM callers WHERE unidecode(name) COLLATE NOCASE LIKE '{normalized_name}%' AND category='{category}'"""
         curs.execute(query)
         records = curs.fetchall()
         conn.close()
-        
+
         if len(records) == 0:
             await ctx.reply("A caller with this name and category does not exist.")
             return
-        
+
         name, category, text, image = records[0]
         name = name.replace("''", "'")
 
         emb = discord.Embed(title=name, description=text, colour=discord.Colour.green())
         emb.set_thumbnail(url=image)
         await ctx.reply(embed=emb)
-        return
-        
+        return        
 
     @commands.command()
     @commands.has_guild_permissions(administrator=True)
