@@ -74,25 +74,19 @@ class UniteCog(commands.Cog):
         all_records = curs.fetchall()
         conn.close()
 
-        normalized_name_keywords = unidecode(name_keywords).lower()
-        normalized_name_keywords_list = normalized_name_keywords.split()
+        normalized_keywords_list = normalized_keywords.split()  # Split normalized keywords into individual words
 
         matching_records = []
 
         for record in all_records:
             record_name = record[0]
             normalized_record_name = unidecode(record_name).lower()
-            normalized_record_name_list = normalized_record_name.split()
-            
-            if all(keyword in normalized_record_name_list for keyword in normalized_name_keywords_list):
-                matching_records.append(record)
-                
-        if len(matching_records) == 0:
-            await ctx.reply("A caller with this name and category does not exist.")
-            return
 
-        name, category, text, image = matching_records[0]
-        name = name.replace("''", "'")
+            # Check if all individual words in normalized_keywords_list are present in normalized_record_name
+            if all(keyword in normalized_record_name for keyword in normalized_keywords_list):
+                matching_records.append(record)
+                name, category, text, image = matching_records[0]
+                name = name.replace("''", "'")
 
         # Construct the embed title without excluded keywords (if they exist)
         embed_title = name
