@@ -1038,7 +1038,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             description=f"Rank Table:\n{box(data, lang='python')}",
             color=0x70b139,  # Set the embed color to #70b139
         )
-        embed.set_thumbnail(url=ctx.guild.icon_url_as(format="png"))  # Set the server icon as the thumbnail
+        embed.set_thumbnail(url=ctx.guild.icon_url)  # Set the server icon as the thumbnail
 
         ignore = [discord.HTTPException, discord.Forbidden, discord.NotFound]
         if ctx:
