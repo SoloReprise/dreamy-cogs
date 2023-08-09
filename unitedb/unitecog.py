@@ -74,7 +74,7 @@ class UniteCog(commands.Cog):
         all_records = curs.fetchall()
         conn.close()
 
-        normalized_keywords_list = normalized_keywords.split()  # Split normalized keywords into individual words
+        normalized_keywords_list = normalized_keywords.split() if normalized_keywords else []  # Split normalized keywords into individual words
 
         matching_records = []
 
@@ -85,8 +85,8 @@ class UniteCog(commands.Cog):
             # Check if all individual words in normalized_keywords_list are present in normalized_record_name
             if all(keyword in normalized_record_name for keyword in normalized_keywords_list):
                 matching_records.append(record)
-                name, category, text, image = matching_records[0]
-                name = name.replace("''", "'")
+            name, category, text, image = matching_records[0]
+            name = name.replace("''", "'")
 
         # Construct the embed title without excluded keywords (if they exist)
         embed_title = name
