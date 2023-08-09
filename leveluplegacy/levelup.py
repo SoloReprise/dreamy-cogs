@@ -1046,11 +1046,16 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         # Assuming top_uids contains usernames (or user identifiers)
         top_username = top_uids[0]  # Assuming top_uids is not empty
 
-        # Find the member by username
+        # Try to find the member by username and discriminator
         top_user_member = discord.utils.get(ctx.guild.members, name=top_username)
+        if not top_user_member:
+            # If not found, check if the username contains a discriminator
+            parts = top_username.split('#')
+            if len(parts) == 2:
+                top_user_member = discord.utils.get(ctx.guild.members, name=parts[0], discriminator=parts[1])
 
         if top_user_member:
-            # Mention the top user with discriminator if available, otherwise without
+            # Mention the top user
             mention = top_user_member.mention
         else:
             # If the member is not found, just use the username
