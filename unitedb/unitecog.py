@@ -13,7 +13,7 @@ excluded_words = ["Absol", "Aegislash", "Azumarill", "Blastoise", "Blaziken", "B
                   "Garchomp", "Gardevoir", "Gengar", "Glaceon", "Goodra", "Greedent", "Greninja", "Hoopa", "Inteleon", "Lapras", "Leafeon", "Lucario", 
                   "Machamp", "Mamoswine", "Meowscarada", "Metagross", "Mew", "Mewtwo X", "Mewtwo Y", "Mimikyu", "Mr Mime", "Ninetales", "Pikachu", 
                   "Sableye", "Scizor", "Scyther", "Slowbro", "Snorlax", "Sylveon", "Talonflame", "Trevenant", "Tsareena", "Tyranitar", "Umbreon", 
-                  "Urshifu", "Venusaur", "Wigglytuff", "Zacian", "Zeraora", "Zoroark"]  # Add other excluded words here
+                  "Urshifu", "Venusaur", "Wigglytuff","Zacian", "Zeraora", "Zoroark"]  # Add other excluded words here
 
 unitedbtext = f"""
 Placeholder
@@ -37,10 +37,6 @@ class UniteCog(commands.Cog):
             print(exc)
             return None
         
-
-class UniteCog(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
 
     @commands.command()
     async def unite(self, ctx, *, args=None):
