@@ -1036,8 +1036,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             place = index + 1
             if place > w["count"]:
                 break
-
-            user = ctx.guild.get_member(int(uid))  # Convert uid to int
             if user:
                 user_name = user.nick or user.name  # Use nickname if available, else use username
             else:
