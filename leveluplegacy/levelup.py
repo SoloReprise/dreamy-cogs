@@ -1032,16 +1032,14 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             if user:
                 # Get the user's nickname on the server (if available), else use their display name.
                 user_name = user.nick if user.nick else user.display_name
+                user_name = discord.utils.escape_markdown(user_name)  # Escape any markdown
             else:
                 user_name = str(uid)
 
             stars = humanize_number(data["stars"])
             stars_formatted = f"{stars} ⭐"
 
-            # Add a mention to the username
-            user_mention = user.mention if user else user_name
-
-            table.append([place, user_mention, stars_formatted])
+            table.append([place, user_name, stars_formatted])
             top_uids.append(str(uid))
 
         data = tabulate.tabulate(table, headers=["#", "Usuario", "GGs"], tablefmt="presto")
