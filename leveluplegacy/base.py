@@ -195,6 +195,7 @@ class UserCommands(MixinMeta, ABC):
             self.stars[guild_id] = {}
 
         recipients = []
+        cooldown_triggered = False
 
         for user in mentioned_users:
             user_id = str(user.id)
@@ -206,7 +207,10 @@ class UserCommands(MixinMeta, ABC):
                 td = now - lastused
                 td = td.total_seconds()
                 if td <= cooldown:
-                    continue  # Skip this user due to cooldown
+                    cooldown_triggered = True
+                    remaining_time = int(cooldown - td)
+                    await ctx.send(_("¡Espera {} minutos antes de usar el comando otra vez!").format(remaining_time // 60))
+                    break  # Stop processing further if cooldown triggered
                 else:
                     self.stars[guild_id][star_giver] = now
 
@@ -225,9 +229,10 @@ class UserCommands(MixinMeta, ABC):
 
             recipients.append(user.display_name)  # Use display_name instead of mention
 
-        if recipients:
+        if recipients and not cooldown_triggered:
             recipients_str = ", ".join(recipients[:-1]) + _(" y ") + recipients[-1] if len(recipients) > 1 else recipients[0]
             await ctx.send(_("¡Bien jugado, {}!").format(recipients_str))
+
 
 
     # For testing purposes
