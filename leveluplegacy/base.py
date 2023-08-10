@@ -166,11 +166,11 @@ class UserCommands(MixinMeta, ABC):
 
     @commands.command(name="gg", aliases=["givestar", "addstar", "thanks", "stars"])
     @commands.guild_only()
-    async def give_star(self, ctx: commands.Context, *users: discord.Member):
+    async def give_star(self, ctx: commands.Context, *, args: str):
         """
         ¡Dile a otros jugadores lo bien que han jugado!
         """
-        if not users:
+        if not args:
             return await ctx.send(_("¡Tienes que mencionar al menos a un usuario!"))
 
         now = datetime.datetime.now()
@@ -180,29 +180,23 @@ class UserCommands(MixinMeta, ABC):
             return await ctx.send(_("Cache not loaded yet, wait a few more seconds."))
 
         mentioned_users = []
-        non_mention_text = []
-        for user in users:
-            if ctx.author == user:
+        for mention in ctx.message.mentions:
+            if ctx.author == mention:
                 await ctx.send(_("¡No puedes decirte gg a ti mismo!"))
-            elif user.bot:
+            elif mention.bot:
                 await ctx.send(_("¡No puedes decirle gg a un bot!"))
             else:
-                mentioned_users.append(user)
-        
-        # Extract non-mention text from the message content
-        for word in ctx.message.content.split():
-            if not word.startswith("<@"):  # Non-mention text
-                non_mention_text.append(word)
-        
+                mentioned_users.append(mention)
+
         if not mentioned_users:
             return
-        
+
         if guild_id not in self.stars:
             self.stars[guild_id] = {}
-        
+
         recipients = []
         cooldown_triggered = False
-        
+
         for user in mentioned_users:
             user_id = str(user.id)
             if star_giver not in self.stars[guild_id]:
@@ -219,27 +213,25 @@ class UserCommands(MixinMeta, ABC):
                     break  # Stop processing further if cooldown triggered
                 else:
                     self.stars[guild_id][star_giver] = now
-            
+
             user_mention = self.data[guild_id]["mention"]
             users_data = self.data[guild_id]["users"]
             if user_id not in users_data:
                 await ctx.send(_("No data available for that user yet!"))
                 return
-            
+
             users_data[user_id]["stars"] += 1
-            
+
             if self.data[guild_id]["weekly"]["on"]:
                 if guild_id not in self.data[guild_id]["weekly"]["users"]:
                     self.init_user_weekly(guild_id, user_id)
                 self.data[guild_id]["weekly"]["users"][user_id]["stars"] += 1
-            
+
             recipients.append(user.display_name)  # Use display_name instead of mention
-        
+
         if recipients and not cooldown_triggered:
             recipients_str = ", ".join(recipients[:-1]) + _(" y ") + recipients[-1] if len(recipients) > 1 else recipients[0]
             await ctx.send(_("¡Bien jugado, {}!").format(recipients_str))
-
-        # Now you can use non_mention_text for whatever purpose you need
 
     # For testing purposes
     @commands.command(name="mocklvl", hidden=True)
