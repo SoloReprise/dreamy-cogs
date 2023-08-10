@@ -180,6 +180,7 @@ class UserCommands(MixinMeta, ABC):
             return await ctx.send(_("Cache not loaded yet, wait a few more seconds."))
 
         recipients = []  # Initialize the recipients list
+        total_cooldown = 0
 
         for user in users:
             if ctx.author == user:
@@ -189,17 +190,13 @@ class UserCommands(MixinMeta, ABC):
             else:
                 user_id = str(user.id)
 
-                if star_giver not in self.stars[guild_id]:
-                    self.stars[guild_id][star_giver] = now
-                else:
+                if star_giver in self.stars[guild_id]:
                     lastused = self.stars[guild_id][star_giver]
                     td = now - lastused
                     td = td.total_seconds()
                     cooldown = self.data[guild_id]["starcooldown"]
                     if td <= cooldown:
-                        remaining_time = int(cooldown - td)
-                        await ctx.send(_("¡Espera {} minutos antes de usar el comando otra vez!").format(remaining_time // 60))
-                        return  # Stop processing further if cooldown triggered
+                        total_cooldown = max(total_cooldown, cooldown - td)
                     else:
                         self.stars[guild_id][star_giver] = now
 
@@ -218,7 +215,10 @@ class UserCommands(MixinMeta, ABC):
 
                 recipients.append(user.display_name)  # Use display_name instead of mention
 
-        if recipients:
+        if total_cooldown > 0:
+            remaining_time = int(total_cooldown)
+            await ctx.send(_("¡Espera {} minutos antes de usar el comando otra vez!").format(remaining_time // 60))
+        elif recipients:
             recipients_str = ", ".join(recipients[:-1]) + _(" y ") + recipients[-1] if len(recipients) > 1 else recipients[0]
             await ctx.send(_("¡Bien jugado, {}!").format(recipients_str))
 
