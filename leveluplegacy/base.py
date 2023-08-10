@@ -166,11 +166,11 @@ class UserCommands(MixinMeta, ABC):
 
     @commands.command(name="gg", aliases=["givestar", "addstar", "thanks", "stars"])
     @commands.guild_only()
-    async def give_star(self, ctx: commands.Context, *args):
+    async def give_star(self, ctx: commands.Context, *, message: str):
         """
         ¡Dile a otros jugadores lo bien que han jugado!
         """
-        if not args:
+        if not message:
             return await ctx.send(_("¡Tienes que mencionar al menos a un usuario!"))
 
         now = datetime.datetime.now()
@@ -180,16 +180,11 @@ class UserCommands(MixinMeta, ABC):
             return await ctx.send(_("Cache not loaded yet, wait a few more seconds."))
 
         mentioned_users = []
-        for arg in args:
-            if arg.startswith("<@") and arg.endswith(">"):
-                user_id = arg[2:-1]
-                if user_id.startswith("!"):
-                    user_id = user_id[1:]
-                try:
-                    user = await commands.MemberConverter().convert(ctx, user_id)
-                    mentioned_users.append(user)
-                except commands.MemberNotFound:
-                    pass
+        for mention in ctx.message.mentions:
+            if mention.bot:
+                await ctx.send(_("¡No puedes decirle gg a un bot!"))
+            else:
+                mentioned_users.append(mention)
 
         if not mentioned_users:
             return
