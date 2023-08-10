@@ -183,12 +183,7 @@ class UserCommands(MixinMeta, ABC):
         for arg in args:
             try:
                 user = await commands.MemberConverter().convert(ctx, arg)
-                if user.bot:
-                    await ctx.send(_("¡No puedes decirle gg a un bot!"))
-                elif ctx.author == user:
-                    await ctx.send(_("¡No puedes decirte gg a ti mismo!"))
-                else:
-                    mentioned_users.append(user)
+                mentioned_users.append(user)
             except commands.MemberNotFound:
                 pass
 
@@ -212,8 +207,6 @@ class UserCommands(MixinMeta, ABC):
                 td = td.total_seconds()
                 if td <= cooldown:
                     cooldown_triggered = True
-                    remaining_time = int(cooldown - td)
-                    await ctx.send(_("¡Espera {} minutos antes de usar el comando otra vez!").format(remaining_time // 60))
                     break  # Stop processing further if cooldown triggered
                 else:
                     self.stars[guild_id][star_giver] = now
