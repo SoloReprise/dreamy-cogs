@@ -192,10 +192,10 @@ class UserCommands(MixinMeta, ABC):
                 if star_giver not in self.stars[guild_id]:
                     self.stars[guild_id][star_giver] = now
                 else:
-                    cooldown = self.data[guild_id]["starcooldown"]
                     lastused = self.stars[guild_id][star_giver]
                     td = now - lastused
                     td = td.total_seconds()
+                    cooldown = self.data[guild_id]["starcooldown"]
                     if td <= cooldown:
                         remaining_time = int(cooldown - td)
                         await ctx.send(_("¡Espera {} minutos antes de usar el comando otra vez!").format(remaining_time // 60))
