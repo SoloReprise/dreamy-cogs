@@ -205,10 +205,10 @@ class UserCommands(MixinMeta, ABC):
                 cooldown = self.data[guild_id]["starcooldown"]
                 lastused = self.stars[guild_id][star_giver]
                 td = now - lastused
-                td_seconds = td.total_seconds()  # Calculate time difference in seconds
-                if td_seconds <= cooldown:
+                td = td.total_seconds()
+                if td <= cooldown:
                     cooldown_triggered = True
-                    remaining_time = int(cooldown - td_seconds)
+                    remaining_time = int(cooldown - td)
                     await ctx.send(_("¡Espera {} minutos antes de usar el comando otra vez!").format(remaining_time // 60))
                     break  # Stop processing further if cooldown triggered
                 else:
