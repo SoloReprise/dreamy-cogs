@@ -166,11 +166,11 @@ class UserCommands(MixinMeta, ABC):
 
     @commands.command(name="gg", aliases=["givestar", "addstar", "thanks", "stars"])
     @commands.guild_only()
-    async def give_star(self, ctx: commands.Context, *, args: str):
+    async def give_star(self, ctx: commands.Context, *users: discord.Member):
         """
         ¡Dile a otros jugadores lo bien que han jugado!
         """
-        if not args:
+        if not users:
             return await ctx.send(_("¡Tienes que mencionar al menos a un usuario!"))
 
         now = datetime.datetime.now()
@@ -180,13 +180,13 @@ class UserCommands(MixinMeta, ABC):
             return await ctx.send(_("Cache not loaded yet, wait a few more seconds."))
 
         mentioned_users = []
-        for mention in ctx.message.mentions:
-            if ctx.author == mention:
+        for user in users:
+            if ctx.author == user:
                 await ctx.send(_("¡No puedes decirte gg a ti mismo!"))
-            elif mention.bot:
+            elif user.bot:
                 await ctx.send(_("¡No puedes decirle gg a un bot!"))
             else:
-                mentioned_users.append(mention)
+                mentioned_users.append(user)
 
         if not mentioned_users:
             return
@@ -205,10 +205,10 @@ class UserCommands(MixinMeta, ABC):
                 cooldown = self.data[guild_id]["starcooldown"]
                 lastused = self.stars[guild_id][star_giver]
                 td = now - lastused
-                td = td.total_seconds()
-                if td <= cooldown:
+                td_seconds = td.total_seconds()  # Calculate time difference in seconds
+                if td_seconds <= cooldown:
                     cooldown_triggered = True
-                    remaining_time = int(cooldown - td)
+                    remaining_time = int(cooldown - td_seconds)
                     await ctx.send(_("¡Espera {} minutos antes de usar el comando otra vez!").format(remaining_time // 60))
                     break  # Stop processing further if cooldown triggered
                 else:
