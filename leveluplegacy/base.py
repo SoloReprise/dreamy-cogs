@@ -166,11 +166,11 @@ class UserCommands(MixinMeta, ABC):
 
     @commands.command(name="gg", aliases=["givestar", "addstar", "thanks", "stars"])
     @commands.guild_only()
-    async def give_star(self, ctx: commands.Context, *args):
+    async def give_star(self, ctx: commands.Context, *users: discord.Member):
         """
         ¡Dile a otros jugadores lo bien que han jugado!
         """
-        if not args:
+        if not users:
             return await ctx.send(_("¡Tienes que mencionar al menos a un usuario!"))
 
         now = datetime.datetime.now()
@@ -179,57 +179,49 @@ class UserCommands(MixinMeta, ABC):
         if guild_id not in self.data:
             return await ctx.send(_("Cache not loaded yet, wait a few more seconds."))
 
-        mentioned_users = []
-        for arg in args:
-            try:
-                user = await commands.MemberConverter().convert(ctx, arg)
-                if user.bot:
-                    await ctx.send(_("¡No puedes decirle gg a un bot!"))
-                elif ctx.author == user:
-                    await ctx.send(_("¡No puedes decirte gg a ti mismo!"))
-                else:
-                    mentioned_users.append(user)
-            except commands.MemberNotFound:
-                pass
+        recipients = []  # Initialize the recipients list outside the loop
+        cooldown_triggered = False
 
-        if not mentioned_users:
-            return
-
-        if guild_id not in self.stars:
-            self.stars[guild_id] = {}
-
-        recipients = []
-
-        for user in mentioned_users:
-            user_id = str(user.id)
-            if star_giver not in self.stars[guild_id]:
-                self.stars[guild_id][star_giver] = now
+        for user in users:
+            if ctx.author == user:
+                await ctx.send(_("¡No puedes decirte gg a ti mismo!"))
+            elif user.bot:
+                await ctx.send(_("¡No puedes decirle gg a un bot!"))
             else:
-                cooldown = self.data[guild_id]["starcooldown"]
-                lastused = self.stars[guild_id][star_giver]
-                td = now - lastused
-                td = td.total_seconds()
-                if td <= cooldown:
-                    recipients.append(user.display_name)  # Use display_name instead of mention
-                else:
+                user_id = str(user.id)
+                mentioned_users.append(user)
+
+                if star_giver not in self.stars[guild_id]:
                     self.stars[guild_id][star_giver] = now
+                else:
+                    cooldown = self.data[guild_id]["starcooldown"]
+                    lastused = self.stars[guild_id][star_giver]
+                    td = now - lastused
+                    td = td.total_seconds()
+                    if td <= cooldown:
+                        cooldown_triggered = True
+                        remaining_time = int(cooldown - td)
+                        await ctx.send(_("¡Espera {} minutos antes de usar el comando otra vez!").format(remaining_time // 60))
+                        break  # Stop processing further if cooldown triggered
+                    else:
+                        self.stars[guild_id][star_giver] = now
 
-                    user_mention = self.data[guild_id]["mention"]
-                    users_data = self.data[guild_id]["users"]
-                    if user_id not in users_data:
-                        await ctx.send(_("No data available for that user yet!"))
-                        return
+                user_mention = self.data[guild_id]["mention"]
+                users_data = self.data[guild_id]["users"]
+                if user_id not in users_data:
+                    await ctx.send(_("No data available for that user yet!"))
+                    return
 
-                    users_data[user_id]["stars"] += 1
+                users_data[user_id]["stars"] += 1
 
-                    if self.data[guild_id]["weekly"]["on"]:
-                        if guild_id not in self.data[guild_id]["weekly"]["users"]:
-                            self.init_user_weekly(guild_id, user_id)
-                        self.data[guild_id]["weekly"]["users"][user_id]["stars"] += 1
+                if self.data[guild_id]["weekly"]["on"]:
+                    if guild_id not in self.data[guild_id]["weekly"]["users"]:
+                        self.init_user_weekly(guild_id, user_id)
+                    self.data[guild_id]["weekly"]["users"][user_id]["stars"] += 1
 
-                    recipients.append(user.display_name)  # Use display_name instead of mention
+                recipients.append(user.display_name)  # Use display_name instead of mention
 
-        if recipients:
+        if recipients and not cooldown_triggered:
             recipients_str = ", ".join(recipients[:-1]) + _(" y ") + recipients[-1] if len(recipients) > 1 else recipients[0]
             await ctx.send(_("¡Bien jugado, {}!").format(recipients_str))
 
