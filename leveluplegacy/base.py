@@ -230,6 +230,7 @@ class UserCommands(MixinMeta, ABC):
 
     @commands.command(name="ungg")
     @commands.guild_only()
+    @commands.mod_or_permissions(administrator=True)
     async def ungg(self, ctx: commands.Context, user: discord.Member, amount: int):
         """
         Reduce the 'gg' count for a user.
