@@ -187,7 +187,7 @@ class UserCommands(MixinMeta, ABC):
         recipients = []  # Initialize the recipients list
         total_cooldown = 0
 
-        for user in unique_users:  # Iterate through the unique set of users
+        for user in unique_users:
             if ctx.author == user:
                 await ctx.send(_("¡No puedes decirte gg a ti mismo!"))
             elif user.bot:
@@ -202,8 +202,11 @@ class UserCommands(MixinMeta, ABC):
                     cooldown = self.data[guild_id]["starcooldown"]
                     if td <= cooldown:
                         total_cooldown = max(total_cooldown, cooldown - td)
+                        continue  # Skip the rest of the loop for this user
                     else:
                         self.stars[guild_id][star_giver] = now
+                else:
+                    self.stars[guild_id][star_giver] = now
 
                 user_mention = self.data[guild_id]["mention"]
                 users_data = self.data[guild_id]["users"]
