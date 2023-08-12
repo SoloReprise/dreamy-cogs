@@ -6,7 +6,7 @@ from typing import Any
 import discord
 from redbot.core import commands
 from redbot.core.utils.chat_formatting import error, humanize_timedelta
-from redbot.core.commands import has_permissions, bot_has_permissions, guild_only, admin_or_permissions
+from redbot.core.commands import has_permissions, bot_has_permissions, guild_only, mod_or_permissions
 
 from .abc import MixinMeta
 from .pcx_lib import Perms, SettingDisplay, delete
