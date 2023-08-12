@@ -228,6 +228,39 @@ class UserCommands(MixinMeta, ABC):
             recipients_str = ", ".join(recipients[:-1]) + _(" y ") + recipients[-1] if len(recipients) > 1 else recipients[0]
             await ctx.send(_("¡Bien jugado, {}!").format(recipients_str))
 
+    @commands.command(name="ungg")
+    @commands.guild_only()
+    async def ungg(self, ctx: commands.Context, user: discord.Member, amount: int):
+        """
+        Reduce the 'gg' count for a user.
+        """
+        if amount <= 0:
+            return await ctx.send(_("Amount should be a positive integer!"))
+
+        guild_id = ctx.guild.id
+        if guild_id not in self.data:
+            return await ctx.send(_("Cache not loaded yet, wait a few more seconds."))
+
+        user_id = str(user.id)
+        users_data = self.data[guild_id]["users"]
+        if user_id not in users_data:
+            return await ctx.send(_("No data available for that user yet!"))
+
+        if users_data[user_id]["stars"] < amount:
+            return await ctx.send(_("The user doesn't have enough 'gg' points to subtract."))
+
+        users_data[user_id]["stars"] -= amount
+
+        if self.data[guild_id]["weekly"]["on"]:
+            if guild_id not in self.data[guild_id]["weekly"]["users"]:
+                self.init_user_weekly(guild_id, user_id)
+            if self.data[guild_id]["weekly"]["users"][user_id]["stars"] >= amount:
+                self.data[guild_id]["weekly"]["users"][user_id]["stars"] -= amount
+            else:
+                self.data[guild_id]["weekly"]["users"][user_id]["stars"] = 0
+
+        await ctx.send(_("Reduced {} 'gg' points from {}.").format(amount, user.display_name))
+
     # For testing purposes
     @commands.command(name="mocklvl", hidden=True)
     async def get_lvl_test(self, ctx, *, user: discord.Member = None):
