@@ -172,11 +172,6 @@ class AutoRoomCommands(MixinMeta, ABC):
         """Change the bitrate of your AutoRoom."""
         if not ctx.guild:
             return
-        
-        # Check if the user has administrator permissions or the specified role
-        if not (await commands.mod_or_permissions().predicate(ctx)):
-            return
-        
         autoroom_channel, autoroom_info = await self._get_autoroom_channel_and_info(ctx)
         if not autoroom_channel or not autoroom_info:
             return
