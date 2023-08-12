@@ -6,6 +6,7 @@ from typing import Any
 import discord
 from redbot.core import commands
 from redbot.core.utils.chat_formatting import error, humanize_timedelta
+from redbot.core.commands import has_permissions, bot_has_permissions, guild_only, admin_or_permissions
 
 from .abc import MixinMeta
 from .pcx_lib import Perms, SettingDisplay, delete
@@ -128,7 +129,7 @@ class AutoRoomCommands(MixinMeta, ABC):
         await ctx.send(str(room_settings.display(access_settings)))
 
     @autoroom.command(name="name")
-    @has_permissions(administrator=True)
+    @mod_or_permissions(administrator=True)
     async def autoroom_name(self, ctx: commands.Context, *, name: str) -> None:
         """Change the name of your AutoRoom."""
         if not ctx.guild:
