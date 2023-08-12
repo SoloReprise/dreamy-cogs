@@ -223,10 +223,10 @@ class UserCommands(MixinMeta, ABC):
         if total_cooldown > 0:
             remaining_time = int(total_cooldown)
             await ctx.send(_("¡Espera {} minutos antes de usar el comando otra vez!").format(remaining_time // 60))
+            return  # Added return here to prevent sending the success message when there's a cooldown
         elif recipients:
             recipients_str = ", ".join(recipients[:-1]) + _(" y ") + recipients[-1] if len(recipients) > 1 else recipients[0]
             await ctx.send(_("¡Bien jugado, {}!").format(recipients_str))
-
 
     # For testing purposes
     @commands.command(name="mocklvl", hidden=True)
