@@ -167,7 +167,21 @@ class AutoRoomCommands(MixinMeta, ABC):
         await ctx.tick()
         await delete(ctx.message, delay=5)
 
+    def is_mod_or_has_permission():
+        async def predicate(ctx):
+            if ctx.author.guild_permissions.administrator:
+                return True
+            
+            # Replace 'mod_or_permissions' with the actual name of the role or permission check
+            if await commands_mod_or_permissions_check(ctx):
+                return True
+
+            return False
+        
+        return commands.check(predicate)
+
     @autoroom.command(name="bitrate", aliases=["kbps"])
+    @is_mod_or_has_permission()
     async def autoroom_bitrate(self, ctx: commands.Context, kbps: int) -> None:
         """Change the bitrate of your AutoRoom."""
         if not ctx.guild:
@@ -259,7 +273,6 @@ class AutoRoomCommands(MixinMeta, ABC):
         await self._process_allow_deny(ctx, self.perms_public)
 
     @autoroom.command()
-    @autoroom.command.mod_or_permissions(administrator=True)  # Add this decorator
     async def locked(self, ctx: commands.Context) -> None:
         """Lock your AutoRoom (visible, but no one can join)."""
         await self._process_allow_deny(ctx, self.perms_locked)
