@@ -187,26 +187,23 @@ class UserCommands(MixinMeta, ABC):
         recipients = []  # Initialize the recipients list
         total_cooldown = 0
 
-        for user in unique_users:
+        if star_giver in self.stars[guild_id]:
+            lastused = self.stars[guild_id][star_giver]
+            td = now - lastused
+            td = td.total_seconds()
+            cooldown = self.data[guild_id]["starcooldown"]
+            if td <= cooldown:
+                total_cooldown = max(total_cooldown, cooldown - td)
+            else:
+                self.stars[guild_id][star_giver] = now
+
+        for user in unique_users:  # Iterate through the unique set of users
             if ctx.author == user:
                 await ctx.send(_("¡No puedes decirte gg a ti mismo!"))
             elif user.bot:
                 await ctx.send(_("¡No puedes decirle gg a un bot!"))
             else:
                 user_id = str(user.id)
-
-                if star_giver in self.stars[guild_id]:
-                    lastused = self.stars[guild_id][star_giver]
-                    td = now - lastused
-                    td = td.total_seconds()
-                    cooldown = self.data[guild_id]["starcooldown"]
-                    if td <= cooldown:
-                        total_cooldown = max(total_cooldown, cooldown - td)
-                        continue  # Skip the rest of the loop for this user
-                    else:
-                        self.stars[guild_id][star_giver] = now
-                else:
-                    self.stars[guild_id][star_giver] = now
 
                 user_mention = self.data[guild_id]["mention"]
                 users_data = self.data[guild_id]["users"]
@@ -226,7 +223,6 @@ class UserCommands(MixinMeta, ABC):
         if total_cooldown > 0:
             remaining_time = int(total_cooldown)
             await ctx.send(_("¡Espera {} minutos antes de usar el comando otra vez!").format(remaining_time // 60))
-            return  # Added return here to prevent sending the success message when there's a cooldown
         elif recipients:
             recipients_str = ", ".join(recipients[:-1]) + _(" y ") + recipients[-1] if len(recipients) > 1 else recipients[0]
             await ctx.send(_("¡Bien jugado, {}!").format(recipients_str))
