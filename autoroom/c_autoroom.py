@@ -130,7 +130,6 @@ class AutoRoomCommands(MixinMeta, ABC):
         await ctx.send(str(room_settings.display(access_settings)))
 
     @autoroom.command(name="name")
-    @is_admin_or_mod
     async def autoroom_name(self, ctx: commands.Context, *, name: str) -> None:
         """Change the name of your AutoRoom."""
         if not ctx.guild:
