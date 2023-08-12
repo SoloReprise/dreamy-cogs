@@ -259,7 +259,7 @@ class AutoRoomCommands(MixinMeta, ABC):
         await self._process_allow_deny(ctx, self.perms_public)
 
     @autoroom.command()
-    @commands.mod_or_permissions(administrator=True)  # Add this decorator
+    @autoroom.command.mod_or_permissions(administrator=True)  # Add this decorator
     async def locked(self, ctx: commands.Context) -> None:
         """Lock your AutoRoom (visible, but no one can join)."""
         await self._process_allow_deny(ctx, self.perms_locked)
