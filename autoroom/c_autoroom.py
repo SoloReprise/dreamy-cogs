@@ -187,7 +187,9 @@ class AutoRoomCommands(MixinMeta, ABC):
         await delete(ctx.message, delay=5)
 
     @autoroom.command(name="users", aliases=["userlimit"])
-    @mod_or_permissions(administrator=True)
+    @guild_only()
+    @has_permissions(administrator=True)
+    @bot_has_permissions(manage_channels=True)
     async def autoroom_users(self, ctx: commands.Context, user_limit: int) -> None:
         """Change the user limit of your AutoRoom."""
         autoroom_channel, autoroom_info = await self._get_autoroom_channel_and_info(ctx)
