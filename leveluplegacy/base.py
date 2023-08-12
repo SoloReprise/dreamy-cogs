@@ -186,6 +186,18 @@ class UserCommands(MixinMeta, ABC):
 
         recipients = []  # Initialize the recipients list
 
+        if guild_id in self.stars:
+            cooldown = self.data[guild_id]["starcooldown"]
+            lastused = self.stars[guild_id].get(star_giver, None)
+
+            if lastused is not None:
+                td = now - lastused
+                td = td.total_seconds()
+                if td < cooldown:
+                    remaining_time = int(cooldown - td)
+                    await ctx.send(_("¡Espera {} minutos antes de usar el comando otra vez!").format(remaining_time // 60))
+                    return
+
         for user in unique_users:  # Iterate through the unique set of users
             if ctx.author == user:
                 await ctx.send(_("¡No puedes decirte gg a ti mismo!"))
@@ -193,22 +205,6 @@ class UserCommands(MixinMeta, ABC):
                 await ctx.send(_("¡No puedes decirle gg a un bot!"))
             else:
                 user_id = str(user.id)
-
-                if guild_id not in self.stars:
-                    self.stars[guild_id] = {}
-                if star_giver not in self.stars[guild_id]:
-                    self.stars[guild_id][star_giver] = now
-                else:
-                    cooldown = self.data[guild_id]["starcooldown"]
-                    lastused = self.stars[guild_id][star_giver]
-                    td = now - lastused
-                    td = td.total_seconds()
-                    if td <= cooldown:
-                        remaining_time = int(cooldown - td)
-                        await ctx.send(_("¡Espera {} minutos antes de usar el comando otra vez!").format(remaining_time // 60))
-                        return
-                    else:
-                        self.stars[guild_id][star_giver] = now
 
                 user_mention = self.data[guild_id]["mention"]
                 users_data = self.data[guild_id]["users"]
@@ -224,6 +220,9 @@ class UserCommands(MixinMeta, ABC):
                     self.data[guild_id]["weekly"]["users"][user_id]["stars"] += 1
 
                 recipients.append(user.display_name)  # Use display_name instead of mention
+
+        self.stars.setdefault(guild_id, {})
+        self.stars[guild_id][star_giver] = now
 
         if recipients:
             recipients_str = ", ".join(recipients[:-1]) + _(" y ") + recipients[-1] if len(recipients) > 1 else recipients[0]
