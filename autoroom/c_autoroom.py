@@ -168,6 +168,7 @@ class AutoRoomCommands(MixinMeta, ABC):
         await delete(ctx.message, delay=5)
 
     @autoroom.command(name="bitrate", aliases=["kbps"])
+    @commands.mod_or_permissions(administrator=True)  # Add this decorator
     async def autoroom_bitrate(self, ctx: commands.Context, kbps: int) -> None:
         """Change the bitrate of your AutoRoom."""
         if not ctx.guild:
