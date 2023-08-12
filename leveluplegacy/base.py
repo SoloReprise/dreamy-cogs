@@ -197,18 +197,17 @@ class UserCommands(MixinMeta, ABC):
 
                 if guild_id not in self.stars:
                     self.stars[guild_id] = {}
-
-                if star_giver not in self.stars[guild_id]:
-                    self.stars[guild_id][star_giver] = now
-                else:
-                    cooldown = self.data[guild_id]["starcooldown"]
+                if star_giver in self.stars[guild_id]:
                     lastused = self.stars[guild_id][star_giver]
                     td = now - lastused
                     td = td.total_seconds()
-                    if td > cooldown:
-                        self.stars[guild_id][star_giver] = now
-                    else:
+                    cooldown = self.data[guild_id]["starcooldown"]
+                    if td <= cooldown:
                         total_cooldown = max(total_cooldown, cooldown - td)
+                    else:
+                        self.stars[guild_id][star_giver] = now
+                else:
+                    self.stars[guild_id][star_giver] = now
 
                 user_mention = self.data[guild_id]["mention"]
                 users_data = self.data[guild_id]["users"]
