@@ -12,6 +12,8 @@ from .pcx_lib import Perms, SettingDisplay, delete
 
 MAX_CHANNEL_NAME_LENGTH = 100
 
+def is_admin_or_mod(ctx):
+    return commands.mod_or_permissions(administrator=True)()
 
 class AutoRoomCommands(MixinMeta, ABC):
     """The autoroom command."""
@@ -128,6 +130,7 @@ class AutoRoomCommands(MixinMeta, ABC):
         await ctx.send(str(room_settings.display(access_settings)))
 
     @autoroom.command(name="name")
+    @commands.check(is_admin_or_mod)
     async def autoroom_name(self, ctx: commands.Context, *, name: str) -> None:
         """Change the name of your AutoRoom."""
         if not ctx.guild:
