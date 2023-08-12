@@ -173,6 +173,11 @@ class UserCommands(MixinMeta, ABC):
         if not users:
             return await ctx.send(_("¡Tienes que mencionar al menos a un usuario!"))
 
+        unique_users = set(users)  # Convert the users list to a set to ensure uniqueness
+
+        if len(unique_users) < len(users):
+            return await ctx.send(_("¡No puedes mencionar al mismo usuario más de una vez!"))
+
         now = datetime.datetime.now()
         star_giver = str(ctx.author.id)
         guild_id = ctx.guild.id
@@ -182,7 +187,7 @@ class UserCommands(MixinMeta, ABC):
         recipients = []  # Initialize the recipients list
         total_cooldown = 0
 
-        for user in users:
+        for user in unique_users:  # Iterate through the unique set of users
             if ctx.author == user:
                 await ctx.send(_("¡No puedes decirte gg a ti mismo!"))
             elif user.bot:
@@ -221,6 +226,7 @@ class UserCommands(MixinMeta, ABC):
         elif recipients:
             recipients_str = ", ".join(recipients[:-1]) + _(" y ") + recipients[-1] if len(recipients) > 1 else recipients[0]
             await ctx.send(_("¡Bien jugado, {}!").format(recipients_str))
+
 
     # For testing purposes
     @commands.command(name="mocklvl", hidden=True)
