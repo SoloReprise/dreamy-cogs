@@ -6,7 +6,6 @@ from typing import Any
 import discord
 from redbot.core import commands
 from redbot.core.utils.chat_formatting import error, humanize_timedelta
-from redbot.core.commands import has_permissions, bot_has_permissions, guild_only, mod_or_permissions
 
 from .abc import MixinMeta
 from .pcx_lib import Perms, SettingDisplay, delete
@@ -129,7 +128,6 @@ class AutoRoomCommands(MixinMeta, ABC):
         await ctx.send(str(room_settings.display(access_settings)))
 
     @autoroom.command(name="name")
-    @commands.mod_or_permissions(administrator=True)  # Apply the existing decorator here
     async def autoroom_name(self, ctx: commands.Context, *, name: str) -> None:
         """Change the name of your AutoRoom."""
         if not ctx.guild:
@@ -187,9 +185,6 @@ class AutoRoomCommands(MixinMeta, ABC):
         await delete(ctx.message, delay=5)
 
     @autoroom.command(name="users", aliases=["userlimit"])
-    @guild_only()
-    @has_permissions(administrator=True)
-    @bot_has_permissions(manage_channels=True)
     async def autoroom_users(self, ctx: commands.Context, user_limit: int) -> None:
         """Change the user limit of your AutoRoom."""
         autoroom_channel, autoroom_info = await self._get_autoroom_channel_and_info(ctx)
