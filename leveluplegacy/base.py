@@ -170,6 +170,12 @@ class UserCommands(MixinMeta, ABC):
         """
         ¡Dile a otros jugadores lo bien que han jugado!
         """
+        # Check if the command is used as a reply
+        if ctx.message.reference and ctx.message.reference.message_id:
+            replied_to_msg = await ctx.channel.fetch_message(ctx.message.reference.message_id)
+            target_user = replied_to_msg.author
+            users = [target_user]  # Target the user being replied to
+
         if not users:
             return await ctx.send(_("¡Tienes que mencionar al menos a un usuario!"))
 
