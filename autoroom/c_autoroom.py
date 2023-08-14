@@ -131,7 +131,6 @@ class AutoRoomCommands(MixinMeta, ABC):
 
 
     @autoroom.command(name="name")
-    @commands.check(is_admin_or_mod)
     async def autoroom_name(self, ctx: commands.Context, *, name: str) -> None:
         """Change the name of your AutoRoom. Only for amdins."""
         if not ctx.guild:
