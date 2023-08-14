@@ -177,37 +177,37 @@ class AutoRoomCommands(MixinMeta, ABC):
 #        else:
 #            await ctx.send("Only administrators and moderators can change the autoroom name.")
 
-    @autoroom.command(name="bitrate", aliases=["kbps"])
-    async def autoroom_bitrate(self, ctx: commands.Context, kbps: int) -> None:
-        """Change the bitrate of your AutoRoom."""
-        if not ctx.guild:
-            return
-        autoroom_channel, autoroom_info = await self._get_autoroom_channel_and_info(ctx)
-        if not autoroom_channel or not autoroom_info:
-            return
+#    @autoroom.command(name="bitrate", aliases=["kbps"])
+#    async def autoroom_bitrate(self, ctx: commands.Context, kbps: int) -> None:
+#        """Change the bitrate of your AutoRoom."""
+#        if not ctx.guild:
+#            return
+#        autoroom_channel, autoroom_info = await self._get_autoroom_channel_and_info(ctx)
+#        if not autoroom_channel or not autoroom_info:
+#            return
+#
+#        bps = max(8000, min(int(ctx.guild.bitrate_limit), kbps * 1000))
+#        if bps != autoroom_channel.bitrate:
+#            await autoroom_channel.edit(
+#                bitrate=bps, reason="AutoRoom: User edit room info"
+#            )
+#        await ctx.tick()
+#        await delete(ctx.message, delay=5)
 
-        bps = max(8000, min(int(ctx.guild.bitrate_limit), kbps * 1000))
-        if bps != autoroom_channel.bitrate:
-            await autoroom_channel.edit(
-                bitrate=bps, reason="AutoRoom: User edit room info"
-            )
-        await ctx.tick()
-        await delete(ctx.message, delay=5)
-
-    @autoroom.command(name="users", aliases=["userlimit"])
-    async def autoroom_users(self, ctx: commands.Context, user_limit: int) -> None:
-        """Change the user limit of your AutoRoom."""
-        autoroom_channel, autoroom_info = await self._get_autoroom_channel_and_info(ctx)
-        if not autoroom_channel or not autoroom_info:
-            return
-
-        limit = max(0, min(99, user_limit))
-        if limit != autoroom_channel.user_limit:
-            await autoroom_channel.edit(
-                user_limit=limit, reason="AutoRoom: User edit room info"
-            )
-        await ctx.tick()
-        await delete(ctx.message, delay=5)
+#    @autoroom.command(name="users", aliases=["userlimit"])
+#    async def autoroom_users(self, ctx: commands.Context, user_limit: int) -> None:
+#        """Change the user limit of your AutoRoom."""
+#        autoroom_channel, autoroom_info = await self._get_autoroom_channel_and_info(ctx)
+#        if not autoroom_channel or not autoroom_info:
+#            return
+#
+#        limit = max(0, min(99, user_limit))
+#        if limit != autoroom_channel.user_limit:
+#            await autoroom_channel.edit(
+#                user_limit=limit, reason="AutoRoom: User edit room info"
+#            )
+#        await ctx.tick()
+#        await delete(ctx.message, delay=5)
 
     @autoroom.command()
     async def claim(self, ctx: commands.Context) -> None:
