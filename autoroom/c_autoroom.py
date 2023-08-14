@@ -131,7 +131,7 @@ class AutoRoomCommands(MixinMeta, ABC):
 
     @autoroom.command(name="name")
     async def autoroom_name(self, ctx: commands.Context, *, name: str) -> None:
-        """Change the name of your AutoRoom."""
+        """Change the name of your AutoRoom. Only for amdins."""
         if not ctx.guild:
             return
 
