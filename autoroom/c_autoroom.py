@@ -129,52 +129,55 @@ class AutoRoomCommands(MixinMeta, ABC):
 
         await ctx.send(str(room_settings.display(access_settings)))
 
+
+# Check if the user is an admin or mod before defining the subcommand
+if (
+    await self.is_mod_or_mod_role(ctx.author)
+    or await self.is_admin_or_admin_role(ctx.author)
+):
     @autoroom.command(name="name")
     async def autoroom_name(self, ctx: commands.Context, *, name: str) -> None:
-        """Change the name of your AutoRoom. Only for amdins."""
+        """Change the name of your AutoRoom."""
         if not ctx.guild:
             return
 
-        if (
-            await self.is_mod_or_mod_role(ctx.author)
-            or await self.is_admin_or_admin_role(ctx.author)
-        ):
-            autoroom_channel, autoroom_info = await self._get_autoroom_channel_and_info(ctx)
-            if not autoroom_channel or not autoroom_info:
-                return
+        autoroom_channel, autoroom_info = await self._get_autoroom_channel_and_info(ctx)
+        if not autoroom_channel or not autoroom_info:
+            return
 
-            if len(name) > MAX_CHANNEL_NAME_LENGTH:
-                name = name[:MAX_CHANNEL_NAME_LENGTH]
-            if name != autoroom_channel.name:
-                bucket = self.bucket_autoroom_name.get_bucket(autoroom_channel)
-                if bucket:
-                    retry_after = bucket.update_rate_limit()
-                    if retry_after:
-                        per_display = bucket.per - self.extra_channel_name_change_delay
-                        hint_text = error(
-                            f"{ctx.message.author.mention}, you can only modify an AutoRoom name **{bucket.rate}** times "
-                            f"every **{humanize_timedelta(seconds=per_display)}** with this command. "
-                            f"You can try again in **{humanize_timedelta(seconds=max(1, int(min(per_display, retry_after))))}**."
-                            "\n\n"
-                            "Alternatively, you can modify the channel yourself by either right clicking the channel on "
-                            "desktop or by long pressing it on mobile."
-                        )
-                        if ctx.guild.mfa_level:
-                            hint_text += (
-                                " Do note that since this server has 2FA enabled, you will need it enabled "
-                                "on your account to modify the channel in this way."
-                            )
-                        hint = await ctx.send(hint_text)
-                        await delete(ctx.message, delay=30)
-                        await delete(hint, delay=30)
-                        return
-                    await autoroom_channel.edit(
-                        name=name, reason="AutoRoom: User edit room info"
+        if len(name) > MAX_CHANNEL_NAME_LENGTH:
+            name = name[:MAX_CHANNEL_NAME_LENGTH]
+        if name != autoroom_channel.name:
+            bucket = self.bucket_autoroom_name.get_bucket(autoroom_channel)
+            if bucket:
+                retry_after = bucket.update_rate_limit()
+                if retry_after:
+                    per_display = bucket.per - self.extra_channel_name_change_delay
+                    hint_text = error(
+                        f"{ctx.message.author.mention}, you can only modify an AutoRoom name **{bucket.rate}** times "
+                        f"every **{humanize_timedelta(seconds=per_display)}** with this command. "
+                        f"You can try again in **{humanize_timedelta(seconds=max(1, int(min(per_display, retry_after))))}**."
+                        "\n\n"
+                        "Alternatively, you can modify the channel yourself by either right clicking the channel on "
+                        "desktop or by long pressing it on mobile."
                     )
-            await ctx.tick()
-            await delete(ctx.message, delay=5)
-        else:
-            await ctx.send("Only administrators and moderators can change the autoroom name.")
+                    if ctx.guild.mfa_level:
+                        hint_text += (
+                            " Do note that since this server has 2FA enabled, you will need it enabled "
+                            "on your account to modify the channel in this way."
+                        )
+                    hint = await ctx.send(hint_text)
+                    await delete(ctx.message, delay=30)
+                    await delete(hint, delay=30)
+                    return
+                await autoroom_channel.edit(
+                    name=name, reason="AutoRoom: User edit room info"
+                )
+        await ctx.tick()
+        await delete(ctx.message, delay=5)
+else:
+    # Regular users will see no command definition here, effectively hiding it
+    pass
 
     @autoroom.command(name="bitrate", aliases=["kbps"])
     async def autoroom_bitrate(self, ctx: commands.Context, kbps: int) -> None:
