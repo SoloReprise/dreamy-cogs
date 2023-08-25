@@ -269,7 +269,7 @@ class AutoRoomCommands(MixinMeta, ABC):
         # Check if the member is in the specified voice room
         voice_channel = ctx.guild.get_channel(1128373585933770883)
         if not voice_channel or member.voice.channel != voice_channel:
-            await ctx.send(error("The member is not in the specified voice room."))
+            await ctx.send("The member is not in the specified voice room.")
             return
         
         # Check if the member is a moderator, administrator, or if they're trying to move one
@@ -278,17 +278,17 @@ class AutoRoomCommands(MixinMeta, ABC):
             or await self.is_admin_or_admin_role(member)
             or member == ctx.guild.owner
         ):
-            await ctx.send(error("Mods, administrators, and server owner cannot be moved."))
+            await ctx.send("Mods, administrators, and server owner cannot be moved.")
             return
         
         # Move the member to the AutoRoom
         try:
             await member.move_to(autoroom_channel)
-            await ctx.send(success(f"{member.display_name} has been moved to the AutoRoom."))
+            await ctx.send(f"{member.display_name} has been moved to the AutoRoom.")
         except discord.Forbidden:
-            await ctx.send(error("I don't have the permissions to move members."))
+            await ctx.send("I don't have the permissions to move members.")
         except discord.HTTPException:
-            await ctx.send(error("Failed to move the member."))
+            await ctx.send("Failed to move the member.")
 
     @room.command()
     async def public(self, ctx: commands.Context) -> None:
