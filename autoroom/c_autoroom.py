@@ -20,14 +20,14 @@ class AutoRoomCommands(MixinMeta, ABC):
 
     @commands.group()
     @commands.guild_only()
-    async def autoroom(self, ctx: commands.Context) -> None:
+    async def room(self, ctx: commands.Context) -> None:
         """Manage your AutoRoom.
 
         For a quick rundown on how to manage your AutoRoom,
         check out [the readme](https://github.com/PhasecoreX/PCXCogs/tree/master/autoroom/README.md)
         """
 
-    @autoroom.command(name="settings", aliases=["about", "info"])
+    @room.command(name="settings", aliases=["about", "info"])
     async def autoroom_settings(self, ctx: commands.Context) -> None:
         """Display current settings."""
         if not ctx.guild:
@@ -209,7 +209,7 @@ class AutoRoomCommands(MixinMeta, ABC):
 #        await ctx.tick()
 #        await delete(ctx.message, delay=5)
 
-    @autoroom.command()
+    @room.command()
     async def claim(self, ctx: commands.Context) -> None:
         """Claim ownership of this AutoRoom."""
         if not ctx.guild:
@@ -263,22 +263,22 @@ class AutoRoomCommands(MixinMeta, ABC):
         await ctx.tick()
         await delete(ctx.message, delay=5)
 
-    @autoroom.command()
+    @room.command()
     async def public(self, ctx: commands.Context) -> None:
         """Make your AutoRoom public."""
         await self._process_allow_deny(ctx, self.perms_public)
 
-    @autoroom.command()
+    @room.command()
     async def locked(self, ctx: commands.Context) -> None:
         """Lock your AutoRoom (visible, but no one can join)."""
         await self._process_allow_deny(ctx, self.perms_locked)
 
-    @autoroom.command()
+    @room.command()
     async def private(self, ctx: commands.Context) -> None:
         """Make your AutoRoom private."""
         await self._process_allow_deny(ctx, self.perms_private)
 
-    @autoroom.command(aliases=["add"])
+    @room.command(aliases=["add"])
     async def allow(
         self, ctx: commands.Context, member_or_role: discord.Role | discord.Member
     ) -> None:
@@ -287,7 +287,7 @@ class AutoRoomCommands(MixinMeta, ABC):
             ctx, self.perms_public, member_or_role=member_or_role
         )
 
-    @autoroom.command(aliases=["ban", "block"])
+    @room.command(aliases=["ban", "block"])
     async def deny(
         self, ctx: commands.Context, member_or_role: discord.Role | discord.Member
     ) -> None:
