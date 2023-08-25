@@ -107,15 +107,6 @@ class AutoRoomCommands(MixinMeta, ABC):
                 else:
                     denied_members.append(member_or_role)
 
-        if allowed_members:
-            access_settings.add(
-                "Allowed Members",
-                ", ".join(member.display_name for member in allowed_members),
-            )
-        if allowed_roles:
-            access_settings.add(
-                "Allowed Roles", ", ".join(role.name for role in allowed_roles)
-            )
         if denied_members:
             access_settings.add(
                 "Denied Members",
