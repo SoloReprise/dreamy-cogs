@@ -263,7 +263,7 @@ class AutoRoomCommands(MixinMeta, ABC):
             return
         
         # Check if the member is in the specified voice room
-        voice_channel = ctx.guild.get_channel(1128373585933770883)
+        voice_channel = ctx.guild.get_channel(1127625556247203863)
         if not voice_channel or member.voice.channel != voice_channel:
             await ctx.send("La persona que quieres mover no está en Off-Topic.")
             return
