@@ -21,15 +21,11 @@ class AutoRoomCommands(MixinMeta, ABC):
     @commands.group()
     @commands.guild_only()
     async def room(self, ctx: commands.Context) -> None:
-        """Manage your AutoRoom.
-
-        For a quick rundown on how to manage your AutoRoom,
-        check out [the readme](https://github.com/PhasecoreX/PCXCogs/tree/master/autoroom/README.md)
-        """
+        """Cambia los ajustes de tu chat de voz."""
 
     @room.command(name="settings", aliases=["about", "info"])
     async def autoroom_settings(self, ctx: commands.Context) -> None:
-        """Display current settings."""
+        """Muestra los ajustes actuales de la sala."""
         if not ctx.guild:
             return
         autoroom_channel, autoroom_info = await self._get_autoroom_channel_and_info(
@@ -79,14 +75,14 @@ class AutoRoomCommands(MixinMeta, ABC):
                 )
 
         room_settings.add(
-            "Channel Age",
+            "Edad del canal",
             humanize_timedelta(
                 timedelta=datetime.datetime.now(datetime.UTC)
                 - autoroom_channel.created_at
             ),
         )
 
-        access_settings = SettingDisplay("Current Access Settings")
+        access_settings = SettingDisplay("Ajustes de acceso actuales")
         allowed_members = []
         allowed_roles = []
         denied_members = []
@@ -109,12 +105,12 @@ class AutoRoomCommands(MixinMeta, ABC):
 
         if denied_members:
             access_settings.add(
-                "Denied Members",
+                "Miembros bloqueados",
                 ", ".join(member.display_name for member in denied_members),
             )
         if denied_roles:
             access_settings.add(
-                "Denied Roles", ", ".join(role.name for role in denied_roles)
+                "Roles bloqueados", ", ".join(role.name for role in denied_roles)
             )
 
         await ctx.send(str(room_settings.display(access_settings)))
@@ -201,7 +197,7 @@ class AutoRoomCommands(MixinMeta, ABC):
 
     @room.command()
     async def claim(self, ctx: commands.Context) -> None:
-        """Claim ownership of this AutoRoom."""
+        """Reclama la pertenencia de la Sala."""
         if not ctx.guild:
             return
         new_owner = ctx.message.author
@@ -223,12 +219,12 @@ class AutoRoomCommands(MixinMeta, ABC):
         ):
             if old_owner and old_owner in autoroom_channel.members:
                 denied_message = (
-                    "you can only claim ownership once the AutoRoom Owner has left"
+                    "solo puedes obtener la propiedad de una sala si el anterior dueño de la sala se ha ido de ella"
                 )
             elif bucket:
                 retry_after = bucket.update_rate_limit()
                 if retry_after:
-                    denied_message = f"you must wait **{humanize_timedelta(seconds=max(retry_after, 1))}** before claiming ownership, in case the previous AutoRoom Owner comes back"
+                    denied_message = f"debes esperar **{humanize_timedelta(seconds=max(retry_after, 1))}** antes de reclamar la propiedad, en caso de que el anterior dueño vuelva"
 
         if denied_message:
             hint = await ctx.send(
@@ -245,7 +241,7 @@ class AutoRoomCommands(MixinMeta, ABC):
         if perms.modified:
             await autoroom_channel.edit(
                 overwrites=perms.overwrites if perms.overwrites else {},
-                reason="AutoRoom: Ownership claimed",
+                reason="Sala: Se ha cambiado la propiedad",
             )
         await self.config.channel(autoroom_channel).owner.set(new_owner.id)
         if bucket:
@@ -255,7 +251,7 @@ class AutoRoomCommands(MixinMeta, ABC):
 
     @room.command()
     async def move(self, ctx: commands.Context, member: discord.Member) -> None:
-        """Move a member to your AutoRoom if eligible."""
+        """Mueve a una persona a tu sala si está en la sala de Off-Topic."""
         if not ctx.guild:
             return
         
@@ -269,7 +265,7 @@ class AutoRoomCommands(MixinMeta, ABC):
         # Check if the member is in the specified voice room
         voice_channel = ctx.guild.get_channel(1128373585933770883)
         if not voice_channel or member.voice.channel != voice_channel:
-            await ctx.send("The member is not in the specified voice room.")
+            await ctx.send("La persona que quieres mover no está en Off-Topic.")
             return
         
         # Check if the member is a moderator, administrator, or if they're trying to move one
@@ -278,13 +274,13 @@ class AutoRoomCommands(MixinMeta, ABC):
             or await self.is_admin_or_admin_role(member)
             or member == ctx.guild.owner
         ):
-            await ctx.send("Mods, administrators, and server owner cannot be moved.")
+            await ctx.send("Mods, administradores o dueños del servidor no pueden ser movidos.")
             return
         
         # Move the member to the AutoRoom
         try:
             await member.move_to(autoroom_channel)
-            await ctx.send(f"{member.display_name} has been moved to the AutoRoom.")
+            await ctx.send(f"{member.display_name} ha sido movido a la sala.")
         except discord.Forbidden:
             await ctx.send("I don't have the permissions to move members.")
         except discord.HTTPException:
@@ -292,17 +288,17 @@ class AutoRoomCommands(MixinMeta, ABC):
 
     @room.command()
     async def public(self, ctx: commands.Context) -> None:
-        """Make your AutoRoom public."""
+        """Haz tu sala pública."""
         await self._process_allow_deny(ctx, self.perms_public)
 
     @room.command()
     async def locked(self, ctx: commands.Context) -> None:
-        """Lock your AutoRoom (visible, but no one can join)."""
+        """Bloquea tu sala (será privada, pero nadie podrá unirse)."""
         await self._process_allow_deny(ctx, self.perms_locked)
 
     @room.command()
     async def private(self, ctx: commands.Context) -> None:
-        """Make your AutoRoom private."""
+        """Haz tu sala privada."""
         await self._process_allow_deny(ctx, self.perms_private)
 
 #    @room.command(aliases=["add"])
@@ -318,13 +314,9 @@ class AutoRoomCommands(MixinMeta, ABC):
     async def deny(
         self, ctx: commands.Context, member_or_role: discord.Role | discord.Member
     ) -> None:
-        """Deny a user (or role) from accessing your AutoRoom.
+        """Bloquea a un usuario (o rol) de entrar en tu Sala.
 
-        If the user is already in your AutoRoom, they will be disconnected.
-
-        If a user is no longer able to access the room due to denying a role,
-        they too will be disconnected. Keep in mind that if the server is using
-        member roles, denying roles will probably not work as expected.
+        Si el usuario (o usuarios con el rol) están en la sala, serán desconectados.
         """
         if not ctx.guild:
             return
@@ -422,13 +414,13 @@ class AutoRoomCommands(MixinMeta, ABC):
         # Deny a specific role
         # - Check that it isn't a mod/admin role, then deny role
         elif member_or_role == ctx.guild.me:
-            denied_message = "why would I deny myself from entering your AutoRoom?"
+            denied_message = "¿Por qué iba a prohibirme a mí entrar en la sala?"
         elif member_or_role == ctx.message.author:
-            denied_message = "don't be so hard on yourself! This is your AutoRoom!"
+            denied_message = "¡No seas tan dure contigo misme! ¡Esta sala es tuya!"
         elif member_or_role == ctx.guild.owner:
             denied_message = (
-                "I don't know if you know this, but that's the server owner... "
-                "I can't deny them from entering your AutoRoom."
+                "No puedo prohibirle a mi dueño entrar en la Sala... "
+                "Lo siento, pero va contra mi programación de Spribotito."
             )
         elif await self.is_admin_or_admin_role(member_or_role):
             role_suffix = " role" if isinstance(member_or_role, discord.Role) else ""
@@ -452,7 +444,7 @@ class AutoRoomCommands(MixinMeta, ABC):
         if perms.modified:
             await autoroom_channel.edit(
                 overwrites=perms.overwrites if perms.overwrites else {},
-                reason="AutoRoom: Permission change",
+                reason="Sala: Permisos cambiados",
             )
         await ctx.tick()
         await delete(ctx.message, delay=5)
@@ -478,7 +470,7 @@ class AutoRoomCommands(MixinMeta, ABC):
         autoroom_info = await self.get_autoroom_info(autoroom_channel)
         if not autoroom_info:
             hint = await ctx.send(
-                error(f"{ctx.message.author.mention}, you are not in an AutoRoom.")
+                error(f"{ctx.message.author.mention}, no estás en una Sala.")
             )
             await delete(ctx.message, delay=5)
             await delete(hint, delay=5)
@@ -489,7 +481,7 @@ class AutoRoomCommands(MixinMeta, ABC):
                 reason_server = " (it is a server AutoRoom)"
             hint = await ctx.send(
                 error(
-                    f"{ctx.message.author.mention}, you are not the owner of this AutoRoom{reason_server}."
+                    f"{ctx.message.author.mention}, no tienes la propiedad de esta Sala{reason_server}."
                 )
             )
             await delete(ctx.message, delay=10)
