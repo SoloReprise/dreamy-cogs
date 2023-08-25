@@ -278,14 +278,14 @@ class AutoRoomCommands(MixinMeta, ABC):
         """Make your AutoRoom private."""
         await self._process_allow_deny(ctx, self.perms_private)
 
-    @room.command(aliases=["add"])
-    async def allow(
-        self, ctx: commands.Context, member_or_role: discord.Role | discord.Member
-    ) -> None:
-        """Allow a user (or role) into your AutoRoom."""
-        await self._process_allow_deny(
-            ctx, self.perms_public, member_or_role=member_or_role
-        )
+#    @room.command(aliases=["add"])
+#    async def allow(
+#        self, ctx: commands.Context, member_or_role: discord.Role | discord.Member
+#    ) -> None:
+#        """Allow a user (or role) into your AutoRoom."""
+#        await self._process_allow_deny(
+#            ctx, self.perms_public, member_or_role=member_or_role
+#        )
 
     @room.command(aliases=["ban", "block"])
     async def deny(
