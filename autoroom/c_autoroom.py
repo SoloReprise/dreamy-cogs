@@ -78,7 +78,6 @@ class AutoRoomCommands(MixinMeta, ABC):
                     "Member Roles", ", ".join(role.name for role in member_roles)
                 )
 
-        room_settings.add("Bitrate", f"{autoroom_channel.bitrate // 1000}kbps")
         room_settings.add(
             "Channel Age",
             humanize_timedelta(
