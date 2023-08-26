@@ -89,13 +89,12 @@ class UniteCog(commands.Cog):
             record_name = record[0]
             normalized_record_name = unidecode(record_name).lower()
 
-            # Check if normalized_record_name is in the excluded_keywords list
-            if normalized_record_name not in excluded_keywords:
+            # Check if normalized_record_name exactly matches any excluded keyword
+            if any(excluded_keyword == normalized_record_name for excluded_keyword in excluded_keywords):
+                continue  # Skip this record if it exactly matches an excluded keyword
+            elif normalized_keywords in normalized_record_name:
                 matching_records.append(record)
-
-        # ... (your existing code)
-
-        matching_pokemons = [record[0] for record in matching_records]
+                matching_pokemons = [record[0] for record in matching_records]
 
         # Filter out excluded keywords from the matching_pokemons
         filtered_matching_pokemons = [
