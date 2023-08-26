@@ -8,13 +8,15 @@ from unidecode import unidecode
 unitetext = f"""
 !unite pokemon/emblem/move/hold-item/battle-item <nombre>
 """
-excluded_keywords = [{"Absol"}, {"Aegislash"}, {"Azumarill"}, {"Blastoise"}, {"Blaziken"}, {"Blissey"}, {"Buzzwole"}, {"Chandelure"}, {"Charizard"}, {"Cinderace"}, 
-                  {"Clefable"}, {"Comfey"}, {"Cramorant"}, {"Decidueye"}, {"Delphox"}, {"Dodrio"}, {"Dragapult"}, {"Dragonite"}, {"Duraludon"}, {"Eldegoss"}, {"Espeon"}, 
-                  {"Garchomp"}, {"Gardevoir"}, {"Gengar"}, {"Glaceon"}, {"Goodra"}, {"Greedent"}, {"Greninja"}, {"Hoopa"}, {"Inteleon"}, {"Lapras"}, {"Leafeon"}, {"Lucario"}, 
-                  {"Machamp"}, {"Mamoswine"}, {"Meowscarada"}, {"Metagross"}, {"Mew"}, {"Mewtwo X"}, {"Mewtwo Y"}, {"Mimikyu"}, {"Mr Mime"}, {"Ninetales"}, {"Pikachu"}, 
-                  {"Sableye"}, {"Scizor"}, {"Scyther"}, {"Slowbro"}, {"Snorlax"}, {"Sylveon"}, {"Talonflame"}, {"Trevenant"}, {"Tsareena"}, {"Tyranitar"}, {"Umbreon"}, 
-                  {"Urshifu"}, {"Venusaur"}, {"Wigglytuff"},{"Zacian"}, {"Zeraora"}, {"Zoroark"}]  # Add other excluded words here
-
+excluded_keywords = [
+    "Absol", "Aegislash", "Azumarill", "Blastoise", "Blaziken", "Blissey", "Buzzwole", "Chandelure",
+    "Charizard", "Cinderace", "Clefable", "Comfey", "Cramorant", "Decidueye", "Delphox", "Dodrio",
+    "Dragapult", "Dragonite", "Duraludon", "Eldegoss", "Espeon", "Garchomp", "Gardevoir", "Gengar",
+    "Glaceon", "Goodra", "Greedent", "Greninja", "Hoopa", "Inteleon", "Lapras", "Leafeon", "Lucario",
+    "Machamp", "Mamoswine", "Meowscarada", "Metagross", "Mew", "Mewtwo X", "Mewtwo Y", "Mimikyu",
+    "Mr Mime", "Ninetales", "Pikachu", "Sableye", "Scizor", "Scyther", "Slowbro", "Snorlax", "Sylveon",
+    "Talonflame", "Trevenant", "Tsareena", "Tyranitar", "Umbreon", "Urshifu", "Venusaur", "Wigglytuff",
+    "Zacian", "Zeraora", "Zoroark"]
 unitedbtext = f"""
 Placeholder
 """
