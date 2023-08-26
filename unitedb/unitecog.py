@@ -90,6 +90,11 @@ class UniteCog(commands.Cog):
         if len(matching_records) == 0:
             await ctx.reply("Lo que estás buscando no existe.")
             return
+        elif len(matching_records) > 1:
+            matching_pokemons = [record[0] for record in matching_records]
+            pokemon_list = ", ".join(matching_pokemons)
+            await ctx.reply(f"¡Oops! Vas a tener que especificar más. Al menos los siguientes Pokémon aprenden **{category.capitalize()}**: {pokemon_list}")
+            return
 
         name, category, text, image = matching_records[0]
         name = name.replace("''", "'")
