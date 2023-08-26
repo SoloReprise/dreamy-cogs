@@ -120,8 +120,8 @@ class UniteCog(commands.Cog):
         # Construct the embed title without excluded keywords (if they exist)
         embed_title = name
         for excluded_keyword in excluded_keywords:
-            if excluded_keyword in embed_title:
-                embed_title = embed_title.replace(excluded_keyword, "")
+            if embed_title.startswith(excluded_keyword):
+                embed_title = embed_title[len(excluded_keyword):].lstrip()
 
         emb = discord.Embed(title=embed_title, description=text, color=0x70b139)
         emb.set_thumbnail(url=image)
