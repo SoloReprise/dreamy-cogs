@@ -47,17 +47,7 @@ API_URL: Final[str] = "https://pokeapi.co/api/v2"
 
 
 class WhosThatPokemon(commands.Cog):
-    """Can you guess Who's That Pokémon?"""
-
-    __author__: Final[List[str]] = [
-        "<@306810730055729152>",
-        "MAX#1000",
-        "Flame (Flame#2941)",
-    ]
-    __version__: Final[str] = "1.2.7"
-    __docs__: Final[
-        str
-    ] = "https://github.com/ltzmax/maxcogs/blob/master/whosthatpokemon/README.md"
+    """¿Puedes adivinar el Pokémon?"""
 
     def __init__(self, bot: Red):
         self.bot: Red = bot
@@ -227,7 +217,7 @@ class WhosThatPokemon(commands.Cog):
         )
 
         embed = discord.Embed(
-            title=":tada: ¡Has acertado! :tada:",
+            title=":tada: ¡Pokémon acertado! :tada:",
             description=f"El Pokémon era... **{english_name}**.",
             color=0x76EE00,
         )
