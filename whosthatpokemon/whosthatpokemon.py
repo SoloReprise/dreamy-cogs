@@ -253,6 +253,7 @@ class WhosThatPokemon(commands.Cog):
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.mod_or_permissions(administrator=True)
     @commands.command(name="wtpleaderboard", aliases=["wtplb"])
     async def whosthatpokemon_leaderboard(self, ctx: commands.Context):
         """Shows the leaderboard for whosthatpokemon.
@@ -297,6 +298,7 @@ class WhosThatPokemon(commands.Cog):
     @commands.command(name="wtpstats")
     @commands.bot_has_permissions(embed_links=True)
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.mod_or_permissions(administrator=True)
     async def whosthatpokemon_stats(self, ctx: commands.Context):
         """Shows your stats for whosthatpokemon.
 
