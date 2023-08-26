@@ -8,12 +8,12 @@ from unidecode import unidecode
 unitetext = f"""
 !unite pokemon/emblem/move/hold-item/battle-item <nombre>
 """
-excluded_keywords = ["Absol", "Aegislash", "Azumarill", "Blastoise", "Blaziken", "Blissey", "Buzzwole", "Chandelure", "Charizard", "Cinderace", 
-                  "Clefable", "Comfey", "Cramorant", "Decidueye", "Delphox", "Dodrio", "Dragapult", "Dragonite", "Duraludon", "Eldegoss", "Espeon", 
-                  "Garchomp", "Gardevoir", "Gengar", "Glaceon", "Goodra", "Greedent", "Greninja", "Hoopa", "Inteleon", "Lapras", "Leafeon", "Lucario", 
-                  "Machamp", "Mamoswine", "Meowscarada", "Metagross", "Mew", "Mewtwo X", "Mewtwo Y", "Mimikyu", "Mr Mime", "Ninetales", "Pikachu", 
-                  "Sableye", "Scizor", "Scyther", "Slowbro", "Snorlax", "Sylveon", "Talonflame", "Trevenant", "Tsareena", "Tyranitar", "Umbreon", 
-                  "Urshifu", "Venusaur", "Wigglytuff","Zacian", "Zeraora", "Zoroark"]  # Add other excluded words here
+excluded_keywords = [{"Absol"}, {"Aegislash"}, {"Azumarill"}, {"Blastoise"}, {"Blaziken"}, {"Blissey"}, {"Buzzwole"}, {"Chandelure"}, {"Charizard"}, {"Cinderace"}, 
+                  {"Clefable"}, {"Comfey"}, {"Cramorant"}, {"Decidueye"}, {"Delphox"}, {"Dodrio"}, {"Dragapult"}, {"Dragonite"}, {"Duraludon"}, {"Eldegoss"}, {"Espeon"}, 
+                  {"Garchomp"}, {"Gardevoir"}, {"Gengar"}, {"Glaceon"}, {"Goodra"}, {"Greedent"}, {"Greninja"}, {"Hoopa"}, {"Inteleon"}, {"Lapras"}, {"Leafeon"}, {"Lucario"}, 
+                  {"Machamp"}, {"Mamoswine"}, {"Meowscarada"}, {"Metagross"}, {"Mew"}, {"Mewtwo X"}, {"Mewtwo Y"}, {"Mimikyu"}, {"Mr Mime"}, {"Ninetales"}, {"Pikachu"}, 
+                  {"Sableye"}, {"Scizor"}, {"Scyther"}, {"Slowbro"}, {"Snorlax"}, {"Sylveon"}, {"Talonflame"}, {"Trevenant"}, {"Tsareena"}, {"Tyranitar"}, {"Umbreon"}, 
+                  {"Urshifu"}, {"Venusaur"}, {"Wigglytuff"},{"Zacian"}, {"Zeraora"}, {"Zoroark"}]  # Add other excluded words here
 
 unitedbtext = f"""
 Placeholder
@@ -52,7 +52,7 @@ class UniteCog(commands.Cog):
                 return
 
         try:
-            parts = args.split(" ")
+            parts = args.split("/")
             category = parts[0].lower()
             name_keywords = " ".join(parts[1:])
         except Exception as exc:
@@ -81,10 +81,12 @@ class UniteCog(commands.Cog):
         for record in all_records:
             record_name = record[0]
             normalized_record_name = unidecode(record_name).lower()
-            if normalized_keywords == normalized_record_name:
-                matching_records = [record]
-                break
-            elif normalized_keywords in normalized_record_name:
+
+            # Split the normalized_record_name into individual words
+            record_words = set(normalized_record_name.split())
+
+            # Check if normalized_keywords is a subset of record_words
+            if normalized_keywords in record_words:
                 matching_records.append(record)
 
         if len(matching_records) == 0:
