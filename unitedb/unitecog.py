@@ -89,8 +89,8 @@ class UniteCog(commands.Cog):
             record_name = record[0]
             normalized_record_name = unidecode(record_name).lower()
 
-            # Check if normalized_keywords is a subset of the normalized_record_name
-            if normalized_keywords in normalized_record_name:
+            # Check if any normalized_keyword is a complete word in the normalized_record_name
+            if any(keyword in normalized_record_name.split() for keyword in normalized_keywords):
                 matching_records.append(record)
 
         # ... (your existing code)
