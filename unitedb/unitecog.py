@@ -92,13 +92,10 @@ class UniteCog(commands.Cog):
             return
         elif len(matching_records) > 1:
             matching_pokemons = [record[0] for record in matching_records]
-            prompt_name = category.capitalize()
-            matching_pokemons = [pokemon.replace(prompt_name + " ", "") for pokemon in matching_pokemons]
-            pokemon_list = ", ".join(matching_pokemons)
 
             embed = discord.Embed(
-                title=prompt_name,
-                description=f"¡Oops! Vas a tener que especificar más. Al menos los siguientes Pokémon aprenden **{prompt_name}**: {pokemon_list}",
+                title=category.capitalize(),
+                description=f"¡Oops! Vas a tener que especificar más. Al menos los siguientes Pokémon aprenden **{matching_pokemons[0]}**: {', '.join(matching_pokemons[1:])}",
                 color=0xFF5733  # You can customize the color
             )
             await ctx.reply(embed=embed)
