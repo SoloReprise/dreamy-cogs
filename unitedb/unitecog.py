@@ -99,9 +99,12 @@ class UniteCog(commands.Cog):
                 if excluded_keyword in pokemon
             ]
 
+            # Get the move name from the matching records
+            move_name = matching_records[0][0]
+
             embed = discord.Embed(
-                title=name,
-                description=f"¡Oops! Vas a tener que especificar más. Al menos los siguientes Pokémon aprenden **{name}**: {', '.join(excluded_pokemons)}",
+                title=move_name,
+                description=f"¡Oops! Vas a tener que especificar más. Al menos los siguientes Pokémon aprenden **{move_name}**: {', '.join(excluded_pokemons)}",
                 color=0xFF5733  # You can customize the color
             )
             await ctx.reply(embed=embed)
