@@ -106,6 +106,9 @@ class UniteCog(commands.Cog):
                 if excluded_keyword in move_name:
                     move_name = move_name.replace(excluded_keyword, "").strip()
 
+            # Clean up consecutive spaces caused by keyword removal
+            move_name = " ".join(move_name.split())
+
             embed = discord.Embed(
                 title=move_name,
                 description=f"¡Oops! Vas a tener que especificar más. Al menos los siguientes Pokémon aprenden **{move_name}**: {', '.join(excluded_pokemons)}",
