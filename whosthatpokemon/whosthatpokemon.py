@@ -177,6 +177,7 @@ class WhosThatPokemon(commands.Cog):
     @commands.cooldown(1, 30, commands.BucketType.user)
     @commands.max_concurrency(1, commands.BucketType.channel)
     @commands.bot_has_permissions(attach_files=True, embed_links=True)
+    @commands.mod_or_permissions(administrator=True)
     async def whosthatpokemon(
         self,
         ctx: commands.Context,
@@ -220,14 +221,14 @@ class WhosThatPokemon(commands.Cog):
 
         view = WhosThatPokemonView(eligible_names)
         view.message = await ctx.send(
-            f"**Who's that Pokémon?**\nI need a valid answer at most {img_timeout}.",
+            f"**¡¿Cuál es este Pokémon?!**\nNecesito una respuesta válida en menos de {img_timeout}.",
             file=File(temp, "guessthatpokemon.png"),
             view=view,
         )
 
         embed = discord.Embed(
-            title=":tada: You got it right! :tada:",
-            description=f"The Pokemon was... **{english_name}**.",
+            title=":tada: ¡Has acertado! :tada:",
+            description=f"El Pokémon era... **{english_name}**.",
             color=0x76EE00,
         )
         embed.set_image(url="attachment://whosthatpokemon.png")
@@ -237,8 +238,8 @@ class WhosThatPokemon(commands.Cog):
         timeout = await view.wait()
         if timeout:
             embed = discord.Embed(
-                title=":x: You ran out of time! :x:",
-                description=f"You took too long to answer.\nThe Pokemon was... **{english_name}**.",
+                title=":x: ¡Tiempoooooooooo! :x:",
+                description=f"Nadie ha respondido a tiempo.\nEl Pokémon era... **{english_name}**.",
                 color=0x8B0000,
             )
             return await ctx.send(embed=embed)
