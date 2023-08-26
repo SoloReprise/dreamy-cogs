@@ -60,7 +60,7 @@ class UniteCog(commands.Cog):
             await ctx.reply(embed=emb)
             return
 
-        if category not in cats:
+        if category.lower() not in [cat.lower() for cat in cats]:
             await ctx.reply("Categoría incorrecta")
             return
 
