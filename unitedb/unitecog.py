@@ -96,13 +96,10 @@ class UniteCog(commands.Cog):
             if normalized_keywords in record_words:
                 matching_records.append(record)
 
-        # Create a list of matching_pokemons for excluded keywords check
-        matching_pokemons = [record[0] for record in matching_records]
-
-        # Find the excluded keywords that appear in the matching_pokemons
-        excluded_pokemons = [
+        # Filter out excluded keywords that are contained within matching record names
+        filtered_excluded_pokemons = [
             excluded_keyword for excluded_keyword in excluded_keywords
-            if any(keyword in excluded_keyword for keyword in matching_records)
+            if not any(keyword in excluded_keyword for keyword in matching_records)
         ]
 
         if len(matching_records) == 0:
