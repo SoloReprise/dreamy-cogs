@@ -12,14 +12,14 @@ log: RedTraceLogger = getLogger("red.maxcogs.whosthatpokemon.view")
 class WhosThatPokemonModal(discord.ui.Modal, title="Whos That Pokémon?"):
     poke: discord.ui.TextInput = discord.ui.TextInput(
         label="Pokémon",
-        placeholder="Enter the pokémon here...",
+        placeholder="El Pokémon es...",
         max_length=14,
         required=True,
     )
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
         await interaction.response.send_message(
-            f"You entered: {self.poke.value}", ephemeral=True
+            f"Has dicho que es: {self.poke.value}", ephemeral=True
         )
 
 
@@ -35,7 +35,7 @@ class WhosThatPokemonView(discord.ui.View):
             item.disabled = True
         await self.message.edit(view=self)
 
-    @discord.ui.button(label="Guess The Pokémon", style=discord.ButtonStyle.blurple)
+    @discord.ui.button(label="Adivina el Pokémon", style=discord.ButtonStyle.blurple)
     async def guess_the_pokemon(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
@@ -49,13 +49,13 @@ class WhosThatPokemonView(discord.ui.View):
 
             # Disable the button after a correct response
             button.disabled = True
-            button.label = "Correct Pokémon Guessed"
+            button.label = "Pokémon acertado"
             button.style = discord.ButtonStyle.success
             await self.message.edit(view=self)
             
             # Mention the winner in the message
             await interaction.followup.send(
-                content=f"{self.winner.mention} guessed the Pokémon correctly!"
+                content=f"¡{self.winner.mention} ha acertado el Pokémon!"
             )
 
     async def on_error(
