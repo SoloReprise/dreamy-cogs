@@ -103,7 +103,8 @@ class UniteCog(commands.Cog):
 
             # Remove the excluded keywords from the move name
             for excluded_keyword in excluded_keywords:
-                move_name = move_name.replace(excluded_keyword, "").strip()
+                if excluded_keyword in move_name:
+                    move_name = move_name.replace(excluded_keyword, "").strip()
 
             embed = discord.Embed(
                 title=move_name,
