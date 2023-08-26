@@ -91,11 +91,12 @@ class UniteCog(commands.Cog):
             await ctx.reply("Lo que estás buscando no existe.")
             return
         elif len(matching_records) > 1:
-            matching_pokemons = [
-                record[0].replace(excluded_keyword, "").strip()
-                for record in matching_records
+            matching_pokemons = [record[0] for record in matching_records]
+            excluded_pokemons = [
+                pokemon.replace(excluded_keyword, "").strip()
                 for excluded_keyword in excluded_keywords
-                if excluded_keyword in record[0]
+                for pokemon in matching_pokemons
+                if excluded_keyword in pokemon
             ]
 
             # Get the move name from the matching records
@@ -103,7 +104,7 @@ class UniteCog(commands.Cog):
 
             embed = discord.Embed(
                 title=move_name,
-                description=f"¡Oops! Vas a tener que especificar más. Al menos los siguientes Pokémon aprenden **{move_name}**: {', '.join(matching_pokemons)}",
+                description=f"¡Oops! Vas a tener que especificar más. Al menos los siguientes Pokémon aprenden **{move_name}**: {', '.join(excluded_pokemons)}",
                 color=0xFF5733  # You can customize the color
             )
             await ctx.reply(embed=embed)
