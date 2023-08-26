@@ -97,10 +97,16 @@ class UniteCog(commands.Cog):
 
         matching_pokemons = [record[0] for record in matching_records]
 
-        # Filter out excluded keywords that are part of excluded_pokemons
-        filtered_excluded_pokemons = [
+        # Filter out excluded keywords that are part of matching_pokemons
+        filtered_matching_pokemons = [
+            matching_pokemon for matching_pokemon in matching_pokemons
+            if not any(excluded_keyword in matching_pokemon for excluded_keyword in excluded_keywords)
+        ]
+
+        # Filter out excluded keywords that are part of excluded_keywords but not in filtered_matching_pokemons
+        final_excluded_pokemons = [
             excluded_keyword for excluded_keyword in excluded_keywords
-            if not any(keyword in excluded_keyword for keyword in matching_pokemons)
+            if not any(keyword in excluded_keyword for keyword in filtered_matching_pokemons)
         ]
 
         if len(matching_records) == 0:
