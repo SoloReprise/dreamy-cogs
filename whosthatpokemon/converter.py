@@ -5,11 +5,12 @@ from redbot.core import commands
 
 class Generation(commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str) -> int:
-        allowed_gens = [f"gen{x}" for x in range(1, 11)]
+        allowed_gens = [f"gen{x}" for x in range(1, 11)] + ["arceus"]
+        
         if argument.lower() not in allowed_gens:
             ctx.command.reset_cooldown(ctx)
-            raise commands.BadArgument("Only `gen1` to `gen8` values are allowed.")
-
+            raise commands.BadArgument("Only `gen1` to `gen8`, `arceus`, and `gen9` values are allowed.")
+        
         if argument.lower() == "gen1":
             return randint(1, 151)
         elif argument.lower() == "gen2":
