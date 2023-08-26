@@ -241,11 +241,13 @@ class WhosThatPokemon(commands.Cog):
                 description=f"You took too long to answer.\nThe Pokemon was... **{english_name}**.",
                 color=0x8B0000,
             )
-            return await ctx.send(f"{ctx.author.mention}", embed=embed)
+            return await ctx.send(embed=embed)
+
         if await self.config.user(ctx.author).all():
             await self.config.user(ctx.author).total_correct_guesses.set(
                 await self.config.user(ctx.author).total_correct_guesses() + 1
             )
+            
         await ctx.send(file=revealed_img, embed=embed)
 
     @commands.bot_has_permissions(embed_links=True)
