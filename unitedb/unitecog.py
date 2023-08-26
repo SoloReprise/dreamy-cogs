@@ -98,26 +98,31 @@ class UniteCog(commands.Cog):
             # Get the move name from the matching records
             move_name = matching_records[0][0]
 
-            # Remove the excluded keywords from the move name
+            # Remove all excluded keywords from the move name
             for excluded_keyword in excluded_keywords:
                 move_name = move_name.replace(excluded_keyword, "").strip()
 
-            # Construct the embed title without excluded keywords (if they exist)
-            embed_title = move_name
-
-            # Check if any part of the move name matches an excluded keyword
-            for excluded_keyword in excluded_keywords:
-                if excluded_keyword in move_name:
-                    embed_title = move_name.replace(excluded_keyword, "").strip()
-                    break
-
             embed = discord.Embed(
-                title=embed_title,
+                title=move_name,
                 description=f"¡Oops! Vas a tener que especificar más. Al menos los siguientes Pokémon aprenden **{move_name}**: {', '.join(excluded_pokemons)}",
                 color=0xFF5733  # You can customize the color
             )
             await ctx.reply(embed=embed)
             return
+            
+        name, category, text, image = matching_records[0]
+        name = name.replace("''", "'")
+
+        # Construct the embed title without excluded keywords (if they exist)
+        embed_title = name
+        for excluded_keyword in excluded_keywords:
+            if excluded_keyword in embed_title:
+                embed_title = embed_title.replace(excluded_keyword, "")
+
+        emb = discord.Embed(title=embed_title, description=text, color=0x70b139)
+        emb.set_thumbnail(url=image)
+        await ctx.reply(embed=emb)
+        return
 
     @commands.command()
     @commands.has_guild_permissions(administrator=True)
