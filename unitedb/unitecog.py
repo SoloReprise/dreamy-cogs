@@ -89,49 +89,24 @@ class UniteCog(commands.Cog):
             record_name = record[0]
             normalized_record_name = unidecode(record_name).lower()
 
-            # Check if normalized_keywords is a subset of the normalized_record_name
-            if normalized_keywords in normalized_record_name:
-                matching_records.append(record)
+            if normalized_keywords == normalized_record_name:
+                matching_records = [record]
+                break
 
         # ... (your existing code)
-
-        matching_pokemons = [record[0] for record in matching_records]
-
-        # Filter out excluded keywords that are part of matching_pokemons
-        filtered_matching_pokemons = [
-            matching_pokemon for matching_pokemon in matching_pokemons
-            if not any(excluded_keyword in matching_pokemon for excluded_keyword in excluded_keywords)
-        ]
-
-        # Filter out excluded keywords that are part of excluded_keywords but not in filtered_matching_pokemons
-        final_excluded_pokemons = [
-            excluded_keyword for excluded_keyword in excluded_keywords
-            if not any(keyword in excluded_keyword for keyword in filtered_matching_pokemons)
-        ]
 
         if len(matching_records) == 0:
             await ctx.reply("Lo que estás buscando no existe.")
             return
         elif len(matching_records) > 1:
             matching_pokemons = [record[0] for record in matching_records]
-            excluded_pokemons = [
-                excluded_keyword for pokemon in matching_pokemons
-                for excluded_keyword in excluded_keywords
-                if excluded_keyword in pokemon
-            ]
-
-            # Get the move name from the matching records
-            move_name = matching_records[0][0]
-
-            # Remove the excluded keywords from the move name
-            for excluded_keyword in excluded_keywords:
-                move_name = move_name.replace(excluded_keyword, "").strip()
 
             embed = discord.Embed(
-                title=move_name,
-                description=f"¡Oops! Vas a tener que especificar más. Al menos los siguientes Pokémon aprenden **{move_name}**: {', '.join(excluded_pokemons)}",
-                color=0xFF5733  # You can customize the color
+                title="¡Oops! Vas a tener que especificar más.",
+                description=f"Al menos los siguientes Pokémon aprenden **{name}**: {', '.join(matching_pokemons)}",
+                color=0xFF5733  # Customize the color
             )
+
             await ctx.reply(embed=embed)
             return
     
