@@ -93,18 +93,17 @@ class UniteCog(commands.Cog):
         elif len(matching_records) > 1:
             matching_pokemons = [record[0] for record in matching_records]
             excluded_pokemons = [
-                excluded_keyword for excluded_keyword in excluded_keywords
-                if any(pokemon.lower() == excluded_keyword.lower() for pokemon in matching_pokemons)
+                excluded_keyword for pokemon in matching_pokemons
+                for excluded_keyword in excluded_keywords
+                if excluded_keyword in pokemon
             ]
 
-        # Get the move name from the matching records
-        move_name = matching_records[0][0]
+            # Get the move name from the matching records
+            move_name = matching_records[0][0]
 
-        # Remove the excluded keywords that exactly match the move name
-        for excluded_keyword in excluded_keywords:
-            if move_name.lower() == excluded_keyword.lower():
-                move_name = ""
-                break
+            # Remove the excluded keywords from the move name
+            for excluded_keyword in excluded_keywords:
+                move_name = move_name.replace(excluded_keyword, "").strip()
 
             embed = discord.Embed(
                 title=move_name,
@@ -117,40 +116,16 @@ class UniteCog(commands.Cog):
         name, category, text, image = matching_records[0]
         name = name.replace("''", "'")
 
-        # Construct the message for multiple Pokémon learners
-        embed_title = move_name
+        # Construct the embed title without excluded keywords (if they exist)
+        embed_title = name
+        for excluded_keyword in excluded_keywords:
+            if excluded_keyword in embed_title:
+                embed_title = embed_title.replace(excluded_keyword, "")
 
-        matching_pokemons = [record[0] for record in matching_records]
-
-        excluded_pokemons = [
-            excluded_keyword for excluded_keyword in excluded_keywords
-            if any(pokemon.lower() == excluded_keyword.lower() for pokemon in matching_pokemons)
-        ]
-
-        if excluded_pokemons:
-            description = (
-                f"¡Oops! Vas a tener que especificar más. Al menos los siguientes Pokémon aprenden {move_name}: "
-                f"{', '.join(excluded_pokemons)}"
-            )
-            embed = discord.Embed(
-                title=embed_title,
-                description=description,
-                color=0xFF5733  # You can customize the color
-            )
-        else:
-            name, category, text, image = matching_records[0]
-            name = name.replace("''", "'")
-
-            # Construct the embed title without excluded keywords (if they exist) at the start
-            embed_title = name
-            for excluded_keyword in excluded_keywords:
-                if embed_title.startswith(excluded_keyword):
-                    embed_title = embed_title[len(excluded_keyword):].lstrip()
-
-            emb = discord.Embed(title=embed_title, description=text, color=0x70b139)
-            emb.set_thumbnail(url=image)
-            await ctx.reply(embed=emb)
-            return
+        emb = discord.Embed(title=embed_title, description=text, color=0x70b139)
+        emb.set_thumbnail(url=image)
+        await ctx.reply(embed=emb)
+        return
 
     @commands.command()
     @commands.has_guild_permissions(administrator=True)
