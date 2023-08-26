@@ -91,17 +91,23 @@ class UniteCog(commands.Cog):
             await ctx.reply("Lo que estás buscando no existe.")
             return
         elif len(matching_records) > 1:
-            matching_pokemons = [
-                pokemon for pokemon in excluded_keywords
-                if any(excluded_keyword in record[0] for excluded_keyword in excluded_keywords)
+            matching_pokemons = [record[0] for record in matching_records]
+            excluded_pokemons = [
+                excluded_keyword for pokemon in matching_pokemons
+                for excluded_keyword in excluded_keywords
+                if excluded_keyword in pokemon
             ]
 
             # Get the move name from the matching records
             move_name = matching_records[0][0]
 
+            # Remove the excluded keywords from the move name
+            for excluded_keyword in excluded_keywords:
+                move_name = move_name.replace(excluded_keyword, "").strip()
+
             embed = discord.Embed(
                 title=move_name,
-                description=f"¡Oops! Vas a tener que especificar más. Al menos los siguientes Pokémon aprenden **{move_name}**: {', '.join(matching_pokemons)}",
+                description=f"¡Oops! Vas a tener que especificar más. Al menos los siguientes Pokémon aprenden **{move_name}**: {', '.join(excluded_pokemons)}",
                 color=0xFF5733  # You can customize the color
             )
             await ctx.reply(embed=embed)
