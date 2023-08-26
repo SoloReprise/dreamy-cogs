@@ -26,3 +26,5 @@ class Generation(commands.Converter):
             return randint(722, 809)
         elif argument.lower() == "gen8":
             return randint(810, 898)
+        elif argument.lower() == "gen9":
+            return randint(906, 1010)

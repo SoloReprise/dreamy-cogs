@@ -53,9 +53,9 @@ class WhosThatPokemonView(discord.ui.View):
             button.style = discord.ButtonStyle.success
             await self.message.edit(view=self)
             
-            # Mention the winner in the message
+            # Mention the winner using their user ID
             await interaction.followup.send(
-                content=f"{self.winner.mention} guessed the Pokémon correctly!"
+                content=f"<@{self.winner.id}> guessed the Pokémon correctly!"
             )
 
     async def on_error(
