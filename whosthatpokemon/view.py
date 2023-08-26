@@ -42,6 +42,7 @@ class WhosThatPokemonView(discord.ui.View):
         modal = WhosThatPokemonModal()
         await interaction.response.send_modal(modal)
         await modal.wait()
+        
         if modal.poke.value.casefold() in self.eligible_names and self.winner is None:
             self.winner = interaction.user
             self.stop()
@@ -51,9 +52,10 @@ class WhosThatPokemonView(discord.ui.View):
             button.label = "Correct Pokémon Guessed"
             button.style = discord.ButtonStyle.success
             await self.message.edit(view=self)
-            # Send a message indicating who guessed the Pokémon
+            
+            # Mention the winner in the message
             await interaction.followup.send(
-                f"{self.winner.display_name} guessed the Pokémon correctly!"
+                content=f"{self.winner.mention} guessed the Pokémon correctly!"
             )
 
     async def on_error(
