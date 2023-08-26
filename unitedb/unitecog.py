@@ -95,7 +95,7 @@ class UniteCog(commands.Cog):
             excluded_pokemons = [
                 pokemon for pokemon in matching_pokemons
                 for excluded_keyword in excluded_keywords
-                if excluded_keyword in pokemon.lower()
+                if excluded_keyword in pokemon.lower()  # Convert to lowercase for accurate match
             ]
 
             # Get the move name from the matching records
