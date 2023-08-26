@@ -52,18 +52,23 @@ class UniteCog(commands.Cog):
                 return
 
         try:
-            parts = args.split("/")
+            # Split the args on spaces
+            parts = args.split()
+
+            # Get the category from the first part
             category = parts[0].lower()
+
+            # Join the remaining parts to get the name_keywords
             name_keywords = " ".join(parts[1:])
         except Exception as exc:
             emb = discord.Embed(title="Ayuda !unite", description=unitetext, color=0x70b139)
             await ctx.reply(embed=emb)
             return
 
-        if category.lower() not in [cat.lower() for cat in cats]:
+        if category not in cats:
             await ctx.reply("Categoría incorrecta")
             return
-
+    
         result = UniteCog.connect(self)
         if result is None:
             return
