@@ -101,9 +101,7 @@ class UniteCog(commands.Cog):
         # Filter out excluded keywords that are part of other Pokémon names
         filtered_excluded_pokemons = [
             excluded_keyword for excluded_keyword in excluded_keywords
-            if not any(excluded_keyword in matching_pokemon and
-                    not any(keyword in excluded_keyword for keyword in matching_pokemons)
-                    for matching_pokemon in matching_pokemons)
+            if excluded_keyword in matching_pokemons
         ]
 
         if len(matching_records) == 0:
