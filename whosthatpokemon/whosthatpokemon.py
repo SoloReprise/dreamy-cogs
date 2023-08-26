@@ -161,6 +161,7 @@ class WhosThatPokemon(commands.Cog):
             app_commands.Choice(name="Generation 6", value="gen6"),
             app_commands.Choice(name="Generation 7", value="gen7"),
             app_commands.Choice(name="Generation 8", value="gen8"),
+            app_commands.Choice(name="Leyendas: Arceus", value="arceus"),
             app_commands.Choice(name="Generation 9", value="gen9"),
         ]
     )
