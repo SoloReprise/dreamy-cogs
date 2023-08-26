@@ -92,10 +92,16 @@ class UniteCog(commands.Cog):
             return
         elif len(matching_records) > 1:
             matching_pokemons = [record[0] for record in matching_records]
+            excluded_pokemons = [
+                pokemon.replace(excluded_keyword, "").strip()
+                for pokemon in matching_pokemons
+                for excluded_keyword in excluded_keywords
+                if excluded_keyword in pokemon
+            ]
 
             embed = discord.Embed(
-                title=category.capitalize(),
-                description=f"¡Oops! Vas a tener que especificar más. Al menos los siguientes Pokémon aprenden **{matching_pokemons[0]}**: {', '.join(matching_pokemons[1:])}",
+                title=name,
+                description=f"¡Oops! Vas a tener que especificar más. Al menos los siguientes Pokémon aprenden **{name}**: {', '.join(excluded_pokemons)}",
                 color=0xFF5733  # You can customize the color
             )
             await ctx.reply(embed=embed)
