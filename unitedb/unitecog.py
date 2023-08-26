@@ -90,7 +90,7 @@ class UniteCog(commands.Cog):
             normalized_record_name = unidecode(record_name).lower()
 
             # Split the normalized_record_name into individual words
-            record_words = set(normalized_record_name.split())
+            record_words = normalized_record_name.split()
 
             # Check if normalized_keywords is a subset of record_words
             if normalized_keywords in record_words:
@@ -102,7 +102,7 @@ class UniteCog(commands.Cog):
         # Find the excluded keywords that appear in the matching_pokemons
         excluded_pokemons = [
             excluded_keyword for excluded_keyword in excluded_keywords
-            if any(keyword in excluded_keyword for keyword in matching_pokemons)
+            if any(keyword in excluded_keyword for keyword in matching_records)
         ]
 
         if len(matching_records) == 0:
