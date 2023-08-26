@@ -87,7 +87,10 @@ class UniteCog(commands.Cog):
             elif normalized_keywords in normalized_record_name:
                 matching_records.append(record)
 
-        if len(matching_records) > 1:
+        if len(matching_records) == 0:
+            await ctx.reply("Lo que estás buscando no existe.")
+            return
+        elif len(matching_records) > 1:
             matching_pokemons = [record[0] for record in matching_records]
             excluded_pokemons = [
                 excluded_keyword for pokemon in matching_pokemons
@@ -99,22 +102,18 @@ class UniteCog(commands.Cog):
             move_name = matching_records[0][0]
 
             # Remove the excluded keywords from the move name
-            move_name_without_excluded = move_name
             for excluded_keyword in excluded_keywords:
-                move_name_without_excluded = move_name_without_excluded.replace(excluded_keyword, "").strip()
-
-            # If the move name is empty after removing excluded keywords, use the original move name
-            if not move_name_without_excluded:
-                move_name_without_excluded = move_name
+                if excluded_keyword in move_name:
+                    move_name = move_name.replace(excluded_keyword, "").strip()
 
             embed = discord.Embed(
-                title=move_name_without_excluded,
-                description=f"Oops! You need to specify more. At least the following Pokémon learn **{move_name}**: {', '.join(excluded_pokemons)}",
-                color=0xFF5733
+                title=move_name,
+                description=f"¡Oops! Vas a tener que especificar más. Al menos los siguientes Pokémon aprenden **{move_name}**: {', '.join(excluded_pokemons)}",
+                color=0xFF5733  # You can customize the color
             )
             await ctx.reply(embed=embed)
             return
-            
+    
         name, category, text, image = matching_records[0]
         name = name.replace("''", "'")
 
