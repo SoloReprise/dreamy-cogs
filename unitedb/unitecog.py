@@ -93,18 +93,18 @@ class UniteCog(commands.Cog):
         elif len(matching_records) > 1:
             matching_pokemons = [record[0] for record in matching_records]
             excluded_pokemons = [
-                excluded_keyword for pokemon in matching_pokemons
-                for excluded_keyword in excluded_keywords
-                if excluded_keyword in pokemon
+                excluded_keyword for excluded_keyword in excluded_keywords
+                if any(pokemon.lower() == excluded_keyword.lower() for pokemon in matching_pokemons)
             ]
 
-            # Get the move name from the matching records
-            move_name = matching_records[0][0]
+        # Get the move name from the matching records
+        move_name = matching_records[0][0]
 
-            # Remove the excluded keywords from the move name
-            for excluded_keyword in excluded_keywords:
-                if excluded_keyword in move_name:
-                    move_name = move_name.replace(excluded_keyword, "").strip()
+        # Remove the excluded keywords that exactly match the move name
+        for excluded_keyword in excluded_keywords:
+            if move_name.lower() == excluded_keyword.lower():
+                move_name = ""
+                break
 
             embed = discord.Embed(
                 title=move_name,
