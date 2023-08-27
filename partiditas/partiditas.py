@@ -17,7 +17,7 @@ class Partiditas(commands.Cog):
     async def battlers(self, ctx, role: discord.Role, num_teams: int):
         """Randomiza equipos con un rol específico."""
         guild = ctx.guild
-        members_with_role = [member for member in guild.members if role in member.roles]
+        members_with_role = [member.id for member in guild.members if role in member.roles]
 
         if len(members_with_role) < num_teams * 5:
             await ctx.send("No hay suficientes miembros con el rol especificado.")
@@ -28,13 +28,10 @@ class Partiditas(commands.Cog):
 
         lista_equipos = []
         for index, team in enumerate(teams, start=1):
-            miembros_equipo = ", ".join([member.display_name for member in team])
+            miembros_equipo = ", ".join([guild.get_member(member_id).display_name for member_id in team])
             lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
 
         equipos_unidos = "\n".join(lista_equipos)
         await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}")
 
         await self.config.guild(guild).role_to_team.set_raw(str(role.id), value=teams)
-
-def setup(bot):
-    bot.add_cog(Partiditas(bot))
