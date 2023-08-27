@@ -1,18 +1,19 @@
 import discord
 import random
-from redbot.core import commands, checks, Config
+from redbot.core import commands, Config
 
-class TeamRandomizer(commands.Cog):
+class Partiditas(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(self, identifier=1234567890)  # Usa un identificador único
+        self.config = Config.get_conf(self, identifier=1234567890)  # Use a unique identifier
         default_guild = {
-            "role_to_team": {}  # Mapea roles a listas de equipos
+            "role_to_team": {}  # Maps roles to team lists
         }
         self.config.register_guild(**default_guild)
 
     @commands.command()
-    @checks.mod_or_permissions()
+    @commands.guild_only()
+    @commands.mod_or_permissions()
     async def battlers(self, ctx, role: discord.Role, num_teams: int):
         """Randomiza equipos con un rol específico."""
         guild = ctx.guild
@@ -36,4 +37,4 @@ class TeamRandomizer(commands.Cog):
         await self.config.guild(guild).role_to_team.set_raw(str(role.id), value=teams)
 
 def setup(bot):
-    bot.add_cog(TeamRandomizer(bot))
+    bot.add_cog(Partiditas(bot))
