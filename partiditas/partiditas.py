@@ -40,7 +40,7 @@ class Partiditas(commands.Cog):
         random.shuffle(members_with_role)
 
         # Distribute members into teams
-        teams = [members_with_role[i:i+5] for i in range(0, len(members_with_role), 5)]
+        teams = [members_with_role[i:i+5] for i in range(0, num_teams * 5, 5)]
 
         # Get user pairs to exclude from the same team
         user_pairs = await self.config.guild(guild).user_pairs()
