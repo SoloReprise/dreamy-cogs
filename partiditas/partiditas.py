@@ -38,7 +38,11 @@ class Partiditas(commands.Cog):
             return
 
         random.shuffle(members_with_role)
-        teams = [members_with_role[i:i+5] for i in range(0, len(members_with_role), 5)]
+        teams = [[] for _ in range(num_teams)]
+
+        # Distribute members into teams
+        for i, member_id in enumerate(members_with_role):
+            teams[i % num_teams].append(member_id)
 
         # Get user pairs to exclude from the same team
         user_pairs = await self.config.guild(guild).user_pairs()
@@ -46,11 +50,10 @@ class Partiditas(commands.Cog):
             if member_id in members_with_role and exclusion_id in members_with_role:
                 member_index = members_with_role.index(member_id)
                 exclusion_index = members_with_role.index(exclusion_id)
-                if member_index // 5 == exclusion_index // 5:
+                if member_index // num_teams == exclusion_index // num_teams:
                     # Swap the excluded member to another team
-                    target_team = (exclusion_index // 5 + 1) % num_teams
-                    new_exclusion_index = target_team * 5 + member_index % 5
-                    teams[exclusion_index // 5].remove(exclusion_id)
+                    target_team = (exclusion_index // num_teams + 1) % num_teams
+                    teams[exclusion_index // num_teams].remove(exclusion_id)
                     teams[target_team].append(exclusion_id)
 
         lista_equipos = []
