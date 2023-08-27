@@ -7,9 +7,23 @@ class Partiditas(commands.Cog):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=1234567890)  # Use a unique identifier
         default_guild = {
-            "role_to_team": {}  # Maps roles to team lists
+            "role_to_team": {},  # Maps roles to team lists
+            "user_pairs": {}     # Stores user pairs that shouldn't be on the same team
         }
         self.config.register_guild(**default_guild)
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.mod_or_permissions()
+    async def unteam(self, ctx, member1: discord.Member, member2: discord.Member):
+        """Evita que dos usuarios estén en el mismo equipo."""
+        if member1 == member2:
+            await ctx.send("¡No puedes poner a la misma persona en la lista de exclusión!")
+            return
+
+        await self.config.guild(ctx.guild).user_pairs.set_raw(str(member1.id), value=member2.id)
+        await self.config.guild(ctx.guild).user_pairs.set_raw(str(member2.id), value=member1.id)
+        await ctx.send(f"¡Los usuarios {member1.mention} y {member2.mention} no estarán en el mismo equipo!")
 
     @commands.command()
     @commands.guild_only()
@@ -25,6 +39,19 @@ class Partiditas(commands.Cog):
 
         random.shuffle(members_with_role)
         teams = [members_with_role[i:i+5] for i in range(0, len(members_with_role), 5)]
+
+        # Get user pairs to exclude from the same team
+        user_pairs = await self.config.guild(guild).user_pairs()
+        for member_id, exclusion_id in user_pairs.items():
+            if member_id in members_with_role and exclusion_id in members_with_role:
+                member_index = members_with_role.index(member_id)
+                exclusion_index = members_with_role.index(exclusion_id)
+                if member_index // 5 == exclusion_index // 5:
+                    # Swap the excluded member to another team
+                    target_team = (exclusion_index // 5 + 1) % num_teams
+                    new_exclusion_index = target_team * 5 + member_index % 5
+                    teams[exclusion_index // 5].remove(exclusion_id)
+                    teams[target_team].append(exclusion_id)
 
         lista_equipos = []
         for index, team in enumerate(teams, start=1):
