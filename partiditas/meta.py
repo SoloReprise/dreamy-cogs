@@ -34,9 +34,9 @@ class Partiditas(commands.Cog):
         equipos_unidos = "\n".join(lista_equipos)
         await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}")
 
-        # Store member IDs in the configuration
-        member_ids = [[member.id for member in team] for team in teams]
+        # Store member IDs (as strings) in the configuration
+        member_ids = [[str(member.id) for member in team] for team in teams]
         await self.config.guild(guild).role_to_team.set_raw(str(role.id), value=member_ids)
-
+        
 def setup(bot):
     bot.add_cog(Partiditas(bot))
