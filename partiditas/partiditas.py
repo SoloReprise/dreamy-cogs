@@ -28,23 +28,12 @@ class Partiditas(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @commands.mod_or_permissions()
-    async def battlers(self, ctx, role1_id: int, role2_id: int = None, num_teams: int = 2, members_per_team: int = 5):
+    async def battlers(self, ctx, role1: discord.Role, num_teams: int = 2, members_per_team: int = 5, *, role2: discord.Role = None):
         """Randomiza equipos con roles específicos y crea canales de voz."""
         guild = ctx.guild
 
-        role1 = guild.get_role(role1_id)
-        role2 = guild.get_role(role2_id) if role2_id else None
-
-        if not role1:
-            await ctx.send(f"Rol con ID {role1_id} no encontrado.")
-            return
-
-        if role2_id and not role2:
-            await ctx.send(f"Rol con ID {role2_id} no encontrado.")
-            return
-
         members_with_role1 = [member.id for member in guild.members if role1 in member.roles]
-        members_with_role2 = [member.id for member in guild.members if role2 in member.roles] if role2 else []
+        members_with_role2 = [member.id for member in guild.members if role2 and role2 in member.roles] if role2 else []
 
         total_members_needed = num_teams * members_per_team
 
@@ -72,7 +61,7 @@ class Partiditas(commands.Cog):
                 guild.default_role: discord.PermissionOverwrite(connect=False),
                 guild.me: discord.PermissionOverwrite(connect=True)
             }
-            voice_channel = await category.create_voice_channel(voice_channel_name, overwrites=overwrites)
+            voice_channel = await category.create_voice_channel(voice_channel_name, overwrites=over
             voice_channels.append(voice_channel)
 
             for member_id in team:
