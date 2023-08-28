@@ -12,6 +12,15 @@ class Partiditas(commands.Cog):
         }
         self.config.register_guild(**default_guild)
 
+        # Role IDs for the specified roles
+        self.specified_roles = [
+            1127716398416797766,  # Equilibrado
+            1127716463478853702,  # Auxiliar
+            1127716528121446573,  # Defensivo
+            1127716546370871316,  # Ofensivo
+            1127716426594140160   # Ágil
+        ]
+
     @commands.group()
     @commands.guild_only()
     @commands.mod_or_permissions()
@@ -90,14 +99,26 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        members_with_role1 = random.sample(members_with_role1, min(len(members_with_role1), total_members_needed))
-        members_with_role2 = random.sample(members_with_role2, min(len(members_with_role2), total_members_needed))
+        # Prioritize the specified roles for each team
+        teams = []
+        for _ in range(num_teams):
+            team = []
+            for role_id in self.specified_roles:
+                for member_id in members_with_role1 + members_with_role2:
+                    member = guild.get_member(member_id)
+                    if role_id in [r.id for r in member.roles]:
+                        team.append(member_id)
+                        members_with_role1.remove(member_id)
+                        members_with_role2.remove(member_id)
+                        break  # Move on to the next specified role
+            teams.append(team)
 
+        # Distribute remaining members randomly
         combined_members = members_with_role1 + members_with_role2
         random.shuffle(combined_members)
 
-        # Distribute members into teams
-        teams = [combined_members[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
+        for i, member_id in enumerate(combined_members):
+            teams[i % num_teams].append(member_id)
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
@@ -142,16 +163,36 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        odd_teams = [members_with_role1[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
-        even_teams = [members_with_role2[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
+        # Prioritize the specified roles for each team
+        odd_teams = []
+        even_teams = []
+        for _ in range(num_teams):
+            odd_team = []
+            even_team = []
+            for role_id in self.specified_roles:
+                for member_id in members_with_role1 + members_with_role2:
+                    member = guild.get_member(member_id)
+                    if role_id in [r.id for r in member.roles]:
+                        if len(odd_team) % 2 == 0:
+                            odd_team.append(member_id)
+                        else:
+                            even_team.append(member_id)
+                        members_with_role1.remove(member_id)
+                        members_with_role2.remove(member_id)
+                        break  # Move on to the next specified role
+            odd_teams.append(odd_team)
+            even_teams.append(even_team)
 
-        combined_teams = []
-        for i in range(num_teams):
+        # Distribute remaining members randomly
+        combined_members = members_with_role1 + members_with_role2
+        random.shuffle(combined_members)
+
+        for i, member_id in enumerate(combined_members):
             if i % 2 == 0:
-                combined_teams.append(odd_teams.pop(0))
+                odd_teams[i % num_teams].append(member_id)
             else:
-                combined_teams.append(even_teams.pop(0))
-
+                even_teams[i % num_teams].append(member_id)
+                
         # Get the category
         category = guild.get_channel(1127625556247203861)
 
