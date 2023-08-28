@@ -182,5 +182,6 @@ class Partiditas(commands.Cog):
                 if role2_id is None and any(role.id == 1127716463478853702 for role in member.roles):
                     role2_id = member.roles[1].id
 
-        await self.config.guild(guild).role_to_team.set_raw(str(role1_id), value=teams)
-        await self.config.guild(guild).role_to_team.set_raw(str(role2_id), value=teams)
+        serialized_teams = [team.ids for team in teams]
+        await self.config.guild(guild).role_to_team.set_raw(str(role1_id), value=serialized_teams)
+        await self.config.guild(guild).role_to_team.set_raw(str(role2_id), value=serialized_teams)
