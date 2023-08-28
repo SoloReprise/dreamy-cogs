@@ -86,33 +86,28 @@ class Partiditas(commands.Cog):
 
         total_members_needed = num_teams * members_per_team
 
-        if len(members_with_role1) + len(members_with_role2) < total_members_needed:
-            await ctx.send("No hay suficientes miembros con los roles especificados.")
-            return
-
-        # Get the list of users with each of the specified roles
+        # Get the list of users with the specified roles
         roles_to_add = [
-            1127716398416797766,  # Equilibrado
-            1127716463478853702,  # Auxiliar
-            1127716528121446573,  # Defensivo
-            1127716546370871316,  # Ofensivo
-            1127716426594140160   # Ágil
+            guild.get_role(1127716398416797766),  # Equilibrado
+            guild.get_role(1127716463478853702),  # Auxiliar
+            guild.get_role(1127716528121446573),  # Defensivo
+            guild.get_role(1127716546370871316),  # Ofensivo
+            guild.get_role(1127716426594140160),  # Ágil
         ]
 
-        members_with_roles = {}
-        for role_id in roles_to_add:
-            role = guild.get_role(role_id)
-            if role:
-                members_with_roles[role_id] = [member.id for member in guild.members if role in member.roles]
+        members_with_roles = []
+        for role in roles_to_add:
+            members_with_role = [member.id for member in guild.members if role in member.roles]
+            members_with_roles.extend(members_with_role)
 
-        members_with_role1 = random.sample(members_with_role1, min(len(members_with_role1), total_members_needed))
-        members_with_role2 = random.sample(members_with_role2, min(len(members_with_role2), total_members_needed))
+        members_with_roles = list(set(members_with_roles))  # Remove duplicates
 
-        combined_members = members_with_role1 + members_with_role2
-        random.shuffle(combined_members)
+        # If there are not enough members with specified roles, fall back to randomly assigning users
+        if len(members_with_roles) < total_members_needed:
+            members_with_roles = random.sample(members_with_roles, min(len(members_with_roles), total_members_needed))
 
         # Distribute members into teams
-        teams = [combined_members[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
+        teams = [members_with_roles[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
         
         # Get the category
         category = guild.get_channel(1127625556247203861)
@@ -148,14 +143,28 @@ class Partiditas(commands.Cog):
     async def _create_teams_and_channels_vs(self, ctx, role1: discord.Role, role2: discord.Role, num_teams: int, members_per_team: int):
         guild = ctx.guild
 
-        members_with_role1 = [member.id for member in guild.members if role1 in member.roles]
-        members_with_role2 = [member.id for member in guild.members if role2 in member.roles]
+        # Similar logic as _create_teams_and_channels, combining users with specified roles
+        roles_to_add = [
+            guild.get_role(1127716398416797766),  # Equilibrado
+            guild.get_role(1127716463478853702),  # Auxiliar
+            guild.get_role(1127716528121446573),  # Defensivo
+            guild.get_role(1127716546370871316),  # Ofensivo
+            guild.get_role(1127716426594140160),  # Ágil
+        ]
 
-        total_members_needed = num_teams * members_per_team
+        members_with_roles1 = []
+        for role in roles_to_add:
+            members_with_role = [member.id for member in guild.members if role in member.roles]
+            members_with_roles1.extend(members_with_role)
 
-        if len(members_with_role1) < num_teams or len(members_with_role2) < num_teams:
-            await ctx.send("No hay suficientes miembros con los roles especificados.")
-            return
+        members_with_roles1 = list(set(members_with_roles1))  # Remove duplicates
+
+        members_with_roles2 = [member.id for member in guild.members if role2 in member.roles]
+
+        # If there are not enough members with specified roles, fall back to randomly assigning users
+        if len(members_with_roles1) < num_teams * members_per_team or len(members_with_roles2) < num_teams * members_per_team:
+            members_with_roles1 = random.sample(members_with_roles1, min(len(members_with_roles1), num_teams * members_per_team))
+            members_with_roles2 = random.sample(members_with_roles2, min(len(members_with_roles2), num_teams * members_per_team))
 
         odd_teams = [members_with_role1[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
         even_teams = [members_with_role2[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
