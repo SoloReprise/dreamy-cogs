@@ -12,13 +12,6 @@ class Partiditas(commands.Cog):
         }
         self.config.register_guild(**default_guild)
 
-    position_roles = {
-        1127716398416797766: "Equilibrado",
-        1127716463478853702: "Auxiliar",
-        1127716528121446573: "Defensivo",
-        1127716546370871316: "Ofensivo",
-        1127716426594140160: "Ágil"
-    }
 
     @commands.group()
     @commands.guild_only()
@@ -107,29 +100,6 @@ class Partiditas(commands.Cog):
         # Distribute members into teams
         teams = [combined_members[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
 
-        if len(teams) == 5:
-            # Shuffle the position roles
-            shuffled_roles = list(position_roles.keys())
-            random.shuffle(shuffled_roles)
-            
-            # Assign position roles to team members
-            for i, team in enumerate(teams):
-                for j, member_id in enumerate(team):
-                    role_id = shuffled_roles[j]
-                    role = guild.get_role(role_id)
-                    member = guild.get_member(member_id)
-                    if role and member:
-                        await member.add_roles(role)
-            
-            # Send messages indicating the assigned positions
-            for i, team in enumerate(teams):
-                for j, member_id in enumerate(team):
-                    role_id = shuffled_roles[j]
-                    role_name = position_roles[role_id]
-                    member = guild.get_member(member_id)
-                    if member:
-                        await ctx.send(f"{member.mention} fue asignado como {role_name} en el Equipo {i+1}")
-
         # Get the category
         category = guild.get_channel(1127625556247203861)
 
@@ -185,29 +155,6 @@ class Partiditas(commands.Cog):
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
-
-        if len(combined_teams) == 5:
-            # Shuffle the position roles
-            shuffled_roles = list(position_roles.keys())
-            random.shuffle(shuffled_roles)
-            
-            # Assign position roles to team members
-            for i, team in enumerate(combined_teams):
-                for j, member_id in enumerate(team):
-                    role_id = shuffled_roles[j]
-                    role = guild.get_role(role_id)
-                    member = guild.get_member(member_id)
-                    if role and member:
-                        await member.add_roles(role)
-            
-            # Send messages indicating the assigned positions
-            for i, team in enumerate(combined_teams):
-                for j, member_id in enumerate(team):
-                    role_id = shuffled_roles[j]
-                    role_name = position_roles[role_id]
-                    member = guild.get_member(member_id)
-                    if member:
-                        await ctx.send(f"{member.mention} fue asignado como {role_name} en el Equipo {i+1}")
 
         # Create voice channels for each team within the specified category
         voice_channels = []
