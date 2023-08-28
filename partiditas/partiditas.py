@@ -102,24 +102,17 @@ class Partiditas(commands.Cog):
         # Check if team size is 5
         if members_per_team == 5:
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
-            random.shuffle(position_roles)
 
             for team in teams:
-                for member_id in team:
+                random.shuffle(position_roles)
+                for _ in range(5):
+                    role_id = position_roles.pop(0)
+                    position_role = guild.get_role(role_id)
+                    member_id = team.pop(0)
+
                     member = guild.get_member(member_id)
-
-                    # Get the position roles the member has
-                    member_position_roles = [role for role in member.roles if role.id in position_roles]
-
-                    if member_position_roles:
-                        # Assign one of the roles they have
-                        assigned_role = random.choice(member_position_roles)
-                    else:
-                        # Assign a random role from the available ones
-                        assigned_role = discord.utils.get(guild.roles, id=random.choice(position_roles))
-
-                    await member.add_roles(assigned_role)
-                    await ctx.send(f"{member.mention}, tu posición en el equipo es: {assigned_role.name}")
+                    await member.add_roles(position_role)
+                    await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
@@ -180,24 +173,17 @@ class Partiditas(commands.Cog):
         # Check if team size is 5
         if members_per_team == 5:
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
-            random.shuffle(position_roles)
 
             for team in combined_teams:
-                for member_id in team:
+                random.shuffle(position_roles)
+                for _ in range(5):
+                    role_id = position_roles.pop(0)
+                    position_role = guild.get_role(role_id)
+                    member_id = team.pop(0)
+
                     member = guild.get_member(member_id)
-
-                    # Get the position roles the member has
-                    member_position_roles = [role for role in member.roles if role.id in position_roles]
-
-                    if member_position_roles:
-                        # Assign one of the roles they have
-                        assigned_role = random.choice(member_position_roles)
-                    else:
-                        # Assign a random role from the available ones
-                        assigned_role = discord.utils.get(guild.roles, id=random.choice(position_roles))
-
-                    await member.add_roles(assigned_role)
-                    await ctx.send(f"{member.mention}, tu posición en el equipo es: {assigned_role.name}")
+                    await member.add_roles(position_role)
+                    await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
                     
         # Get the category
         category = guild.get_channel(1127625556247203861)
