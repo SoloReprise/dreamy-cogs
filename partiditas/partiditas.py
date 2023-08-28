@@ -72,12 +72,6 @@ class Partiditas(commands.Cog):
         # Distribute members into teams
         teams = [combined_members[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
 
-        for index, team in enumerate(teams, start=1):
-            if index % 2 == 0 and role2:
-                team_role = role2
-            else:
-                team_role = role1
-            await ctx.send(f"Equipo {index} ({team_role.name}): {' '.join([guild.get_member(member_id).mention for member_id in team])}")
         # Get the category
         category = guild.get_channel(1127625556247203861)
 
