@@ -58,9 +58,10 @@ class Partiditas(commands.Cog):
         unteam_list = []
         for member_id, exclusion_id in user_pairs.items():
             member = ctx.guild.get_member(int(member_id))
-            exclusion = ctx.guild.get_member(int(exclusion_id))
-            if member and exclusion:
-                unteam_list.append(f"{member.mention} y {exclusion.mention}")
+            if exclusion_id:
+                exclusion = ctx.guild.get_member(int(exclusion_id))
+                if member and exclusion:
+                    unteam_list.append(f"{member.mention} y {exclusion.mention}")
         if unteam_list:
             await ctx.send("Lista de usuarios que no pueden estar en el mismo equipo:\n" + "\n".join(unteam_list))
         else:
@@ -72,7 +73,7 @@ class Partiditas(commands.Cog):
         await self.config.guild(ctx.guild).user_pairs.set_raw(str(member1.id), value=None)
         await self.config.guild(ctx.guild).user_pairs.set_raw(str(member2.id), value=None)
         await ctx.send(f"Caso de unteaming entre {member1.mention} y {member2.mention} eliminado.")
-        
+
     async def _create_teams_and_channels(self, ctx, role1: discord.Role, role2: discord.Role = None, num_teams: int = 2, members_per_team: int = 5):
         guild = ctx.guild
 
