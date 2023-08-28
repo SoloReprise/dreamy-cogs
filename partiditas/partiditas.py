@@ -12,15 +12,6 @@ class Partiditas(commands.Cog):
         }
         self.config.register_guild(**default_guild)
 
-                # List of role IDs to prioritize
-        self.prioritized_role_ids = [
-            1127716398416797766,  # Equilibrado
-            1127716463478853702,  # Auxiliar
-            1127716528121446573,  # Defensivo
-            1127716546370871316,  # Ofensivo
-            1127716426594140160   # Ágil
-        ]
-
     @commands.group()
     @commands.guild_only()
     @commands.mod_or_permissions()
@@ -88,6 +79,46 @@ class Partiditas(commands.Cog):
         await ctx.send(f"Caso de unteaming entre {member1.mention} y {member2.mention} eliminado.")
         
     async def _create_teams_and_channels(self, ctx, role1: discord.Role, role2: discord.Role = None, num_teams: int = 2, members_per_team: int = 5):
+ChatGPT2 / 2
+
+Got it. To prioritize adding users with specified roles to each team, while also attempting to have one user from each specified role in each team, we can modify the _create_teams_and_channels and _create_teams_and_channels_vs methods as follows:
+
+python
+
+import discord
+import random
+from redbot.core import commands, Config
+
+class Partiditas(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        self.config = Config.get_conf(self, identifier=1234567890)
+        default_guild = {
+            "role_to_team": {},
+            "user_pairs": {}
+        }
+        self.config.register_guild(**default_guild)
+
+    @commands.group()
+    @commands.guild_only()
+    @commands.mod_or_permissions()
+    async def battle(self, ctx):
+        """Comandos para crear equipos y canales de voz para enfrentamientos."""
+        pass
+
+    @battle.command(name="inhouse")
+    async def inhouse(self, ctx, role: discord.Role, num_teams: int = 2, members_per_team: int = 5):
+        """Randomiza equipos con un rol específico y crea canales de voz."""
+        await self._create_teams_and_channels(ctx, role, None, num_teams, members_per_team)
+
+    @battle.command(name="vs")
+    async def vs(self, ctx, role1: discord.Role, role2: discord.Role, num_teams: int = 2, members_per_team: int = 5):
+        """Enfrenta a dos roles en equipos y crea canales de voz."""
+        await self._create_teams_and_channels_vs(ctx, role1, role2, num_teams, members_per_team)
+
+    # ... (Other methods remain the same)
+
+    async def _create_teams_and_channels(self, ctx, role1: discord.Role, role2: discord.Role = None, num_teams: int = 2, members_per_team: int = 5):
         guild = ctx.guild
 
         members_with_role1 = [member.id for member in guild.members if role1 in member.roles]
@@ -99,27 +130,26 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        members_with_role1 = random.sample(members_with_role1, min(len(members_with_role1), total_members_needed))
-        members_with_role2 = random.sample(members_with_role2, min(len(members_with_role2), total_members_needed))
+        # Prioritize one user from each specified role
+        teams = []
+        roles_to_prioritize = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
 
-        combined_members = members_with_role1 + members_with_role2
-        random.shuffle(combined_members)
+        for role_id in roles_to_prioritize:
+            role = discord.utils.get(guild.roles, id=role_id)
+            if role:
+                members_with_role = [member.id for member in guild.members if role in member.roles]
+                members_for_role = random.sample(members_with_role, min(len(members_with_role), num_teams))
+                for i, member_id in enumerate(members_for_role):
+                    if i >= len(teams):
+                        teams.append([])
+                    teams[i].append(member_id)
 
-        # Distribute members into teams
-        teams = [combined_members[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
-
-        # Attempt to include one user from each specified role in each team if team size is 5
-        if members_per_team == 5:
-            for role_id in self.prioritized_role_ids:
-                members_with_role = [member.id for member in guild.members if role_id in member.roles]
-                for team in teams:
-                    if len(team) < members_per_team:
-                        available_members = [member_id for member_id in members_with_role if member_id in team]
-                        if available_members:
-                            member_to_add = random.choice(available_members)
-                            team.append(member_to_add)
-                            members_with_role.remove(member_to_add)
-
+        # Fill remaining spots with random users
+        remaining_members_needed = total_members_needed - sum(len(team) for team in teams)
+        all_members = members_with_role1 + members_with_role2
+        random.shuffle(all_members)
+        teams.extend([all_members[i:i+members_per_team] for i in range(0, remaining_members_needed, members_per_team)])
+        
         # Get the category
         category = guild.get_channel(1127625556247203861)
 
@@ -173,21 +203,6 @@ class Partiditas(commands.Cog):
             else:
                 combined_teams.append(even_teams.pop(0))
 
-        # Attempt to include one user from each specified role in each team if team size is 5
-        if members_per_team == 5:
-            for role_id in self.prioritized_role_ids:
-                members_with_role1 = [member.id for member in guild.members if role_id in member.roles and member.id in members_with_role1]
-                members_with_role2 = [member.id for member in guild.members if role_id in member.roles and member.id in members_with_role2]
-                for combined_team in combined_teams:
-                    if len(combined_team) < members_per_team:
-                        if combined_team in odd_teams:
-                            available_members = [member_id for member_id in members_with_role1 if member_id in combined_team]
-                        else:
-                            available_members = [member_id for member_id in members_with_role2 if member_id in combined_team]
-                        if available_members:
-                            member_to_add = random.choice(available_members)
-                            combined_team.append(member_to_add)
-                            
         # Get the category
         category = guild.get_channel(1127625556247203861)
 
