@@ -11,7 +11,6 @@ class Partiditas(commands.Cog):
             "user_pairs": {}     # Stores user pairs that shouldn't be on the same team
         }
         self.config.register_guild(**default_guild)
-        self.role_priority = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
 
     @commands.group()
     @commands.guild_only()
@@ -91,31 +90,14 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        # Get members with specified roles
-        priority_members = {role_id: [] for role_id in self.role_priority}
-        for member in guild.members:
-            for role_id in self.role_priority:
-                if discord.utils.get(member.roles, id=role_id):
-                    priority_members[role_id].append(member.id)
+        members_with_role1 = random.sample(members_with_role1, min(len(members_with_role1), total_members_needed))
+        members_with_role2 = random.sample(members_with_role2, min(len(members_with_role2), total_members_needed))
 
-        # Distribute members with specified roles into teams
-        priority_teams = [[] for _ in range(num_teams)]
-        for role_id, members in priority_members.items():
-            while members:
-                for team in priority_teams:
-                    if len(team) < members_per_team:
-                        team.append(members.pop(0))
-                        if not members:
-                            break
+        combined_members = members_with_role1 + members_with_role2
+        random.shuffle(combined_members)
 
-        # Fill remaining spots with non-priority members
-        remaining_members = members_with_role1 + members_with_role2
-        random.shuffle(remaining_members)
-        for i, team in enumerate(priority_teams):
-            while len(team) < members_per_team and remaining_members:
-                team.append(remaining_members.pop(0))
-
-        teams = priority_teams
+        # Distribute members into teams
+        teams = [combined_members[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
@@ -160,53 +142,15 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        # Get members with specified roles
-        priority_members1 = {role_id: [] for role_id in self.role_priority}
-        for member in guild.members:
-            for role_id in self.role_priority:
-                if discord.utils.get(member.roles, id=role_id) and member.id in members_with_role1:
-                    priority_members1[role_id].append(member.id)
+        odd_teams = [members_with_role1[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
+        even_teams = [members_with_role2[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
 
-        priority_members2 = {role_id: [] for role_id in self.role_priority}
-        for member in guild.members:
-            for role_id in self.role_priority:
-                if discord.utils.get(member.roles, id=role_id) and member.id in members_with_role2:
-                    priority_members2[role_id].append(member.id)
-
-        # Distribute members with specified roles into teams
-        odd_teams = [[] for _ in range(num_teams)]
-        even_teams = [[] for _ in range(num_teams)]
-
-        for role_id, members in priority_members1.items():
-            while members:
-                for team in odd_teams:
-                    if len(team) < members_per_team:
-                        team.append(members.pop(0))
-                        if not members:
-                            break
-
-        for role_id, members in priority_members2.items():
-            while members:
-                for team in even_teams:
-                    if len(team) < members_per_team:
-                        team.append(members.pop(0))
-                        if not members:
-                            break
-
-        # Fill remaining spots with non-priority members
-        remaining_members1 = [member for member in members_with_role1 if member not in priority_members1]
-        remaining_members2 = [member for member in members_with_role2 if member not in priority_members2]
-        random.shuffle(remaining_members1)
-        random.shuffle(remaining_members2)
-
-        for i, (team1, team2) in enumerate(zip(odd_teams, even_teams)):
-            while len(team1) < members_per_team and remaining_members1:
-                team1.append(remaining_members1.pop(0))
-
-            while len(team2) < members_per_team and remaining_members2:
-                team2.append(remaining_members2.pop(0))
-
-        combined_teams = odd_teams + even_teams
+        combined_teams = []
+        for i in range(num_teams):
+            if i % 2 == 0:
+                combined_teams.append(odd_teams.pop(0))
+            else:
+                combined_teams.append(even_teams.pop(0))
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
