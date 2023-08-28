@@ -41,8 +41,14 @@ class Partiditas(commands.Cog):
         await ctx.send("Canales de voz de enfrentamiento eliminados.")
 
     @battle.command(name="unteam")
-    async def unteam(self, ctx, member1: discord.Member, member2: discord.Member):
-        """Evita que dos usuarios estén en el mismo equipo."""
+    async def unteam(self, ctx, member1: discord.Member, member2: discord.Member = None):
+        """Evita que dos usuarios estén en el mismo equipo o lista las parejas desbloqueadas."""
+        if member2:
+            await self._add_user_pair(ctx, member1, member2)
+        else:
+            await self._list_user_pairs(ctx)
+
+    async def _add_user_pair(self, ctx, member1: discord.Member, member2: discord.Member):
         if member1 == member2:
             await ctx.send("¡No puedes poner a la misma persona en la lista de exclusión!")
             return
@@ -51,6 +57,33 @@ class Partiditas(commands.Cog):
         await self.config.guild(ctx.guild).user_pairs.set_raw(str(member2.id), value=member1.id)
         await ctx.send(f"¡Los usuarios {member1.mention} y {member2.mention} no estarán en el mismo equipo!")
 
+    async def _list_user_pairs(self, ctx):
+        user_pairs = await self.config.guild(ctx.guild).user_pairs()
+        if not user_pairs:
+            await ctx.send("No hay parejas de exclusión registradas.")
+            return
+
+        pairs_list = []
+        for member_id, exclusion_id in user_pairs.items():
+            member = ctx.guild.get_member(int(member_id))
+            exclusion = ctx.guild.get_member(int(exclusion_id))
+            pairs_list.append(f"{member.mention} - {exclusion.mention}")
+
+        pairs_info = "\n".join(pairs_list)
+        await ctx.send("Parejas de exclusión registradas:\n" + pairs_info)
+
+    @commands.command(name="ununteam")
+    @commands.guild_only()
+    @commands.mod_or_permissions()
+    async def ununteam(self, ctx, member1: discord.Member, member2: discord.Member):
+        """Elimina una pareja de exclusión existente."""
+        await self._remove_user_pair(ctx, member1, member2)
+
+    async def _remove_user_pair(self, ctx, member1: discord.Member, member2: discord.Member):
+        await self.config.guild(ctx.guild).user_pairs.clear_raw(str(member1.id))
+        await self.config.guild(ctx.guild).user_pairs.clear_raw(str(member2.id))
+        await ctx.send(f"Pareja de exclusión entre {member1.mention} y {member2.mention} eliminada.")
+        
     async def _create_teams_and_channels(self, ctx, role1: discord.Role, role2: discord.Role = None, num_teams: int = 2, members_per_team: int = 5):
         guild = ctx.guild
 
