@@ -102,3 +102,5 @@ class Partiditas(commands.Cog):
         await self.config.guild(guild).role_to_team.set_raw(str(role1.id), value=teams)
         if role2:
             await self.config.guild(guild).role_to_team.set_raw(str(role2.id), value=teams)
+
+        # ... (Rest of the code remains the same)
