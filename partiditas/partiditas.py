@@ -99,6 +99,32 @@ class Partiditas(commands.Cog):
         # Distribute members into teams
         teams = [combined_members[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
 
+        # If the team size is 5, assign position roles
+        if members_per_team == 5:
+            position_roles = {
+                "Equilibrado": 1127716398416797766,
+                "Auxiliar": 1127716463478853702,
+                "Defensivo": 1127716528121446573,
+                "Ofensivo": 1127716546370871316,
+                "Ágil": 1127716426594140160
+            }
+            
+            for team in teams:
+                for member_id in team:
+                    member = guild.get_member(member_id)
+                    if member:
+                        assigned_positions = [position for position, role_id in position_roles.items() if discord.utils.get(member.roles, id=role_id)]
+                        if assigned_positions:
+                            assigned_position = random.choice(assigned_positions)
+                        else:
+                            assigned_position = random.choice(list(position_roles.keys()))
+                        
+                        position_role_id = position_roles[assigned_position]
+                        position_role = guild.get_role(position_role_id)
+                        if position_role:
+                            await member.add_roles(position_role)
+                            await ctx.send(f"{member.mention}, you've been assigned the position role: {assigned_position}")
+
         # Get the category
         category = guild.get_channel(1127625556247203861)
 
@@ -152,6 +178,35 @@ class Partiditas(commands.Cog):
             else:
                 combined_teams.append(even_teams.pop(0))
 
+        # Distribute members into teams
+        teams = [combined_members[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
+
+        # If the team size is 5, assign position roles
+        if members_per_team == 5:
+            position_roles = {
+                "Equilibrado": 1127716398416797766,
+                "Auxiliar": 1127716463478853702,
+                "Defensivo": 1127716528121446573,
+                "Ofensivo": 1127716546370871316,
+                "Ágil": 1127716426594140160
+            }
+            
+            for team in teams:
+                for member_id in team:
+                    member = guild.get_member(member_id)
+                    if member:
+                        assigned_positions = [position for position, role_id in position_roles.items() if discord.utils.get(member.roles, id=role_id)]
+                        if assigned_positions:
+                            assigned_position = random.choice(assigned_positions)
+                        else:
+                            assigned_position = random.choice(list(position_roles.keys()))
+                        
+                        position_role_id = position_roles[assigned_position]
+                        position_role = guild.get_role(position_role_id)
+                        if position_role:
+                            await member.add_roles(position_role)
+                            await ctx.send(f"{member.mention}, you've been assigned the position role: {assigned_position}")
+                            
         # Get the category
         category = guild.get_channel(1127625556247203861)
 
