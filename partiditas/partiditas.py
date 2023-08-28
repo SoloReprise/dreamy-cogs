@@ -31,21 +31,26 @@ class Partiditas(commands.Cog):
         guild = ctx.guild
         await self._perform_battle_vs(ctx, role1, role2, num_teams, members_per_team)
 
-    async def _perform_battle(self, ctx, roles, num_teams, members_per_team):
+    async def _perform_battle_vs(self, ctx, role1, role2, num_teams, members_per_team):
         guild = ctx.guild
 
-        members_with_roles = [member.id for member in guild.members if any(role in member.roles for role in roles)]
+        members_with_role1 = [member.id for member in guild.members if role1 in member.roles]
+        members_with_role2 = [member.id for member in guild.members if role2 in member.roles]
 
         total_members_needed = num_teams * members_per_team
 
-        if len(members_with_roles) < total_members_needed:
+        if len(members_with_role1) + len(members_with_role2) < total_members_needed:
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        members_with_roles = random.sample(members_with_roles, min(len(members_with_roles), total_members_needed))
+        members_with_role1 = random.sample(members_with_role1, min(len(members_with_role1), total_members_needed))
+        members_with_role2 = random.sample(members_with_role2, min(len(members_with_role2), total_members_needed))
+
+        combined_members = members_with_role1 + members_with_role2
+        random.shuffle(combined_members)
 
         # Distribute members into teams
-        teams = [members_with_roles[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
+        teams = [combined_members[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
@@ -69,7 +74,7 @@ class Partiditas(commands.Cog):
         # Get user pairs to exclude from the same team
         user_pairs = await self.config.guild(guild).user_pairs()
         for member_id, exclusion_id in user_pairs.items():
-            if member_id in members_with_roles and exclusion_id in members_with_roles:
+            if member_id in combined_members and exclusion_id in combined_members:
                 member_team_index = next((i for i, team in enumerate(teams) if member_id in team), None)
                 exclusion_team_index = next((i for i, team in enumerate(teams) if exclusion_id in team), None)
                 if member_team_index is not None and exclusion_team_index is not None and member_team_index == exclusion_team_index:
@@ -86,8 +91,8 @@ class Partiditas(commands.Cog):
         equipos_unidos = "\n".join(lista_equipos)
         await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}")
 
-        await self.config.guild(guild).role_to_team.set_raw("_".join(str(role.id) for role in roles), value=teams)
-
+        await self.config.guild(guild).role_to_team.set_raw("_".join(str(role.id) for role in [role1, role2]), value=teams)
+        
     async def _perform_battle_vs(self, ctx, role1, role2, num_teams, members_per_team):
         guild = ctx.guild
 
