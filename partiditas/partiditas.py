@@ -79,7 +79,7 @@ class Partiditas(commands.Cog):
         # Get the category
         category = guild.get_channel(1127625556247203861)
 
-        # Create voice channels for all teams (even and odd)
+        # Create voice channels for even teams (role2)
         voice_channels = []
         for index, (even_team, odd_team) in enumerate(zip(even_teams, odd_teams), start=1):
             voice_channel_name = f"◇║Equipo {index}"
