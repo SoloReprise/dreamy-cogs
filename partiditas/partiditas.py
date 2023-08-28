@@ -28,9 +28,20 @@ class Partiditas(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @commands.mod_or_permissions()
-    async def battlers(self, ctx, role1: discord.Role, role2: discord.Role = None, num_teams: int = 2, members_per_team: int = 5):
+    async def battlers(self, ctx, role1_id: int, role2_id: int = None, num_teams: int = 2, members_per_team: int = 5):
         """Randomiza equipos con roles específicos y crea canales de voz."""
         guild = ctx.guild
+
+        role1 = guild.get_role(role1_id)
+        role2 = guild.get_role(role2_id) if role2_id else None
+
+        if not role1:
+            await ctx.send(f"Rol con ID {role1_id} no encontrado.")
+            return
+
+        if role2_id and not role2:
+            await ctx.send(f"Rol con ID {role2_id} no encontrado.")
+            return
 
         members_with_role1 = [member.id for member in guild.members if role1 in member.roles]
         members_with_role2 = [member.id for member in guild.members if role2 in member.roles] if role2 else []
