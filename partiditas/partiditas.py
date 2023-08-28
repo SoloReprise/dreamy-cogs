@@ -72,12 +72,16 @@ class Partiditas(commands.Cog):
         # Distribute members into teams
         teams = [combined_members[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
 
+        # Separate even and odd teams for role1 and role2
+        even_teams = [team for i, team in enumerate(teams) if i % 2 == 0]
+        odd_teams = [team for i, team in enumerate(teams) if i % 2 != 0]
+
         # Get the category
         category = guild.get_channel(1127625556247203861)
 
-        # Create voice channels for each team within the specified category
+        # Create voice channels for even teams (role2)
         voice_channels = []
-        for index, team in enumerate(teams, start=1):
+        for index, team in enumerate(even_teams, start=1):
             voice_channel_name = f"◇║Equipo {index}"
             overwrites = {
                 guild.default_role: discord.PermissionOverwrite(connect=False),
@@ -85,6 +89,16 @@ class Partiditas(commands.Cog):
             }
             voice_channel = await category.create_voice_channel(voice_channel_name, overwrites=overwrites)
             voice_channels.append(voice_channel)
+
+            for member_id in team:
+                member = guild.get_member(member_id)
+                if member.voice:
+                    await member.move_to(voice_channel)
+
+        # Add odd teams (role1) members to the existing voice channels
+        for index, team in enumerate(odd_teams, start=1):
+            voice_channel_name = f"◇║Equipo {index}"
+            voice_channel = discord.utils.get(category.voice_channels, name=voice_channel_name)
 
             for member_id in team:
                 member = guild.get_member(member_id)
@@ -102,4 +116,3 @@ class Partiditas(commands.Cog):
         await self.config.guild(guild).role_to_team.set_raw(str(role1.id), value=teams)
         if role2:
             await self.config.guild(guild).role_to_team.set_raw(str(role2.id), value=teams)
-
