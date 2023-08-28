@@ -47,10 +47,12 @@ class Partiditas(commands.Cog):
             await ctx.send("¡No puedes poner a la misma persona en la lista de exclusión!")
             return
 
-        await self.config.guild(ctx.guild).user_pairs.set_raw(str(member1.id), value=member2.id)
-        await self.config.guild(ctx.guild).user_pairs.set_raw(str(member2.id), value=member1.id)
-        await ctx.send(f"¡Los usuarios {member1.mention} y {member2.mention} no estarán en el mismo equipo!")
+        # Store the unteaming relationship using sorted IDs to avoid duplication
+        sorted_ids = sorted([str(member1.id), str(member2.id)])
+        await self.config.guild(ctx.guild).user_pairs.set_raw(sorted_ids[0], value=sorted_ids[1])
 
+        await ctx.send(f"¡Los usuarios {member1.mention} y {member2.mention} no estarán en el mismo equipo!")
+    
     @battle.command(name="unteamlist")
     async def unteam_list(self, ctx):
         """Muestra la lista de usuarios que no pueden estar en el mismo equipo."""
@@ -70,10 +72,12 @@ class Partiditas(commands.Cog):
     @battle.command(name="ununteam")
     async def un_unteam(self, ctx, member1: discord.Member, member2: discord.Member):
         """Elimina un caso de usuarios que no pueden estar en el mismo equipo."""
-        await self.config.guild(ctx.guild).user_pairs.set_raw(str(member1.id), value=None)
-        await self.config.guild(ctx.guild).user_pairs.set_raw(str(member2.id), value=None)
+        # Remove the unteaming relationship using sorted IDs
+        sorted_ids = sorted([str(member1.id), str(member2.id)])
+        await self.config.guild(ctx.guild).user_pairs.set_raw(sorted_ids[0], value=None)
+        await self.config.guild(ctx.guild).user_pairs.set_raw(sorted_ids[1], value=None)
         await ctx.send(f"Caso de unteaming entre {member1.mention} y {member2.mention} eliminado.")
-
+        
     async def _create_teams_and_channels(self, ctx, role1: discord.Role, role2: discord.Role = None, num_teams: int = 2, members_per_team: int = 5):
         guild = ctx.guild
 
