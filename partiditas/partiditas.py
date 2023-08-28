@@ -28,7 +28,7 @@ class Partiditas(commands.Cog):
     async def vs(self, ctx, role1: discord.Role, role2: discord.Role, num_teams: int = 2, members_per_team: int = 5):
         """Enfrenta a dos roles en equipos y crea canales de voz."""
         await self._create_teams_and_channels_vs(ctx, role1, role2, num_teams, members_per_team)
-    
+
     @battle.command(name="clear")
     async def clearscrim(self, ctx):
         """Elimina los canales de voz creados para el enfrentamiento."""
