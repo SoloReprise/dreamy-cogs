@@ -28,27 +28,22 @@ class Partiditas(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @commands.mod_or_permissions()
-    async def battlers(self, ctx, role1: discord.Role, num_teams: int = 2, members_per_team: int = 5, *, role2: discord.Role = None):
-        """Randomiza equipos con roles específicos y crea canales de voz."""
+    async def battlers(self, ctx, role1: discord.Role, num_teams: int = 2, members_per_team: int = 5):
+        """Randomiza equipos con un rol específico y crea canales de voz."""
         guild = ctx.guild
 
         members_with_role1 = [member.id for member in guild.members if role1 in member.roles]
-        members_with_role2 = [member.id for member in guild.members if role2 and role2 in member.roles] if role2 else []
 
         total_members_needed = num_teams * members_per_team
 
-        if len(members_with_role1) + len(members_with_role2) < total_members_needed:
-            await ctx.send("No hay suficientes miembros con los roles especificados.")
+        if len(members_with_role1) < total_members_needed:
+            await ctx.send("No hay suficientes miembros con el rol especificado.")
             return
 
         members_with_role1 = random.sample(members_with_role1, min(len(members_with_role1), total_members_needed))
-        members_with_role2 = random.sample(members_with_role2, min(len(members_with_role2), total_members_needed))
-
-        combined_members = members_with_role1 + members_with_role2
-        random.shuffle(combined_members)
 
         # Distribute members into teams
-        teams = [combined_members[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
+        teams = [members_with_role1[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
@@ -61,7 +56,7 @@ class Partiditas(commands.Cog):
                 guild.default_role: discord.PermissionOverwrite(connect=False),
                 guild.me: discord.PermissionOverwrite(connect=True)
             }
-            voice_channel = await category.create_voice_channel(voice_channel_name, overwrites=over
+            voice_channel = await category.create_voice_channel(voice_channel_name, overwrites=overwrites)
             voice_channels.append(voice_channel)
 
             for member_id in team:
