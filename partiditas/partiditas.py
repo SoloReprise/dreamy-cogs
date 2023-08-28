@@ -118,8 +118,12 @@ class Partiditas(commands.Cog):
         odd_teams = [members_with_role1[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
         even_teams = [members_with_role2[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
 
-        combined_teams = odd_teams + even_teams
-        random.shuffle(combined_teams)
+        combined_teams = []
+        for i in range(num_teams):
+            if i % 2 == 0:
+                combined_teams.append(odd_teams.pop(0))
+            else:
+                combined_teams.append(even_teams.pop(0))
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
