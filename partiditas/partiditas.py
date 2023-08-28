@@ -51,33 +51,30 @@ class Partiditas(commands.Cog):
         await self.config.guild(ctx.guild).user_pairs.set_raw(str(member2.id), value=member1.id)
         await ctx.send(f"¡Los usuarios {member1.mention} y {member2.mention} no estarán en el mismo equipo!")
 
-    async def _create_teams_and_channels(self, ctx, role1: discord.Role, role2: discord.Role = None, num_teams: int = 2, members_per_team: int = 5):
+    async def _create_teams_and_channels_vs(self, ctx, role1: discord.Role, role2: discord.Role, num_teams: int, members_per_team: int):
         guild = ctx.guild
 
         members_with_role1 = [member.id for member in guild.members if role1 in member.roles]
-        members_with_role2 = [member.id for member in guild.members if role2 in member.roles] if role2 else []
+        members_with_role2 = [member.id for member in guild.members if role2 in member.roles]
 
         total_members_needed = num_teams * members_per_team
 
-        if len(members_with_role1) + len(members_with_role2) < total_members_needed:
+        if len(members_with_role1) < num_teams or len(members_with_role2) < num_teams:
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        members_with_role1 = random.sample(members_with_role1, min(len(members_with_role1), total_members_needed))
-        members_with_role2 = random.sample(members_with_role2, min(len(members_with_role2), total_members_needed))
+        odd_teams = [members_with_role1[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
+        even_teams = [members_with_role2[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
 
-        combined_members = members_with_role1 + members_with_role2
-        random.shuffle(combined_members)
-
-        # Distribute members into teams
-        teams = [combined_members[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
+        combined_teams = odd_teams + even_teams
+        random.shuffle(combined_teams)
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
 
         # Create voice channels for each team within the specified category
         voice_channels = []
-        for index, team in enumerate(teams, start=1):
+        for index, team in enumerate(combined_teams, start=1):
             voice_channel_name = f"◇║Equipo {index}"
             overwrites = {
                 guild.default_role: discord.PermissionOverwrite(connect=False),
@@ -92,13 +89,12 @@ class Partiditas(commands.Cog):
                     await member.move_to(voice_channel)
 
         lista_equipos = []
-        for index, team in enumerate(teams, start=1):
+        for index, team in enumerate(combined_teams, start=1):
             miembros_equipo = " ".join([guild.get_member(member_id).mention for member_id in team])
             lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
 
         equipos_unidos = "\n".join(lista_equipos)
         await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}")
 
-        await self.config.guild(guild).role_to_team.set_raw(str(role1.id), value=teams)
-        if role2:
-            await self.config.guild(guild).role_to_team.set_raw(str(role2.id), value=teams)
+        await self.config.guild(guild).role_to_team.set_raw(str(role1.id), value=odd_teams)
+        await self.config.guild(guild).role_to_team.set_raw(str(role2.id), value=even_teams)
