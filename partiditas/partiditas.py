@@ -28,19 +28,21 @@ class Partiditas(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @commands.mod_or_permissions()
-    async def battlers(self, ctx, role: discord.Role, num_teams: int):
+    async def battlers(self, ctx, role: discord.Role, num_teams: int, members_per_team: int):
         """Randomiza equipos con un rol específico."""
         guild = ctx.guild
         members_with_role = [member.id for member in guild.members if role in member.roles]
 
-        if len(members_with_role) < num_teams * 5:
+        total_members_needed = num_teams * members_per_team
+
+        if len(members_with_role) < total_members_needed:
             await ctx.send("No hay suficientes miembros con el rol especificado.")
             return
 
         random.shuffle(members_with_role)
 
         # Distribute members into teams
-        teams = [members_with_role[i:i+5] for i in range(0, num_teams * 5, 5)]
+        teams = [members_with_role[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
 
         # Get user pairs to exclude from the same team
         user_pairs = await self.config.guild(guild).user_pairs()
