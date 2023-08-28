@@ -77,7 +77,7 @@ class Partiditas(commands.Cog):
         await self.config.guild(ctx.guild).user_pairs.set_raw(sorted_ids[0], value=None)
         await self.config.guild(ctx.guild).user_pairs.set_raw(sorted_ids[1], value=None)
         await ctx.send(f"Caso de unteaming entre {member1.mention} y {member2.mention} eliminado.")
-
+        
     async def _create_teams_and_channels(self, ctx, role1: discord.Role, role2: discord.Role = None, num_teams: int = 2, members_per_team: int = 5):
         guild = ctx.guild
 
@@ -90,18 +90,30 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        # Get members with the specified roles
-        roles_to_add = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
-        members_with_roles = [member.id for member in guild.members if any(role.id in roles_to_add for role in member.roles)]
+        # Get the list of users with each of the specified roles
+        roles_to_add = [
+            1127716398416797766,  # Equilibrado
+            1127716463478853702,  # Auxiliar
+            1127716528121446573,  # Defensivo
+            1127716546370871316,  # Ofensivo
+            1127716426594140160   # Ágil
+        ]
 
-        # Select members with specified roles and combine with members_with_role1 and members_with_role2
-        members_with_roles = random.sample(members_with_roles, min(len(members_with_roles), total_members_needed - len(members_with_role1) - len(members_with_role2)))
-        combined_members = members_with_role1 + members_with_role2 + members_with_roles
+        members_with_roles = {}
+        for role_id in roles_to_add:
+            role = guild.get_role(role_id)
+            if role:
+                members_with_roles[role_id] = [member.id for member in guild.members if role in member.roles]
+
+        members_with_role1 = random.sample(members_with_role1, min(len(members_with_role1), total_members_needed))
+        members_with_role2 = random.sample(members_with_role2, min(len(members_with_role2), total_members_needed))
+
+        combined_members = members_with_role1 + members_with_role2
         random.shuffle(combined_members)
 
         # Distribute members into teams
         teams = [combined_members[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
-
+        
         # Get the category
         category = guild.get_channel(1127625556247203861)
 
@@ -145,15 +157,9 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        # Get members with the specified roles
-        roles_to_add = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
-        members_with_roles = [member.id for member in guild.members if any(role.id in roles_to_add for role in member.roles)]
-
-        # Select members with specified roles and combine with members_with_role1 and members_with_role2
-        members_with_roles = random.sample(members_with_roles, min(len(members_with_roles), total_members_needed - len(members_with_role1) - len(members_with_role2)))
         odd_teams = [members_with_role1[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
         even_teams = [members_with_role2[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
-       
+
         combined_teams = []
         for i in range(num_teams):
             if i % 2 == 0:
