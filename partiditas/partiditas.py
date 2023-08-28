@@ -120,8 +120,16 @@ class Partiditas(commands.Cog):
                     member = guild.get_member(member_id)
                     if role and member:
                         await member.add_roles(role)
-                        await ctx.send(f"{member.mention} fue asignado como {position_roles[role_id]} en el Equipo {i+1}")
-                        
+            
+            # Send messages indicating the assigned positions
+            for i, team in enumerate(teams):
+                for j, member_id in enumerate(team):
+                    role_id = shuffled_roles[j]
+                    role_name = position_roles[role_id]
+                    member = guild.get_member(member_id)
+                    if member:
+                        await ctx.send(f"{member.mention} fue asignado como {role_name} en el Equipo {i+1}")
+
         # Get the category
         category = guild.get_channel(1127625556247203861)
 
@@ -191,8 +199,16 @@ class Partiditas(commands.Cog):
                     member = guild.get_member(member_id)
                     if role and member:
                         await member.add_roles(role)
-                        await ctx.send(f"{member.mention} fue asignado como {position_roles[role_id]} en el Equipo {i+1}")
-                        
+            
+            # Send messages indicating the assigned positions
+            for i, team in enumerate(combined_teams):
+                for j, member_id in enumerate(team):
+                    role_id = shuffled_roles[j]
+                    role_name = position_roles[role_id]
+                    member = guild.get_member(member_id)
+                    if member:
+                        await ctx.send(f"{member.mention} fue asignado como {role_name} en el Equipo {i+1}")
+
         # Create voice channels for each team within the specified category
         voice_channels = []
         for index, team in enumerate(combined_teams, start=1):
