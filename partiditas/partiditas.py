@@ -29,7 +29,7 @@ class Partiditas(commands.Cog):
     @commands.guild_only()
     @commands.mod_or_permissions()
     async def battlers(self, ctx, role: discord.Role, num_teams: int, members_per_team: int):
-        """Randomiza equipos con un rol específico."""
+        """Randomiza equipos con un rol específico y crea canales de voz."""
         guild = ctx.guild
         members_with_role = [member.id for member in guild.members if role in member.roles]
 
@@ -43,6 +43,22 @@ class Partiditas(commands.Cog):
 
         # Distribute members into teams
         teams = [members_with_role[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
+
+        # Create voice channels for each team
+        voice_channels = []
+        for index, team in enumerate(teams, start=1):
+            voice_channel_name = f"◇║Equipo {index}"
+            overwrites = {
+                guild.default_role: discord.PermissionOverwrite(connect=False),
+                guild.me: discord.PermissionOverwrite(connect=True)
+            }
+            voice_channel = await guild.create_voice_channel(voice_channel_name, overwrites=overwrites)
+            voice_channels.append(voice_channel)
+
+            for member_id in team:
+                member = guild.get_member(member_id)
+                if member.voice:
+                    await member.move_to(voice_channel)
 
         # Get user pairs to exclude from the same team
         user_pairs = await self.config.guild(guild).user_pairs()
@@ -65,3 +81,16 @@ class Partiditas(commands.Cog):
         await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}")
 
         await self.config.guild(guild).role_to_team.set_raw(str(role.id), value=teams)
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.mod_or_permissions()
+    async def clearscrim(self, ctx):
+        """Elimina los canales de voz creados para el scrim."""
+        guild = ctx.guild
+        voice_channels = [channel for channel in guild.voice_channels if "◇║Equipo" in channel.name]
+
+        for channel in voice_channels:
+            await channel.delete()
+
+        await ctx.send("Canales de voz de scrim eliminados.")
