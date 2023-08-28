@@ -96,42 +96,31 @@ class Partiditas(commands.Cog):
         combined_members = members_with_role1 + members_with_role2
         random.shuffle(combined_members)
 
+        # Distribute members into teams
+        teams = [combined_members[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
+
         # Check if team size is 5
         if members_per_team == 5:
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
-
-            # Get the previous position roles of each player
-            player_position_roles = {}
-            for member in guild.members:
-                for role in member.roles:
-                    if role.id in position_roles:
-                        player_position_roles[member.id] = role.id
-
-            roles_assigned = {role_id: 0 for role_id in position_roles}
+            random.shuffle(position_roles)
 
             for team in teams:
-                for _ in range(5):
-                    available_roles = [role_id for role_id in position_roles if roles_assigned[role_id] < num_teams]
-                    available_roles.sort(key=lambda role_id: roles_assigned[role_id])
-
-                    # Find the position role that the player previously had
-                    prev_role_id = player_position_roles.get(team[0])
-
-                    # If the previous role is available, assign it; otherwise, assign the first available role
-                    role_id = prev_role_id if prev_role_id in available_roles else available_roles[0]
-
-                    position_role = guild.get_role(role_id)
-                    member_id = team.pop(0)
-
+                for member_id in team:
                     member = guild.get_member(member_id)
-                    await member.add_roles(position_role)
-                    await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
 
-                    roles_assigned[role_id] += 1
+                    # Get the position roles the member has
+                    member_position_roles = [role for role in member.roles if role.id in position_roles]
 
-                    # Remove the assigned role from the available roles
-                    available_roles.remove(role_id)
-                    
+                    if member_position_roles:
+                        # Assign one of the roles they have
+                        assigned_role = random.choice(member_position_roles)
+                    else:
+                        # Assign a random role from the available ones
+                        assigned_role = discord.utils.get(guild.roles, id=random.choice(position_roles))
+
+                    await member.add_roles(assigned_role)
+                    await ctx.send(f"{member.mention}, tu posición en el equipo es: {assigned_role.name}")
+
         # Get the category
         category = guild.get_channel(1127625556247203861)
 
@@ -192,16 +181,24 @@ class Partiditas(commands.Cog):
         if members_per_team == 5:
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
             random.shuffle(position_roles)
-            
-            for i, team in enumerate(combined_teams):
-                position_role = position_roles[i % 5]
-                position_role = guild.get_role(position_role)
-                
+
+            for team in combined_teams:
                 for member_id in team:
                     member = guild.get_member(member_id)
-                    await member.add_roles(position_role)
-                    await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
 
+                    # Get the position roles the member has
+                    member_position_roles = [role for role in member.roles if role.id in position_roles]
+
+                    if member_position_roles:
+                        # Assign one of the roles they have
+                        assigned_role = random.choice(member_position_roles)
+                    else:
+                        # Assign a random role from the available ones
+                        assigned_role = discord.utils.get(guild.roles, id=random.choice(position_roles))
+
+                    await member.add_roles(assigned_role)
+                    await ctx.send(f"{member.mention}, tu posición en el equipo es: {assigned_role.name}")
+                    
         # Get the category
         category = guild.get_channel(1127625556247203861)
 
