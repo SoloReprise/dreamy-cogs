@@ -67,7 +67,7 @@ class Partiditas(commands.Cog):
         # Get user pairs to exclude from the same team
         user_pairs = await self.config.guild(guild).user_pairs()
         for member_id, exclusion_id in user_pairs.items():
-            if member_id in members_with_role and exclusion_id in members_with_role:
+            if member_id in members_with_role1 and exclusion_id in members_with_role1:
                 member_team_index = next((i for i, team in enumerate(teams) if member_id in team), None)
                 exclusion_team_index = next((i for i, team in enumerate(teams) if exclusion_id in team), None)
                 if member_team_index is not None and exclusion_team_index is not None and member_team_index == exclusion_team_index:
@@ -84,7 +84,7 @@ class Partiditas(commands.Cog):
         equipos_unidos = "\n".join(lista_equipos)
         await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}")
 
-        await self.config.guild(guild).role_to_team.set_raw(str(role.id), value=teams)
+        await self.config.guild(guild).role_to_team.set_raw(str(role1.id), value=teams)
 
     @commands.command()
     @commands.guild_only()
