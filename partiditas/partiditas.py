@@ -125,7 +125,7 @@ class Partiditas(commands.Cog):
                         await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
                         positions_assigned.add(pre_chosen_position)
 
-                # Assign positions randomly for remaining members
+                # Assign positions based on pre-chosen roles for remaining members
                 remaining_positions = [role_id for role_id in position_roles if role_id not in positions_assigned]
                 for member_id in team:
                     if not remaining_positions:
@@ -137,11 +137,24 @@ class Partiditas(commands.Cog):
                     if any(role_id in member_roles for role_id in position_roles):
                         continue
 
-                    # Assign a random position
-                    random_position = random.choice(remaining_positions)
-                    position_role = guild.get_role(random_position)
-                    await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
-                    remaining_positions.remove(random_position)
+                    # Check if the member's pre-chosen position is available in other teams
+                    pre_chosen_position = None
+                    for role_id in member_roles:
+                        if role_id in position_roles and role_id in remaining_positions:
+                            pre_chosen_position = role_id
+                            break
+
+                    if pre_chosen_position:
+                        position_role = guild.get_role(pre_chosen_position)
+                        await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
+                        positions_assigned.add(pre_chosen_position)
+                        remaining_positions.remove(pre_chosen_position)
+                    else:
+                        # Assign a random position
+                        random_position = random.choice(remaining_positions)
+                        position_role = guild.get_role(random_position)
+                        await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
+                        remaining_positions.remove(random_position)
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
@@ -225,7 +238,7 @@ class Partiditas(commands.Cog):
                         await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
                         positions_assigned.add(pre_chosen_position)
 
-                # Assign positions randomly for remaining members
+                # Assign positions based on pre-chosen roles for remaining members
                 remaining_positions = [role_id for role_id in position_roles if role_id not in positions_assigned]
                 for member_id in team:
                     if not remaining_positions:
@@ -237,12 +250,25 @@ class Partiditas(commands.Cog):
                     if any(role_id in member_roles for role_id in position_roles):
                         continue
 
-                    # Assign a random position
-                    random_position = random.choice(remaining_positions)
-                    position_role = guild.get_role(random_position)
-                    await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
-                    remaining_positions.remove(random_position)
-                    
+                    # Check if the member's pre-chosen position is available in other teams
+                    pre_chosen_position = None
+                    for role_id in member_roles:
+                        if role_id in position_roles and role_id in remaining_positions:
+                            pre_chosen_position = role_id
+                            break
+
+                    if pre_chosen_position:
+                        position_role = guild.get_role(pre_chosen_position)
+                        await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
+                        positions_assigned.add(pre_chosen_position)
+                        remaining_positions.remove(pre_chosen_position)
+                    else:
+                        # Assign a random position
+                        random_position = random.choice(remaining_positions)
+                        position_role = guild.get_role(random_position)
+                        await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
+                        remaining_positions.remove(random_position)
+                                                                    
         # Get the category
         category = guild.get_channel(1127625556247203861)
 
