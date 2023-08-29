@@ -272,13 +272,13 @@ class Partiditas(commands.Cog):
 
             for member_id in team:
                 member = guild.get_member(member_id)
-                if member and member.voice:
-                    await member.move_to(voice_channel)
-
+            if member.voice:
+                await member.move_to(voice_channel)
+                
         # Notify users with their team positions
         lista_equipos = []
         for index, team in enumerate(combined_teams, start=1):
-            miembros_equipo = " ".join([member.mention for member in team if member])
+            miembros_equipo = " ".join([member.mention for member_id in team if (member := guild.get_member(member_id))])
             lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
 
         equipos_unidos = "\n".join(lista_equipos)
