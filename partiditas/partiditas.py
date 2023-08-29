@@ -100,24 +100,35 @@ class Partiditas(commands.Cog):
         teams = [combined_members[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
 
         # Check if team size is 5
-        # Check if team size is 5
         if members_per_team == 5:
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
+            random.shuffle(position_roles)
 
             for team in teams:
-                random.shuffle(position_roles)
-                assigned_roles = []
-
-                for _ in range(5):
-                    role_id = position_roles.pop(0)
-                    position_role = guild.get_role(role_id)
-                    member_id = team.pop(0)
-
+                roles_assigned = set()
+                for member_id in team:
                     member = guild.get_member(member_id)
-                    await member.add_roles(position_role)
-                    assigned_roles.append(position_role.name)
 
-                await ctx.send(f"Roles asignados para el equipo: {', '.join(assigned_roles)}")
+                    # Get the roles the member already has
+                    member_roles = [role.id for role in member.roles]
+
+                    # Find a position role that the member doesn't have yet
+                    available_roles = [role_id for role_id in position_roles if role_id not in member_roles]
+
+                    # If the member has all position roles, assign randomly
+                    if not available_roles:
+                        available_roles = position_roles
+
+                    role_id = random.choice(available_roles)
+                    position_role = guild.get_role(role_id)
+
+                    await member.add_roles(position_role)
+                    await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
+
+                    roles_assigned.add(role_id)
+
+                # Remove assigned roles from the pool for the next iteration
+                position_roles = [role_id for role_id in position_roles if role_id not in roles_assigned]
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
@@ -178,21 +189,33 @@ class Partiditas(commands.Cog):
         # Check if team size is 5
         if members_per_team == 5:
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
+            random.shuffle(position_roles)
 
             for team in combined_teams:
-                random.shuffle(position_roles)
-                assigned_roles = []
-
-                for _ in range(5):
-                    role_id = position_roles.pop(0)
-                    position_role = guild.get_role(role_id)
-                    member_id = team.pop(0)
-
+                roles_assigned = set()
+                for member_id in team:
                     member = guild.get_member(member_id)
-                    await member.add_roles(position_role)
-                    assigned_roles.append(position_role.name)
 
-                await ctx.send(f"Roles asignados para el equipo: {', '.join(assigned_roles)}")
+                    # Get the roles the member already has
+                    member_roles = [role.id for role in member.roles]
+
+                    # Find a position role that the member doesn't have yet
+                    available_roles = [role_id for role_id in position_roles if role_id not in member_roles]
+
+                    # If the member has all position roles, assign randomly
+                    if not available_roles:
+                        available_roles = position_roles
+
+                    role_id = random.choice(available_roles)
+                    position_role = guild.get_role(role_id)
+
+                    await member.add_roles(position_role)
+                    await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
+
+                    roles_assigned.add(role_id)
+
+                # Remove assigned roles from the pool for the next iteration
+                position_roles = [role_id for role_id in position_roles if role_id not in roles_assigned]
                 
         # Get the category
         category = guild.get_channel(1127625556247203861)
