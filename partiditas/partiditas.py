@@ -247,12 +247,16 @@ class Partiditas(commands.Cog):
                     assigned_positions.add(chosen_position)
                     remaining_positions.remove(chosen_position)
 
-                # Notify users without preferred roles about their assigned positions
-                users_without_preferred_roles = [member for member in team if member not in user_preferred_positions]
+                # Assign positions to users without preferred roles
+                users_without_preferred_roles = [user for user in team if user not in user_preferred_positions.keys()]
                 for user in users_without_preferred_roles:
-                    chosen_position = remaining_positions.pop(0)
+                    if not remaining_positions:
+                        break
+
+                    chosen_position = random.choice(remaining_positions)
                     position_role = guild.get_role(chosen_position)
                     await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
+                    remaining_positions.remove(chosen_position)
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
