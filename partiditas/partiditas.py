@@ -255,7 +255,8 @@ class Partiditas(commands.Cog):
 
         lista_equipos = []
         for index, team in enumerate(combined_teams, start=1):
-            miembros_equipo = " ".join([guild.get_member(member_id).mention for member_id in team])
+            valid_members = [guild.get_member(member_id) for member_id in team if guild.get_member(member_id) is not None]
+            miembros_equipo = " ".join([member.mention for member in valid_members])
             lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
 
         equipos_unidos = "\n".join(lista_equipos)
