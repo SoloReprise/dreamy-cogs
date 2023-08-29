@@ -212,7 +212,6 @@ class Partiditas(commands.Cog):
         # Check if team size is 5
         if members_per_team == 5:
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
-            random.shuffle(position_roles)
 
             for team in combined_teams:
                 assigned_positions = set()
@@ -263,6 +262,29 @@ class Partiditas(commands.Cog):
                         position_role = guild.get_role(random_position)
                         await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
                         remaining_positions.remove(random_position)
+            
+            # Randomize the positions for all teams
+            random.shuffle(position_roles)
+            
+            for team in combined_teams:
+                for member_id in team:
+                    member = guild.get_member(member_id)
+
+                    # Get the roles the member already has
+                    member_roles = [role.id for role in member.roles]
+
+                    # Check if the member has a pre-chosen position role
+                    pre_chosen_position = None
+                    for role_id in member_roles:
+                        if role_id in position_roles:
+                            pre_chosen_position = role_id
+                            break
+
+                    if not pre_chosen_position:
+                        # Assign a random position
+                        random_position = random.choice(position_roles)
+                        position_role = guild.get_role(random_position)
+                        await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
