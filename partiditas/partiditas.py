@@ -195,9 +195,8 @@ class Partiditas(commands.Cog):
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
             random.shuffle(position_roles)
 
-            assigned_positions = set()
-
             for team in combined_teams:
+                assigned_positions = set()
                 for member in team:
                     member_roles = [role.id for role in member.roles]
 
@@ -212,8 +211,6 @@ class Partiditas(commands.Cog):
 
             # Distribute remaining positions to members without pre-chosen positions
             remaining_positions = [role_id for role_id in position_roles if role_id not in assigned_positions]
-            random.shuffle(remaining_positions)
-
             for team in combined_teams:
                 for member in team:
                     member_roles = [role.id for role in member.roles]
@@ -223,9 +220,13 @@ class Partiditas(commands.Cog):
                         continue
 
                     if remaining_positions:
-                        random_position = remaining_positions.pop()
+                        random_position = random.choice(remaining_positions)
                         position_role = guild.get_role(random_position)
                         await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
+                        assigned_positions.add(random_position)
+                        remaining_positions.remove(random_position)
+                    else:
+                        break  # No more positions available, stop assigning
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
@@ -242,7 +243,7 @@ class Partiditas(commands.Cog):
             voice_channels.append(voice_channel)
 
             for member in team:
-                if member.voice:
+                if member and member.voice:
                     await member.move_to(voice_channel)
 
         lista_equipos = []
@@ -252,6 +253,3 @@ class Partiditas(commands.Cog):
 
         equipos_unidos = "\n".join(lista_equipos)
         await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}")
-
-        await self.config.guild(guild).role_to_team.set_raw(str(role1.id), value=odd_teams)
-        await self.config.guild(guild).role_to_team.set_raw(str(role2.id), value=even_teams)
