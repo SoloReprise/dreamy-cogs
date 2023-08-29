@@ -99,56 +99,6 @@ class Partiditas(commands.Cog):
         # Distribute members into teams
         teams = [combined_members[i:i+members_per_team] for i in range(0, total_members_needed, members_per_team)]
 
-        # Check if team size is 5
-        if members_per_team == 5:
-            position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
-            random.shuffle(position_roles)
-
-            assigned_positions = set()
-
-            for team in teams:
-                for member_id in team:
-                    member = guild.get_member(member_id)
-
-                    # Get the roles the member already has
-                    member_roles = [role.id for role in member.roles]
-
-                    # Check if the member has a pre-chosen position role
-                    pre_chosen_position = next((role_id for role_id in member_roles if role_id in position_roles), None)
-
-                    # If they have a pre-chosen position, try to give them that position
-                    if pre_chosen_position and pre_chosen_position not in assigned_positions:
-                        position_role = guild.get_role(pre_chosen_position)
-                        await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
-                        assigned_positions.add(pre_chosen_position)
-
-                # Assign positions based on pre-chosen roles for remaining members
-                remaining_positions = [role_id for role_id in position_roles if role_id not in assigned_positions]
-                for member_id in team:
-                    if not remaining_positions:
-                        break
-
-                    member = guild.get_member(member_id)
-
-                    # Check if the member already has a position role
-                    if any(role_id in member_roles for role_id in position_roles):
-                        continue
-
-                    # Check if the member's pre-chosen position is available in other teams
-                    pre_chosen_position = next((role_id for role_id in member_roles if role_id in position_roles and role_id in remaining_positions), None)
-
-                    if pre_chosen_position:
-                        position_role = guild.get_role(pre_chosen_position)
-                        await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
-                        assigned_positions.add(pre_chosen_position)
-                        remaining_positions.remove(pre_chosen_position)
-                    else:
-                        # Assign a random position
-                        random_position = random.choice(remaining_positions)
-                        position_role = guild.get_role(random_position)
-                        await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
-                        remaining_positions.remove(random_position)
-
         # Get the category
         category = guild.get_channel(1127625556247203861)
 
@@ -170,7 +120,7 @@ class Partiditas(commands.Cog):
 
         lista_equipos = []
         for index, team in enumerate(teams, start=1):
-            miembros_equipo = " ".join([member.mention for member_id in team if (member := guild.get_member(member_id)) and member.voice])
+            miembros_equipo = " ".join([member.mention for member_id in team if (member := guild.get_member(member_id))])
             lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
 
         equipos_unidos = "\n".join(lista_equipos)
@@ -192,20 +142,23 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        odd_teams = [random.sample(members_with_role1, members_per_team) for _ in range(num_teams)]
-        even_teams = [random.sample(members_with_role2, members_per_team) for _ in range(num_teams)]
-
         combined_teams = []
-        for i in range(num_teams):
-            if i % 2 == 0:
-                combined_teams.append(odd_teams[i])
-            else:
-                combined_teams.append(even_teams[i])
+        for _ in range(num_teams):
+            team = random.sample(members_with_role1, members_per_team)
+            combined_teams.append(team)
+            members_with_role1 = [member_id for member_id in members_with_role1 if member_id not in team]
+
+            team = random.sample(members_with_role2, members_per_team)
+            combined_teams.append(team)
+            members_with_role2 = [member_id for member_id in members_with_role2 if member_id not in team]
 
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
         random.shuffle(position_roles)
 
         assigned_positions = set()
+
+        # Shuffle the combined teams before assigning positions
+        random.shuffle(combined_teams)
 
         for team in combined_teams:
             for member_id in team:
