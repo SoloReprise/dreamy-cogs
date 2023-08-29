@@ -199,15 +199,15 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        odd_teams = [members_with_role1[i:i + members_per_team] for i in range(0, total_members_needed, members_per_team)]
-        even_teams = [members_with_role2[i:i + members_per_team] for i in range(0, total_members_needed, members_per_team)]
+        odd_teams = [random.sample(members_with_role1, members_per_team) for _ in range(num_teams)]
+        even_teams = [random.sample(members_with_role2, members_per_team) for _ in range(num_teams)]
 
         combined_teams = []
         for i in range(num_teams):
             if i % 2 == 0:
-                combined_teams.append(odd_teams.pop(0))
+                combined_teams.append(odd_teams[i])
             else:
-                combined_teams.append(even_teams.pop(0))
+                combined_teams.append(even_teams[i])
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
