@@ -199,8 +199,8 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        odd_teams = [random.sample(members_with_role1, members_per_team) for _ in range(num_teams)]
-        even_teams = [random.sample(members_with_role2, members_per_team) for _ in range(num_teams)]
+        odd_teams = [random.sample([member.id for member in members_with_role1], members_per_team) for _ in range(num_teams)]
+        even_teams = [random.sample([member.id for member in members_with_role2], members_per_team) for _ in range(num_teams)]
 
         combined_teams = []
         for i in range(num_teams):
@@ -216,7 +216,8 @@ class Partiditas(commands.Cog):
 
             for team in combined_teams:
                 assigned_positions = set()
-                for member in team:
+                for member_id in team:
+                    member = guild.get_member(member_id)
                     member_roles = [role.id for role in member.roles]
 
                     # Check if the member has a pre-chosen position role
@@ -231,7 +232,8 @@ class Partiditas(commands.Cog):
             # Distribute remaining positions to members without pre-chosen positions
             remaining_positions = [role_id for role_id in position_roles if role_id not in assigned_positions]
             for team in combined_teams:
-                for member in team:
+                for member_id in team:
+                    member = guild.get_member(member_id)
                     member_roles = [role.id for role in member.roles]
 
                     # Check if the member already has a position role
@@ -266,7 +268,7 @@ class Partiditas(commands.Cog):
 
         lista_equipos = []
         for index, team in enumerate(combined_teams, start=1):
-            miembros_equipo = " ".join([guild.get_member(member_id).mention for member_id in team if guild.get_member(member_id)])
+            miembros_equipo = " ".join([guild.get_member(member_id).mention for member_id in team])
             lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
 
         equipos_unidos = "\n".join(lista_equipos)
