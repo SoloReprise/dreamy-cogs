@@ -198,42 +198,54 @@ class Partiditas(commands.Cog):
             for team in combined_teams:
                 assigned_positions = set()
 
-                # Check for players with pre-chosen positions
-                pre_chosen_positions = [role_id for role_id in position_roles if any(role_id in member.roles for member in team)]
+                # Create a dictionary to keep track of users and their preferred positions
+                user_preferred_positions = {}
 
-                for position in pre_chosen_positions:
-                    matching_members = [member for member in team if position in [role.id for role in member.roles]]
-                    chosen_member = None
-                    for member in matching_members:
-                        if len(member.roles) == 2:  # User has only one prefered role
-                            chosen_member = member
-                            break
-                    if not chosen_member:
-                        chosen_member = random.choice(matching_members)
-                    position_role = guild.get_role(position)
-                    await ctx.send(f"{chosen_member.mention}, tu posición en el equipo es: {position_role.name}")
-                    assigned_positions.add(position)
+                for member in team:
+                    member_roles = [role.id for role in member.roles]
+
+                    # Check if the member has a pre-chosen position role
+                    pre_chosen_positions = [role_id for role_id in member_roles if role_id in position_roles]
+
+                    if pre_chosen_positions:
+                        user_preferred_positions[member] = pre_chosen_positions
+
+                # Assign roles to users with a single preferred role
+                users_with_single_preferred_role = [user for user, positions in user_preferred_positions.items() if len(positions) == 1]
+                for user in users_with_single_preferred_role:
+                    position_id = user_preferred_positions[user][0]
+                    position_role = guild.get_role(position_id)
+                    await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
+                    assigned_positions.add(position_id)
+                    del user_preferred_positions[user]
+
+                # Assign roles to users with multiple preferred roles
+                users_with_multiple_preferred_roles = [user for user, positions in user_preferred_positions.items() if len(positions) > 1]
+                for user in users_with_multiple_preferred_roles:
+                    valid_positions = [position for position in user_preferred_positions[user] if position not in assigned_positions]
+                    if valid_positions:
+                        chosen_position = random.choice(valid_positions)
+                        position_role = guild.get_role(chosen_position)
+                        await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
+                        assigned_positions.add(chosen_position)
+                        del user_preferred_positions[user]
 
                 # Assign remaining positions randomly
                 remaining_positions = [role_id for role_id in position_roles if role_id not in assigned_positions]
-                for member in team:
+                for user in user_preferred_positions.keys():
                     if not remaining_positions:
                         break
 
-                    if all(role_id in member.roles for role_id in position_roles):
-                        continue
+                    valid_positions = [position for position in user_preferred_positions[user] if position in remaining_positions]
+                    if valid_positions:
+                        chosen_position = random.choice(valid_positions)
+                    else:
+                        chosen_position = random.choice(remaining_positions)
 
-                    if len(member.roles) > 2:
-                        continue
-
-                    if any(role_id in member.roles for role_id in remaining_positions):
-                        continue
-
-                    random_position = random.choice(remaining_positions)
-                    position_role = guild.get_role(random_position)
-                    await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
-                    assigned_positions.add(random_position)
-                    remaining_positions.remove(random_position)
+                    position_role = guild.get_role(chosen_position)
+                    await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
+                    assigned_positions.add(chosen_position)
+                    remaining_positions.remove(chosen_position)
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
