@@ -214,8 +214,10 @@ class Partiditas(commands.Cog):
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
             random.shuffle(position_roles)
 
-            for team in combined_teams:
-                assigned_positions = set()
+            assigned_positions_by_team = [[] for _ in range(num_teams)]  # List of assigned positions for each team
+
+            for team_index, team in enumerate(combined_teams):
+                assigned_positions = set(assigned_positions_by_team[team_index])
                 for member_id in team:
                     member = guild.get_member(member_id)
                     member_roles = [role.id for role in member.roles]
@@ -225,13 +227,18 @@ class Partiditas(commands.Cog):
 
                     if pre_chosen_positions:
                         chosen_position = random.choice(pre_chosen_positions)
+                        while chosen_position in assigned_positions:
+                            chosen_position = random.choice(pre_chosen_positions)
+                        assigned_positions.add(chosen_position)
                         position_role = guild.get_role(chosen_position)
                         await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
-                        assigned_positions.add(chosen_position)
 
             # Distribute remaining positions to members without pre-chosen positions
             remaining_positions = [role_id for role_id in position_roles if role_id not in assigned_positions]
-            for team in combined_teams:
+            available_players = [member.id for members in combined_teams for member_id in members]
+            random.shuffle(available_players)
+
+            for team_index, team in enumerate(combined_teams):
                 for member_id in team:
                     member = guild.get_member(member_id)
                     member_roles = [role.id for role in member.roles]
@@ -242,10 +249,12 @@ class Partiditas(commands.Cog):
 
                     if remaining_positions:
                         random_position = random.choice(remaining_positions)
+                        while random_position in assigned_positions_by_team[team_index]:
+                            random_position = random.choice(remaining_positions)
+                        assigned_positions_by_team[team_index].append(random_position)
+                        remaining_positions.remove(random_position)
                         position_role = guild.get_role(random_position)
                         await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
-                        assigned_positions.add(random_position)
-                        remaining_positions.remove(random_position)
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
