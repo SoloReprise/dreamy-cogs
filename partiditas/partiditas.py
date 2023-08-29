@@ -190,8 +190,8 @@ class Partiditas(commands.Cog):
     async def _create_teams_and_channels_vs(self, ctx, role1: discord.Role, role2: discord.Role, num_teams: int, members_per_team: int):
         guild = ctx.guild
 
-        members_with_role1 = [member.id for member in guild.members if role1 in member.roles]
-        members_with_role2 = [member.id for member in guild.members if role2 in member.roles]
+        members_with_role1 = [member for member in guild.members if role1 in member.roles]
+        members_with_role2 = [member for member in guild.members if role2 in member.roles]
 
         total_members_needed = num_teams * members_per_team
 
@@ -216,55 +216,23 @@ class Partiditas(commands.Cog):
 
             for team in combined_teams:
                 assigned_positions = set()
-                for member_id in team:
-                    member = guild.get_member(member_id)
-
-                    # Get the roles the member already has
+                for member in team:
                     member_roles = [role.id for role in member.roles]
 
                     # Check if the member has a pre-chosen position role
-                    pre_chosen_position = None
-                    for role_id in member_roles:
-                        if role_id in position_roles:
-                            pre_chosen_position = role_id
-                            break
+                    pre_chosen_positions = [role_id for role_id in member_roles if role_id in position_roles]
 
-                    # If they have a pre-chosen position, try to give them that position
-                    if pre_chosen_position and pre_chosen_position not in assigned_positions:
-                        position_role = guild.get_role(pre_chosen_position)
+                    if pre_chosen_positions:
+                        chosen_position = random.choice(pre_chosen_positions)
+                        position_role = guild.get_role(chosen_position)
                         await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
-                        assigned_positions.add(pre_chosen_position)
-
-                # Assign positions based on pre-chosen roles for remaining members
-                remaining_positions = [role_id for role_id in position_roles if role_id not in assigned_positions]
-                for member_id in team:
-                    if not remaining_positions:
-                        break
-
-                    member = guild.get_member(member_id)
-
-                    # Check if the member already has a position role
-                    if any(role_id in member_roles for role_id in position_roles):
-                        continue
-
-                    # Check if the member's pre-chosen position is available in other teams
-                    pre_chosen_position = None
-                    for role_id in member_roles:
-                        if role_id in position_roles and role_id in remaining_positions:
-                            pre_chosen_position = role_id
-                            break
-
-                    if pre_chosen_position:
-                        position_role = guild.get_role(pre_chosen_position)
-                        await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
-                        assigned_positions.add(pre_chosen_position)
-                        remaining_positions.remove(pre_chosen_position)
+                        assigned_positions.add(chosen_position)
                     else:
                         # Assign a random position
-                        random_position = random.choice(remaining_positions)
+                        random_position = random.choice(position_roles)
                         position_role = guild.get_role(random_position)
                         await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
-                        remaining_positions.remove(random_position)
+                        assigned_positions.add(random_position)
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
