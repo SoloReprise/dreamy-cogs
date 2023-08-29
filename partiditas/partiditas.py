@@ -256,10 +256,8 @@ class Partiditas(commands.Cog):
                             if member:
                                 await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
 
-        # Get the category
-        category = guild.get_channel(1127625556247203861)
-
         # Create voice channels for each team within the specified category
+        category = guild.get_channel(1127625556247203861)
         voice_channels = []
         for index, team in enumerate(combined_teams, start=1):
             voice_channel_name = f"◇║Equipo {index}"
@@ -275,9 +273,10 @@ class Partiditas(commands.Cog):
                 if member and member.voice:
                     await member.move_to(voice_channel)
 
+        # Notify users with their team positions
         lista_equipos = []
         for index, team in enumerate(combined_teams, start=1):
-            miembros_equipo = " ".join([guild.get_member(member_id).mention for member_id in team])
+            miembros_equipo = " ".join([member.mention for member in team if member])
             lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
 
         equipos_unidos = "\n".join(lista_equipos)
