@@ -232,9 +232,10 @@ class Partiditas(commands.Cog):
                             position_role = guild.get_role(chosen_position)
                             if member:
                                 await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
+                                member_roles.remove(chosen_position)
 
             # Distribute remaining positions to members without pre-chosen positions
-            remaining_positions = [role_id for role_id in position_roles if role_id not in assigned_positions_by_team[team_index]]
+            remaining_positions = [role_id for role_id in position_roles if not any(role_id in member_roles for member_roles in assigned_positions_by_team)]
             available_players = [member for members in combined_teams for member in members]
             random.shuffle(available_players)
 
@@ -255,6 +256,7 @@ class Partiditas(commands.Cog):
                             position_role = guild.get_role(chosen_position)
                             if member:
                                 await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
+                                member_roles.remove(chosen_position)
 
         # Create voice channels for each team within the specified category
         category = guild.get_channel(1127625556247203861)
