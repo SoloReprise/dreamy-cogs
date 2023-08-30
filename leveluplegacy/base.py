@@ -158,11 +158,8 @@ class UserCommands(MixinMeta, ABC):
     # Hacky way to get user banner
     @cached(ttl=7200)
     async def get_banner(self, user: discord.Member) -> str:
-        req = await self.bot.http.request(discord.http.Route("GET", "/users/{uid}", uid=user.id))
-        banner_id = req["banner"]
-        if banner_id:
-            banner_url = f"https://cdn.discordapp.com/banners/{user.id}/{banner_id}?size=1024"
-            return banner_url
+        # Return the URL of the predefined server background
+        return "https://i.imgur.com/wsOC1nW.png"
 
     @commands.command(name="gg", aliases=["givestar", "addstar", "thanks", "stars"])
     @commands.guild_only()
@@ -926,7 +923,7 @@ class UserCommands(MixinMeta, ABC):
                     await ctx.send(embed=em)
 
             else:
-                bg_image = bg if bg else await self.get_banner(user)
+                bg_image = bg 
                 colors = users[user_id]["colors"]
                 usercolors = {
                     "base": hex_to_rgb(str(user.colour)),
