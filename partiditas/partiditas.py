@@ -171,7 +171,7 @@ class Partiditas(commands.Cog):
                     if user in user_preferred_positions:
                         preferred_positions = user_preferred_positions[user]
                         await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{', '.join(preferred_positions)}].")
-                        valid_positions = [position for position in preferred_positions if position in position_roles and position not in assigned_positions]
+                        valid_positions = [position for position in preferred_positions if position in assigned_positions]
                         if valid_positions:
                             position_id = random.choice(valid_positions)
                         else:
