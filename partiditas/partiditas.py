@@ -194,6 +194,3 @@ class Partiditas(commands.Cog):
 
         equipos_unidos = "\n".join(lista_equipos)
         await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}")
-
-        await self.config.guild(guild).role_to_team.set_raw(str(role1.id), value=odd_teams)
-        await self.config.guild(guild).role_to_team.set_raw(str(role2.id), value=even_teams)
