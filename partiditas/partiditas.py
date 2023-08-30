@@ -131,27 +131,16 @@ class Partiditas(commands.Cog):
                     position_names = [guild.get_role(position_id).name for position_id in preferred_positions]
                     await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{', '.join(position_names)}].")
                     valid_positions = [position for position in preferred_positions if position in position_roles and position not in team_positions and position not in assigned_positions and position not in positions_assigned_to_team]
-                    
+
                     if valid_positions:
                         position_id = random.choice(valid_positions)
                     else:
-                        await ctx.send(f"El jugador {user.mention} no puede obtener su posición preferida en este equipo. Intentando con otro equipo.")
-                        other_teams = [t for t in combined_teams if t != team and len(t) < members_per_team]
-                        if other_teams:
-                            other_team = random.choice(other_teams)
-                            if not any(u in other_team for u in user_preferred_positions.keys()):
-                                await ctx.send(f"El jugador {user.mention} no puede obtener su posición preferida en este equipo. Intentando con otro equipo.")
-                                other_team.append(user)
-                                continue
-
-                        if team_positions:
-                            available_positions = [position for position in position_roles if position not in team_positions and position not in assigned_positions and position not in positions_assigned_to_team]
-                            if available_positions:
-                                position_id = random.choice(available_positions)
-                            else:
-                                position_id = random.choice(position_roles)
+                        available_positions = [position for position in position_roles if position not in assigned_positions and position not in positions_assigned_to_team]
+                        if available_positions:
+                            position_id = random.choice(available_positions)
                         else:
-                            position_id = random.choice(position_roles)
+                            await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
+                            continue
 
                     team_positions.add(position_id)
                     assigned_positions.add(position_id)
@@ -160,14 +149,12 @@ class Partiditas(commands.Cog):
                     await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
                 else:
                     await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
-                    if team_positions:
-                        available_positions = [position for position in position_roles if position not in team_positions and position not in assigned_positions and position not in positions_assigned_to_team]
-                        if available_positions:
-                            position_id = random.choice(available_positions)
-                        else:
-                            position_id = random.choice(position_roles)
+                    available_positions = [position for position in position_roles if position not in assigned_positions and position not in positions_assigned_to_team]
+                    if available_positions:
+                        position_id = random.choice(available_positions)
                     else:
-                        position_id = random.choice(position_roles)
+                        await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
+                        continue
 
                     team_positions.add(position_id)
                     assigned_positions.add(position_id)
