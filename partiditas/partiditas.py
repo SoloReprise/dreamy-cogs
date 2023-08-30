@@ -87,7 +87,7 @@ class Partiditas(commands.Cog):
 
         total_members_needed = num_teams * members_per_team
 
-        if len(set(members_with_role1)) < num_teams or len(set(members_with_role2)) < num_teams:
+        if len(members_with_role1) < num_teams * members_per_team or len(members_with_role2) < num_teams * members_per_team:
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
@@ -141,9 +141,9 @@ class Partiditas(commands.Cog):
                                 other_team.append(user)
                                 continue
 
-                        assigned_positions.add(position_id)
-                        position_role = guild.get_role(position_id)
-                        await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
+                    assigned_positions.add(position_id)
+                    position_role = guild.get_role(position_id)
+                    await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
                 else:
                     await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
                     if assigned_positions:
