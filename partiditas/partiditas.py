@@ -141,9 +141,9 @@ class Partiditas(commands.Cog):
                                 other_team.append(user)
                                 continue
 
-                    assigned_positions.add(position_id)
-                    position_role = guild.get_role(position_id)
-                    await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
+                        assigned_positions.add(position_id)
+                        position_role = guild.get_role(position_id)
+                        await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
                 else:
                     await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
                     if assigned_positions:
@@ -156,28 +156,28 @@ class Partiditas(commands.Cog):
                     position_role = guild.get_role(position_id)
                     await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
 
-            # Get the category
-            category = guild.get_channel(1127625556247203861)
+        # Get the category
+        category = guild.get_channel(1127625556247203861)
 
-            # Create voice channels for each team within the specified category
-            voice_channels = []
-            for index, team in enumerate(combined_teams, start=1):
-                voice_channel_name = f"◇║Equipo {index}"
-                overwrites = {
-                    guild.default_role: discord.PermissionOverwrite(connect=False),
-                    guild.me: discord.PermissionOverwrite(connect=True)
-                }
-                voice_channel = await category.create_voice_channel(voice_channel_name, overwrites=overwrites)
-                voice_channels.append(voice_channel)
+        # Create voice channels for each team within the specified category
+        voice_channels = []
+        for index, team in enumerate(combined_teams, start=1):
+            voice_channel_name = f"◇║Equipo {index}"
+            overwrites = {
+                guild.default_role: discord.PermissionOverwrite(connect=False),
+                guild.me: discord.PermissionOverwrite(connect=True)
+            }
+            voice_channel = await category.create_voice_channel(voice_channel_name, overwrites=overwrites)
+            voice_channels.append(voice_channel)
 
-                for member in team:
-                    if member.voice:
-                        await member.move_to(voice_channel)
+            for member in team:
+                if member.voice:
+                    await member.move_to(voice_channel)
 
-            lista_equipos = []
-            for index, team in enumerate(combined_teams, start=1):
-                miembros_equipo = " ".join([member.mention for member in team])
-                lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
+        lista_equipos = []
+        for index, team in enumerate(combined_teams, start=1):
+            miembros_equipo = " ".join([member.mention for member in team])
+            lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
 
-            equipos_unidos = "\n".join(lista_equipos)
-            await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}")
+        equipos_unidos = "\n".join(lista_equipos)
+        await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}")
