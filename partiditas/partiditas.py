@@ -107,7 +107,6 @@ class Partiditas(commands.Cog):
 
             for team in combined_teams:
                 assigned_positions = set()
-                assigned_players = set()
 
                 # Create a dictionary to keep track of users and their preferred positions
                 user_preferred_positions = {}
@@ -127,7 +126,6 @@ class Partiditas(commands.Cog):
                     position_id = user_preferred_positions[user][0]
                     position_role = guild.get_role(position_id)
                     assigned_positions.add(position_id)
-                    assigned_players.add(user)
                     del user_preferred_positions[user]
 
                 # Assign roles to users with multiple preferred roles
@@ -137,15 +135,11 @@ class Partiditas(commands.Cog):
                     if valid_positions:
                         chosen_position = random.choice(valid_positions)
                         assigned_positions.add(chosen_position)
-                        assigned_players.add(user)
                         del user_preferred_positions[user]
 
                 # Assign remaining positions randomly
                 remaining_positions = [role_id for role_id in position_roles if role_id not in assigned_positions]
                 for user in user_preferred_positions.keys():
-                    if user in assigned_players:
-                        continue
-
                     if not remaining_positions:
                         break
 
@@ -157,26 +151,28 @@ class Partiditas(commands.Cog):
 
                     assigned_positions.add(chosen_position)
                     remaining_positions.remove(chosen_position)
-                    assigned_players.add(user)
 
                 # Assign positions to users without preferred roles
-                users_without_preferred_roles = [user for user in team if user not in assigned_players]
+                users_without_preferred_roles = [user for user in team if user not in user_preferred_positions.keys()]
                 for user in users_without_preferred_roles:
-                    if user in assigned_players:
-                        continue
-
                     if not remaining_positions:
                         break
 
                     chosen_position = random.choice(remaining_positions)
                     assigned_positions.add(chosen_position)
                     remaining_positions.remove(chosen_position)
-                    assigned_players.add(user)
 
                 # Notify each user of their final position
                 for user in team:
-                    position_role = guild.get_role(assigned_positions.pop())
-                    await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
+                    position_id = next(iter(user_preferred_positions.get(user, [])), None)
+                    if position_id is None:
+                        position_id = next(iter(remaining_positions), None)
+                        if position_id:
+                            remaining_positions.remove(position_id)
+
+                    if position_id:
+                        position_role = guild.get_role(position_id)
+                        await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
