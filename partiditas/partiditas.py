@@ -145,17 +145,14 @@ class Partiditas(commands.Cog):
                                         position = pref_pos
                                         break
                                 if position is None:
-                                    position_id = random.choice(available_positions)
-                                    position = guild.get_role(position_id)
-                            else:
-                                await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
-                                continue
+                                    await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
+                                    continue
 
                     team_positions.add(position.id)
                     assigned_positions.add(position.id)
-                    available_players.remove(user)  # Remove user from available players
                     await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name}")
                     team_with_positions.append((user, position))
+                    available_players.remove(user)  # Remove user from available players
                 else:
                     await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
                     available_positions = [position_id for position_id in position_roles if position_id not in team_positions and position_id not in assigned_positions]
@@ -175,15 +172,12 @@ class Partiditas(commands.Cog):
                             if position is None:
                                 await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
                                 continue
-                        else:
-                            await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
-                            continue
 
                     team_positions.add(position.id)
                     assigned_positions.add(position.id)
-                    available_players.remove(user)  # Remove user from available players
                     await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name}")
                     team_with_positions.append((user, position))
+                    available_players.remove(user)  # Remove user from available players
 
             teams_with_positions.append(team_with_positions)
 
