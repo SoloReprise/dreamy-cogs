@@ -98,8 +98,14 @@ class Partiditas(commands.Cog):
         for i in range(num_teams):
             if i % 2 == 0:
                 team = random.sample(unique_members_with_role1, members_per_team)
+                unique_members_with_role1 = [member for member in unique_members_with_role1 if member not in team]
             else:
-                team = random.sample(unique_members_with_role2, members_per_team)
+                if len(unique_members_with_role2) < members_per_team:
+                    team = random.sample(unique_members_with_role2, len(unique_members_with_role2))
+                    unique_members_with_role2 = []
+                else:
+                    team = random.sample(unique_members_with_role2, members_per_team)
+                    unique_members_with_role2 = [member for member in unique_members_with_role2 if member not in team]
 
             combined_teams.append(team)
             unique_members_with_role1 = [member for member in unique_members_with_role1 if member not in team]
