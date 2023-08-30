@@ -195,11 +195,12 @@ class Partiditas(commands.Cog):
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
             random.shuffle(position_roles)
 
-            assigned_positions = set()  # Keep track of assigned positions
-            assigned_teams = set()  # Keep track of assigned teams
-            user_to_position = {}  # Keep track of user to their assigned positions
-
             for team in combined_teams:
+                assigned_positions = set()
+
+                # Create a dictionary to keep track of users and their preferred positions
+                user_preferred_positions = {}
+
                 for member in team:
                     member_roles = [role.id for role in member.roles]
 
@@ -207,49 +208,79 @@ class Partiditas(commands.Cog):
                     pre_chosen_positions = [role_id for role_id in member_roles if role_id in position_roles]
 
                     if pre_chosen_positions:
-                        valid_positions = [position for position in pre_chosen_positions if position not in assigned_positions]
-                        if valid_positions:
-                            chosen_position = random.choice(valid_positions)
-                        else:
-                            chosen_position = random.choice(pre_chosen_positions)
-                    else:
-                        valid_positions = [position for position in position_roles if position not in assigned_positions]
-                        chosen_position = random.choice(valid_positions)
+                        user_preferred_positions[member] = pre_chosen_positions
 
-                    user_to_position[member] = chosen_position
-                    assigned_positions.add(chosen_position)
-
-            for team in combined_teams:
-                team_mentions = []
-                for member in team:
-                    position_id = user_to_position[member]
+                # Assign roles to users with a single preferred role
+                users_with_single_preferred_role = [user for user, positions in user_preferred_positions.items() if len(positions) == 1]
+                for user in users_with_single_preferred_role:
+                    position_id = user_preferred_positions[user][0]
                     position_role = guild.get_role(position_id)
-                    await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
-                    team_mentions.append(member.mention)
+                    await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
+                    assigned_positions.add(position_id)
+                    del user_preferred_positions[user]
 
-                assigned_teams.add(tuple(sorted(team_mentions)))  # Keep track of assigned teams
+                # Assign roles to users with multiple preferred roles
+                users_with_multiple_preferred_roles = [user for user, positions in user_preferred_positions.items() if len(positions) > 1]
+                for user in users_with_multiple_preferred_roles:
+                    valid_positions = [position for position in user_preferred_positions[user] if position not in assigned_positions]
+                    if valid_positions:
+                        chosen_position = random.choice(valid_positions)
+                        position_role = guild.get_role(chosen_position)
+                        await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
+                        assigned_positions.add(chosen_position)
+                        del user_preferred_positions[user]
 
-            # Create voice channels for each team within the specified category
-            category = guild.get_channel(1127625556247203861)
-            voice_channels = []
+                # Assign remaining positions randomly
+                remaining_positions = [role_id for role_id in position_roles if role_id not in assigned_positions]
+                for user in user_preferred_positions.keys():
+                    if not remaining_positions:
+                        break
 
-            for index, team in enumerate(combined_teams, start=1):
-                voice_channel_name = f"◇║Equipo {index}"
-                overwrites = {
-                    guild.default_role: discord.PermissionOverwrite(connect=False),
-                    guild.me: discord.PermissionOverwrite(connect=True)
-                }
-                voice_channel = await category.create_voice_channel(voice_channel_name, overwrites=overwrites)
-                voice_channels.append(voice_channel)
+                    valid_positions = [position for position in user_preferred_positions[user] if position in remaining_positions]
+                    if valid_positions:
+                        chosen_position = random.choice(valid_positions)
+                    else:
+                        chosen_position = random.choice(remaining_positions)
 
-                for member in team:
-                    if member and member.voice:
-                        await member.move_to(voice_channel)
+                    position_role = guild.get_role(chosen_position)
+                    await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
+                    assigned_positions.add(chosen_position)
+                    remaining_positions.remove(chosen_position)
 
-            lista_equipos = []
-            for index, team in enumerate(combined_teams, start=1):
-                miembros_equipo = " ".join([member.mention for member in team])
-                lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
+                # Assign positions to users without preferred roles
+                users_without_preferred_roles = [user for user in team if user not in user_preferred_positions.keys()]
+                for user in users_without_preferred_roles:
+                    if not remaining_positions:
+                        break
 
-            equipos_unidos = "\n".join(lista_equipos)
-            await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}")
+                    chosen_position = random.choice(remaining_positions)
+                    position_role = guild.get_role(chosen_position)
+                    await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
+                    assigned_positions.add(chosen_position)
+                    remaining_positions.remove(chosen_position)
+
+        # Get the category
+        category = guild.get_channel(1127625556247203861)
+
+        # Create voice channels for each team within the specified category
+        voice_channels = []
+        for index, team in enumerate(combined_teams, start=1):
+            voice_channel_name = f"◇║Equipo {index}"
+            overwrites = {
+                guild.default_role: discord.PermissionOverwrite(connect=False),
+                guild.me: discord.PermissionOverwrite(connect=True)
+            }
+            voice_channel = await category.create_voice_channel(voice_channel_name, overwrites=overwrites)
+            voice_channels.append(voice_channel)
+
+            for member in team:
+                if member and member.voice:
+                    await member.move_to(voice_channel)
+
+        lista_equipos = []
+        for index, team in enumerate(combined_teams, start=1):
+            miembros_equipo = " ".join([member.mention for member in team])
+            lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
+
+        equipos_unidos = "\n".join(lista_equipos)
+        await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}")
