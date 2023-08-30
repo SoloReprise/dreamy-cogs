@@ -105,9 +105,10 @@ class Partiditas(commands.Cog):
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
             random.shuffle(position_roles)
 
-            for team in combined_teams:
-                assigned_positions = set()
+            assigned_positions = set()
+            unassigned_users = []
 
+            for team in combined_teams:
                 # Create a dictionary to keep track of users and their preferred positions
                 user_preferred_positions = {}
 
@@ -119,6 +120,8 @@ class Partiditas(commands.Cog):
 
                     if pre_chosen_positions:
                         user_preferred_positions[member] = pre_chosen_positions
+                    else:
+                        unassigned_users.append(member)
 
                 # Assign roles to users with a single preferred role
                 users_with_single_preferred_role = [user for user, positions in user_preferred_positions.items() if len(positions) == 1]
@@ -168,6 +171,13 @@ class Partiditas(commands.Cog):
                     await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
                     assigned_positions.add(chosen_position)
                     remaining_positions.remove(chosen_position)
+
+            # Assign unassigned users to teams randomly, ensuring they are unique
+            remaining_teams = [i for i in range(num_teams)]
+            for user in unassigned_users:
+                chosen_team = random.choice(remaining_teams)
+                combined_teams[chosen_team].append(user)
+                remaining_teams.remove(chosen_team)
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
