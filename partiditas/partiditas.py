@@ -81,19 +81,21 @@ class Partiditas(commands.Cog):
     async def _create_teams_and_channels_vs(self, ctx, role1: discord.Role, role2: discord.Role, num_teams: int, members_per_team: int):
         guild = ctx.guild
 
-        members_with_role1 = {member for member in guild.members if role1 in member.roles}
-        members_with_role2 = {member for member in guild.members if role2 in member.roles}
+        members_with_role1 = list(set([member for member in guild.members if role1 in member.roles]))
+        members_with_role2 = list(set([member for member in guild.members if role2 in member.roles]))
 
         total_members_needed = num_teams * members_per_team
 
-        unique_members = members_with_role1.union(members_with_role2)
-
-        if len(unique_members) < total_members_needed:
+        if len(members_with_role1) < num_teams or len(members_with_role2) < num_teams:
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        odd_teams = [random.sample(unique_members, members_per_team) for _ in range(num_teams)]
-        even_teams = [random.sample(unique_members, members_per_team) for _ in range(num_teams)]
+        if len(members_with_role1) + len(members_with_role2) < total_members_needed:
+            await ctx.send("No hay suficientes miembros únicos con los roles especificados para formar los equipos.")
+            return
+
+        odd_teams = [random.sample(members_with_role1, members_per_team) for _ in range(num_teams)]
+        even_teams = [random.sample(members_with_role2, members_per_team) for _ in range(num_teams)]
 
         combined_teams = []
         for i in range(num_teams):
