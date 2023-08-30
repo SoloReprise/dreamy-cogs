@@ -93,6 +93,10 @@ class Partiditas(commands.Cog):
         unique_members_with_role1 = list(set(members_with_role1))
         unique_members_with_role2 = list(set(members_with_role2))
 
+        if total_members_needed > len(unique_members_with_role1) + len(unique_members_with_role2):
+            await ctx.send("No hay suficientes miembros con los roles especificados.")
+            return
+
         odd_teams = [random.sample(unique_members_with_role1, members_per_team) for _ in range(num_teams)]
         even_teams = [random.sample(unique_members_with_role2, members_per_team) for _ in range(num_teams)]
 
@@ -107,6 +111,8 @@ class Partiditas(commands.Cog):
         if members_per_team == 5:
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
             random.shuffle(position_roles)
+
+            assigned_users = set()
 
             for team in combined_teams:
                 assigned_positions = set()
@@ -129,6 +135,7 @@ class Partiditas(commands.Cog):
                     position_id = user_preferred_positions[user][0]
                     position_role = guild.get_role(position_id)
                     assigned_positions.add(position_id)
+                    assigned_users.add(user)
                     del user_preferred_positions[user]
 
                 # Assign roles to users with multiple preferred roles
@@ -138,6 +145,7 @@ class Partiditas(commands.Cog):
                     if valid_positions:
                         chosen_position = random.choice(valid_positions)
                         assigned_positions.add(chosen_position)
+                        assigned_users.add(user)
                         del user_preferred_positions[user]
 
                 # Assign remaining positions randomly
@@ -154,6 +162,7 @@ class Partiditas(commands.Cog):
 
                     assigned_positions.add(chosen_position)
                     remaining_positions.remove(chosen_position)
+                    assigned_users.add(user)
 
                 # Assign positions to users without preferred roles
                 users_without_preferred_roles = [user for user in team if user not in user_preferred_positions.keys()]
@@ -164,6 +173,7 @@ class Partiditas(commands.Cog):
                     chosen_position = random.choice(remaining_positions)
                     assigned_positions.add(chosen_position)
                     remaining_positions.remove(chosen_position)
+                    assigned_users.add(user)
 
                 # Notify each user of their final position
                 for user in team:
