@@ -122,7 +122,6 @@ class Partiditas(commands.Cog):
                 if pre_chosen_positions:
                     user_preferred_positions[member] = pre_chosen_positions
 
-            # Notify each user of their final position
             for user in team:
                 if user in user_preferred_positions:
                     preferred_positions = user_preferred_positions[user]
@@ -132,6 +131,15 @@ class Partiditas(commands.Cog):
                     if valid_positions:
                         position_id = random.choice(valid_positions)
                     else:
+                        # Attempt to move the user to another team if possible
+                        other_teams = [t for t in combined_teams if t != team and len(t) < members_per_team]
+                        if other_teams:
+                            other_team = random.choice(other_teams)
+                            if not any(u in other_team for u in user_preferred_positions.keys()):
+                                await ctx.send(f"El jugador {user.mention} no puede obtener su posición preferida en este equipo. Intentando con otro equipo.")
+                                await other_team.append(user)
+                                continue
+
                         if assigned_positions:
                             position_id = assigned_positions.pop()
                         else:
@@ -145,6 +153,7 @@ class Partiditas(commands.Cog):
                         await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
                         continue
 
+                assigned_positions.add(position_id)
                 position_role = guild.get_role(position_id)
                 await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
 
