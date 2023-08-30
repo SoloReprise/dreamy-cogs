@@ -86,17 +86,17 @@ class Partiditas(commands.Cog):
 
         total_members_needed = num_teams * members_per_team
 
-        if len(set(members_with_role1)) < num_teams or len(set(members_with_role2)) < num_teams:
+        if len(members_with_role1) < total_members_needed or len(members_with_role2) < total_members_needed:
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
         unique_members_with_role1 = list(set(members_with_role1))
         unique_members_with_role2 = list(set(members_with_role2))
 
-        if len(unique_members_with_role1) < num_teams * members_per_team or len(unique_members_with_role2) < num_teams * members_per_team:
+        if len(unique_members_with_role1) < total_members_needed or len(unique_members_with_role2) < total_members_needed:
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
-
+    
         odd_teams = [random.sample(unique_members_with_role1, members_per_team) for _ in range(num_teams)]
         even_teams = [random.sample(unique_members_with_role2, members_per_team) for _ in range(num_teams)]
 
