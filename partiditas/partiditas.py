@@ -140,11 +140,9 @@ class Partiditas(commands.Cog):
                             if available_positions:
                                 position_id = random.choice(available_positions)
                             else:
-                                await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
-                                continue
+                                position_id = random.choice(position_roles)
                         else:
-                            await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
-                            continue
+                            position_id = random.choice(position_roles)
 
                     team_positions.add(position_id)
                     assigned_positions.add(position_id)
@@ -158,18 +156,16 @@ class Partiditas(commands.Cog):
                         if available_positions:
                             position_id = random.choice(available_positions)
                         else:
-                            await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
-                            continue
+                            position_id = random.choice(position_roles)
                     else:
-                        await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
-                        continue
+                        position_id = random.choice(position_roles)
 
                     team_positions.add(position_id)
                     assigned_positions.add(position_id)
                     positions_assigned_to_team.add(position_id)
                     position_role = guild.get_role(position_id)
                     await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
-            
+
         # Notify each team about their positions
         lista_equipos = []
         position_names = [guild.get_role(position_id).name for position_id in position_roles]
