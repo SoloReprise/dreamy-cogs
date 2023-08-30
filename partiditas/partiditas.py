@@ -171,12 +171,9 @@ class Partiditas(commands.Cog):
                     if user in user_preferred_positions:
                         preferred_positions = user_preferred_positions[user]
                         await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{', '.join(preferred_positions)}].")
+                        position_id = preferred_positions[0]
                     else:
                         await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
-
-                    if user in user_preferred_positions:
-                        position_id = user_preferred_positions[user][0]
-                    else:
                         position_id = assigned_positions.pop()
 
                     position_role = guild.get_role(position_id)
