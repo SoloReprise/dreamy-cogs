@@ -105,9 +105,9 @@ class Partiditas(commands.Cog):
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
             random.shuffle(position_roles)
 
-            for team in combined_teams:
-                assigned_positions = set()
+            assigned_positions = set()
 
+            for team in combined_teams:
                 # Create a dictionary to keep track of users and their preferred positions
                 user_preferred_positions = {}
 
@@ -115,7 +115,7 @@ class Partiditas(commands.Cog):
                     member_roles = [role.id for role in member.roles]
 
                     # Check if the member has a pre-chosen position role
-                    pre_chosen_positions = [role_id for role_id in member_roles if role_id in position_roles]
+                    pre_chosen_positions = [position for position in member_roles if position in position_roles]
 
                     if pre_chosen_positions:
                         user_preferred_positions[member] = pre_chosen_positions
@@ -140,34 +140,17 @@ class Partiditas(commands.Cog):
                         assigned_positions.add(chosen_position)
                         del user_preferred_positions[user]
 
-                # Assign remaining positions randomly
-                remaining_positions = [role_id for role_id in position_roles if role_id not in assigned_positions]
-                for user in user_preferred_positions.keys():
+            # Assign remaining positions randomly
+            remaining_positions = [position for position in position_roles if position not in assigned_positions]
+            for team in combined_teams:
+                for member in team:
                     if not remaining_positions:
                         break
 
-                    valid_positions = [position for position in user_preferred_positions[user] if position in remaining_positions]
-                    if valid_positions:
-                        chosen_position = random.choice(valid_positions)
-                    else:
-                        chosen_position = random.choice(remaining_positions)
-
-                    position_role = guild.get_role(chosen_position)
-                    await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
-                    assigned_positions.add(chosen_position)
-                    remaining_positions.remove(chosen_position)
-
-                # Assign positions to users without preferred roles
-                users_without_preferred_roles = [user for user in team if user not in user_preferred_positions.keys()]
-                for user in users_without_preferred_roles:
-                    if not remaining_positions:
-                        break
-
-                    chosen_position = random.choice(remaining_positions)
-                    position_role = guild.get_role(chosen_position)
-                    await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
-                    assigned_positions.add(chosen_position)
-                    remaining_positions.remove(chosen_position)
+                    position_id = random.choice(remaining_positions)
+                    position_role = guild.get_role(position_id)
+                    await ctx.send(f"{member.mention}, tu posición en el equipo es: {position_role.name}")
+                    remaining_positions.remove(position_id)
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
