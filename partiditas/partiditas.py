@@ -91,17 +91,17 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        unique_members_with_role1 = list(set(members_with_role1))
-        unique_members_with_role2 = list(set(members_with_role2))
+        unique_members_with_role1 = set(members_with_role1)
+        unique_members_with_role2 = set(members_with_role2)
 
         combined_teams = []
         for i in range(num_teams):
             if i % 2 == 0:
                 team = random.sample(unique_members_with_role1, members_per_team)
-                unique_members_with_role1 = [member for member in unique_members_with_role1 if member not in team]
+                unique_members_with_role1 -= set(team)
             else:
                 team = random.sample(unique_members_with_role2, members_per_team)
-                unique_members_with_role2 = [member for member in unique_members_with_role2 if member not in team]
+                unique_members_with_role2 -= set(team)
 
             combined_teams.append(team)
 
@@ -122,16 +122,15 @@ class Partiditas(commands.Cog):
                 if pre_chosen_positions:
                     user_preferred_positions[member] = pre_chosen_positions
 
-            for user in team:
-                await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición.")
+            # Notify each user of their preferred positions
+            for user, preferred_positions in user_preferred_positions.items():
+                await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{', '.join(preferred_positions)}].")
 
-                if user in user_preferred_positions:
-                    preferred_positions = user_preferred_positions[user]
-                    valid_positions = [position for position in preferred_positions if position in assigned_positions]
-                    if valid_positions:
-                        position_id = random.choice(valid_positions)
-                    else:
-                        position_id = random.choice(position_roles)
+            # Assign roles based on preferred positions
+            for user, preferred_positions in user_preferred_positions.items():
+                valid_positions = [position for position in preferred_positions if position in assigned_positions]
+                if valid_positions:
+                    position_id = random.choice(valid_positions)
                 else:
                     position_id = random.choice(position_roles)
 
