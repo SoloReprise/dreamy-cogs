@@ -105,6 +105,8 @@ class Partiditas(commands.Cog):
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
             random.shuffle(position_roles)
 
+            processed_users = set()
+
             for team in combined_teams:
                 assigned_positions = set()
 
@@ -112,6 +114,9 @@ class Partiditas(commands.Cog):
                 user_preferred_positions = {}
 
                 for member in team:
+                    if member in processed_users:
+                        continue
+
                     member_roles = [role.id for role in member.roles]
 
                     # Check if the member has a pre-chosen position role
@@ -119,6 +124,7 @@ class Partiditas(commands.Cog):
 
                     if pre_chosen_positions:
                         user_preferred_positions[member] = pre_chosen_positions
+                        processed_users.add(member)
 
                 # Assign roles to users with a single preferred role
                 users_with_single_preferred_role = [user for user, positions in user_preferred_positions.items() if len(positions) == 1]
