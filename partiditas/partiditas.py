@@ -125,7 +125,6 @@ class Partiditas(commands.Cog):
                 for user in users_with_single_preferred_role:
                     position_id = user_preferred_positions[user][0]
                     position_role = guild.get_role(position_id)
-                    await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
                     assigned_positions.add(position_id)
                     del user_preferred_positions[user]
 
@@ -135,8 +134,6 @@ class Partiditas(commands.Cog):
                     valid_positions = [position for position in user_preferred_positions[user] if position not in assigned_positions]
                     if valid_positions:
                         chosen_position = random.choice(valid_positions)
-                        position_role = guild.get_role(chosen_position)
-                        await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
                         assigned_positions.add(chosen_position)
                         del user_preferred_positions[user]
 
@@ -152,8 +149,6 @@ class Partiditas(commands.Cog):
                     else:
                         chosen_position = random.choice(remaining_positions)
 
-                    position_role = guild.get_role(chosen_position)
-                    await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
                     assigned_positions.add(chosen_position)
                     remaining_positions.remove(chosen_position)
 
@@ -164,10 +159,13 @@ class Partiditas(commands.Cog):
                         break
 
                     chosen_position = random.choice(remaining_positions)
-                    position_role = guild.get_role(chosen_position)
-                    await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
                     assigned_positions.add(chosen_position)
                     remaining_positions.remove(chosen_position)
+
+                # Notify each user of their final position
+                for user, position_ids in user_preferred_positions.items():
+                    position_role = guild.get_role(position_ids[0])
+                    await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
 
         # Get the category
         category = guild.get_channel(1127625556247203861)
