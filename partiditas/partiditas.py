@@ -31,17 +31,15 @@ class Partiditas(commands.Cog):
 
     @battle.command(name="clear")
     async def clearscrim(self, ctx):
-        """Elimina los canales de voz creados para el enfrentamiento y resetea las asignaciones de posiciones."""
+        """Elimina los canales de voz creados para el enfrentamiento y resetea la información."""
         guild = ctx.guild
         voice_channels = [channel for channel in guild.voice_channels if "◇║Equipo" in channel.name]
 
         for channel in voice_channels:
             await channel.delete()
 
-        # Reset the assigned positions and teams
-        await self.config.guild(guild).role_to_team.clear()
-
-        await ctx.send("Canales de voz de enfrentamiento eliminados y asignaciones de posiciones reseteadas.")
+        await self.config.guild(guild).clear()
+        await ctx.send("Canales de voz de enfrentamiento eliminados y datos reseteados.")
 
     @battle.command(name="unteam")
     async def unteam(self, ctx, member1: discord.Member, member2: discord.Member):
