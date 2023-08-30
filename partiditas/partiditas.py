@@ -207,9 +207,15 @@ class Partiditas(commands.Cog):
                                 else:
                                     await ctx.send(f"No se encontró una posición preferida para el jugador {user.mention} y no hay más posiciones disponibles.")
                         
-                        # Notify the user of their final position
-                        position_role = guild.get_role(chosen_position)
-                        await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
+                            # Notify each user of their final position within the team
+                            for user in team:
+                                if user in user_positions:
+                                    position_id = user_positions[user]
+                                else:
+                                    position_id = assigned_positions.pop()
+
+                                position_role = guild.get_role(position_id)
+                                await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
 
             # Get the category
             category = guild.get_channel(1127625556247203861)
