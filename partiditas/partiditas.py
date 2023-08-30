@@ -135,7 +135,7 @@ class Partiditas(commands.Cog):
                 # Assign roles to users with multiple preferred roles
                 users_with_multiple_preferred_roles = [user for user, positions in user_preferred_positions.items() if len(positions) > 1]
                 for user in users_with_multiple_preferred_roles:
-                    valid_positions = [position for position in user_preferred_positions[user] if position not in assigned_positions]
+                    valid_positions = [position for position in user_preferred_positions[user] if position in position_roles and position not in assigned_positions]
                     if valid_positions:
                         chosen_position = random.choice(valid_positions)
                         assigned_positions.add(chosen_position)
