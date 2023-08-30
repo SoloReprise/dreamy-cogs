@@ -166,6 +166,7 @@ class Partiditas(commands.Cog):
                     chosen_position = random.choice(remaining_positions)
                     position_role = guild.get_role(chosen_position)
                     await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
+                    assigned_positions.add(chosen_position)
                     remaining_positions.remove(chosen_position)
 
         # Get the category
