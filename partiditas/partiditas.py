@@ -90,22 +90,29 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        odd_teams = [random.sample(members_with_role1, members_per_team) for _ in range(num_teams)]
-        even_teams = [random.sample(members_with_role2, members_per_team) for _ in range(num_teams)]
+        # Combine members with prefered roles
+        combined_members = members_with_role1 + members_with_role2
+        random.shuffle(combined_members)
 
-        combined_teams = []
+        if len(combined_members) < total_members_needed:
+            await ctx.send("No hay suficientes miembros con los roles especificados.")
+            return
+
+        teams = []
+
         for i in range(num_teams):
-            if i % 2 == 0:
-                combined_teams.append(odd_teams[i])
-            else:
-                combined_teams.append(even_teams[i])
+            team = []
+            for j in range(members_per_team):
+                if combined_members:
+                    team.append(combined_members.pop())
+            teams.append(team)
 
         # Check if team size is 5
         if members_per_team == 5:
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
             random.shuffle(position_roles)
 
-            for team in combined_teams:
+            for team in teams:
                 assigned_positions = set()
 
                 # Create a dictionary to keep track of users and their preferred positions
@@ -174,7 +181,7 @@ class Partiditas(commands.Cog):
 
         # Create voice channels for each team within the specified category
         voice_channels = []
-        for index, team in enumerate(combined_teams, start=1):
+        for index, team in enumerate(teams, start=1):
             voice_channel_name = f"◇║Equipo {index}"
             overwrites = {
                 guild.default_role: discord.PermissionOverwrite(connect=False),
@@ -188,7 +195,7 @@ class Partiditas(commands.Cog):
                     await member.move_to(voice_channel)
 
         lista_equipos = []
-        for index, team in enumerate(combined_teams, start=1):
+        for index, team in enumerate(teams, start=1):
             miembros_equipo = " ".join([member.mention for member in team])
             lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
 
