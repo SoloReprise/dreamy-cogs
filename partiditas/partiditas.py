@@ -111,12 +111,12 @@ class Partiditas(commands.Cog):
 
         teams_with_positions = []
 
-        for team in combined_teams:
+        for team_index in range(num_teams):
             assigned_positions = set()  # Reset assigned positions for each team
             team_positions = set()  # Keep track of positions assigned to this team
             team_with_positions = []
 
-            for user in team:
+            for user in combined_teams[team_index]:
                 member_roles = [role.id for role in user.roles]
 
                 # Check if the member has a pre-chosen position role
@@ -135,8 +135,21 @@ class Partiditas(commands.Cog):
                             position_id = random.choice(available_positions)
                             position = guild.get_role(position_id)
                         else:
-                            await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
-                            continue
+                            available_teams = [t for t in teams_with_positions if user in t[0] and len(t) < members_per_team]
+                            if available_teams:
+                                other_team = random.choice(available_teams)
+                                other_team_positions = [pos for _, pos in other_team]
+                                position = None
+                                for pref_pos in preferred_positions:
+                                    if pref_pos.id not in other_team_positions:
+                                        position = pref_pos
+                                        break
+                                if position is None:
+                                    position_id = random.choice(available_positions)
+                                    position = guild.get_role(position_id)
+                            else:
+                                await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
+                                continue
 
                     team_positions.add(position.id)
                     assigned_positions.add(position.id)
@@ -150,8 +163,21 @@ class Partiditas(commands.Cog):
                         position_id = random.choice(available_positions)
                         position = guild.get_role(position_id)
                     else:
-                        await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
-                        continue
+                        available_teams = [t for t in teams_with_positions if user in t[0] and len(t) < members_per_team]
+                        if available_teams:
+                            other_team = random.choice(available_teams)
+                            other_team_positions = [pos for _, pos in other_team]
+                            position = None
+                            for pos_id in available_positions:
+                                if pos_id not in other_team_positions:
+                                    position = guild.get_role(pos_id)
+                                    break
+                            if position is None:
+                                await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
+                                continue
+                        else:
+                            await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
+                            continue
 
                     team_positions.add(position.id)
                     assigned_positions.add(position.id)
