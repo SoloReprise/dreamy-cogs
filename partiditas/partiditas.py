@@ -116,7 +116,7 @@ class Partiditas(commands.Cog):
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
             random.shuffle(position_roles)
 
-            for team in combined_teams:
+            for team_index, team in enumerate(combined_teams):
                 assigned_positions = set()
 
                 # Create a dictionary to keep track of users and their preferred positions
@@ -130,6 +130,25 @@ class Partiditas(commands.Cog):
 
                     if pre_chosen_positions:
                         user_preferred_positions[member] = pre_chosen_positions
+
+                for user in user_preferred_positions.keys():
+                    preferred_positions = user_preferred_positions[user]
+                    added_to_team = False
+
+                    # Try to add the user to their preferred team
+                    for preferred_position in preferred_positions:
+                        preferred_team_index = team_index
+                        while not added_to_team and preferred_team_index < num_teams:
+                            if preferred_team_index != team_index and len(combined_teams[preferred_team_index]) < members_per_team:
+                                combined_teams[preferred_team_index].append(user)
+                                added_to_team = True
+                                assigned_positions.add(preferred_position)
+                                break
+                            preferred_team_index += 1
+
+                    # If user couldn't be added to a preferred team, add to current team
+                    if not added_to_team:
+                        assigned_positions.add(preferred_positions[0])
 
                 # Assign roles to users with a single preferred role
                 users_with_single_preferred_role = [user for user, positions in user_preferred_positions.items() if len(positions) == 1]
