@@ -118,6 +118,7 @@ class Partiditas(commands.Cog):
 
             for team in combined_teams:
                 assigned_positions = set()
+                user_positions = {}
 
                 # Create a dictionary to keep track of users and their preferred positions
                 user_preferred_positions = {}
