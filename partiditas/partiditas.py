@@ -128,6 +128,7 @@ class Partiditas(commands.Cog):
                     await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
                     assigned_positions.add(position_id)
                     del user_preferred_positions[user]
+                    team.remove(user)  # Remove the user from the team list
 
                 # Assign roles to users with multiple preferred roles
                 users_with_multiple_preferred_roles = [user for user, positions in user_preferred_positions.items() if len(positions) > 1]
@@ -139,6 +140,7 @@ class Partiditas(commands.Cog):
                         await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
                         assigned_positions.add(chosen_position)
                         del user_preferred_positions[user]
+                        team.remove(user)  # Remove the user from the team list
 
                 # Assign remaining positions randomly
                 remaining_positions = [role_id for role_id in position_roles if role_id not in assigned_positions]
@@ -156,6 +158,7 @@ class Partiditas(commands.Cog):
                     await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
                     assigned_positions.add(chosen_position)
                     remaining_positions.remove(chosen_position)
+                    team.remove(user)  # Remove the user from the team list
 
                 # Assign positions to users without preferred roles
                 users_without_preferred_roles = [user for user in team if user not in user_preferred_positions.keys()]
@@ -184,7 +187,7 @@ class Partiditas(commands.Cog):
             voice_channels.append(voice_channel)
 
             for member in team:
-                if member and member.voice:
+                if member.voice:
                     await member.move_to(voice_channel)
 
         lista_equipos = []
@@ -194,3 +197,6 @@ class Partiditas(commands.Cog):
 
         equipos_unidos = "\n".join(lista_equipos)
         await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}")
+
+        await self.config.guild(guild).role_to_team.set_raw(str(role1.id), value=odd_teams)
+        await self.config.guild(guild).role_to_team.set_raw(str(role2.id), value=even_teams)
