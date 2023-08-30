@@ -122,21 +122,21 @@ class Partiditas(commands.Cog):
                 if pre_chosen_positions:
                     user_preferred_positions[member] = pre_chosen_positions
 
+            # Notify each user of their final position
             for user in team:
                 if user in user_preferred_positions:
                     preferred_positions = user_preferred_positions[user]
                     await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{', '.join(preferred_positions)}].")
                     valid_positions = [position for position in preferred_positions if position in position_roles and position not in assigned_positions]
                     if valid_positions:
-                        chosen_position = random.choice(valid_positions)
-                        assigned_positions.add(chosen_position)
+                        position_id = random.choice(valid_positions)
                     else:
-                        chosen_position = random.choice(position_roles)
+                        position_id = assigned_positions.pop()
                 else:
                     await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
-                    chosen_position = random.choice(position_roles)
+                    position_id = assigned_positions.pop()
 
-                position_role = guild.get_role(chosen_position)
+                position_role = guild.get_role(position_id)
                 await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
 
             # Get the category
