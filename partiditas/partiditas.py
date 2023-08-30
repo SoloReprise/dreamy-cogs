@@ -128,9 +128,6 @@ class Partiditas(commands.Cog):
                     assigned_positions.add(position_id)
                     del user_preferred_positions[user]
 
-                    # Notify user of their position
-                    await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
-
                 # Assign roles to users with multiple preferred roles
                 users_with_multiple_preferred_roles = [user for user, positions in user_preferred_positions.items() if len(positions) > 1]
                 for user in users_with_multiple_preferred_roles:
@@ -139,10 +136,6 @@ class Partiditas(commands.Cog):
                         chosen_position = random.choice(valid_positions)
                         assigned_positions.add(chosen_position)
                         del user_preferred_positions[user]
-
-                        # Notify user of their position
-                        position_role = guild.get_role(chosen_position)
-                        await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
 
                 # Assign remaining positions randomly
                 remaining_positions = [role_id for role_id in position_roles if role_id not in assigned_positions]
@@ -159,10 +152,6 @@ class Partiditas(commands.Cog):
                     assigned_positions.add(chosen_position)
                     remaining_positions.remove(chosen_position)
 
-                    # Notify user of their position
-                    position_role = guild.get_role(chosen_position)
-                    await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
-
                 # Assign positions to users without preferred roles
                 users_without_preferred_roles = [user for user in team if user not in user_preferred_positions.keys()]
                 for user in users_without_preferred_roles:
@@ -173,8 +162,14 @@ class Partiditas(commands.Cog):
                     assigned_positions.add(chosen_position)
                     remaining_positions.remove(chosen_position)
 
-                    # Notify user of their position
-                    position_role = guild.get_role(chosen_position)
+                # Notify each user of their final position
+                for user in team:
+                    if user in user_preferred_positions:
+                        position_id = user_preferred_positions[user][0]
+                    else:
+                        position_id = assigned_positions.pop()
+
+                    position_role = guild.get_role(position_id)
                     await ctx.send(f"{user.mention}, tu posición en el equipo es: {position_role.name}")
 
         # Get the category
@@ -192,7 +187,7 @@ class Partiditas(commands.Cog):
             voice_channels.append(voice_channel)
 
             for member in team:
-                if member.voice:
+                if member and member.voice:
                     await member.move_to(voice_channel)
 
         lista_equipos = []
@@ -202,6 +197,3 @@ class Partiditas(commands.Cog):
 
         equipos_unidos = "\n".join(lista_equipos)
         await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}")
-
-        await self.config.guild(guild).role_to_team.set_raw(str(role1.id), value=odd_teams)
-        await self.config.guild(guild).role_to_team.set_raw(str(role2.id), value=even_teams)
