@@ -645,7 +645,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
         else:
             # Generate LevelUP Image
-            banner = bg if bg else await self.get_banner(member)
+            banner = bg
 
             color = str(member.colour)
             if color == "#000000":  # Don't use default color
