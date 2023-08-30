@@ -93,6 +93,10 @@ class Partiditas(commands.Cog):
         unique_members_with_role1 = list(set(members_with_role1))
         unique_members_with_role2 = list(set(members_with_role2))
 
+        if len(unique_members_with_role1) < num_teams * members_per_team or len(unique_members_with_role2) < num_teams * members_per_team:
+            await ctx.send("No hay suficientes miembros únicos con los roles especificados para formar los equipos.")
+            return
+
         odd_teams = [random.sample(unique_members_with_role1, members_per_team) for _ in range(num_teams)]
         even_teams = [random.sample(unique_members_with_role2, members_per_team) for _ in range(num_teams)]
 
@@ -110,16 +114,11 @@ class Partiditas(commands.Cog):
 
             for team in combined_teams:
                 assigned_positions = set()
-                team_users = []
 
                 # Create a dictionary to keep track of users and their preferred positions
                 user_preferred_positions = {}
 
-                for member_id in team:
-                    member = guild.get_member(member_id)
-                    if not member:
-                        continue
-
+                for member in team:
                     member_roles = [role.id for role in member.roles]
 
                     # Check if the member has a pre-chosen position role
@@ -127,8 +126,6 @@ class Partiditas(commands.Cog):
 
                     if pre_chosen_positions:
                         user_preferred_positions[member] = pre_chosen_positions
-                    else:
-                        team_users.append(member)
 
                 # Assign roles to users with a single preferred role
                 users_with_single_preferred_role = [user for user, positions in user_preferred_positions.items() if len(positions) == 1]
@@ -163,7 +160,7 @@ class Partiditas(commands.Cog):
                     remaining_positions.remove(chosen_position)
 
                 # Assign positions to users without preferred roles
-                users_without_preferred_roles = [user for user in team_users if user not in user_preferred_positions.keys()]
+                users_without_preferred_roles = [user for user in team if user not in user_preferred_positions.keys()]
                 for user in users_without_preferred_roles:
                     if not remaining_positions:
                         break
