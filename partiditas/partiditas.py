@@ -126,7 +126,8 @@ class Partiditas(commands.Cog):
             for user in team:
                 if user in user_preferred_positions:
                     preferred_positions = user_preferred_positions[user]
-                    await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{', '.join(preferred_positions)}].")
+                    position_names = [guild.get_role(position_id).name for position_id in preferred_positions]
+                    await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{', '.join(position_names)}].")
                     valid_positions = [position for position in preferred_positions if position in position_roles and position not in assigned_positions]
                     if valid_positions:
                         position_id = random.choice(valid_positions)
