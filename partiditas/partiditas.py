@@ -118,7 +118,6 @@ class Partiditas(commands.Cog):
 
             for team in combined_teams:
                 assigned_positions = set()
-                user_positions = {}
 
                 # Create a dictionary to keep track of users and their preferred positions
                 user_preferred_positions = {}
@@ -175,48 +174,20 @@ class Partiditas(commands.Cog):
                     remaining_positions.remove(chosen_position)
 
                 # Notify each user of their final position
-                # Inside the loop where teams are being assigned
                 for user in team:
                     if user in user_preferred_positions:
                         preferred_positions = user_preferred_positions[user]
-                        valid_positions = [position for position in preferred_positions if position not in assigned_positions]
-                        if valid_positions:
-                            chosen_position = random.choice(valid_positions)
-                            assigned_positions.add(chosen_position)
-                            await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición {guild.get_role(chosen_position).name}.")
-                        else:
-                            await ctx.send(f"No se encontró una posición válida para el jugador {user.mention} en su equipo actual. Buscando en el siguiente equipo...")
-                            for next_team in combined_teams:
-                                if next_team is not team:
-                                    for next_user in next_team:
-                                        if next_user in user_preferred_positions:
-                                            preferred_positions = user_preferred_positions[next_user]
-                                            valid_positions = [position for position in preferred_positions if position not in assigned_positions]
-                                            if valid_positions:
-                                                chosen_position = random.choice(valid_positions)
-                                                assigned_positions.add(chosen_position)
-                                                await ctx.send(f"Se ha encontrado una posición para el jugador {next_user.mention} en el siguiente equipo. Posición: {guild.get_role(chosen_position).name}.")
-                                                break
-                                    else:
-                                        continue
-                                    break
-                            else:
-                                if remaining_positions:
-                                    chosen_position = remaining_positions.pop()
-                                    assigned_positions.add(chosen_position)
-                                    await ctx.send(f"No se encontró una posición preferida para el jugador {user.mention}. Asignando posición aleatoria: {guild.get_role(chosen_position).name}.")
-                                else:
-                                    await ctx.send(f"No se encontró una posición preferida para el jugador {user.mention} y no hay más posiciones disponibles.")
-                        
-                            # Notify each user of their final position within the team
-                            for user in team:
-                                if user in user_positions:
-                                    position_id = user_positions[user]
-                                else:
-                                    position_id = assigned_positions.pop()
+                        await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{', '.join(preferred_positions)}].")
+                    else:
+                        await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
 
-                                position_role = guild.get_role(position_id)
-                                await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
+                    if user in user_preferred_positions:
+                        position_id = user_preferred_positions[user][0]
+                    else:
+                        position_id = assigned_positions.pop()
+
+                    position_role = guild.get_role(position_id)
+                    await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
 
             # Get the category
             category = guild.get_channel(1127625556247203861)
