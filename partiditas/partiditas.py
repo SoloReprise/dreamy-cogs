@@ -81,21 +81,20 @@ class Partiditas(commands.Cog):
     async def _create_teams_and_channels_vs(self, ctx, role1: discord.Role, role2: discord.Role, num_teams: int, members_per_team: int):
         guild = ctx.guild
 
-        members_with_role1 = list(set([member for member in guild.members if role1 in member.roles]))
-        members_with_role2 = list(set([member for member in guild.members if role2 in member.roles]))
+        members_with_role1 = [member for member in guild.members if role1 in member.roles]
+        members_with_role2 = [member for member in guild.members if role2 in member.roles]
 
         total_members_needed = num_teams * members_per_team
 
-        if len(members_with_role1) < num_teams or len(members_with_role2) < num_teams:
+        if len(set(members_with_role1)) < num_teams or len(set(members_with_role2)) < num_teams:
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        if len(members_with_role1) + len(members_with_role2) < total_members_needed:
-            await ctx.send("No hay suficientes miembros únicos con los roles especificados para formar los equipos.")
-            return
+        unique_members_with_role1 = list(set(members_with_role1))
+        unique_members_with_role2 = list(set(members_with_role2))
 
-        odd_teams = [random.sample(members_with_role1, members_per_team) for _ in range(num_teams)]
-        even_teams = [random.sample(members_with_role2, members_per_team) for _ in range(num_teams)]
+        odd_teams = [random.sample(unique_members_with_role1, members_per_team) for _ in range(num_teams)]
+        even_teams = [random.sample(unique_members_with_role2, members_per_team) for _ in range(num_teams)]
 
         combined_teams = []
         for i in range(num_teams):
@@ -109,8 +108,6 @@ class Partiditas(commands.Cog):
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
             random.shuffle(position_roles)
 
-            processed_users = set()
-
             for team in combined_teams:
                 assigned_positions = set()
 
@@ -118,9 +115,6 @@ class Partiditas(commands.Cog):
                 user_preferred_positions = {}
 
                 for member in team:
-                    if member in processed_users:
-                        continue
-
                     member_roles = [role.id for role in member.roles]
 
                     # Check if the member has a pre-chosen position role
@@ -128,7 +122,6 @@ class Partiditas(commands.Cog):
 
                     if pre_chosen_positions:
                         user_preferred_positions[member] = pre_chosen_positions
-                        processed_users.add(member)
 
                 # Assign roles to users with a single preferred role
                 users_with_single_preferred_role = [user for user, positions in user_preferred_positions.items() if len(positions) == 1]
@@ -196,7 +189,8 @@ class Partiditas(commands.Cog):
             voice_channel = await category.create_voice_channel(voice_channel_name, overwrites=overwrites)
             voice_channels.append(voice_channel)
 
-            for member in team:
+            for member_id in team:
+                member = guild.get_member(member_id)
                 if member and member.voice:
                     await member.move_to(voice_channel)
 
