@@ -93,19 +93,18 @@ class Partiditas(commands.Cog):
         odd_teams = [random.sample(members_with_role1, members_per_team) for _ in range(num_teams)]
         even_teams = [random.sample(members_with_role2, members_per_team) for _ in range(num_teams)]
 
-        combined_teams = []
-        for i in range(num_teams):
-            if i % 2 == 0:
-                combined_teams.append(odd_teams[i])
-            else:
-                combined_teams.append(even_teams[i])
-
         # Check if team size is 5
         if members_per_team == 5:
             position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
             random.shuffle(position_roles)
 
-            for team in combined_teams:
+            combined_teams = []
+            for i in range(num_teams):
+                if i % 2 == 0:
+                    team = odd_teams[i]
+                else:
+                    team = even_teams[i]
+
                 assigned_positions = set()
 
                 # Create a dictionary to keep track of users and their preferred positions
@@ -124,7 +123,6 @@ class Partiditas(commands.Cog):
                 users_with_single_preferred_role = [user for user, positions in user_preferred_positions.items() if len(positions) == 1]
                 for user in users_with_single_preferred_role:
                     position_id = user_preferred_positions[user][0]
-                    position_role = guild.get_role(position_id)
                     assigned_positions.add(position_id)
                     del user_preferred_positions[user]
 
@@ -162,6 +160,8 @@ class Partiditas(commands.Cog):
                     assigned_positions.add(chosen_position)
                     remaining_positions.remove(chosen_position)
 
+                combined_teams.append(team)
+
                 # Notify each user of their final position
                 for user, position_ids in user_preferred_positions.items():
                     position_role = guild.get_role(position_ids[0])
@@ -192,3 +192,6 @@ class Partiditas(commands.Cog):
 
         equipos_unidos = "\n".join(lista_equipos)
         await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}")
+
+        await self.config.guild(guild).role_to_team.set_raw(str(role1.id), value=odd_teams)
+        await self.config.guild(guild).role_to_team.set_raw(str(role2.id), value=even_teams)
