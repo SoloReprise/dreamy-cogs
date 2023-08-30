@@ -107,9 +107,8 @@ class Partiditas(commands.Cog):
 
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
 
-        assigned_positions = set()  # Keep track of assigned positions for all teams
-
         for team in combined_teams:
+            assigned_positions = set()  # Reset assigned positions for each team
             team_positions = set()  # Keep track of positions assigned to this team
 
             for user in team:
