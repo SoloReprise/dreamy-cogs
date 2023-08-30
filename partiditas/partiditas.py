@@ -124,54 +124,13 @@ class Partiditas(commands.Cog):
                     if pre_chosen_positions:
                         user_preferred_positions[member] = pre_chosen_positions
 
-                # Assign roles to users with a single preferred role
-                users_with_single_preferred_role = [user for user, positions in user_preferred_positions.items() if len(positions) == 1]
-                for user in users_with_single_preferred_role:
-                    position_id = user_preferred_positions[user][0]
-                    position_role = guild.get_role(position_id)
-                    assigned_positions.add(position_id)
-                    del user_preferred_positions[user]
-
-                # Assign roles to users with multiple preferred roles
-                users_with_multiple_preferred_roles = [user for user, positions in user_preferred_positions.items() if len(positions) > 1]
-                for user in users_with_multiple_preferred_roles:
-                    valid_positions = [position for position in user_preferred_positions[user] if position in position_roles and position not in assigned_positions]
-                    if valid_positions:
-                        chosen_position = random.choice(valid_positions)
-                        assigned_positions.add(chosen_position)
-                        del user_preferred_positions[user]
-
-                # Assign remaining positions randomly
-                remaining_positions = [role_id for role_id in position_roles if role_id not in assigned_positions]
-                for user in user_preferred_positions.keys():
-                    if not remaining_positions:
-                        break
-
-                    valid_positions = [position for position in user_preferred_positions[user] if position in remaining_positions]
-                    if valid_positions:
-                        chosen_position = random.choice(valid_positions)
-                    else:
-                        chosen_position = random.choice(remaining_positions)
-
-                    assigned_positions.add(chosen_position)
-                    remaining_positions.remove(chosen_position)
-
-                # Assign positions to users without preferred roles
-                users_without_preferred_roles = [user for user in team if user not in user_preferred_positions.keys()]
-                for user in users_without_preferred_roles:
-                    if not remaining_positions:
-                        break
-
-                    chosen_position = random.choice(remaining_positions)
-                    assigned_positions.add(chosen_position)
-                    remaining_positions.remove(chosen_position)
-
-                # Notify each user of their final position
+                # Notify each user of their final position or search for a preferred position
                 for user in team:
                     if user in user_preferred_positions:
                         preferred_positions = user_preferred_positions[user]
-                        await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{', '.join(str(role_id) for role_id in preferred_positions)}].")
-                        valid_positions = [position for position in preferred_positions if position in assigned_positions]
+                        await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{', '.join(preferred_positions)}].")
+
+                        valid_positions = [position for position in preferred_positions if position in position_roles and position not in assigned_positions]
                         if valid_positions:
                             position_id = random.choice(valid_positions)
                         else:
