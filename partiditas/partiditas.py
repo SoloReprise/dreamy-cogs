@@ -126,9 +126,10 @@ class Partiditas(commands.Cog):
                     if valid_positions:
                         position = random.choice(valid_positions)
                     else:
-                        available_positions = [position for position in position_roles if position.id not in team_positions and position.id not in assigned_positions]
+                        available_positions = [position_id for position_id in position_roles if position_id not in team_positions and position_id not in assigned_positions]
                         if available_positions:
-                            position = random.choice(available_positions)
+                            position_id = random.choice(available_positions)
+                            position = guild.get_role(position_id)
                         else:
                             await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
                             continue
@@ -138,9 +139,10 @@ class Partiditas(commands.Cog):
                     await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name}")
                 else:
                     await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
-                    available_positions = [position for position in position_roles if position.id not in team_positions and position.id not in assigned_positions]
+                    available_positions = [position_id for position_id in position_roles if position_id not in team_positions and position_id not in assigned_positions]
                     if available_positions:
-                        position = random.choice(available_positions)
+                        position_id = random.choice(available_positions)
+                        position = guild.get_role(position_id)
                     else:
                         await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
                         continue
