@@ -175,11 +175,7 @@ class Partiditas(commands.Cog):
                         await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
 
                     if user in user_preferred_positions:
-                        valid_positions = [position_id for position_id in user_preferred_positions[user] if position_id in assigned_positions]
-                        if valid_positions:
-                            position_id = random.choice(valid_positions)
-                        else:
-                            position_id = assigned_positions.pop()
+                        position_id = user_preferred_positions[user][0]
                     else:
                         position_id = assigned_positions.pop()
 
