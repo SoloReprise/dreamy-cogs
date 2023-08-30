@@ -132,10 +132,18 @@ class Partiditas(commands.Cog):
                     if valid_positions:
                         position_id = random.choice(valid_positions)
                     else:
-                        position_id = assigned_positions.pop()
+                        if assigned_positions:
+                            position_id = assigned_positions.pop()
+                        else:
+                            await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
+                            continue
                 else:
                     await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
-                    position_id = assigned_positions.pop()
+                    if assigned_positions:
+                        position_id = assigned_positions.pop()
+                    else:
+                        await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
+                        continue
 
                 position_role = guild.get_role(position_id)
                 await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
