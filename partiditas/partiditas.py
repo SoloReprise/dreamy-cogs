@@ -107,9 +107,12 @@ class Partiditas(commands.Cog):
 
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
 
+        teams_with_positions = []
+
         for team in combined_teams:
             assigned_positions = set()  # Reset assigned positions for each team
             team_positions = set()  # Keep track of positions assigned to this team
+            team_with_positions = []
 
             for user in team:
                 member_roles = [role.id for role in user.roles]
@@ -136,6 +139,7 @@ class Partiditas(commands.Cog):
                     team_positions.add(position.id)
                     assigned_positions.add(position.id)
                     await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name}")
+                    team_with_positions.append((user, position))
                 else:
                     await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
                     available_positions = [position_id for position_id in position_roles if position_id not in team_positions and position_id not in assigned_positions]
@@ -149,6 +153,9 @@ class Partiditas(commands.Cog):
                     team_positions.add(position.id)
                     assigned_positions.add(position.id)
                     await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name}")
+                    team_with_positions.append((user, position))
+
+            teams_with_positions.append(team_with_positions)
 
         # Notify each team about their positions
         lista_equipos = []
