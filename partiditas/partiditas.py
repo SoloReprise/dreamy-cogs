@@ -105,42 +105,39 @@ class Partiditas(commands.Cog):
 
             combined_teams.append(team)
 
-        # Check if team size is 5
-        if members_per_team == 5:
-            position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
+        position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
 
-            for team in combined_teams:
-                assigned_positions = set()
+        for team in combined_teams:
+            assigned_positions = set()
 
-                # Create a dictionary to keep track of users and their preferred positions
-                user_preferred_positions = {}
+            # Create a dictionary to keep track of users and their preferred positions
+            user_preferred_positions = {}
 
-                for member in team:
-                    member_roles = [role.id for role in member.roles]
+            for member in team:
+                member_roles = [role.id for role in member.roles]
 
-                    # Check if the member has a pre-chosen position role
-                    pre_chosen_positions = [role_id for role_id in member_roles if role_id in position_roles]
+                # Check if the member has a pre-chosen position role
+                pre_chosen_positions = [role_id for role_id in member_roles if role_id in position_roles]
 
-                    if pre_chosen_positions:
-                        user_preferred_positions[member] = pre_chosen_positions
+                if pre_chosen_positions:
+                    user_preferred_positions[member] = pre_chosen_positions
 
-                # Notify each user of their final position or search for a preferred position
-                for user in team:
-                    if user in user_preferred_positions:
-                        preferred_positions = user_preferred_positions[user]
-                        await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{', '.join(preferred_positions)}].")
-
-                        valid_positions = [position for position in preferred_positions if position in position_roles and position not in assigned_positions]
-                        if valid_positions:
-                            position_id = random.choice(valid_positions)
-                        else:
-                            position_id = assigned_positions.pop()
+            for user in team:
+                if user in user_preferred_positions:
+                    preferred_positions = user_preferred_positions[user]
+                    await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{', '.join(preferred_positions)}].")
+                    valid_positions = [position for position in preferred_positions if position in position_roles and position not in assigned_positions]
+                    if valid_positions:
+                        chosen_position = random.choice(valid_positions)
+                        assigned_positions.add(chosen_position)
                     else:
-                        await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
-                        position_id = assigned_positions.pop()
+                        chosen_position = random.choice(position_roles)
+                else:
+                    await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
+                    chosen_position = random.choice(position_roles)
 
-                    position_role = guild.get_role(position_id)
-                    await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
+                position_role = guild.get_role(chosen_position)
+                await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
 
             # Get the category
             category = guild.get_channel(1127625556247203861)
