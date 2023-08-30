@@ -122,48 +122,24 @@ class Partiditas(commands.Cog):
                 if pre_chosen_positions:
                     user_preferred_positions[member] = pre_chosen_positions
 
-            for user in team:
-                if user in user_preferred_positions:
-                    preferred_positions = user_preferred_positions[user]
-                    position_names = [guild.get_role(position_id).name for position_id in preferred_positions]
-                    await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{', '.join(position_names)}].")
-                    valid_positions = [position for position in preferred_positions if position in position_roles and position not in assigned_positions]
-                    
-                    if valid_positions:
-                        position_id = random.choice(valid_positions)
-                    else:
-                        # Attempt to move the user to another team if possible
-                        other_teams = [t for t in combined_teams if t != team and len(t) < members_per_team]
-                        if other_teams:
-                            other_team = random.choice(other_teams)
-                            if not any(u in other_team for u in user_preferred_positions.keys()):
-                                await ctx.send(f"El jugador {user.mention} no puede obtener su posición preferida en este equipo. Intentando con otro equipo.")
-                                other_team.append(user)
-                                continue
+            # Ensure at least one player per position in the team
+            for position in position_roles:
+                position_members = [user for user, positions in user_preferred_positions.items() if position in positions]
+                if position_members:
+                    user = random.choice(position_members)
+                    user_preferred_positions.pop(user)
+                    assigned_positions.add(position)
 
+            # Assign the remaining positions
+            for user, preferred_positions in user_preferred_positions.items():
+                valid_positions = [position for position in preferred_positions if position in position_roles and position not in assigned_positions]
+                if valid_positions:
+                    position_id = random.choice(valid_positions)
                     assigned_positions.add(position_id)
                     position_role = guild.get_role(position_id)
                     await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
                 else:
-                    await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
-                    if assigned_positions:
-                        position_id = assigned_positions.pop()
-                    else:
-                        await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
-                        continue
-
-                    assigned_positions.add(position_id)
-                    position_role = guild.get_role(position_id)
-                    await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
-
-        # Notify each team about their positions
-        lista_equipos = []
-        position_names = [guild.get_role(position_id).name for position_id in position_roles]
-        for index, team in enumerate(combined_teams, start=1):
-            miembros_equipo = " ".join([member.mention for member in team])
-            lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
-        equipos_unidos = "\n".join(lista_equipos)
-        await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}\nPosiciones disponibles: [{', '.join(position_names)}]")
+                    await ctx.send(f"El jugador {user.mention} no puede obtener su posición preferida en este equipo.")
 
         # Create voice channels and move members
         category = guild.get_channel(1127625556247203861)
