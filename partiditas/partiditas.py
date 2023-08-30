@@ -196,13 +196,16 @@ class Partiditas(commands.Cog):
                                                 assigned_positions.add(chosen_position)
                                                 await ctx.send(f"Se ha encontrado una posición para el jugador {next_user.mention} en el siguiente equipo. Posición: {guild.get_role(chosen_position).name}.")
                                                 break
+                                    else:
+                                        continue
+                                    break
                             else:
-                                chosen_position = remaining_positions.pop()
-                                assigned_positions.add(chosen_position)
-                                await ctx.send(f"No se encontró una posición preferida para el jugador {user.mention}. Asignando posición aleatoria: {guild.get_role(chosen_position).name}.")
-
-                        position_role = guild.get_role(chosen_position)
-                        await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position_role.name}")
+                                if remaining_positions:
+                                    chosen_position = remaining_positions.pop()
+                                    assigned_positions.add(chosen_position)
+                                    await ctx.send(f"No se encontró una posición preferida para el jugador {user.mention}. Asignando posición aleatoria: {guild.get_role(chosen_position).name}.")
+                                else:
+                                    await ctx.send(f"No se encontró una posición preferida para el jugador {user.mention} y no hay más posiciones disponibles.")
 
             # Get the category
             category = guild.get_channel(1127625556247203861)
