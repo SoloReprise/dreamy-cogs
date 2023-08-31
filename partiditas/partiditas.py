@@ -93,6 +93,8 @@ class Partiditas(commands.Cog):
     async def _create_teams_and_channels(self, ctx, role1: discord.Role, role2: discord.Role, num_teams: int = 2, members_per_team: int = 5):
         guild = ctx.guild
 
+        self.combined_teams = []
+
         # Extract members with the provided roles.
         members_with_role1 = list(set([member for member in guild.members if role1 in member.roles]))
         if role2:
