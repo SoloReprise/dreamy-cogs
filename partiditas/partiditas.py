@@ -159,10 +159,10 @@ class Partiditas(commands.Cog):
                                 await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
                                 continue
 
-                    team_positions.add(position.id)
-                    assigned_positions.add(position.id)
-                    await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name}")
-                    team_with_positions.append((user, position))
+                        team_positions.add(position.id)
+                        assigned_positions.add(position.id)
+                        await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name}")
+                        team_with_positions.append((user, position))
                 else:
                     await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
                     available_positions = [position_id for position_id in position_roles if position_id not in team_positions and position_id not in assigned_positions]
@@ -200,15 +200,15 @@ class Partiditas(commands.Cog):
                     team_with_positions.append((user, position_id))
 
             teams_with_positions.append((team_with_positions, assigned_positions))
-            
+
         # Notify each team about their positions
         lista_equipos = []
-        position_names = [guild.get_role(position_id).name for position_id in position_roles]
+        position_mentions = [guild.get_role(position_id).mention for position_id in position_roles]
         for index, team in enumerate(combined_teams, start=1):
             miembros_equipo = " ".join([member.mention for member in team])
             lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
         equipos_unidos = "\n".join(lista_equipos)
-        await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}\nPosiciones disponibles: [{', '.join(position_names)}]")
+        await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}\nPosiciones disponibles: [{', '.join(position_mentions)}]")
 
         # Create voice channels and move members
         category = guild.get_channel(1127625556247203861)
