@@ -189,6 +189,12 @@ class Partiditas(commands.Cog):
 
                 available_players.remove(user)  # Remove user from available players
 
+                # If user gets a position in this team, mark them as assigned
+                if position_id is not None:
+                    assigned_positions.add(position_id)
+                    team_positions.add(position_id)
+                    team_with_positions.append((user, position_id))
+
             teams_with_positions.append((team_with_positions, assigned_positions))
             
         # Notify each team about their positions
