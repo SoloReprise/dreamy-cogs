@@ -96,10 +96,16 @@ class Partiditas(commands.Cog):
         # Divide members into teams.
         for i in range(num_teams):
             if i % 2 == 0:
+                if len(members_with_role1) < members_per_team:
+                    await ctx.send(f"No hay suficientes miembros con el rol {role1.name} para formar un equipo.")
+                    return
                 team = random.sample(members_with_role1, members_per_team)
                 for member in team:
                     members_with_role1.remove(member)
             else:
+                if len(members_with_role2) < members_per_team:
+                    await ctx.send(f"No hay suficientes miembros con el rol {role2.name} para formar un equipo.")
+                    return
                 team = random.sample(members_with_role2, members_per_team)
                 for member in team:
                     members_with_role2.remove(member)
