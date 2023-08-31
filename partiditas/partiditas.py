@@ -91,14 +91,9 @@ class Partiditas(commands.Cog):
 
         combined_teams = []
         for i in range(num_teams):
-            if i % 2 == 0:
-                team = random.sample(members_with_role1, members_per_team)
-                members_with_role1 = [member for member in members_with_role1 if member not in team]
-            else:
-                team = random.sample(members_with_role2, members_per_team)
-                members_with_role2 = [member for member in members_with_role2 if member not in team]
-
-            combined_teams.append(team)
+            team1 = random.sample(members_with_role1, members_per_team)
+            team2 = random.sample(members_with_role2, members_per_team)
+            combined_teams.append(team1 + team2)
 
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
 
@@ -106,15 +101,15 @@ class Partiditas(commands.Cog):
 
         teams_with_positions = []
 
-        for team_index in range(num_teams):
+        for team_index, team in enumerate(combined_teams):
             assigned_positions = set()  # Reset assigned positions for each team
             team_positions = set()  # Keep track of positions assigned to this team
             team_with_positions = []
 
             # Adjust the number of members to sample based on the available members
-            members_to_sample = min(len(combined_teams[team_index]), len(available_players))
+            members_to_sample = min(len(team), len(available_players))
 
-            for user in random.sample(available_players, members_to_sample):
+            for user in random.sample(team, members_to_sample):
                 member_roles = [role.id for role in user.roles]
                 position_id = None  # Initialize position_id to None
 
@@ -124,7 +119,7 @@ class Partiditas(commands.Cog):
 
                 # Check if the member has a pre-chosen position role
                 pre_chosen_positions = [role_id for role_id in member_roles if role_id in position_roles]
-
+            
                 if pre_chosen_positions:
                     preferred_positions = [guild.get_role(position_id) for position_id in pre_chosen_positions]
                     await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{', '.join(p.name for p in preferred_positions)}].")
@@ -195,7 +190,7 @@ class Partiditas(commands.Cog):
                     team_with_positions.append((user, position_id))
 
             teams_with_positions.append((team_with_positions, assigned_positions))
-            
+
         # Notify each team about their positions
         lista_equipos = []
         position_names = [guild.get_role(position_id).name for position_id in position_roles]
