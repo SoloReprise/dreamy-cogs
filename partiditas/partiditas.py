@@ -82,25 +82,16 @@ class Partiditas(commands.Cog):
     async def _create_teams_and_channels_vs(self, ctx, role1: discord.Role, role2: discord.Role, num_teams: int, members_per_team: int):
         guild = ctx.guild
 
-        members_with_role1 = [member for member in guild.members if role1 in member.roles]
-        members_with_role2 = [member for member in guild.members if role2 in member.roles]
+        members_with_roles = [member for member in guild.members if role1 in member.roles and role2 in member.roles]
 
-        unique_members_with_role1 = list(set(members_with_role1))
-        unique_members_with_role2 = list(set(members_with_role2))
-
-        if len(unique_members_with_role1) < num_teams * members_per_team or len(unique_members_with_role2) < num_teams * members_per_team:
+        if len(members_with_roles) < num_teams * members_per_team:
             await ctx.send("No hay suficientes miembros con los roles especificados para formar los equipos.")
             return
 
         combined_teams = []
         for i in range(num_teams):
-            if i % 2 == 0:
-                team = random.sample(unique_members_with_role1, members_per_team)
-                unique_members_with_role1 = [member for member in unique_members_with_role1 if member not in team]
-            else:
-                team = random.sample(unique_members_with_role2, members_per_team)
-                unique_members_with_role2 = [member for member in unique_members_with_role2 if member not in team]
-
+            team = random.sample(members_with_roles, members_per_team)
+            members_with_roles = [member for member in members_with_roles if member not in team]
             combined_teams.append(team)
 
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
