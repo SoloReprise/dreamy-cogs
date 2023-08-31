@@ -140,9 +140,9 @@ class Partiditas(commands.Cog):
 
                     # If the player's preferred positions are all occupied, try finding a subsequent team where they can fit.
                     if not assigned_position:
-                        for subsequent_team in teams_with_positions[team_index+1:]:
+                            suitable_position = None  # Initialize here
+                            for subsequent_team in teams_with_positions[team_index+1:]:
                             free_positions = list(set(position_roles) - set([assigned_role[1] for assigned_role in subsequent_team]))
-                            suitable_position = None
                             for pref_pos in preferred_positions:
                                 if pref_pos in free_positions:
                                     suitable_position = pref_pos
