@@ -116,7 +116,10 @@ class Partiditas(commands.Cog):
             team_positions = set()  # Keep track of positions assigned to this team
             team_with_positions = []
 
-            for user in combined_teams[team_index]:
+            # Adjust the number of members to sample based on the available members
+            members_to_sample = min(len(combined_teams[team_index]), len(available_players))
+
+            for user in random.sample(available_players, members_to_sample):
                 member_roles = [role.id for role in user.roles]
                 position_id = None  # Initialize position_id to None
 
