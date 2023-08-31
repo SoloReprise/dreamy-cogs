@@ -39,6 +39,11 @@ class Partiditas(commands.Cog):
             await channel.delete()
 
         await self.config.guild(guild).clear()
+
+        # Notify the team leaders.
+        for leader in team_leaders:
+            await leader.send("El combate ha sido cancelado.")
+
         await ctx.send("Canales de voz de enfrentamiento eliminados y datos reseteados.")
 
     @battle.command(name="unteam")
@@ -193,3 +198,30 @@ class Partiditas(commands.Cog):
             for member in team:
                 if member.voice:
                     await member.move_to(voice_channel)
+
+        # Create a list of team leaders based on odd teams.
+        team_leaders = [team[0] for index, team in enumerate(combined_teams, start=1) if index % 2 == 1]
+
+        for leader in team_leaders:
+            await leader.send("¡Hola! Eres el encargado de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.bot:
+            return
+
+        # Check if message is DM and author is a team leader.
+        if isinstance(message.channel, discord.DMChannel) and message.author in team_leaders:
+            if message.content.isdigit() and len(message.content) == 8:  # Check if the message contains an 8-digit number.
+                await message.author.send("Código recibido. Se lo enviaré al resto de jugadores.")
+
+                # Fetch the team of the leader.
+                team_idx = [i for i, team in enumerate(combined_teams) if message.author in team][0]
+                
+                # Relay code to both the teams (odd and even).
+                for member in combined_teams[team_idx] + combined_teams[team_idx + 1]:
+                    await member.send(f"Código para el combate proporcionado por {message.author.display_name}: {message.content}")
+
+            else:
+                await message.author.send("El código proporcionado no es válido. Por favor, envía un número de 8 dígitos.")
+
