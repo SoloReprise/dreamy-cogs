@@ -91,6 +91,7 @@ class Partiditas(commands.Cog):
             return
 
         combined_teams = []
+        all_assigned_players = []
 
         # Divide members into teams.
         for i in range(num_teams):
@@ -102,45 +103,49 @@ class Partiditas(commands.Cog):
                 team = random.sample(members_with_role2, members_per_team)
                 for member in team:
                     members_with_role2.remove(member)
+            all_assigned_players.extend(team)
             combined_teams.append(team)
 
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
 
         teams_with_positions = []
 
-        for team in combined_teams:
-            team_positions = set()
-            team_with_positions = []
+        if members_per_team == 5:  # Position comprobation only for teams of 5 members.
+            for team in combined_teams:
+                team_positions = set()
+                team_with_positions = []
 
-            for user in team:
-                member_roles = set(role.id for role in user.roles)
-                valid_positions = list(set(position_roles) - team_positions)
-                assigned_position = None
+                for user in team:
+                    member_roles = set(role.id for role in user.roles)
+                    valid_positions = list(set(position_roles) - team_positions)
+                    assigned_position = None
 
-                # Notify about preferred positions.
-                preferred_positions = member_roles & set(position_roles)
-                if preferred_positions:
-                    pref_names = ', '.join([guild.get_role(pos).name for pos in preferred_positions])
-                    await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{pref_names}].")
+                    # Notify about preferred positions.
+                    preferred_positions = member_roles & set(position_roles)
+                    if preferred_positions:
+                        pref_names = ', '.join([guild.get_role(pos).name for pos in preferred_positions])
+                        await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{pref_names}].")
 
-                # Assign position based on preference or random.
-                for pos in preferred_positions:
-                    if pos in valid_positions:
-                        assigned_position = pos
-                        break
+                    # Assign position based on preference or random.
+                    for pos in preferred_positions:
+                        if pos in valid_positions:
+                            assigned_position = pos
+                            break
 
-                if not assigned_position and valid_positions:
-                    assigned_position = random.choice(valid_positions)
+                    if not assigned_position and valid_positions:
+                        assigned_position = random.choice(valid_positions)
 
-                if assigned_position:
-                    position_name = guild.get_role(assigned_position).name
-                    team_positions.add(assigned_position)
-                    team_with_positions.append((user, position_name))
-                    await ctx.send(f"La posición de {user.mention} para el Equipo {combined_teams.index(team) + 1} es {position_name}.")
-                else:
-                    await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
+                    if assigned_position:
+                        position_name = guild.get_role(assigned_position).name
+                        team_positions.add(assigned_position)
+                        team_with_positions.append((user, position_name))
+                        await ctx.send(f"La posición de {user.mention} para el Equipo {combined_teams.index(team) + 1} es {position_name}.")
+                    else:
+                        await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
 
-            teams_with_positions.append(team_with_positions)
+                teams_with_positions.append(team_with_positions)
+        else:
+            teams_with_positions = [[(user, None) for user in team] for team in combined_teams]
 
         # Notify about team compositions.
         position_names = [guild.get_role(position_id).name for position_id in position_roles]
