@@ -91,24 +91,19 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        combined_teams = []
-        for i in range(num_teams):
-            if i % 2 == 0:
-                team = random.sample(members_with_role1, members_per_team)
-                members_with_role1 = [member for member in members_with_role1 if member not in team]
-            else:
-                team = random.sample(members_with_role2, members_per_team)
-                members_with_role2 = [member for member in members_with_role2 if member not in team]
+        available_players = list(set(members_with_role1 + members_with_role2))  # List of available players
+        random.shuffle(available_players)
 
-            combined_teams.append(team)
+        teams = [[] for _ in range(num_teams)]
+
+        for i, player in enumerate(available_players):
+            teams[i % num_teams].append(player)
 
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
 
-        available_players = list(set(members_with_role1 + members_with_role2))  # List of available players
-
         teams_with_positions = []
 
-        for team_index, team in enumerate(combined_teams, start=1):
+        for team_index, team in enumerate(teams, start=1):
             assigned_positions = set()  # Reset assigned positions for each team
             team_positions = set()  # Keep track of positions assigned to this team
             team_with_positions = []
@@ -182,7 +177,7 @@ class Partiditas(commands.Cog):
                     team_with_positions.append((user, position.id))
 
                 # Remove user from available players
-                available_players = [player for player in available_players if player != user]
+                available_players.remove(user)
 
             teams_with_positions.append((team_with_positions, assigned_positions))
 
@@ -203,7 +198,7 @@ class Partiditas(commands.Cog):
         # Create voice channels and move members
         category = guild.get_channel(1127625556247203861)
         voice_channels = []
-        for index, team in enumerate(combined_teams, start=1):
+        for index, team in enumerate(teams, start=1):
             voice_channel_name = f"◇║Equipo {index}"
             overwrites = {
                 guild.default_role: discord.PermissionOverwrite(connect=False),
