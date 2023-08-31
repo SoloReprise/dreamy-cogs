@@ -161,7 +161,6 @@ class Partiditas(commands.Cog):
 
                         team_positions.add(position.id)
                         assigned_positions.add(position.id)
-                        await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name}")
                         team_with_positions.append((user, position))
                 else:
                     await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
@@ -188,7 +187,6 @@ class Partiditas(commands.Cog):
 
                     team_positions.add(position.id)
                     assigned_positions.add(position.id)
-                    await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name}")
                     team_with_positions.append((user, position))
 
                 available_players.remove(user)  # Remove user from available players
@@ -198,6 +196,10 @@ class Partiditas(commands.Cog):
                     assigned_positions.add(position_id)
                     team_positions.add(position_id)
                     team_with_positions.append((user, position_id))
+                    
+                # Announce the player's position assignment
+                if position_id is not None:
+                    await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name}")
 
             teams_with_positions.append((team_with_positions, assigned_positions))
 
