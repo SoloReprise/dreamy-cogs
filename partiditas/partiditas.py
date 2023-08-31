@@ -119,6 +119,10 @@ class Partiditas(commands.Cog):
             for user in combined_teams[team_index]:
                 member_roles = [role.id for role in user.roles]
 
+                # Check if the member has already been assigned to a team
+                if user in [u for t, _ in teams_with_positions for u in t]:
+                    continue
+
                 # Check if the member has a pre-chosen position role
                 pre_chosen_positions = [role_id for role_id in member_roles if role_id in position_roles]
 
