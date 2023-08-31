@@ -102,26 +102,26 @@ class Partiditas(commands.Cog):
         else:
             members_with_role2 = members_with_role1.copy()  # Use members from role1 if role2 is not specified.
 
-        if len(members_with_role1) < num_teams or len(members_with_role2) < num_teams:
+        if len(members_with_role1) < members_per_team or len(members_with_role2) < members_per_team:
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
+        already_chosen = []  # To keep track of members already selected.
+
         # Divide members into teams.
         for i in range(num_teams):
-            if i % 2 == 0:
-                if len(members_with_role1) < members_per_team:
+            if i % 2 == 0:  # Odd Teams
+                if len([m for m in members_with_role1 if m not in already_chosen]) < members_per_team:
                     await ctx.send(f"No hay suficientes miembros con el rol {role1.name} para formar un equipo.")
                     return
-                team = random.sample(members_with_role1, members_per_team)
-                for member in team:
-                    members_with_role1.remove(member)
-            else:
-                if len(members_with_role2) < members_per_team:
+                team = random.sample([m for m in members_with_role1 if m not in already_chosen], members_per_team)
+            else:  # Even Teams
+                if len([m for m in members_with_role2 if m not in already_chosen]) < members_per_team:
                     await ctx.send(f"No hay suficientes miembros con el rol {role2.name} para formar un equipo.")
                     return
-                team = random.sample(members_with_role2, members_per_team)
-                for member in team:
-                    members_with_role2.remove(member)
+                team = random.sample([m for m in members_with_role2 if m not in already_chosen], members_per_team)
+
+            already_chosen.extend(team)
             self.combined_teams.append(team)
 
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
