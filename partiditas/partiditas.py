@@ -137,6 +137,9 @@ class Partiditas(commands.Cog):
 
                     suitable_position = None  # Initialize here
                     if not assigned_position:
+                        # Notify about checking subsequent teams
+                        await ctx.send(f"Se ha encontrado al jugador {user.mention}. Sus posiciones favoritas son [{', '.join([guild.get_role(pos).name for pos in preferred_positions])}]. No encontrada posición en equipo inicial, Equipo {team_index+1}. Buscando en otros equipos.")
+                        
                         # Check subsequent teams for the user's preferred position
                         for subsequent_team in teams_with_positions[team_index+1:]:
                             free_positions = list(set(position_roles) - set([assigned_role[1] for assigned_role in subsequent_team]))
