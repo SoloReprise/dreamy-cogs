@@ -181,7 +181,8 @@ class Partiditas(commands.Cog):
                     await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name} en el Equipo {team_index}")
                     team_with_positions.append((user, position))
 
-                available_players.remove(user)  # Remove user from available players
+                # Remove user from available players
+                available_players = [player for player in available_players if player != user]
 
             teams_with_positions.append((team_with_positions, assigned_positions))
 
