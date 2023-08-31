@@ -87,21 +87,18 @@ class Partiditas(commands.Cog):
 
         total_members_needed = num_teams * members_per_team
 
-        if len(set(members_with_role1)) < num_teams or len(set(members_with_role2)) < num_teams:
+        if len(members_with_role1) < num_teams or len(members_with_role2) < num_teams:
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
-
-        unique_members_with_role1 = list(set(members_with_role1))
-        unique_members_with_role2 = list(set(members_with_role2))
 
         combined_teams = []
         for i in range(num_teams):
             if i % 2 == 0:
-                team = random.sample(unique_members_with_role1, members_per_team)
-                unique_members_with_role1 = [member for member in unique_members_with_role1 if member not in team]
+                team = random.sample(members_with_role1, members_per_team)
+                members_with_role1 = [member for member in members_with_role1 if member not in team]
             else:
-                team = random.sample(unique_members_with_role2, members_per_team)
-                unique_members_with_role2 = [member for member in unique_members_with_role2 if member not in team]
+                team = random.sample(members_with_role2, members_per_team)
+                members_with_role2 = [member for member in members_with_role2 if member not in team]
 
             combined_teams.append(team)
 
@@ -111,21 +108,14 @@ class Partiditas(commands.Cog):
 
         teams_with_positions = []
 
-        for team_index in range(num_teams):
+        for team_index, team in enumerate(combined_teams, start=1):
             assigned_positions = set()  # Reset assigned positions for each team
             team_positions = set()  # Keep track of positions assigned to this team
             team_with_positions = []
 
-            # Adjust the number of members to sample based on the available members
-            members_to_sample = min(len(combined_teams[team_index]), len(available_players))
-
-            for user in random.sample(available_players, members_to_sample):
+            for user in team:
                 member_roles = [role.id for role in user.roles]
                 position_id = None  # Initialize position_id to None
-
-                # Check if the member has already been assigned to a team
-                if user in [u for t, _ in teams_with_positions for u in t]:
-                    continue
 
                 # Check if the member has a pre-chosen position role
                 pre_chosen_positions = [role_id for role_id in member_roles if role_id in position_roles]
@@ -161,7 +151,7 @@ class Partiditas(commands.Cog):
 
                         team_positions.add(position.id)
                         assigned_positions.add(position.id)
-                        await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name} en el Equipo {team_index + 1}")
+                        await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name} en el Equipo {team_index}")
                         team_with_positions.append((user, position))
                 else:
                     await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
@@ -188,7 +178,7 @@ class Partiditas(commands.Cog):
 
                     team_positions.add(position.id)
                     assigned_positions.add(position.id)
-                    await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name} en el Equipo {team_index + 1}")
+                    await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name} en el Equipo {team_index}")
                     team_with_positions.append((user, position))
 
                 available_players.remove(user)  # Remove user from available players
