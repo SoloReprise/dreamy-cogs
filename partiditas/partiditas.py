@@ -41,7 +41,7 @@ class Partiditas(commands.Cog):
         await self.config.guild(guild).clear()
 
         # Notify the team leaders.
-        for leader in team_leaders:
+        for leader in self.team_leaders:
             await leader.send("El combate ha sido cancelado.")
 
         await ctx.send("Canales de voz de enfrentamiento eliminados y datos reseteados.")
@@ -200,7 +200,7 @@ class Partiditas(commands.Cog):
                     await member.move_to(voice_channel)
 
         # Create a list of team leaders based on odd teams.
-        team_leaders = [team[0] for index, team in enumerate(combined_teams, start=1) if index % 2 == 1]
+        self.team_leaders = [team[0] for index, team in enumerate(self.combined_teams, start=1) if index % 2 == 1]
 
         for leader in team_leaders:
             await leader.send("¡Hola! Eres el encargado de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")
