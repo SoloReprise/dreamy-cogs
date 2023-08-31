@@ -94,6 +94,40 @@ class Partiditas(commands.Cog):
         unique_members_with_role1 = list(set(members_with_role1))
         unique_members_with_role2 = list(set(members_with_role2))
 
+        all_teams = []
+
+        for _ in range(num_teams):
+            team = []
+            team_positions = set()
+            
+            while len(team) < members_per_team:
+                user = random.choice(unique_members_with_role1 + unique_members_with_role2)
+                
+                # Check if the user is not already in another team
+                if any(user in t for t in all_teams):
+                    continue
+                
+                preferred_positions = get_preferred_positions(user)  # Implement a function to get preferred positions
+                
+                if preferred_positions:
+                    available_positions = [position for position in position_roles if position not in team_positions]
+                    valid_positions = [p for p in preferred_positions if p in available_positions]
+                    
+                    if valid_positions:
+                        position_id = random.choice(valid_positions)
+                        team_positions.add(position_id)
+                        position_role = guild.get_role(position_id)
+                        team.append((user, position_role))
+                
+                if not team:
+                    # Assign any position if preferred positions are not available
+                    position_id = random.choice(available_positions)
+                    team_positions.add(position_id)
+                    position_role = guild.get_role(position_id)
+                    team.append((user, position_role))
+            
+            all_teams.append(team)
+
         combined_teams = []
         for i in range(num_teams):
             if i % 2 == 0:
