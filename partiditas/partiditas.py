@@ -90,8 +90,7 @@ class Partiditas(commands.Cog):
         """Randomiza equipos con dos roles y crea canales de voz."""
         await self._create_teams_and_channels(ctx, role1, role2, num_teams, members_per_team)
 
-    async def _create_teams_and_channels(self, ctx, role1: discord.Role, role2: discord.Role = None, num_teams: int, members_per_team: int):
-        guild = ctx.guild
+    async def _create_teams_and_channels(self, ctx, role1: discord.Role, role2: discord.Role, num_teams: int = 2, members_per_team: int = 5):        guild = ctx.guild
 
         # Extract members with the provided roles.
         members_with_role1 = list(set([member for member in guild.members if role1 in member.roles]))
