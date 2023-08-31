@@ -161,6 +161,7 @@ class Partiditas(commands.Cog):
 
                         team_positions.add(position.id)
                         assigned_positions.add(position.id)
+                        await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name} en el Equipo {team_index + 1}")
                         team_with_positions.append((user, position))
                 else:
                     await ctx.send(f"Se ha encontrado al jugador {user.mention}. No tiene marcada ninguna posición favorita. Buscando posición.")
@@ -187,6 +188,7 @@ class Partiditas(commands.Cog):
 
                     team_positions.add(position.id)
                     assigned_positions.add(position.id)
+                    await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name} en el Equipo {team_index + 1}")
                     team_with_positions.append((user, position))
 
                 available_players.remove(user)  # Remove user from available players
@@ -196,19 +198,20 @@ class Partiditas(commands.Cog):
                     assigned_positions.add(position_id)
                     team_positions.add(position_id)
                     team_with_positions.append((user, position_id))
-                    
-                # Announce the player's position assignment
-                if position_id is not None:
-                    await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name}")
 
             teams_with_positions.append((team_with_positions, assigned_positions))
 
         # Notify each team about their positions
         lista_equipos = []
         position_mentions = [guild.get_role(position_id).mention for position_id in position_roles]
-        for index, team in enumerate(combined_teams, start=1):
-            miembros_equipo = " ".join([member.mention for member in team])
-            lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
+        for index, (team, assigned_positions) in enumerate(teams_with_positions, start=1):
+            miembros_equipo = " ".join([member.mention for member, _ in team])
+            equipo_info = f"Equipo {index}: {miembros_equipo}"
+            for user, position_id in team:
+                position_name = guild.get_role(position_id).name
+                equipo_info += f"\n  - {user.mention}: {position_name}"
+            lista_equipos.append(equipo_info)
+
         equipos_unidos = "\n".join(lista_equipos)
         await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}\nPosiciones disponibles: [{', '.join(position_mentions)}]")
 
