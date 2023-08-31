@@ -86,8 +86,8 @@ class Partiditas(commands.Cog):
         members_with_role2 = [member for member in guild.members if role2 in member.roles]
 
         total_members_needed = num_teams * members_per_team
-
-        if len(set(members_with_role1)) < num_teams or len(set(members_with_role2)) < num_teams:
+        total_members_available = len(unique_members_with_role1) + len(unique_members_with_role2)
+        if total_members_available < num_teams * members_per_team:
             await ctx.send("No hay suficientes miembros con los roles especificados para crear tantos equipos.")
             return
 
