@@ -228,9 +228,12 @@ class UserCommands(MixinMeta, ABC):
         self.stars[guild_id][star_giver] = now
 
         if recipients:
-            recipients_str = ", ".join(recipients[:-1]) + _(" y ") + recipients[-1] if len(recipients) > 1 else recipients[0]
-            message = await ctx.send(_("¡Bien jugado, {}!").format(recipients_str))
-            await message.add_reaction(":gg:")
+            emoji_id_here = 1146935305765670954  # Replace with the actual emoji ID
+            
+            emoji = ctx.bot.get_emoji(emoji_id_here)
+            
+            if emoji:
+                await ctx.message.add_reaction(emoji)
 
     @commands.command(name="ungg")
     @commands.guild_only()
