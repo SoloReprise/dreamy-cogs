@@ -104,8 +104,6 @@ class Partiditas(commands.Cog):
 
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
 
-        available_players = list(set(members_with_role1 + members_with_role2))  # List of available players
-
         teams_with_positions = []
 
         for team_index, team in enumerate(combined_teams, start=1):
@@ -180,9 +178,6 @@ class Partiditas(commands.Cog):
                     assigned_positions.add(position.id)
                     await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name} en el Equipo {team_index}")
                     team_with_positions.append((user, position))
-
-                # Remove user from available players
-                available_players = [player for player in available_players if player != user]
 
             teams_with_positions.append((team_with_positions, assigned_positions))
 
