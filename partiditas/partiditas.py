@@ -11,6 +11,8 @@ class Partiditas(commands.Cog):
             "user_pairs": {}     # Stores user pairs that shouldn't be on the same team
         }
         self.config.register_guild(**default_guild)
+        self.combined_teams = []
+        self.team_leaders = []
 
     @commands.group()
     @commands.guild_only()
@@ -43,6 +45,10 @@ class Partiditas(commands.Cog):
         # Notify the team leaders.
         for leader in self.team_leaders:
             await leader.send("El combate ha sido cancelado.")
+
+        # Clear out the team data.
+        self.combined_teams = []
+        self.team_leaders = []
 
         await ctx.send("Canales de voz de enfrentamiento eliminados y datos reseteados.")
 
@@ -95,8 +101,6 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        combined_teams = []
-
         # Divide members into teams.
         for i in range(num_teams):
             if i % 2 == 0:
@@ -113,13 +117,13 @@ class Partiditas(commands.Cog):
                 team = random.sample(members_with_role2, members_per_team)
                 for member in team:
                     members_with_role2.remove(member)
-            combined_teams.append(team)
+            self.combined_teams.append(team)
 
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
         teams_with_positions = []
 
         if members_per_team == 5:  # Position comprobation only for teams of 5 members.
-            for team_index, team in enumerate(combined_teams):
+            for team_index, team in enumerate(self.combined_teams):
                 team_positions = set()
                 team_with_positions = []
 
@@ -166,14 +170,14 @@ class Partiditas(commands.Cog):
                         position_name = guild.get_role(assigned_position).name
                         team_positions.add(assigned_position)
                         team_with_positions.append((user, position_name))
-                        await ctx.send(f"La posición de {user.mention} para el Equipo {combined_teams.index(team) + 1} es {position_name}.")
+                        await ctx.send(f"La posición de {user.mention} para el Equipo {self.combined_teams.index(team) + 1} es {position_name}.")
                     else:
                         await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
 
                 teams_with_positions.append(team_with_positions)
 
         else:
-            teams_with_positions = [[(user, None) for user in team] for team in combined_teams]
+            teams_with_positions = [[(user, None) for user in team] for team in self.combined_teams]
 
         # Notify about team compositions.
         position_names = [guild.get_role(position_id).name for position_id in position_roles]
@@ -187,7 +191,7 @@ class Partiditas(commands.Cog):
 
         # Create voice channels and move members.
         category = guild.get_channel(1127625556247203861)
-        for index, team in enumerate(combined_teams, start=1):
+        for index, team in enumerate(self.combined_teams, start=1):
             voice_channel_name = f"◇║Equipo {index}"
             overwrites = {
                 guild.default_role: discord.PermissionOverwrite(connect=False),
@@ -202,7 +206,7 @@ class Partiditas(commands.Cog):
         # Create a list of team leaders based on odd teams.
         self.team_leaders = [team[0] for index, team in enumerate(self.combined_teams, start=1) if index % 2 == 1]
 
-        for leader in team_leaders:
+        for leader in self.team_leaders:
             await leader.send("¡Hola! Eres el encargado de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")
 
     @commands.Cog.listener()
@@ -211,15 +215,15 @@ class Partiditas(commands.Cog):
             return
 
         # Check if message is DM and author is a team leader.
-        if isinstance(message.channel, discord.DMChannel) and message.author in team_leaders:
+        if isinstance(message.channel, discord.DMChannel) and message.author in self.team_leaders:
             if message.content.isdigit() and len(message.content) == 8:  # Check if the message contains an 8-digit number.
                 await message.author.send("Código recibido. Se lo enviaré al resto de jugadores.")
 
                 # Fetch the team of the leader.
-                team_idx = [i for i, team in enumerate(combined_teams) if message.author in team][0]
+                team_idx = [i for i, team in enumerate(self.combined_teams) if message.author in team][0]
                 
                 # Relay code to both the teams (odd and even).
-                for member in combined_teams[team_idx] + combined_teams[team_idx + 1]:
+                for member in self.combined_teams[team_idx] + self.combined_teams[team_idx + 1]:
                     await member.send(f"Código para el combate proporcionado por {message.author.display_name}: {message.content}")
 
             else:
