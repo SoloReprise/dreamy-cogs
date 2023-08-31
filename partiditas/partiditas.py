@@ -184,7 +184,7 @@ class Partiditas(commands.Cog):
         # Notify each team about their positions
         lista_equipos = []
         position_names = [guild.get_role(position_id).name for position_id in position_roles]
-        for index, (team, assigned_positions) in enumerate(teams_with_positions, start=1):
+        for index, (team, _) in enumerate(teams_with_positions, start=1):
             miembros_equipo = " ".join([member.mention for member, _ in team])
             equipo_info = f"Equipo {index}: {miembros_equipo}"
             for user, position_id in team:
