@@ -189,8 +189,8 @@ class Partiditas(commands.Cog):
 
                 available_players.remove(user)  # Remove user from available players
 
-            teams_with_positions.append(team_with_positions)
-
+            teams_with_positions.append((team_with_positions, assigned_positions))
+            
         # Notify each team about their positions
         lista_equipos = []
         position_names = [guild.get_role(position_id).name for position_id in position_roles]
