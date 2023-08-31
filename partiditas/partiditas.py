@@ -140,7 +140,7 @@ class Partiditas(commands.Cog):
 
                     # If the player's preferred positions are all occupied, try finding a subsequent team where they can fit.
                     if not assigned_position:
-                        for subsequent_team in combined_teams[team_index+1:]:
+                        for subsequent_team in teams_with_positions[team_index+1:]:
                             free_positions = list(set(position_roles) - set([assigned_role[1] for assigned_role in subsequent_team]))
                             suitable_position = None
                             for pref_pos in preferred_positions:
@@ -148,13 +148,16 @@ class Partiditas(commands.Cog):
                                     suitable_position = pref_pos
                                     break
                             
-                            # If a suitable position is found in a subsequent team, swap the players
-                            if suitable_position:
-                                swap_index = team_index + 1 + combined_teams[team_index+1:].index(subsequent_team)
-                                combined_teams[swap_index][free_positions.index(suitable_position)] = user
-                                combined_teams[team_index][user_index] = combined_teams[swap_index][free_positions.index(suitable_position)]
-                                assigned_position = suitable_position
-                                break
+                    # If a suitable position is found in a subsequent team, swap the players
+                    if suitable_position:
+                        swap_index = team_index + 1 + teams_with_positions[team_index+1:].index(subsequent_team)
+                        swap_user = next(member for member, pos in combined_teams[swap_index] if pos == suitable_position)
+                        
+                        combined_teams[swap_index][combined_teams[swap_index].index(swap_user)] = user
+                        combined_teams[team_index][user_index] = swap_user
+                        
+                        assigned_position = suitable_position
+                        break
 
                     if assigned_position:
                         position_name = guild.get_role(assigned_position).name
