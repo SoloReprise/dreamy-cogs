@@ -82,21 +82,20 @@ class Partiditas(commands.Cog):
     async def _create_teams_and_channels_vs(self, ctx, role1: discord.Role, role2: discord.Role, num_teams: int, members_per_team: int):
         guild = ctx.guild
 
-        members_with_roles = [member for member in guild.members if role1 in member.roles and role2 in member.roles]
+        members_with_role1 = [member for member in guild.members if role1 in member.roles]
+        members_with_role2 = [member for member in guild.members if role2 in member.roles]
 
-        if len(members_with_roles) < num_teams * members_per_team:
+        # Filter members to include only those with both role1 and role2
+        members_with_both_roles = [member for member in members_with_role1 if role2 in member.roles]
+
+        if len(members_with_both_roles) < num_teams * members_per_team:
             await ctx.send("No hay suficientes miembros con los roles especificados para formar los equipos.")
             return
 
-        combined_teams = []
-        for i in range(num_teams):
-            team = random.sample(members_with_roles, members_per_team)
-            members_with_roles = [member for member in members_with_roles if member not in team]
-            combined_teams.append(team)
+        # Create teams based on members with both roles
+        combined_teams = [members_with_both_roles[i:i+members_per_team] for i in range(0, len(members_with_both_roles), members_per_team)]
 
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
-
-        available_players = list(set(members_with_role1 + members_with_role2))  # List of available players
 
         teams_with_positions = []
 
