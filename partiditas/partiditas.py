@@ -85,48 +85,12 @@ class Partiditas(commands.Cog):
         members_with_role1 = [member for member in guild.members if role1 in member.roles]
         members_with_role2 = [member for member in guild.members if role2 in member.roles]
 
-        total_members_needed = num_teams * members_per_team
-
-        if len(set(members_with_role1)) < total_members_needed or len(set(members_with_role2)) < total_members_needed:
-            await ctx.send("No hay suficientes miembros con los roles especificados para formar los equipos.")
-            return
-
         unique_members_with_role1 = list(set(members_with_role1))
         unique_members_with_role2 = list(set(members_with_role2))
 
-        all_teams = []
-
-        for _ in range(num_teams):
-            team = []
-            team_positions = set()
-            
-            while len(team) < members_per_team:
-                user = random.choice(unique_members_with_role1 + unique_members_with_role2)
-                
-                # Check if the user is not already in another team
-                if any(user in t for t in all_teams):
-                    continue
-                
-                preferred_positions = get_preferred_positions(user)  # Implement a function to get preferred positions
-                
-                if preferred_positions:
-                    available_positions = [position for position in position_roles if position not in team_positions]
-                    valid_positions = [p for p in preferred_positions if p in available_positions]
-                    
-                    if valid_positions:
-                        position_id = random.choice(valid_positions)
-                        team_positions.add(position_id)
-                        position_role = guild.get_role(position_id)
-                        team.append((user, position_role))
-                
-                if not team:
-                    # Assign any position if preferred positions are not available
-                    position_id = random.choice(available_positions)
-                    team_positions.add(position_id)
-                    position_role = guild.get_role(position_id)
-                    team.append((user, position_role))
-            
-            all_teams.append(team)
+        if len(unique_members_with_role1) < num_teams * members_per_team or len(unique_members_with_role2) < num_teams * members_per_team:
+            await ctx.send("No hay suficientes miembros con los roles especificados para formar los equipos.")
+            return
 
         combined_teams = []
         for i in range(num_teams):
