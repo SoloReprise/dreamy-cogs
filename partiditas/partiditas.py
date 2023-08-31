@@ -181,19 +181,11 @@ class Partiditas(commands.Cog):
                     await ctx.send(f"Posición encontrada. La posición de {user.mention} es {position.name} en el Equipo {team_index}")
                     team_with_positions.append((user, position))
 
-                available_players.remove(user)  # Remove user from available players
-
-                # If user gets a position in this team, mark them as assigned
-                if position_id is not None:
-                    assigned_positions.add(position_id)
-                    team_positions.add(position_id)
-                    team_with_positions.append((user, position_id))
-
             teams_with_positions.append((team_with_positions, assigned_positions))
+            available_players.remove(user)  # Remove user from available players
 
         # Notify each team about their positions
         lista_equipos = []
-        position_mentions = [guild.get_role(position_id).mention for position_id in position_roles]
         for index, (team, assigned_positions) in enumerate(teams_with_positions, start=1):
             miembros_equipo = " ".join([member.mention for member, _ in team])
             equipo_info = f"Equipo {index}: {miembros_equipo}"
