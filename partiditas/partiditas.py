@@ -135,7 +135,7 @@ class Partiditas(commands.Cog):
                             position_id = random.choice(available_positions)
                             position = guild.get_role(position_id)
                         else:
-                            available_teams = [t for t in teams_with_positions if user in t[0] and len(t) < members_per_team]
+                            available_teams = [t for t in teams_with_positions if user in [u for u, _ in t] and len(t) < members_per_team]
                             if available_teams:
                                 other_team = random.choice(available_teams)
                                 other_team_positions = [pos for _, pos in other_team]
@@ -162,7 +162,7 @@ class Partiditas(commands.Cog):
                         position_id = random.choice(available_positions)
                         position = guild.get_role(position_id)
                     else:
-                        available_teams = [t for t in teams_with_positions if user in t[0] and len(t) < members_per_team]
+                        available_teams = [t for t in teams_with_positions if user in [u for u, _ in t] and len(t) < members_per_team]
                         if available_teams:
                             other_team = random.choice(available_teams)
                             other_team_positions = [pos for _, pos in other_team]
