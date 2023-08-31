@@ -229,7 +229,8 @@ class UserCommands(MixinMeta, ABC):
 
         if recipients:
             recipients_str = ", ".join(recipients[:-1]) + _(" y ") + recipients[-1] if len(recipients) > 1 else recipients[0]
-            await ctx.send(_("¡Bien jugado, {}!").format(recipients_str))
+            message = await ctx.send(_("¡Bien jugado, {}!").format(recipients_str))
+            await message.add_reaction(":gg:")
 
     @commands.command(name="ungg")
     @commands.guild_only()
