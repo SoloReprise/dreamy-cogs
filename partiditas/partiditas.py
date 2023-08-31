@@ -118,6 +118,7 @@ class Partiditas(commands.Cog):
 
             for user in combined_teams[team_index]:
                 member_roles = [role.id for role in user.roles]
+                position_id = None  # Initialize position_id to None
 
                 # Check if the member has already been assigned to a team
                 if user in [u for t, _ in teams_with_positions for u in t]:
