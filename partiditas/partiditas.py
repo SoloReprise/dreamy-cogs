@@ -87,9 +87,8 @@ class Partiditas(commands.Cog):
 
         total_members_needed = num_teams * members_per_team
 
-        combined_members = set(members_with_role1 + members_with_role2)
-        if len(combined_members) < num_teams:
-            await ctx.send("No hay suficientes miembros con los roles especificados.")
+        if len(set(members_with_role1)) < num_teams or len(set(members_with_role2)) < num_teams:
+            await ctx.send("No hay suficientes miembros con los roles especificados para crear ese número de equipos.")
             return
 
         unique_members_with_role1 = list(set(members_with_role1))
