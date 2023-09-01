@@ -108,23 +108,30 @@ class Partiditas(commands.Cog):
 
         already_chosen = []  # To keep track of members already selected.
 
+        def pick_member_from_role(role_list, other_list):
+            member = random.choice(role_list)
+            role_list.remove(member)
+            if member in other_list:
+                other_list.remove(member)
+            return member
+
         # Divide members into teams.
         for i in range(num_teams):
             team = []
-            role_members = members_with_role1 if i % 2 == 0 else members_with_role2
             
-            while len(team) < members_per_team and role_members:
-                member = random.choice(role_members)
-                role_members.remove(member)
-                if member in members_with_role1:
-                    members_with_role1.remove(member)
-                if member in members_with_role2:
-                    members_with_role2.remove(member)
+            # Determine primary and secondary role lists based on team parity.
+            primary_role_list = members_with_role1 if i % 2 == 0 else members_with_role2
+            secondary_role_list = members_with_role2 if i % 2 == 0 else members_with_role1
+
+            while len(team) < members_per_team and primary_role_list:
+                member = pick_member_from_role(primary_role_list, secondary_role_list)
                 team.append(member)
                 already_chosen.append(member)
-            
-            if len(team) < members_per_team:  # If team isn't filled
-                await ctx.send(f"Could not form a full team {i + 1} due to insufficient members.")
+
+            # If primary role list runs out but team isn't complete, we don't pick from the secondary list.
+            # Instead, we notify that the team couldn't be fully formed and move on.
+            if len(team) < members_per_team:
+                await ctx.send(f"Could not form a full team {i + 1} due to insufficient members with the primary role.")
                 continue
 
             self.combined_teams.append(team)
@@ -175,8 +182,6 @@ class Partiditas(commands.Cog):
         position_names = [guild.get_role(position_id).name for position_id in position_roles]
         lista_equipos = []
         for index, team in enumerate(teams_with_positions, start=1):
-            if None in team:
-                continue
             miembros_equipo = " ".join([member.mention for member in team])
             lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
 
@@ -199,7 +204,7 @@ class Partiditas(commands.Cog):
 
         # Create a list of team leaders based on odd teams.
         self.team_leaders = [team[0] for index, team in enumerate(self.combined_teams, start=1) if index % 2 == 1]
-
+        
         #for leader in self.team_leaders:
             #await leader.send("¡Hola! Eres el encargado de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")
 
