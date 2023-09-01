@@ -104,44 +104,30 @@ class Partiditas(commands.Cog):
 
         # Extract members with the provided roles.
         members_with_role1 = [member for member in guild.members if role1 in member.roles]
-        members_with_role2 = [member for member in guild.members if role2 and role2 in member.roles]
 
-        # Deduplicate members in case some have both roles.
-        all_members = list(set(members_with_role1 + members_with_role2))
+        if role2:
+            members_with_role2 = [member for member in guild.members if role2 in member.roles]
+            combined_members = members_with_role1 + members_with_role2
+        else:
+            combined_members = members_with_role1
 
-        if len(all_members) < members_per_team * num_teams:
+        if len(combined_members) < members_per_team * num_teams:
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
         # Shuffle the members to ensure randomization.
-        random.shuffle(all_members)
-        
-        # Split members by role preference for "vs" command.
-        if role2:
-            members_with_role1 = [member for member in all_members if role1 in member.roles]
-            members_with_role2 = [member for member in all_members if role2 in member.roles]
+        random.shuffle(combined_members)
 
-            selected_players_role1 = random.sample(members_with_role1, (members_per_team * num_teams) // 2)
-            selected_players_role2 = random.sample(members_with_role2, (members_per_team * num_teams) // 2)
+        # Create teams
+        teams = [combined_members[i:i + members_per_team] for i in range(0, len(combined_members), members_per_team)][:num_teams]
 
-            selected_players = selected_players_role1 + selected_players_role2
-        else:
-            selected_players = random.sample(all_members, members_per_team * num_teams)
-        
-        selected_players_mentions = [member.mention for member in selected_players]
-        await ctx.send(f"Jugadores seleccionados:\n{', '.join(selected_players_mentions)}")
-
-        # Begin team-assignment logic
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
         teams_with_positions = []
 
-        # Splitting selected players into teams.
-        for start in range(0, len(selected_players), members_per_team):
-            team = selected_players[start:start+members_per_team]
+        for team_index, team in enumerate(teams, start=1):
             team_positions = set()
             team_with_positions = []
 
-            # Assign positions within the team.
             for user in team:
                 member_roles = set(role.id for role in user.roles)
                 valid_positions = list(set(position_roles) - team_positions)
@@ -153,25 +139,24 @@ class Partiditas(commands.Cog):
                     pref_names = ', '.join([guild.get_role(pos).name for pos in preferred_positions])
                     await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{pref_names}].")
 
-                # Assign position based on preference.
+                # Assign position based on preference or random.
                 for pos in preferred_positions:
                     if pos in valid_positions:
                         assigned_position = pos
                         break
 
-                if not assigned_position and valid_positions:
+                if not assigned_position:
+                    # Assign a random position from the remaining positions
                     assigned_position = random.choice(valid_positions)
 
-                if assigned_position:
-                    position_name = guild.get_role(assigned_position).name
-                    team_positions.add(assigned_position)
-                    team_with_positions.append((user, position_name))
-                    await ctx.send(f"La posición de {user.mention} es {position_name}.")
-                else:
-                    await ctx.send(f"No se pudo encontrar una posición para {user.mention}.")
+                position_name = guild.get_role(assigned_position).name
+                team_positions.add(assigned_position)
+                team_with_positions.append((user, position_name))
+                await ctx.send(f"La posición de {user.mention} para el Equipo {team_index} es {position_name}.")
 
             teams_with_positions.append(team_with_positions)
 
+        # Notify about team compositions.
         position_names = [guild.get_role(position_id).name for position_id in position_roles]
         lista_equipos = []
         for index, team in enumerate(teams_with_positions, start=1):
@@ -181,6 +166,7 @@ class Partiditas(commands.Cog):
         equipos_unidos = "\n".join(lista_equipos)
         await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}\nPosiciones disponibles: [{', '.join(position_names)}]")
 
+        # Create voice channels and move members.
         category = guild.get_channel(1127625556247203861)
         for index, team in enumerate(teams, start=1):
             voice_channel_name = f"◇║Equipo {index}"
@@ -192,10 +178,12 @@ class Partiditas(commands.Cog):
 
             for member in team:
                 if member.voice:
-                    self.user_original_voice_channels[member.id] = member.voice.channel
+                    self.user_original_voice_channels[member.id] = member.voice.channel  # Populate the dictionary
                     await member.move_to(voice_channel)
 
+        # Create a list of team leaders based on odd teams.
         self.team_leaders = [team[0] for index, team in enumerate(teams, start=1) if index % 2 == 1]
+
         #for leader in self.team_leaders:
             #await leader.send("¡Hola! Eres el encargado de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")
     
