@@ -106,6 +106,11 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
+        # List the selected players before assigning positions.
+        selected_players = members_with_role1[:members_per_team] + members_with_role2[:members_per_team]
+        selected_players_mentions = [member.mention for member in selected_players]
+        await ctx.send(f"Jugadores seleccionados:\n{', '.join(selected_players_mentions)}")
+
         already_chosen = []  # To keep track of members already selected.
 
         # Divide members into teams.
