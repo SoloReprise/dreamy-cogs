@@ -114,7 +114,7 @@ class Partiditas(commands.Cog):
             
             if i % 2 == 0:  # Odd Teams (role1)
                 while len(team) < members_per_team:
-                    if not members_with_role1:
+                    if not members_with_role1:  # Check if the list is empty before trying to pick a member.
                         break
                     
                     member = random.choice(members_with_role1)
@@ -127,7 +127,7 @@ class Partiditas(commands.Cog):
                         
             else:  # Even Teams (role2)
                 while len(team) < members_per_team:
-                    if not members_with_role2:
+                    if not members_with_role2:  # Check if the list is empty before trying to pick a member.
                         break
                     
                     member = random.choice(members_with_role2)
