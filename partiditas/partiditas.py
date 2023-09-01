@@ -121,12 +121,15 @@ class Partiditas(commands.Cog):
         all_selected_players = []
 
         # Ensure unique player selection across teams.
-        if role2:
-            # Ensure we always start with role1 for odd teams
-            all_selected_players.extend(random.sample(members_with_role1, min(len(members_with_role1), members_per_team * ((num_teams + 1) // 2))))
-            all_selected_players.extend(random.sample(members_with_role2, min(len(members_with_role2), members_per_team * (num_teams // 2))))
-        else:
-            all_selected_players.extend(random.sample(members_with_role1, total_members_needed))
+        selected_from_role1 = random.sample(members_with_role1, min(len(members_with_role1), members_per_team * ((num_teams + 1) // 2)))
+        selected_from_role2 = random.sample(members_with_role2, min(len(members_with_role2), members_per_team * (num_teams // 2)))
+
+        # Now, interleave these lists:
+        for i in range(max(len(selected_from_role1), len(selected_from_role2))):
+            if i < len(selected_from_role1):
+                all_selected_players.append(selected_from_role1[i])
+            if i < len(selected_from_role2):
+                all_selected_players.append(selected_from_role2[i])
 
         selected_players_mentions = [member.mention for member in all_selected_players]
         await ctx.send(f"Jugadores seleccionados:\n{', '.join(selected_players_mentions)}")
