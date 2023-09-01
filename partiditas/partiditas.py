@@ -122,12 +122,9 @@ class Partiditas(commands.Cog):
 
         # Ensure unique player selection across teams.
         if role2:
-            role1_selected = random.sample(members_with_role1, members_per_team * num_teams // 2)
-            role2_selected = random.sample(members_with_role2, members_per_team * num_teams // 2)
-
-            for i in range(num_teams // 2):
-                all_selected_players.extend(role1_selected[i*members_per_team:(i+1)*members_per_team])
-                all_selected_players.extend(role2_selected[i*members_per_team:(i+1)*members_per_team])
+            # Ensure we always start with role1 for odd teams
+            all_selected_players.extend(random.sample(members_with_role1, min(len(members_with_role1), members_per_team * ((num_teams + 1) // 2))))
+            all_selected_players.extend(random.sample(members_with_role2, min(len(members_with_role2), members_per_team * (num_teams // 2))))
         else:
             all_selected_players.extend(random.sample(members_with_role1, total_members_needed))
 
