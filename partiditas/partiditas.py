@@ -28,6 +28,11 @@ class Partiditas(commands.Cog):
         guild = ctx.guild
         voice_channels = [channel for channel in guild.voice_channels if "◇║Equipo" in channel.name]
 
+        # Inform all players in the matches
+        all_players = [player for team in self.combined_teams for player in team]
+        for player in all_players:
+            await player.send("Combate cancelado. Entra en United Legacy para saber más.")
+
         # Move users back to their original voice channels
         for channel in voice_channels:
             for member in channel.members:
@@ -56,11 +61,6 @@ class Partiditas(commands.Cog):
         self.user_original_voice_channels = {}  # Clear the stored original voice channels
 
         await ctx.send("Canales de voz de enfrentamiento eliminados y datos reseteados.")
- 
-        # Send cancellation message to all users involved in the matches.
-        for team in self.combined_teams:
-            for member in team:
-                await member.send("Combate cancelado. Entra en United Legacy para saber más.")
         
     @battle.command(name="unteam")
     async def unteam(self, ctx, member1: discord.Member, member2: discord.Member):
@@ -267,17 +267,23 @@ class Partiditas(commands.Cog):
                     self.user_original_voice_channels[member.id] = member.voice.channel  # Populate the dictionary
                     await member.move_to(voice_channel)
 
-            # Send messages to the team leaders and other members.
-            for index, team in enumerate(teams, start=1):
-                if index % 2 == 1:  # Only for odd teams
-                    leader = team[0]
-                    await leader.send("¡Hola! Se te ha encargado la tarea de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")
-                    for member in team[1:]:
-                        await member.send(f"¡Hola! La persona encargada de crear la sala para el combate es {leader.mention}. Por favor, espera mientras me envía el código de sala.")
-
-            # Store the team leaders
+            # Create a list of team leaders based on odd teams.
             self.team_leaders = [team[0] for index, team in enumerate(teams, start=1) if index % 2 == 1]
 
+            for leader in self.team_leaders:
+                await leader.send("¡Hola! Se te ha encargado la tarea de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")    
+      
+            for index, team in enumerate(teams, start=1):
+                if index % 2 == 1:  # Odd team
+                    leader = team[0]
+                    for member in team[1:]:  # Excluding the leader
+                        await member.send(f"¡Hola! La persona encargada de crear la sala para el combate es {leader.mention}. Por favor, espera mientras me envía el código de sala.")
+                else:  # Even team
+                    corresponding_odd_team = teams[index-2]
+                    leader_of_odd_team = corresponding_odd_team[0]
+                    for member in team:  # All members of the even team
+                        await member.send(f"¡Hola! La persona encargada de crear la sala para el combate es {leader_of_odd_team.mention}. Por favor, espera mientras me envía el código de sala.")
+   
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.bot:
