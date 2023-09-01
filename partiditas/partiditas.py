@@ -136,7 +136,7 @@ class Partiditas(commands.Cog):
 
         # For role assignment
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
-        teams_with_positions = []
+        teams_with_positions = [[] for _ in teams]
         positions_by_team = {i: set() for i, _ in enumerate(teams, start=1)}
 
         # Split the members based on the number of preferences they have.
