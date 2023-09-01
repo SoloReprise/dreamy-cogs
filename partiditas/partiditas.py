@@ -161,10 +161,14 @@ class Partiditas(commands.Cog):
             members_by_preference_count[position_count].append(user)
 
         unassigned_members = []
+        assigned_members = set()  # Added this to keep track of members that have been assigned
 
         # Start the assignment for members based on their preference count
         for pref_count in range(1, 6):  
             for user in members_by_preference_count[pref_count]:
+                if user in assigned_members:  # Check if user has already been assigned
+                    continue
+
                 member_roles = set(role.id for role in user.roles)
                 preferred_positions = member_roles & set(position_roles)
                 
@@ -185,6 +189,7 @@ class Partiditas(commands.Cog):
                             teams_with_positions[team_index - 1].append((user, position_name))
                             await ctx.send(f"La posición de {user.mention} para el Equipo {team_index} es {position_name}.")
                             assigned = True
+                            assigned_members.add(user)  # Add user to assigned members
                             break
 
                     if assigned:
@@ -194,26 +199,6 @@ class Partiditas(commands.Cog):
                     await ctx.send(f"No se pudo encontrar una posición preferida para {user.mention} en ningún equipo.")
                     unassigned_members.append(user)
 
-        # Handle members with no preference, all preferences, or couldn't be assigned a preferred position.
-        for user in members_by_preference_count[0] + members_by_preference_count[5] + unassigned_members:
-            assigned = False
-            for team_index, team in enumerate(teams, start=1):
-                if user not in team:
-                    continue  # If the user is not in this team, skip
-                
-                valid_positions = list(set(position_roles) - positions_by_team[team_index])
-                if valid_positions:
-                    assigned_position = random.choice(valid_positions)
-                    positions_by_team[team_index].add(assigned_position)
-                    position_name = guild.get_role(assigned_position).name
-                    teams_with_positions[team_index - 1].append((user, position_name))
-                    await ctx.send(f"La posición de {user.mention} para el Equipo {team_index} es {position_name}.")
-                    assigned = True
-                    break
-            
-            if not assigned:
-                await ctx.send(f"No se pudo encontrar una posición para {user.mention} en ningún equipo.")
-        
         # Notify about team compositions.
         position_names = [guild.get_role(position_id).name for position_id in position_roles]
         lista_equipos = []
