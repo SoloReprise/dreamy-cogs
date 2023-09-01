@@ -143,6 +143,7 @@ class Partiditas(commands.Cog):
                     for idx, position in enumerate(teams_with_positions[self.combined_teams.index(team)]):
                         if position is None:
                             teams_with_positions[self.combined_teams.index(team)][idx] = user
+                            await ctx.send(f"La posición de {user.mention} para el Equipo {self.combined_teams.index(team) + 1} es {guild.get_role(position_roles[idx]).name}.")
                             break
 
         # Notify about team compositions.
@@ -167,7 +168,7 @@ class Partiditas(commands.Cog):
 
             for member in team:
                 if member.voice:
-                    await member.move_to(voice_channel)
+                await member.move_to(voice_channel)
 
         # Create a list of team leaders based on odd teams.
         self.team_leaders = [team[0] for index, team in enumerate(self.combined_teams, start=1) if index % 2 == 1]
