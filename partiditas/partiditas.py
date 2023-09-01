@@ -120,6 +120,7 @@ class Partiditas(commands.Cog):
                     member = random.choice(members_with_role1)
                     members_with_role1.remove(member)
                     team.append(member)
+                    already_chosen.append(member)
                     
                     # If the member also exists in role2's list, remove them.
                     if member in members_with_role2:
@@ -133,12 +134,14 @@ class Partiditas(commands.Cog):
                     member = random.choice(members_with_role2)
                     members_with_role2.remove(member)
                     team.append(member)
+                    already_chosen.append(member)
                     
                     # If the member also exists in role1's list, remove them.
                     if member in members_with_role1:
                         members_with_role1.remove(member)
 
-            self.combined_teams.append(team)
+            if len(team) == members_per_team:
+                self.combined_teams.append(team)
 
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
 
@@ -186,6 +189,8 @@ class Partiditas(commands.Cog):
         position_names = [guild.get_role(position_id).name for position_id in position_roles]
         lista_equipos = []
         for index, team in enumerate(teams_with_positions, start=1):
+            if None in team:
+                continue
             miembros_equipo = " ".join([member.mention for member in team])
             lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
 
