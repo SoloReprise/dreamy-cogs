@@ -165,7 +165,10 @@ class Partiditas(commands.Cog):
 
                     for pos in preferred_positions:
                         if pos in get_available_positions(team_positions):
-                            teams_with_positions.setdefault(team_index, []).append((user, pos))
+                            if team_index <= len(teams_with_positions):
+                                teams_with_positions[team_index - 1].append((user, pos))
+                            else:
+                                teams_with_positions.append([(user, pos)])
                             await ctx.send(f"La posición de {user.mention} para el Equipo {team_index} es {pos}.")
                             placed = True
                             break
