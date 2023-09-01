@@ -96,8 +96,8 @@ class Partiditas(commands.Cog):
         self.combined_teams = []
 
         # Extract members with the provided roles.
-        members_with_role1 = list(set([member for member in guild.members if role1 in member.roles]))
-        members_with_role2 = list(set([member for member in guild.members if role2 in member.roles]))
+        members_with_role1 = [member for member in guild.members if role1 in member.roles]
+        members_with_role2 = [member for member in guild.members if role2 in member.roles]
 
         if len(members_with_role1) < members_per_team or len(members_with_role2) < members_per_team:
             await ctx.send("No hay suficientes miembros con los roles especificados.")
@@ -112,12 +112,6 @@ class Partiditas(commands.Cog):
                 member = random.choice(role_members)
                 role_members.remove(member)
                 team.append(member)
-                
-                # Once selected, make sure the member is not available for other teams.
-                if member in members_with_role1:
-                    members_with_role1.remove(member)
-                if member in members_with_role2:
-                    members_with_role2.remove(member)
 
             if len(team) < members_per_team:  # If team isn't filled
                 await ctx.send(f"Could not form a full team {i + 1} due to insufficient members.")
@@ -145,11 +139,11 @@ class Partiditas(commands.Cog):
 
                     position_assigned = False
 
-                    for idx, position in enumerate(teams_with_positions[0]):  # Assuming each team gets their roles sequentially
+                    for idx, position in enumerate(teams_with_positions[self.combined_teams.index(team)]):  
                         if position is None and position_roles[idx] in preferred_positions:
-                            teams_with_positions[0][idx] = user
+                            teams_with_positions[self.combined_teams.index(team)][idx] = user
                             position_assigned = True
-                            await ctx.send(f"La posición de {user.mention} para el Equipo {teams_with_positions.index(team) + 1} es {guild.get_role(position_roles[idx]).name}.")
+                            await ctx.send(f"La posición de {user.mention} para el Equipo {self.combined_teams.index(team) + 1} es {guild.get_role(position_roles[idx]).name}.")
                             break
                     if position_assigned:
                         break
