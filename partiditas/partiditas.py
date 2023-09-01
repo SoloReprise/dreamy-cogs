@@ -125,28 +125,24 @@ class Partiditas(commands.Cog):
 
         if members_per_team == 5:  # Position comprobation only for teams of 5 members.
 
-            # Using self.combined_teams to get already chosen members
             for team in self.combined_teams:
                 for user in team:
                     member_roles = set(role.id for role in user.roles)
                     preferred_positions = member_roles & set(position_roles)
 
-                    if preferred_positions:
-                        pref_names = ', '.join([guild.get_role(pos).name for pos in preferred_positions])
-                        await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{pref_names}].")
-                    else:
+                    if not preferred_positions:
                         preferred_positions = set(position_roles)  # treat as if they prefer all positions
 
                     position_assigned = False
-
-                    for idx, position in enumerate(teams_with_positions[self.combined_teams.index(team)]):  
+                    for idx, position in enumerate(teams_with_positions[self.combined_teams.index(team)]):
                         if position is None and position_roles[idx] in preferred_positions:
                             teams_with_positions[self.combined_teams.index(team)][idx] = user
-                            position_assigned = True
                             await ctx.send(f"La posición de {user.mention} para el Equipo {self.combined_teams.index(team) + 1} es {guild.get_role(position_roles[idx]).name}.")
-                            break
+                            position_assigned = True
+                            break  # Break the inner loop
+
                     if position_assigned:
-                        break
+                        break  # Break the outer loop to avoid double assignments
 
         else:
             teams_with_positions = self.combined_teams
@@ -155,7 +151,7 @@ class Partiditas(commands.Cog):
         position_names = [guild.get_role(position_id).name for position_id in position_roles]
         lista_equipos = []
         for index, team in enumerate(teams_with_positions, start=1):
-            miembros_equipo = " ".join([member.mention for member in team])
+            miembros_equipo = " ".join([member.mention if member is not None else "@unassigned" for member in team])
             lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
 
         equipos_unidos = "\n".join(lista_equipos)
