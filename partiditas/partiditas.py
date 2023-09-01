@@ -115,6 +115,7 @@ class Partiditas(commands.Cog):
 
         # List the selected players before forming teams.
         selected_players = random.sample(members_with_role1, members_per_team) + random.sample(members_with_role2, members_per_team)
+        selected_players = list(set(selected_players))  # Remove duplicates
         selected_players_mentions = [member.mention for member in selected_players]
         await ctx.send(f"Jugadores seleccionados:\n{', '.join(selected_players_mentions)}")
 
