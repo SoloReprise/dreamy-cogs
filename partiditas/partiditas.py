@@ -106,22 +106,28 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        already_chosen = []  # To keep track of members already selected.
+        already_chosen = []
 
         # Divide members into teams.
         for i in range(num_teams):
             if i % 2 == 0:  # Odd Teams
-                if len([m for m in members_with_role1 if m not in already_chosen]) < members_per_team:
-                    await ctx.send(f"No hay suficientes miembros con el rol {role1.name} para formar un equipo.")
-                    return
-                team = random.sample([m for m in members_with_role1 if m not in already_chosen], members_per_team)
+                available = [m for m in members_with_role1 if m not in already_chosen]
             else:  # Even Teams
-                if len([m for m in members_with_role2 if m not in already_chosen]) < members_per_team:
+                available = [m for m in members_with_role2 if m not in already_chosen]
+            
+            if len(available) < members_per_team:
+                if i % 2 == 0:
+                    await ctx.send(f"No hay suficientes miembros con el rol {role1.name} para formar un equipo.")
+                else:
                     await ctx.send(f"No hay suficientes miembros con el rol {role2.name} para formar un equipo.")
-                    return
-                team = random.sample([m for m in members_with_role2 if m not in already_chosen], members_per_team)
+                return
 
-            already_chosen.extend(team)
+            # Populating team with members
+            team = []
+            for _ in range(members_per_team):
+                member = available.pop(0)
+                team.append(member)
+                already_chosen.append(member)
             self.combined_teams.append(team)
 
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
