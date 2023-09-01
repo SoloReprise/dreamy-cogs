@@ -107,7 +107,7 @@ class Partiditas(commands.Cog):
             return
 
         # List the selected players before assigning positions.
-        selected_players = members_with_role1[:members_per_team] + members_with_role2[:members_per_team]
+        selected_players = random.sample(members_with_role1, members_per_team) + random.sample(members_with_role2, members_per_team)
         selected_players_mentions = [member.mention for member in selected_players]
         await ctx.send(f"Jugadores seleccionados:\n{', '.join(selected_players_mentions)}")
 
