@@ -30,8 +30,8 @@ class Partiditas(commands.Cog):
         # Move users back to their original voice channels
         for channel in voice_channels:
             for member in channel.members:
-                if member.id in user_original_voice_channels:
-                    original_channel = user_original_voice_channels[member.id]
+                if member.id in self.user_original_voice_channels:
+                    original_channel = self.user_original_voice_channels[member.id]
                     await member.move_to(original_channel)
 
         # Delete voice channels
@@ -43,9 +43,10 @@ class Partiditas(commands.Cog):
         # Clear out the team data.
         self.combined_teams = []
         self.team_leaders = []
+        self.user_original_voice_channels = {}  # Clear the stored original voice channels
 
         await ctx.send("Canales de voz de enfrentamiento eliminados y datos reseteados.")
-
+        
     @battle.command(name="unteam")
     async def unteam(self, ctx, member1: discord.Member, member2: discord.Member):
         """Evita que dos usuarios estén en el mismo equipo."""
