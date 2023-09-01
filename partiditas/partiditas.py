@@ -110,14 +110,13 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        # Shuffle the members to ensure randomization.
+        # Shuffle the members with specified roles.
         random.shuffle(members_with_role1)
         random.shuffle(members_with_role2)
 
-        # List the selected players before assigning positions.
-        selected_players = members_with_role1[:members_per_team] + members_with_role2[:members_per_team]
-        selected_players_mentions = [member.mention for member in selected_players]
-        await ctx.send(f"Jugadores seleccionados:\n{', '.join(selected_players_mentions)}")
+        # Merge the shuffled members to form the player pool.
+        selected_players = members_with_role1 + members_with_role2
+        random.shuffle(selected_players)
 
         # Divide members into teams.
         self.combined_teams = [selected_players[i:i + members_per_team] for i in range(0, len(selected_players), members_per_team)]
@@ -207,7 +206,7 @@ class Partiditas(commands.Cog):
         self.team_leaders = [team[0] for index, team in enumerate(self.combined_teams, start=1) if index % 2 == 1]
 
         #for leader in self.team_leaders:
-            #await leader.send("¡Hola! Eres el encargado de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")    
+            #await leader.send("¡Hola! Eres el encargado de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")
     
     @commands.Cog.listener()
     async def on_message(self, message):
