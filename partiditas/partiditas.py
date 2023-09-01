@@ -56,6 +56,11 @@ class Partiditas(commands.Cog):
         self.user_original_voice_channels = {}  # Clear the stored original voice channels
 
         await ctx.send("Canales de voz de enfrentamiento eliminados y datos reseteados.")
+ 
+        # Send cancellation message to all users involved in the matches.
+        for team in self.combined_teams:
+            for member in team:
+                await member.send("Combate cancelado. Entra en United Legacy para saber más.")
         
     @battle.command(name="unteam")
     async def unteam(self, ctx, member1: discord.Member, member2: discord.Member):
@@ -262,12 +267,17 @@ class Partiditas(commands.Cog):
                     self.user_original_voice_channels[member.id] = member.voice.channel  # Populate the dictionary
                     await member.move_to(voice_channel)
 
-        # Create a list of team leaders based on odd teams.
-        self.team_leaders = [team[0] for index, team in enumerate(teams, start=1) if index % 2 == 1]
+            # Send messages to the team leaders and other members.
+            for index, team in enumerate(teams, start=1):
+                if index % 2 == 1:  # Only for odd teams
+                    leader = team[0]
+                    await leader.send("¡Hola! Se te ha encargado la tarea de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")
+                    for member in team[1:]:
+                        await member.send(f"¡Hola! La persona encargada de crear la sala para el combate es {leader.mention}. Por favor, espera mientras me envía el código de sala.")
 
-        #for leader in self.team_leaders:
-         #   await leader.send("¡Hola! Eres el encargado de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")
-    
+            # Store the team leaders
+            self.team_leaders = [team[0] for index, team in enumerate(teams, start=1) if index % 2 == 1]
+
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.bot:
