@@ -131,12 +131,16 @@ class Partiditas(commands.Cog):
                     if member not in all_selected_players:
                         current_team.append(member)
                         all_selected_players.add(member)
+                        if member in members_with_role2: 
+                            members_with_role2.remove(member)
             else:  # Even team
                 while len(current_team) < members_per_team and members_with_role2:
                     member = members_with_role2.pop(0)
                     if member not in all_selected_players:
                         current_team.append(member)
                         all_selected_players.add(member)
+                        if member in members_with_role1: 
+                            members_with_role1.remove(member)
 
             teams.append(current_team)
 
@@ -156,56 +160,49 @@ class Partiditas(commands.Cog):
             position_count = len(member_roles & set(position_roles))
             members_by_preference_count[position_count].append(user)
 
-        unassigned_members = []
+        # Create a set to keep track of assigned members
+        assigned_members = set()
 
-        for pref_count in range(1, 6):  # From 1 preference to 5 preferences
-            for user in members_by_preference_count[pref_count]:
+        for team_index, team in enumerate(teams, start=1):
+            for user in team:
                 member_roles = set(role.id for role in user.roles)
                 preferred_positions = member_roles & set(position_roles)
-                if preferred_positions:
-                    pref_names = ', '.join([guild.get_role(pos).name for pos in preferred_positions])
-                    await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{pref_names}].")
-
+                valid_positions = list(set(position_roles) - positions_by_team[team_index])
+                
                 position_found = False
-                for team_index, team in enumerate(teams, start=1):
-                    if user not in team:
-                        continue  # user is not in this team, skip
-
-                    valid_positions = list(set(position_roles) - positions_by_team[team_index])
-                    for pos in preferred_positions:
-                        if pos in valid_positions:
-                            positions_by_team[team_index].add(pos)
-                            position_name = guild.get_role(pos).name
-                            teams_with_positions[team_index - 1].append((user, position_name))
-                            await ctx.send(f"La posición de {user.mention} para el Equipo {team_index} es {position_name}.")
-                            position_found = True
-                            break  # exit inner loop as position has been found
-
-                    if position_found:
-                        break  # exit outer loop as position has been found
-
+                
+                for pref in preferred_positions:
+                    if pref in valid_positions:
+                        positions_by_team[team_index].add(pref)
+                        position_name = guild.get_role(pref).name
+                        await ctx.send(f"La posición de {user.mention} para el Equipo {team_index} es {position_name}.")
+                        assigned_members.add(user)
+                        position_found = True
+                        break  # exit inner loop as position has been found
+                
                 if not position_found:
-                    await ctx.send(f"No se pudo encontrar una posición preferida para {user.mention} en ningún equipo.")
-                    unassigned_members.append(user)  # Add to unassigned members list if couldn't find a preferred position
+                    # Choose a random position if no preference was fulfilled
+                    position = random.choice(valid_positions)
+                    positions_by_team[team_index].add(position)
+                    position_name = guild.get_role(position).name
+                    await ctx.send(f"La posición de {user.mention} para el Equipo {team_index} es {position_name}.")
+                    assigned_members.add(user)
 
-        # Handle members with no preference, all preferences, or couldn't be assigned a preferred position.
-        for user in members_by_preference_count[0] + members_by_preference_count[5] + unassigned_members:
-            position_found = False
+        # Now, assign positions for members who couldn't be assigned a preferred position or have no preferences
+        unassigned_members = [user for user in all_members if user not in assigned_members]
+
+        for user in unassigned_members:
             for team_index, team in enumerate(teams, start=1):
-                if user in team:  # Ensure the user is not already in the team
-                    continue  # If yes, skip this iteration
-
+                if user not in team:
+                    continue
                 valid_positions = list(set(position_roles) - positions_by_team[team_index])
                 if valid_positions:
                     assigned_position = random.choice(valid_positions)
                     positions_by_team[team_index].add(assigned_position)
                     position_name = guild.get_role(assigned_position).name
-                    teams_with_positions[team_index - 1].append((user, position_name))
                     await ctx.send(f"La posición de {user.mention} para el Equipo {team_index} es {position_name}.")
-                    position_found = True
                     break
-
-            if not position_found:
+            else:
                 await ctx.send(f"No se pudo encontrar una posición para {user.mention} en ningún equipo.")
         
         # Notify about team compositions.
