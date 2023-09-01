@@ -33,11 +33,20 @@ class Partiditas(commands.Cog):
             for member in channel.members:
                 if member.id in self.user_original_voice_channels:
                     original_channel = self.user_original_voice_channels[member.id]
-                    await member.move_to(original_channel)
+                    if original_channel in guild.voice_channels:  # Check if the original channel still exists
+                        try:
+                            await member.move_to(original_channel)
+                        except discord.DiscordException as e:
+                            await ctx.send(f"Error al mover a {member.name}: {str(e)}")
+                    else:
+                        await ctx.send(f"El canal original para {member.name} ya no existe.")
 
         # Delete voice channels
         for channel in voice_channels:
-            await channel.delete()
+            try:
+                await channel.delete()
+            except discord.DiscordException as e:
+                await ctx.send(f"Error al eliminar el canal {channel.name}: {str(e)}")
 
         await self.config.guild(guild).clear()
 
@@ -247,8 +256,8 @@ class Partiditas(commands.Cog):
         # Create a list of team leaders based on odd teams.
         self.team_leaders = [team[0] for index, team in enumerate(teams, start=1) if index % 2 == 1]
 
-        #for leader in self.team_leaders:
-            #await leader.send("¡Hola! Eres el encargado de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")
+        for leader in self.team_leaders:
+            await leader.send("¡Hola! Eres el encargado de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")
     
     @commands.Cog.listener()
     async def on_message(self, message):
