@@ -98,14 +98,14 @@ class Partiditas(commands.Cog):
     @battle.command(name="inhouse")
     async def inhouse(self, ctx, role: discord.Role, num_teams: int = 2, members_per_team: int = 5):
         """Randomiza equipos con un rol específico y crea canales de voz."""
-        await self._create_teams_and_channels(ctx, role, None, num_teams, members_per_team)
-
+        await self._create_teams_and_channels(ctx, role, None, num_teams, members_per_team, inhouse=True)
+    
     @battle.command(name="vs")
     async def vs(self, ctx, role1: discord.Role, role2: discord.Role, num_teams: int, members_per_team: int):
         """Randomiza equipos con dos roles y crea canales de voz."""
         await self._create_teams_and_channels(ctx, role1, role2, num_teams, members_per_team)
 
-    async def _create_teams_and_channels(self, ctx, role1: discord.Role, role2: discord.Role = None, num_teams: int = 2, members_per_team: int = 5):
+    async def _create_teams_and_channels(self, ctx, role1: discord.Role, role2: discord.Role = None, num_teams: int = 2, members_per_team: int = 5, inhouse: bool = False):
         guild = ctx.guild
 
         self.combined_teams = []
