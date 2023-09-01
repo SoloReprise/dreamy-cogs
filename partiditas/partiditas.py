@@ -222,20 +222,20 @@ class Partiditas(commands.Cog):
                     unassigned_members.append(user)
 
         # Updated Fallback Logic
-        for user in unassigned_members[:]:  # iterate over a copy of the list to avoid modification issues
-            for team_index, team in enumerate(teams, start=1):
-                if user not in team:
-                    continue  # user is not in this team, skip
+        for user in all_members:  # Now we'll iterate over all_members to ensure everyone gets assigned
+            if user not in assigned_members:  # Only consider those who haven't been assigned yet
+                for team_index, team in enumerate(teams, start=1):
+                    if user not in team:
+                        continue  # user is not in this team, skip
 
-                valid_positions = list(set(position_roles) - positions_by_team[team_index])
-                if valid_positions:
-                    assigned_position = random.choice(valid_positions)
-                    positions_by_team[team_index].add(assigned_position)
-                    position_name = guild.get_role(assigned_position).name
-                    teams_with_positions[team_index - 1].append((user, position_name))
-                    await ctx.send(f"La posición de {user.mention} para el Equipo {team_index} es {position_name}.")
-                    unassigned_members.remove(user)  # Remove player from the unassigned list
-                    break
+                    valid_positions = list(set(position_roles) - positions_by_team[team_index])
+                    if valid_positions:
+                        assigned_position = random.choice(valid_positions)
+                        positions_by_team[team_index].add(assigned_position)
+                        position_name = guild.get_role(assigned_position).name
+                        teams_with_positions[team_index - 1].append((user, position_name))
+                        await ctx.send(f"La posición de {user.mention} para el Equipo {team_index} es {position_name}.")
+                        break
 
         # Handle if there are still any unassigned members left
         for user in unassigned_members:
