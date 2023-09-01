@@ -118,11 +118,13 @@ class Partiditas(commands.Cog):
         random.shuffle(members_with_role1)
         random.shuffle(members_with_role2)
 
+        all_selected_players = []
+
+        # Select members from both roles and then interleave them.
         selected_from_role1 = random.sample(members_with_role1, min(len(members_with_role1), members_per_team * ((num_teams + 1) // 2)))
         selected_from_role2 = random.sample(members_with_role2, min(len(members_with_role2), members_per_team * (num_teams // 2)))
 
-        # Interleave members from role1 and role2.
-        all_selected_players = []
+        # Interleave these lists:
         for i in range(max(len(selected_from_role1), len(selected_from_role2))):
             if i < len(selected_from_role1):
                 all_selected_players.append(selected_from_role1[i])
