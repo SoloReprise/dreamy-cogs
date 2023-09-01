@@ -13,6 +13,7 @@ class Partiditas(commands.Cog):
         self.config.register_guild(**default_guild)
         self.combined_teams = []
         self.team_leaders = []
+        self.user_original_voice_channels = {}  # Initialize the dictionary 
 
     @commands.group()
     @commands.guild_only()
@@ -220,7 +221,7 @@ class Partiditas(commands.Cog):
 
             for member in team:
                 if member.voice:
-                    user_original_voice_channels[member.id] = member.voice.channel  # Store original voice channel
+                    self.user_original_voice_channels[member.id] = member.voice.channel  # Populate the dictionary
                     await member.move_to(voice_channel)
 
         # Create a list of team leaders based on odd teams.
