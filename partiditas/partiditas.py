@@ -150,6 +150,8 @@ class Partiditas(commands.Cog):
             position_count = len(member_roles & set(position_roles))
             members_by_preference_count[position_count].append(user)
 
+        unassigned_members = []
+        
         for pref_count in range(1, 6):  # From 1 preference to 5 preferences
             for user in members_by_preference_count[pref_count]:
                 member_roles = set(role.id for role in user.roles)
