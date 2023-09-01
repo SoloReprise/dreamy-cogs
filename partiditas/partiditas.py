@@ -27,14 +27,18 @@ class Partiditas(commands.Cog):
         guild = ctx.guild
         voice_channels = [channel for channel in guild.voice_channels if "◇║Equipo" in channel.name]
 
+        # Move users back to their original voice channels
+        for channel in voice_channels:
+            for member in channel.members:
+                if member.id in user_original_voice_channels:
+                    original_channel = user_original_voice_channels[member.id]
+                    await member.move_to(original_channel)
+
+        # Delete voice channels
         for channel in voice_channels:
             await channel.delete()
 
         await self.config.guild(guild).clear()
-
-        # Notify the team leaders.
-        #for leader in self.team_leaders:
-            #await leader.send("El combate ha sido cancelado.")
 
         # Clear out the team data.
         self.combined_teams = []
@@ -203,6 +207,8 @@ class Partiditas(commands.Cog):
 
         # Create voice channels and move members.
         category = guild.get_channel(1127625556247203861)
+        user_original_voice_channels = {}  # Store original voice channels
+
         for index, team in enumerate(self.combined_teams, start=1):
             voice_channel_name = f"◇║Equipo {index}"
             overwrites = {
@@ -213,6 +219,7 @@ class Partiditas(commands.Cog):
 
             for member in team:
                 if member.voice:
+                    user_original_voice_channels[member.id] = member.voice.channel  # Store original voice channel
                     await member.move_to(voice_channel)
 
         # Create a list of team leaders based on odd teams.
