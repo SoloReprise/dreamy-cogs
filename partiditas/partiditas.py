@@ -131,27 +131,40 @@ class Partiditas(commands.Cog):
         all_selected_players = set()  # We'll use a set to ensure unique members
         teams = []
 
-        for i in range(num_teams):
-            current_team = []
-            
-            if i % 2 == 0:  # Odd team (e.g., Team 1, Team 3)
-                while len(current_team) < members_per_team and members_with_role1:
-                    member = members_with_role1.pop(0)
-                    if member not in all_selected_players:
-                        current_team.append(member)
-                        all_selected_players.add(member)
-                        if member in members_with_role2: 
-                            members_with_role2.remove(member)
-            else:  # Even team
-                while len(current_team) < members_per_team and members_with_role2:
-                    member = members_with_role2.pop(0)
-                    if member not in all_selected_players:
-                        current_team.append(member)
-                        all_selected_players.add(member)
-                        if member in members_with_role1: 
-                            members_with_role1.remove(member)
+        if inhouse:
+            # Only use members with role1 since we're in 'inhouse' mode
+            all_members = members_with_role1[:]
+            random.shuffle(all_members)
+            for _ in range(num_teams):
+                current_team = []
+                while len(current_team) < members_per_team and all_members:
+                    member = all_members.pop()
+                    current_team.append(member)
+                    all_selected_players.add(member)
+                teams.append(current_team)
+        else:
+            # This is the existing logic for the 'vs' command, distinguishing between odd and even teams
+            for i in range(num_teams):
+                current_team = []
+                
+                if i % 2 == 0:  # Odd team (e.g., Team 1, Team 3)
+                    while len(current_team) < members_per_team and members_with_role1:
+                        member = members_with_role1.pop(0)
+                        if member not in all_selected_players:
+                            current_team.append(member)
+                            all_selected_players.add(member)
+                            if member in members_with_role2: 
+                                members_with_role2.remove(member)
+                else:  # Even team
+                    while len(current_team) < members_per_team and members_with_role2:
+                        member = members_with_role2.pop(0)
+                        if member not in all_selected_players:
+                            current_team.append(member)
+                            all_selected_players.add(member)
+                            if member in members_with_role1: 
+                                members_with_role1.remove(member)
 
-            teams.append(current_team)
+                teams.append(current_team)
 
         selected_players_mentions = [member.mention for member in all_selected_players]
         await ctx.send(f"Jugadores seleccionados:\n{', '.join(selected_players_mentions)}")
