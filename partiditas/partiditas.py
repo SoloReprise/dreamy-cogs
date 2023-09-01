@@ -151,7 +151,7 @@ class Partiditas(commands.Cog):
             members_by_preference_count[position_count].append(user)
 
         unassigned_members = []
-        
+
         for pref_count in range(1, 6):  # From 1 preference to 5 preferences
             for user in members_by_preference_count[pref_count]:
                 member_roles = set(role.id for role in user.roles)
@@ -186,8 +186,8 @@ class Partiditas(commands.Cog):
         for user in members_by_preference_count[0] + members_by_preference_count[5] + unassigned_members:
             position_found = False
             for team_index, team in enumerate(teams, start=1):
-                if user not in team:
-                    continue  # user is not in this team, skip
+                if user in team:  # Ensure the user is not already in the team
+                    continue  # If yes, skip this iteration
 
                 valid_positions = list(set(position_roles) - positions_by_team[team_index])
                 if valid_positions:
@@ -201,7 +201,7 @@ class Partiditas(commands.Cog):
 
             if not position_found:
                 await ctx.send(f"No se pudo encontrar una posición para {user.mention} en ningún equipo.")
-
+        
         # Notify about team compositions.
         position_names = [guild.get_role(position_id).name for position_id in position_roles]
         lista_equipos = []
