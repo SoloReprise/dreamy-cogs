@@ -269,8 +269,8 @@ class Partiditas(commands.Cog):
         # Create a list of team leaders based on odd teams.
         self.team_leaders = [team[0] for index, team in enumerate(teams, start=1) if index % 2 == 1]
 
-        for leader in self.team_leaders:
-            await leader.send("¡Hola! Eres el encargado de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")
+        #for leader in self.team_leaders:
+         #   await leader.send("¡Hola! Eres el encargado de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")
     
     @commands.Cog.listener()
     async def on_message(self, message):
