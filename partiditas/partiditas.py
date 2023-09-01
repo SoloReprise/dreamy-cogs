@@ -107,24 +107,26 @@ class Partiditas(commands.Cog):
             return
 
         # List the selected players before assigning positions.
-        selected_players = random.sample(members_with_role1, members_per_team) + random.sample(members_with_role2, members_per_team)
+        selected_players = members_with_role1[:members_per_team] + members_with_role2[:members_per_team]
         selected_players_mentions = [member.mention for member in selected_players]
         await ctx.send(f"Jugadores seleccionados:\n{', '.join(selected_players_mentions)}")
 
+        # Divide members into teams.
         already_chosen = []  # To keep track of members already selected.
 
-        # Divide members into teams.
         for i in range(num_teams):
             if i % 2 == 0:  # Odd Teams
-                if len([m for m in members_with_role1 if m not in already_chosen]) < members_per_team:
+                available_members = [m for m in members_with_role1 if m not in already_chosen]
+                if len(available_members) < members_per_team:
                     await ctx.send(f"No hay suficientes miembros con el rol {role1.name} para formar un equipo.")
                     return
-                team = random.sample([m for m in members_with_role1 if m not in already_chosen], members_per_team)
+                team = random.sample(available_members, members_per_team)
             else:  # Even Teams
-                if len([m for m in members_with_role2 if m not in already_chosen]) < members_per_team:
+                available_members = [m for m in members_with_role2 if m not in already_chosen]
+                if len(available_members) < members_per_team:
                     await ctx.send(f"No hay suficientes miembros con el rol {role2.name} para formar un equipo.")
                     return
-                team = random.sample([m for m in members_with_role2 if m not in already_chosen], members_per_team)
+                team = random.sample(available_members, members_per_team)
 
             already_chosen.extend(team)
             self.combined_teams.append(team)
