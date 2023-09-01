@@ -106,28 +106,38 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        already_chosen = []
+        already_chosen = []  # To keep track of members already selected.
 
         # Divide members into teams.
         for i in range(num_teams):
-            if i % 2 == 0:  # Odd Teams
-                available = [m for m in members_with_role1 if m not in already_chosen]
-            else:  # Even Teams
-                available = [m for m in members_with_role2 if m not in already_chosen]
-            
-            if len(available) < members_per_team:
-                if i % 2 == 0:
-                    await ctx.send(f"No hay suficientes miembros con el rol {role1.name} para formar un equipo.")
-                else:
-                    await ctx.send(f"No hay suficientes miembros con el rol {role2.name} para formar un equipo.")
-                return
-
-            # Populating team with members
             team = []
-            for _ in range(members_per_team):
-                member = available.pop(0)
-                team.append(member)
-                already_chosen.append(member)
+            
+            if i % 2 == 0:  # Odd Teams (role1)
+                while len(team) < members_per_team:
+                    if not members_with_role1:
+                        break
+                    
+                    member = random.choice(members_with_role1)
+                    members_with_role1.remove(member)
+                    team.append(member)
+                    
+                    # If the member also exists in role2's list, remove them.
+                    if member in members_with_role2:
+                        members_with_role2.remove(member)
+                        
+            else:  # Even Teams (role2)
+                while len(team) < members_per_team:
+                    if not members_with_role2:
+                        break
+                    
+                    member = random.choice(members_with_role2)
+                    members_with_role2.remove(member)
+                    team.append(member)
+                    
+                    # If the member also exists in role1's list, remove them.
+                    if member in members_with_role1:
+                        members_with_role1.remove(member)
+
             self.combined_teams.append(team)
 
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
