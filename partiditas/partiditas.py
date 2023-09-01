@@ -100,6 +100,7 @@ class Partiditas(commands.Cog):
         guild = ctx.guild
 
         self.combined_teams = []
+        self.user_original_voice_channels = {}  # Dictionary to store original voice channels
 
         # Extract members with the provided roles.
         members_with_role1 = list(set([member for member in guild.members if role1 in member.roles]))
@@ -113,26 +114,26 @@ class Partiditas(commands.Cog):
             return
 
         # List the selected players before assigning positions.
-        selected_players = members_with_role1[:members_per_team] + members_with_role2[:members_per_team]
+        selected_players = random.sample(members_with_role1, members_per_team) + random.sample(members_with_role2, members_per_team)
         selected_players_mentions = [member.mention for member in selected_players]
         await ctx.send(f"Jugadores seleccionados:\n{', '.join(selected_players_mentions)}")
 
-        # Divide members into teams.
         already_chosen = []  # To keep track of members already selected.
 
+        # Divide members into teams.
         for i in range(num_teams):
             if i % 2 == 0:  # Odd Teams
                 available_members = [m for m in selected_players if m not in already_chosen]
                 if len(available_members) < members_per_team:
                     await ctx.send(f"No hay suficientes miembros con el rol {role1.name} para formar un equipo.")
                     return
-                team = random.sample(available_members, members_per_team)
+                team = available_members[:members_per_team]
             else:  # Even Teams
                 available_members = [m for m in selected_players if m not in already_chosen]
                 if len(available_members) < members_per_team:
                     await ctx.send(f"No hay suficientes miembros con el rol {role2.name} para formar un equipo.")
                     return
-                team = random.sample(available_members, members_per_team)
+                team = available_members[:members_per_team]
 
             already_chosen.extend(team)
             self.combined_teams.append(team)
@@ -140,7 +141,7 @@ class Partiditas(commands.Cog):
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
         teams_with_positions = []
 
-        if members_per_team == 5:  # Position comprobation only for teams of 5 members.
+        if members_per_team == 5:  # Position check only for teams of 5 members.
             for team_index, team in enumerate(self.combined_teams):
                 team_positions = set()
                 team_with_positions = []
@@ -209,8 +210,6 @@ class Partiditas(commands.Cog):
 
         # Create voice channels and move members.
         category = guild.get_channel(1127625556247203861)
-        user_original_voice_channels = {}  # Store original voice channels
-
         for index, team in enumerate(self.combined_teams, start=1):
             voice_channel_name = f"◇║Equipo {index}"
             overwrites = {
@@ -221,7 +220,6 @@ class Partiditas(commands.Cog):
 
             for member in team:
                 if member.voice:
-                    self.user_original_voice_channels[member.id] = member.voice.channel  # Populate the dictionary
                     await member.move_to(voice_channel)
 
         # Create a list of team leaders based on odd teams.
