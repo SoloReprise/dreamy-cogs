@@ -178,9 +178,10 @@ class Partiditas(commands.Cog):
 
                 if not position_found:
                     await ctx.send(f"No se pudo encontrar una posición preferida para {user.mention} en ningún equipo.")
+                    unassigned_members.append(user)  # Add to unassigned members list if couldn't find a preferred position
 
-        # Handle members with no preference or all preferences.
-        for user in members_by_preference_count[0] + members_by_preference_count[5]:
+        # Handle members with no preference, all preferences, or couldn't be assigned a preferred position.
+        for user in members_by_preference_count[0] + members_by_preference_count[5] + unassigned_members:
             position_found = False
             for team_index, team in enumerate(teams, start=1):
                 if user not in team:
