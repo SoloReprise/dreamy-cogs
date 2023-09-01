@@ -104,29 +104,35 @@ class Partiditas(commands.Cog):
 
         # Extract members with the provided roles.
         members_with_role1 = [member for member in guild.members if role1 in member.roles]
-        members_with_role2 = [member for member in guild.members if role2 in member.roles and member not in members_with_role1]
+        if role2:
+            members_with_role2 = [member for member in guild.members if role2 in member.roles and member not in members_with_role1]
+        else:
+            members_with_role2 = []
 
         total_members_needed = num_teams * members_per_team
         if len(members_with_role1) + len(members_with_role2) < total_members_needed:
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        # Shuffle and sample members from the roles
-        selected_from_role1 = random.sample(members_with_role1, members_per_team * ((num_teams + 1) // 2))
-        selected_from_role2 = random.sample(members_with_role2, members_per_team * (num_teams // 2))
+        # Shuffle the members to ensure randomization.
+        random.shuffle(members_with_role1)
+        random.shuffle(members_with_role2)
 
-        # Interleave these lists to ensure role1 members are in odd teams and role2 members are in even teams
+        selected_from_role1 = random.sample(members_with_role1, min(len(members_with_role1), members_per_team * ((num_teams + 1) // 2)))
+        selected_from_role2 = random.sample(members_with_role2, min(len(members_with_role2), members_per_team * (num_teams // 2)))
+
         all_selected_players = []
-        for i in range(members_per_team):
+        # Now, interleave these lists:
+        for i in range(max(len(selected_from_role1), len(selected_from_role2))):
             if i < len(selected_from_role1):
-                all_selected_players.extend(selected_from_role1[i::members_per_team])
+                all_selected_players.append(selected_from_role1[i])
             if i < len(selected_from_role2):
-                all_selected_players.extend(selected_from_role2[i::members_per_team])
+                all_selected_players.append(selected_from_role2[i])
 
         selected_players_mentions = [member.mention for member in all_selected_players]
         await ctx.send(f"Jugadores seleccionados:\n{', '.join(selected_players_mentions)}")
 
-        # Divide members into teams
+        # Divide members into teams.
         teams = [all_selected_players[i:i + members_per_team] for i in range(0, len(all_selected_players), members_per_team)]
 
         # For role assignment
