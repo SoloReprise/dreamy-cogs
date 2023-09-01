@@ -161,14 +161,11 @@ class Partiditas(commands.Cog):
 
                 placed = False
                 for team_index, team in enumerate(teams, start=1):
-                    team_positions = [pos for _, pos in teams_with_positions[team_index - 1] if teams_with_positions[team_index - 1]] if team_index <= len(teams_with_positions) else []
+                    team_positions = [pos for _, pos in teams_with_positions.get(team_index, [])]
 
                     for pos in preferred_positions:
                         if pos in get_available_positions(team_positions):
-                            if team_index <= len(teams_with_positions):
-                                teams_with_positions[team_index - 1].append((user, pos))
-                            else:
-                                teams_with_positions.append([(user, pos)])
+                            teams_with_positions.setdefault(team_index, []).append((user, pos))
                             await ctx.send(f"La posición de {user.mention} para el Equipo {team_index} es {pos}.")
                             placed = True
                             break
