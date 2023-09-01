@@ -245,7 +245,7 @@ class Partiditas(commands.Cog):
             lista_equipos.append(f"Equipo {index}: {miembros_equipo}")
 
         equipos_unidos = "\n".join(lista_equipos)
-        await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}\nPosiciones disponibles: [{', '.join(position_names)}]")
+        await ctx.send(f"Equipos aleatorizados:\n{equipos_unidos}")
 
         # Create voice channels and move members.
         category = guild.get_channel(1127625556247203861)
