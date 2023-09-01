@@ -103,47 +103,43 @@ class Partiditas(commands.Cog):
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        # Divide members into teams.
-        for i in range(num_teams):
-            team = []
-            role_members = members_with_role1 if i % 2 == 0 else members_with_role2
-            
-            while len(team) < members_per_team and role_members:
-                member = random.choice(role_members)
-                role_members.remove(member)
-                team.append(member)
-
-            if len(team) < members_per_team:  # If team isn't filled
-                await ctx.send(f"Could not form a full team {i + 1} due to insufficient members.")
-                continue
-
-            self.combined_teams.append(team)
-
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
-        
         teams_with_positions = [[None for _ in range(members_per_team)] for _ in range(num_teams)]
 
-        for team in self.combined_teams:
-            for user in team:
-                member_roles = set(role.id for role in user.roles)
-                preferred_positions = member_roles & set(position_roles)
+        def position_member_in_team(member, team_idx):
+            member_roles = set(role.id for role in member.roles)
+            preferred_positions = member_roles & set(position_roles)
 
-                if not preferred_positions:
-                    preferred_positions = set(position_roles)  # treat as if they prefer all positions
+            if not preferred_positions:
+                preferred_positions = set(position_roles)  # treat as if they prefer all positions
 
-                position_assigned = False
-                for idx, position in enumerate(teams_with_positions[self.combined_teams.index(team)]):
-                    if position is None and position_roles[idx] in preferred_positions:
-                        teams_with_positions[self.combined_teams.index(team)][idx] = user
-                        await ctx.send(f"La posición de {user.mention} para el Equipo {self.combined_teams.index(team) + 1} es {guild.get_role(position_roles[idx]).name}.")
-                        position_assigned = True
-                        break
-                    
-                if not position_assigned:
-                    for idx, position in enumerate(teams_with_positions[self.combined_teams.index(team)]):
+            for idx, position in enumerate(teams_with_positions[team_idx]):
+                if position is None and position_roles[idx] in preferred_positions:
+                    teams_with_positions[team_idx][idx] = member
+                    return guild.get_role(position_roles[idx]).name
+            return None
+
+        # Divide members into teams based on their preferred roles.
+        for team_idx in range(num_teams):
+            role_members = members_with_role1 if team_idx % 2 == 0 else members_with_role2
+
+            for member in role_members[:]:
+                position_name = position_member_in_team(member, team_idx)
+                if position_name:
+                    await ctx.send(f"La posición de {member.mention} para el Equipo {team_idx + 1} es {position_name}.")
+                    role_members.remove(member)
+
+            if len([pos for pos in teams_with_positions[team_idx] if pos]) < members_per_team:
+                # Not enough members were placed based on their preferred roles. 
+                # Let's place the remaining members in the remaining slots.
+                for member in role_members[:]:
+                    for idx, position in enumerate(teams_with_positions[team_idx]):
                         if position is None:
-                            teams_with_positions[self.combined_teams.index(team)][idx] = user
-                            await ctx.send(f"La posición de {user.mention} para el Equipo {self.combined_teams.index(team) + 1} es {guild.get_role(position_roles[idx]).name}.")
+                            teams_with_positions[team_idx][idx] = member
+                            role_members.remove(member)
+                            position_name = guild.get_role(position_roles[idx]).name
+                            await ctx.send(f"No se ha encontrado posición favorita para {member.mention} en el Equipo {team_idx + 1}. "
+                                        f"Añadiendo usuario a equipo {team_idx + 1} con posición {position_name}.")
                             break
 
         # Notify about team compositions.
@@ -158,7 +154,7 @@ class Partiditas(commands.Cog):
 
         # Create voice channels and move members.
         category = guild.get_channel(1127625556247203861)
-        for index, team in enumerate(self.combined_teams, start=1):
+        for index, team in enumerate(teams_with_positions, start=1):
             voice_channel_name = f"◇║Equipo {index}"
             overwrites = {
                 guild.default_role: discord.PermissionOverwrite(connect=False),
@@ -168,7 +164,7 @@ class Partiditas(commands.Cog):
 
             for member in team:
                 if member.voice:
-                await member.move_to(voice_channel)
+                    await member.move_to(voice_channel)
 
         # Create a list of team leaders based on odd teams.
         self.team_leaders = [team[0] for index, team in enumerate(self.combined_teams, start=1) if index % 2 == 1]
