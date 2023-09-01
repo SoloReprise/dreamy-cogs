@@ -114,9 +114,8 @@ class Partiditas(commands.Cog):
         random.shuffle(members_with_role1)
         random.shuffle(members_with_role2)
 
-        # List the selected players before assigning positions.
-        selected_players = members_with_role1[:members_per_team] + members_with_role2[:members_per_team]
-        selected_players = list(set(selected_players))  # Remove duplicates
+        # Ensure unique player selection across teams.
+        selected_players = random.sample(members_with_role1, members_per_team) + random.sample(members_with_role2, members_per_team)
         selected_players_mentions = [member.mention for member in selected_players]
         await ctx.send(f"Jugadores seleccionados:\n{', '.join(selected_players_mentions)}")
 
