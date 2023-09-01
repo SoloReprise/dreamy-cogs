@@ -267,22 +267,21 @@ class Partiditas(commands.Cog):
                     self.user_original_voice_channels[member.id] = member.voice.channel  # Populate the dictionary
                     await member.move_to(voice_channel)
 
-            # Create a list of team leaders based on odd teams.
-            self.team_leaders = [team[0] for index, team in enumerate(teams, start=1) if index % 2 == 1]
+        # Create a list of team leaders based on odd teams.
+        self.team_leaders = [team[0] for index, team in enumerate(teams, start=1) if index % 2 == 1]
+        for leader in self.team_leaders:
+            await leader.send("¡Hola! Se te ha encargado la tarea de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")    
 
-            for leader in self.team_leaders:
-                await leader.send("¡Hola! Se te ha encargado la tarea de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")    
-      
-            for index, team in enumerate(teams, start=1):
-                if index % 2 == 1:  # Odd team
-                    leader = team[0]
-                    for member in team[1:]:  # Excluding the leader
-                        await member.send(f"¡Hola! La persona encargada de crear la sala para el combate es {leader.mention}. Por favor, espera mientras me envía el código de sala.")
-                else:  # Even team
-                    corresponding_odd_team = teams[index-2]
-                    leader_of_odd_team = corresponding_odd_team[0]
-                    for member in team:  # All members of the even team
-                        await member.send(f"¡Hola! La persona encargada de crear la sala para el combate es {leader_of_odd_team.mention}. Por favor, espera mientras me envía el código de sala.")
+        for index, team in enumerate(teams, start=1):
+            if index % 2 == 1:  # Odd team
+                leader = team[0]
+                for member in team[1:]:  # Excluding the leader
+                    await member.send(f"¡Hola! La persona encargada de crear la sala para el combate es {leader.mention}. Por favor, espera mientras me envía el código de sala.")
+            else:  # Even team
+                corresponding_odd_team = teams[index-2]
+                leader_of_odd_team = corresponding_odd_team[0]
+                for member in team:  # All members of the even team
+                    await member.send(f"¡Hola! La persona encargada de crear la sala para el combate es {leader_of_odd_team.mention}. Por favor, espera mientras me envía el código de sala.")
    
     @commands.Cog.listener()
     async def on_message(self, message):
