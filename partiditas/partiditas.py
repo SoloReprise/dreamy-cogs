@@ -120,32 +120,30 @@ class Partiditas(commands.Cog):
             self.combined_teams.append(team)
 
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
+        
+        teams_with_positions = [[None for _ in range(members_per_team)] for _ in range(num_teams)]
 
-        teams_with_positions = [[None for _ in range(members_per_team)] for _ in range(num_teams)]  # Initialize with None
+        for team in self.combined_teams:
+            for user in team:
+                member_roles = set(role.id for role in user.roles)
+                preferred_positions = member_roles & set(position_roles)
 
-        if members_per_team == 5:  # Position comprobation only for teams of 5 members.
+                if not preferred_positions:
+                    preferred_positions = set(position_roles)  # treat as if they prefer all positions
 
-            for team in self.combined_teams:
-                for user in team:
-                    member_roles = set(role.id for role in user.roles)
-                    preferred_positions = member_roles & set(position_roles)
-
-                    if not preferred_positions:
-                        preferred_positions = set(position_roles)  # treat as if they prefer all positions
-
-                    position_assigned = False
+                position_assigned = False
+                for idx, position in enumerate(teams_with_positions[self.combined_teams.index(team)]):
+                    if position is None and position_roles[idx] in preferred_positions:
+                        teams_with_positions[self.combined_teams.index(team)][idx] = user
+                        await ctx.send(f"La posición de {user.mention} para el Equipo {self.combined_teams.index(team) + 1} es {guild.get_role(position_roles[idx]).name}.")
+                        position_assigned = True
+                        break
+                    
+                if not position_assigned:
                     for idx, position in enumerate(teams_with_positions[self.combined_teams.index(team)]):
-                        if position is None and position_roles[idx] in preferred_positions:
+                        if position is None:
                             teams_with_positions[self.combined_teams.index(team)][idx] = user
-                            await ctx.send(f"La posición de {user.mention} para el Equipo {self.combined_teams.index(team) + 1} es {guild.get_role(position_roles[idx]).name}.")
-                            position_assigned = True
-                            break  # Break the inner loop
-
-                    if position_assigned:
-                        break  # Break the outer loop to avoid double assignments
-
-        else:
-            teams_with_positions = self.combined_teams
+                            break
 
         # Notify about team compositions.
         position_names = [guild.get_role(position_id).name for position_id in position_roles]
