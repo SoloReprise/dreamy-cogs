@@ -167,7 +167,7 @@ class Partiditas(commands.Cog):
                 teams.append(current_team)
 
         selected_players_mentions = [member.mention for member in all_selected_players]
-        await ctx.send(f"Jugadores seleccionados:\n{', '.join(selected_players_mentions)}")
+        #await ctx.send(f"Jugadores seleccionados:\n{', '.join(selected_players_mentions)}")
 
         # For role assignment
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
@@ -196,7 +196,7 @@ class Partiditas(commands.Cog):
                 
                 if preferred_positions:
                     pref_names = ', '.join([guild.get_role(pos).name for pos in preferred_positions])
-                    await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{pref_names}].")
+                    #await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{pref_names}].")
                 
                 assigned = False
                 for team_index, team in enumerate(teams, start=1):
@@ -209,7 +209,7 @@ class Partiditas(commands.Cog):
                             positions_by_team[team_index].add(pref)
                             position_name = guild.get_role(pref).name
                             teams_with_positions[team_index - 1].append((user, position_name))
-                            await ctx.send(f"La posición de {user.mention} para el Equipo {team_index} es {position_name}.")
+                            #await ctx.send(f"La posición de {user.mention} para el Equipo {team_index} es {position_name}.")
                             assigned = True
                             assigned_members.add(user)  # Add user to assigned members
                             break
@@ -218,7 +218,7 @@ class Partiditas(commands.Cog):
                         break  # exit loop as position has been found
                 
                 if not assigned:
-                    await ctx.send(f"No se pudo encontrar una posición preferida para {user.mention} en ningún equipo.")
+                    #await ctx.send(f"No se pudo encontrar una posición preferida para {user.mention} en ningún equipo.")
                     unassigned_members.append(user)
 
         # Updated Fallback Logic
@@ -234,12 +234,8 @@ class Partiditas(commands.Cog):
                         positions_by_team[team_index].add(assigned_position)
                         position_name = guild.get_role(assigned_position).name
                         teams_with_positions[team_index - 1].append((user, position_name))
-                        await ctx.send(f"La posición de {user.mention} para el Equipo {team_index} es {position_name}.")
+                        #await ctx.send(f"La posición de {user.mention} para el Equipo {team_index} es {position_name}.")
                         break
-
-        # Handle if there are still any unassigned members left
-        for user in unassigned_members:
-            await ctx.send(f"No se pudo encontrar una posición para {user.mention} en ningún equipo.")
 
         # Notify about team compositions.
         position_names = [guild.get_role(position_id).name for position_id in position_roles]
