@@ -97,41 +97,30 @@ class Partiditas(commands.Cog):
 
         # Extract members with the provided roles.
         members_with_role1 = list(set([member for member in guild.members if role1 in member.roles]))
-        if role2:
-            members_with_role2 = list(set([member for member in guild.members if role2 in member.roles]))
-        else:
-            members_with_role2 = members_with_role1.copy()  # Use members from role1 if role2 is not specified.
+        members_with_role2 = list(set([member for member in guild.members if role2 in member.roles]))
 
         if len(members_with_role1) < members_per_team or len(members_with_role2) < members_per_team:
             await ctx.send("No hay suficientes miembros con los roles especificados.")
             return
 
-        already_chosen = []  # To keep track of members already selected.
-
-        def pick_member_from_role(role_list, other_list):
-            member = random.choice(role_list)
-            role_list.remove(member)
-            if member in other_list:
-                other_list.remove(member)
-            return member
-
         # Divide members into teams.
         for i in range(num_teams):
             team = []
+            role_members = members_with_role1 if i % 2 == 0 else members_with_role2
             
-            # Determine primary and secondary role lists based on team parity.
-            primary_role_list = members_with_role1 if i % 2 == 0 else members_with_role2
-            secondary_role_list = members_with_role2 if i % 2 == 0 else members_with_role1
-
-            while len(team) < members_per_team and primary_role_list:
-                member = pick_member_from_role(primary_role_list, secondary_role_list)
+            while len(team) < members_per_team and role_members:
+                member = random.choice(role_members)
+                role_members.remove(member)
                 team.append(member)
-                already_chosen.append(member)
+                
+                # Once selected, make sure the member is not available for other teams.
+                if member in members_with_role1:
+                    members_with_role1.remove(member)
+                if member in members_with_role2:
+                    members_with_role2.remove(member)
 
-            # If primary role list runs out but team isn't complete, we don't pick from the secondary list.
-            # Instead, we notify that the team couldn't be fully formed and move on.
-            if len(team) < members_per_team:
-                await ctx.send(f"Could not form a full team {i + 1} due to insufficient members with the primary role.")
+            if len(team) < members_per_team:  # If team isn't filled
+                await ctx.send(f"Could not form a full team {i + 1} due to insufficient members.")
                 continue
 
             self.combined_teams.append(team)
@@ -142,41 +131,31 @@ class Partiditas(commands.Cog):
 
         if members_per_team == 5:  # Position comprobation only for teams of 5 members.
 
-            # 1. First pass: Try to place all members based on their preferred positions.
-            for user in already_chosen:
-                member_roles = set(role.id for role in user.roles)
-                preferred_positions = member_roles & set(position_roles)
+            # Using self.combined_teams to get already chosen members
+            for team in self.combined_teams:
+                for user in team:
+                    member_roles = set(role.id for role in user.roles)
+                    preferred_positions = member_roles & set(position_roles)
 
-                if preferred_positions:
-                    pref_names = ', '.join([guild.get_role(pos).name for pos in preferred_positions])
-                    await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{pref_names}].")
-                else:
-                    preferred_positions = set(position_roles)  # treat as if they prefer all positions
+                    if preferred_positions:
+                        pref_names = ', '.join([guild.get_role(pos).name for pos in preferred_positions])
+                        await ctx.send(f"Se ha encontrado al jugador {user.mention}. Buscando posición [{pref_names}].")
+                    else:
+                        preferred_positions = set(position_roles)  # treat as if they prefer all positions
 
-                position_assigned = False
+                    position_assigned = False
 
-                for team in teams_with_positions:
-                    for idx, position in enumerate(team):
+                    for idx, position in enumerate(teams_with_positions[0]):  # Assuming each team gets their roles sequentially
                         if position is None and position_roles[idx] in preferred_positions:
-                            team[idx] = user
+                            teams_with_positions[0][idx] = user
                             position_assigned = True
                             await ctx.send(f"La posición de {user.mention} para el Equipo {teams_with_positions.index(team) + 1} es {guild.get_role(position_roles[idx]).name}.")
                             break
                     if position_assigned:
                         break
 
-            # 2. Second pass: Fill in remaining positions.
-            for user in already_chosen:
-                if not any(user == position for team in teams_with_positions for position in team):  # If the user hasn't been placed yet
-                    for team in teams_with_positions:
-                        for idx, position in enumerate(team):
-                            if position is None:
-                                team[idx] = user
-                                await ctx.send(f"La posición de {user.mention} para el Equipo {teams_with_positions.index(team) + 1} es {guild.get_role(position_roles[idx]).name}.")
-                                break
-
         else:
-            teams_with_positions = [[user for user in team] for team in already_chosen]
+            teams_with_positions = self.combined_teams
 
         # Notify about team compositions.
         position_names = [guild.get_role(position_id).name for position_id in position_roles]
