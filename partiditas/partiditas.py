@@ -161,7 +161,7 @@ class Partiditas(commands.Cog):
 
                 placed = False
                 for team_index, team in enumerate(teams, start=1):
-                    team_positions = [pos for _, pos in teams_with_positions.get(team_index, [])]
+                    team_positions = [pos for _, pos in teams_with_positions[team_index - 1] if teams_with_positions[team_index - 1]] if team_index <= len(teams_with_positions) else []
 
                     for pos in preferred_positions:
                         if pos in get_available_positions(team_positions):
