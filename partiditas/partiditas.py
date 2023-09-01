@@ -118,22 +118,24 @@ class Partiditas(commands.Cog):
         random.shuffle(members_with_role1)
         random.shuffle(members_with_role2)
 
-        selected_from_role1 = random.sample(members_with_role1, min(len(members_with_role1), members_per_team * ((num_teams + 1) // 2)))
-        selected_from_role2 = random.sample(members_with_role2, min(len(members_with_role2), members_per_team * (num_teams // 2)))
-
+        # Form teams iteratively
         all_selected_players = []
-        # Now, interleave these lists:
-        for i in range(max(len(selected_from_role1), len(selected_from_role2))):
-            if i < len(selected_from_role1):
-                all_selected_players.append(selected_from_role1[i])
-            if i < len(selected_from_role2):
-                all_selected_players.append(selected_from_role2[i])
+        teams = []
+        role1_count = members_per_team
+        role2_count = members_per_team
+        for i in range(num_teams):
+            if i % 2 == 0:  # Odd team (e.g., Team 1, Team 3)
+                team = random.sample(members_with_role1, role1_count)
+                all_selected_players.extend(team)
+                members_with_role1 = [m for m in members_with_role1 if m not in team]
+            else:  # Even team
+                team = random.sample(members_with_role2, role2_count)
+                all_selected_players.extend(team)
+                members_with_role2 = [m for m in members_with_role2 if m not in team]
+            teams.append(team)
 
         selected_players_mentions = [member.mention for member in all_selected_players]
         await ctx.send(f"Jugadores seleccionados:\n{', '.join(selected_players_mentions)}")
-
-        # Divide members into teams.
-        teams = [all_selected_players[i:i + members_per_team] for i in range(0, len(all_selected_players), members_per_team)]
 
         # For role assignment
         position_roles = [1127716398416797766, 1127716463478853702, 1127716528121446573, 1127716546370871316, 1127716426594140160]
