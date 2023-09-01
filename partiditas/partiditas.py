@@ -119,20 +119,26 @@ class Partiditas(commands.Cog):
         random.shuffle(members_with_role2)
 
         # Form teams iteratively
-        all_selected_players = []
+        all_selected_players = set()  # We'll use a set to ensure unique members
         teams = []
-        role1_count = members_per_team
-        role2_count = members_per_team
+
         for i in range(num_teams):
+            current_team = []
+            
             if i % 2 == 0:  # Odd team (e.g., Team 1, Team 3)
-                team = random.sample(members_with_role1, role1_count)
-                all_selected_players.extend(team)
-                members_with_role1 = [m for m in members_with_role1 if m not in team]
+                while len(current_team) < members_per_team and members_with_role1:
+                    member = members_with_role1.pop(0)
+                    if member not in all_selected_players:
+                        current_team.append(member)
+                        all_selected_players.add(member)
             else:  # Even team
-                team = random.sample(members_with_role2, role2_count)
-                all_selected_players.extend(team)
-                members_with_role2 = [m for m in members_with_role2 if m not in team]
-            teams.append(team)
+                while len(current_team) < members_per_team and members_with_role2:
+                    member = members_with_role2.pop(0)
+                    if member not in all_selected_players:
+                        current_team.append(member)
+                        all_selected_players.add(member)
+
+            teams.append(current_team)
 
         selected_players_mentions = [member.mention for member in all_selected_players]
         await ctx.send(f"Jugadores seleccionados:\n{', '.join(selected_players_mentions)}")
