@@ -115,7 +115,21 @@ class MewtwoWars(commands.Cog):
         await ctx.send("¡Clasificación de Mewtwo Wars reiniciada!")
 
     async def add_points(self, guild: discord.Guild, user: discord.Member, points: int):
-        """Method to add points for external usage."""
+        """Utility method to add points to a user."""
+        
+        # Access the config for this specific guild
         user_points = await self.config.guild(guild).user_points()
+
+        # Check if the user is already present in the user_points dictionary
+        # If not, add them with the given points
+        # If they are present, add the points to their existing total
         user_points[str(user.id)] = user_points.get(str(user.id), 0) + points
+        
         await self.config.guild(guild).user_points.set(user_points)
+        
+        team = 'Mewtwo X' if any(role.id == 1147254156491509780 for role in user.roles) else 'Mewtwo Y'
+        
+        # Update team points similarly
+        team_points = await self.config.guild(guild).team_points()
+        team_points[team] += points
+        await self.config.guild(guild).team_points.set(team_points)
