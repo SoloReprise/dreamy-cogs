@@ -8,9 +8,15 @@ import json
 class MewtwoWars(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.load_data()
-        self.team_points = {'Mewtwo X': 0, 'Mewtwo Y': 0}
-        self.user_points = defaultdict(int)  # default value for a user is 0
+        default_guild = {
+            "user_points": {},
+            "team_points": {
+                "Mewtwo X": 0,
+                "Mewtwo Y": 0
+            }
+        }
+        self.config = Config.get_conf(self, identifier=1234567890, force_registration=True)
+        self.config.register_guild(**default_guild)
 
     @commands.group(name="mwpoints")
     @commands.has_permissions(administrator=True)
@@ -48,26 +54,13 @@ class MewtwoWars(commands.Cog):
         """Check if user belongs to a valid team."""
         return any(role.id in [1147254156491509780, 1147253975893159957] for role in user.roles)
 
-    def save_data(self):
-        """Save user and team points to a JSON file."""
-        with open("mewtwo_data.json", "w") as f:
-            data = {
-                "user_points": self.user_points,
-                "team_points": self.team_points
-            }
-            json.dump(data, f)
+    async def save_data(self):
+        await self.config.guild(ctx.guild).user_points.set(self.user_points)
+        await self.config.guild(ctx.guild).team_points.set(self.team_points)
 
-    def load_data(self):
-        """Load user and team points from a JSON file."""
-        try:
-            with open("mewtwo_data.json", "r") as f:
-                data = json.load(f)
-                self.user_points = data.get("user_points", {})
-                self.team_points = data.get("team_points", {"Mewtwo X": 0, "Mewtwo Y": 0})
-        except FileNotFoundError:
-            # If file doesn't exist, initialize with default values
-            self.user_points = {}
-            self.team_points = {"Mewtwo X": 0, "Mewtwo Y": 0}
+    async def load_data(self):
+        self.user_points = await self.config.guild(ctx.guild).user_points()
+        self.team_points = await self.config.guild(ctx.guild).team_points()
             
     async def display_ranking(self, ctx):
         table = [["Ranking", "Usuario", "Puntos"]]
