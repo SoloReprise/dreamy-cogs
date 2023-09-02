@@ -26,7 +26,7 @@ class MewtwoWars(commands.Cog):
     @mwpoints.command(name="add")
     async def mwpoints_add(self, ctx, user: discord.Member, points: int):
         """Add points to a user."""
-        self.user_points[user.id] += points
+        self.user_points[user.id] = self.user_points.get(user.id, 0) + points
         team = 'Mewtwo X' if any(role.id == 1147254156491509780 for role in user.roles) else 'Mewtwo Y'
         self.team_points[team] += points
         await ctx.send(f"Se han añadido {points} puntos a {user.display_name}.")
@@ -41,13 +41,14 @@ class MewtwoWars(commands.Cog):
 
     async def display_ranking(self, ctx):
         table = [["Ranking", "Usuario", "Puntos"]]
-
+        
+        # Sort the users by their points in descending order
         sorted_users = sorted(self.user_points.items(), key=lambda x: x[1], reverse=True)[:10]
         for idx, (user_id, points) in enumerate(sorted_users):
-            user = ctx.guild.get_member(user_id)  # Fetch the Member object
+            user = ctx.guild.get_member(user_id)
             if user:
                 team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
-                table.append([f"# {idx + 1}", f"{user.name} ({team})", f"{points} puntos"])
+                table.append([f"# {idx + 1}", f"{user.display_name} ({team})", f"{points} puntos"])
             else:
                 table.append([f"# {idx + 1}", "Unknown", f"{points} puntos"])
         table_str = tabulate(table, headers="firstrow", tablefmt="grid")
