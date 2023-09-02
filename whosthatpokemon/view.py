@@ -22,7 +22,7 @@ class WhosThatPokemonModal(discord.ui.Modal, title="Whos That Pokémon?"):
             f"Has dicho que es: {self.poke.value}", ephemeral=True
         )
 
-
+#MewtwoWars, bot
 class WhosThatPokemonView(discord.ui.View):
     def __init__(self, bot, eligible_names: List[Any]) -> None:
         self.bot = bot
