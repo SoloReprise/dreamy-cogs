@@ -125,6 +125,19 @@ class WhosThatPokemon(commands.Cog):
         poke_image.close()
         return temp
 
+    # Define a mod cooldown. The arguments are: 5 times per day per mod.
+    mod_daily_cooldown = commands.CooldownMapping.from_cooldown(5, 86400, commands.BucketType.user)
+
+    @whosthatpokemon.before_invoke
+    async def check_mod_cooldown(ctx):
+        # Check if the member has the 'mod' role or the necessary permissions.
+        if ctx.author.guild_permissions.manage_messages or any(role.name == "Mod" for role in ctx.author.roles):
+            bucket = mod_daily_cooldown.get_bucket(ctx.message)
+            retry_after = bucket.update_rate_limit()
+            if retry_after:
+                time_left = datetime.timedelta(seconds=retry_after)
+                raise commands.CommandOnCooldown(bucket, time_left)
+        
     # _____ ________  ______  ___  ___   _   _______  _____
     # /  __ \  _  |  \/  ||  \/  | / _ \ | \ | |  _  \/  ___|
     # | /  \/ | | | .  . || .  . |/ /_\ \|  \| | | | |\ `--.
@@ -203,7 +216,7 @@ class WhosThatPokemon(commands.Cog):
             return await ctx.send("Failed to get species data from PokeAPI.")
         names_data = species_data.get("names", [{}])
         eligible_names = [x["name"].lower() for x in names_data]
-        english_name = [x["name"] for x in names_data if x["language"]["name"] == "en"][
+        english_name = [x["name"] for x in names_data if x["language"]["name"] == "es"][
             0
         ]
 
