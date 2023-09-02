@@ -39,10 +39,22 @@ class WhosThatPokemonView(discord.ui.View):
     async def guess_the_pokemon(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
+        # Get the list of the member's role IDs
+        member_roles = [role.id for role in interaction.user.roles]
+
+        # Check if the member has one of the required roles
+        required_roles = [1147253975893159957, 1147254156491509780]
+        if not any(role_id in member_roles for role_id in required_roles):
+            await interaction.response.send_message(
+                "¡Lo siento! Las adivinanzas son parte de las Mewtwo Wars. Necesitas escoger bando para que tu respuesta sea tenida en cuenta.",
+                ephemeral=True
+            )
+            return
+
         modal = WhosThatPokemonModal()
         await interaction.response.send_modal(modal)
         await modal.wait()
-        
+
         if modal.poke.value.casefold() in self.eligible_names and self.winner is None:
             self.winner = interaction.user
             self.stop()
@@ -52,7 +64,7 @@ class WhosThatPokemonView(discord.ui.View):
             button.label = "Pokémon acertado"
             button.style = discord.ButtonStyle.success
             await self.message.edit(view=self)
-            
+
             # Mention the winner in the message
             await interaction.followup.send(
                 content=f"¡{self.winner.mention} ha acertado el Pokémon!"

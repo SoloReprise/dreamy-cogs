@@ -196,7 +196,7 @@ class WhosThatPokemon(commands.Cog):
         # Took this from Core's event file.
         # https://github.com/Cog-Creators/Red-DiscordBot/blob/41d89c7b54a1f231a01f79655c20d4acf1799633/redbot/core/_events.py#L424-L426
         img_timeout = discord.utils.format_dt(
-            datetime.now(timezone.utc) + timedelta(seconds=30.0), "R"
+            datetime.now(timezone.utc) + timedelta(minutes=5), "R"
         )
         species_data = await self.get_data(f"{API_URL}/pokemon-species/{poke_id}")
         if species_data.get("http_code"):
