@@ -75,7 +75,8 @@ class WhosThatPokemonView(discord.ui.View):
             # Add points to the winner using the MewtwoWars cog
             mewtwo_cog = self.bot.get_cog('MewtwoWars') # Assuming the cog's name is 'MewtwoWars'
             if mewtwo_cog:
-                await mewtwo_cog.add_points(self.winner, 1)
+                guild = interaction.guild
+                await mewtwo_cog.add_points(guild, self.winner, 1)
 
             # Mention the winner in the message with the team name without pinging
             await interaction.followup.send(
