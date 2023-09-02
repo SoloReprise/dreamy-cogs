@@ -10,11 +10,10 @@ class MewtwoWars(commands.Cog):
         self.team_points = {'Mewtwo X': 0, 'Mewtwo Y': 0}
         self.user_points = defaultdict(int)  # default value for a user is 0
 
-    @commands.group(name="mwranking")
+    @commands.group(name="mwranking", invoke_without_command=True)
     async def mwranking(self, ctx):
-        """Command to check Mewtwo Wars rankings."""
-        if ctx.invoked_subcommand is None:
-            await self.display_ranking(ctx)
+        """Check the Mewtwo Wars ranking."""
+        await self.display_ranking(ctx)
 
     @commands.group(name="mwpoints")
     @commands.has_permissions(administrator=True)
