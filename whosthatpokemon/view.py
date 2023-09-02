@@ -44,7 +44,13 @@ class WhosThatPokemonView(discord.ui.View):
 
         # Check if the member has one of the required roles
         required_roles = [1147253975893159957, 1147254156491509780]
-        if not any(role_id in member_roles for role_id in required_roles):
+        matching_role = None
+        for role_id in required_roles:
+            if role_id in member_roles:
+                matching_role = discord.utils.get(interaction.guild.roles, id=role_id)
+                break
+
+        if not matching_role:
             await interaction.response.send_message(
                 "¡Lo siento! Las adivinanzas son parte de las Mewtwo Wars. Necesitas escoger bando para que tu respuesta sea tenida en cuenta.",
                 ephemeral=True
@@ -65,9 +71,9 @@ class WhosThatPokemonView(discord.ui.View):
             button.style = discord.ButtonStyle.success
             await self.message.edit(view=self)
 
-            # Mention the winner in the message
+            # Mention the winner in the message with the team name without pinging
             await interaction.followup.send(
-                content=f"¡{self.winner.mention} ha acertado el Pokémon!"
+                content=f"¡{self.winner.mention} ha acertado el Pokémon! ¡**2 puntos** para el Equipo {matching_role.name}!"
             )
 
     async def on_error(
