@@ -75,12 +75,13 @@ class WhosThatPokemonView(discord.ui.View):
             await interaction.followup.send(
                 content=f"¡{self.winner.mention} ha acertado el Pokémon! ¡**1 punto** para el Equipo {matching_role.name}!"
             )
+            
             # Get the instance of the MewtwoWars cog
             mewtwo_cog = self.bot.get_cog("MewtwoWars")
-            
-            # Add the point to the winner
             if mewtwo_cog:
                 await mewtwo_cog.add_points(interaction.guild, self.winner, 1)
+            else:
+                print("MewtwoWars cog is not loaded.")
 
     async def on_error(
         self,
