@@ -12,25 +12,6 @@ class MewtwoWars(commands.Cog):
         self.team_points = {'Mewtwo X': 0, 'Mewtwo Y': 0}
         self.user_points = defaultdict(int)  # default value for a user is 0
 
-    def load_data(self):
-        try:
-            with open("mewtwo_data.json", "r") as f:
-                data = json.load(f)
-                self.user_points = data.get("user_points", {})
-                self.team_points = data.get("team_points", {"Mewtwo X": 0, "Mewtwo Y": 0})
-        except FileNotFoundError:
-            # If file doesn't exist, initialize with default values
-            self.user_points = {}
-            self.team_points = {"Mewtwo X": 0, "Mewtwo Y": 0}
-
-    def save_data(self):
-        with open("mewtwo_data.json", "w") as f:
-            data = {
-                "user_points": self.user_points,
-                "team_points": self.team_points
-            }
-            json.dump(data, f)
-
     @commands.group(name="mwpoints")
     @commands.has_permissions(administrator=True)
     async def mwpoints(self, ctx):
@@ -62,6 +43,31 @@ class MewtwoWars(commands.Cog):
             await ctx.send(f"Se han eliminado {points} puntos de {user.display_name}.")
         else:
             await ctx.send(f"{user.display_name} no tiene puntos suficientes o no pertenece a ningún equipo válido.")
+            
+    def is_valid_team(self, user):
+        """Check if user belongs to a valid team."""
+        return any(role.id in [1147254156491509780, 1147253975893159957] for role in user.roles)
+
+    def save_data(self):
+        """Save user and team points to a JSON file."""
+        with open("mewtwo_data.json", "w") as f:
+            data = {
+                "user_points": self.user_points,
+                "team_points": self.team_points
+            }
+            json.dump(data, f)
+
+    def load_data(self):
+        """Load user and team points from a JSON file."""
+        try:
+            with open("mewtwo_data.json", "r") as f:
+                data = json.load(f)
+                self.user_points = data.get("user_points", {})
+                self.team_points = data.get("team_points", {"Mewtwo X": 0, "Mewtwo Y": 0})
+        except FileNotFoundError:
+            # If file doesn't exist, initialize with default values
+            self.user_points = {}
+            self.team_points = {"Mewtwo X": 0, "Mewtwo Y": 0}
             
     async def display_ranking(self, ctx):
         table = [["Ranking", "Usuario", "Puntos"]]
