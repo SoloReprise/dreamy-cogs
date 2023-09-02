@@ -73,7 +73,7 @@ class WhosThatPokemonView(discord.ui.View):
 
             # Mention the winner in the message with the team name without pinging
             await interaction.followup.send(
-                content=f"¡{self.winner.mention} ha acertado el Pokémon! ¡**1 puntos** para el Equipo {matching_role.name}!"
+                content=f"¡{self.winner.mention} ha acertado el Pokémon! ¡**1 punto** para el Equipo {matching_role.name}!"
             )
 
     async def on_error(
