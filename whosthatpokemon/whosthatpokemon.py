@@ -283,7 +283,7 @@ class WhosThatPokemon(commands.Cog):
         await SimpleMenu(
             pages,
             disable_after_timeout=True,
-            timeout=60,
+            timeout=300,
         ).start(ctx)
 
     @commands.command(name="wtpstats")
