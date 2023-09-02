@@ -113,3 +113,9 @@ class MewtwoWars(commands.Cog):
         })
 
         await ctx.send("¡Clasificación de Mewtwo Wars reiniciada!")
+
+    async def add_points(self, guild: discord.Guild, user: discord.Member, points: int):
+        """Method to add points for external usage."""
+        user_points = await self.config.guild(guild).user_points()
+        user_points[str(user.id)] = user_points.get(str(user.id), 0) + points
+        await self.config.guild(guild).user_points.set(user_points)
