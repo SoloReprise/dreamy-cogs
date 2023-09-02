@@ -3,17 +3,33 @@ from discord.ext import commands
 from redbot.core import commands
 from collections import defaultdict
 from tabulate import tabulate
+import json
 
 class MewtwoWars(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.load_data()
         self.team_points = {'Mewtwo X': 0, 'Mewtwo Y': 0}
         self.user_points = defaultdict(int)  # default value for a user is 0
 
-    @commands.group(name="mwranking", invoke_without_command=True)
-    async def mwranking(self, ctx):
-        """Check the Mewtwo Wars ranking."""
-        await self.display_ranking(ctx)
+    def load_data(self):
+        try:
+            with open("mewtwo_data.json", "r") as f:
+                data = json.load(f)
+                self.user_points = data.get("user_points", {})
+                self.team_points = data.get("team_points", {"Mewtwo X": 0, "Mewtwo Y": 0})
+        except FileNotFoundError:
+            # If file doesn't exist, initialize with default values
+            self.user_points = {}
+            self.team_points = {"Mewtwo X": 0, "Mewtwo Y": 0}
+
+    def save_data(self):
+        with open("mewtwo_data.json", "w") as f:
+            data = {
+                "user_points": self.user_points,
+                "team_points": self.team_points
+            }
+            json.dump(data, f)
 
     @commands.group(name="mwpoints")
     @commands.has_permissions(administrator=True)
@@ -25,19 +41,28 @@ class MewtwoWars(commands.Cog):
     @mwpoints.command(name="add")
     async def mwpoints_add(self, ctx, user: discord.Member, points: int):
         """Add points to a user."""
-        self.user_points[user.id] = self.user_points.get(user.id, 0) + points
-        team = 'Mewtwo X' if any(role.id == 1147254156491509780 for role in user.roles) else 'Mewtwo Y'
-        self.team_points[team] += points
-        await ctx.send(f"Se han añadido {points} puntos a {user.display_name}.")
+        if self.is_valid_team(user):
+            self.user_points[user.id] = self.user_points.get(user.id, 0) + points
+            team = 'Mewtwo X' if any(role.id == 1147254156491509780 for role in user.roles) else 'Mewtwo Y'
+            self.team_points[team] += points
+            self.save_data()
+            await ctx.send(f"Se han añadido {points} puntos a {user.display_name}.")
+        else:
+            await ctx.send(f"{user.display_name} no pertenece a ningún equipo válido.")
 
     @mwpoints.command(name="delete")
     async def mwpoints_delete(self, ctx, user: discord.Member, points: int):
         """Delete points from a user."""
-        self.user_points[user.id] -= points
-        team = 'Mewtwo X' if any(role.id == 1147254156491509780 for role in user.roles) else 'Mewtwo Y'
-        self.team_points[team] -= points
-        await ctx.send(f"Se han eliminado {points} puntos de {user.display_name}.")
-
+        current_points = self.user_points.get(user.id, 0)
+        if self.is_valid_team(user) and current_points - points >= 0:
+            self.user_points[user.id] = current_points - points
+            team = 'Mewtwo X' if any(role.id == 1147254156491509780 for role in user.roles) else 'Mewtwo Y'
+            self.team_points[team] -= points
+            self.save_data()
+            await ctx.send(f"Se han eliminado {points} puntos de {user.display_name}.")
+        else:
+            await ctx.send(f"{user.display_name} no tiene puntos suficientes o no pertenece a ningún equipo válido.")
+            
     async def display_ranking(self, ctx):
         table = [["Ranking", "Usuario", "Puntos"]]
         
