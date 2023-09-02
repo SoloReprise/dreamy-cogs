@@ -44,10 +44,12 @@ class MewtwoWars(commands.Cog):
 
         sorted_users = sorted(self.user_points.items(), key=lambda x: x[1], reverse=True)[:10]
         for idx, (user_id, points) in enumerate(sorted_users):
-            user = self.bot.get_user(user_id)
-            team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
-            table.append([f"# {idx + 1}", f"{user.name} ({team})", f"{points} puntos"])
-
+            user = ctx.guild.get_member(user_id)  # Fetch the Member object
+            if user:
+                team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
+                table.append([f"# {idx + 1}", f"{user.name} ({team})", f"{points} puntos"])
+            else:
+                table.append([f"# {idx + 1}", "Unknown", f"{points} puntos"])
         table_str = tabulate(table, headers="firstrow", tablefmt="grid")
 
         embed = discord.Embed(title="Clasificación Mewtwo Wars")
