@@ -57,3 +57,17 @@ class MewtwoWars(commands.Cog):
         embed.add_field(name="Mewtwo Y", value=f"{self.team_points['Mewtwo Y']} puntos", inline=True)
         embed.description = f"```\n{table_str}\n```"
         await ctx.send(embed=embed)
+
+    @commands.command(name="mwreset")
+    @commands.is_owner()  # Ensure only the bot owner can run this
+    async def mwreset(self, ctx):
+        """Reset the Mewtwo Wars ranking."""
+        
+        # Reset user points and team points
+        self.user_points = {}
+        self.team_points = {
+            'Mewtwo X': 0,
+            'Mewtwo Y': 0
+        }
+
+        await ctx.send("¡Clasificación de Mewtwo Wars reiniciada!")
