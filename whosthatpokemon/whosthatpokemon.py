@@ -216,7 +216,10 @@ class WhosThatPokemon(commands.Cog):
             return await ctx.send("Failed to get species data from PokeAPI.")
         names_data = species_data.get("names", [{}])
         eligible_names = [x["name"].lower() for x in names_data]
-        english_name = [x["name"] for x in names_data if x["language"]["name"] == "es"][
+        english_name = [x["name"] for x in names_data if x["language"]["name"] == "en"][
+            0
+        ]
+        spanish_name = [x["name"] for x in names_data if x["language"]["name"] == "es"][
             0
         ]
 
@@ -232,7 +235,7 @@ class WhosThatPokemon(commands.Cog):
 
         embed = discord.Embed(
             title=":tada: ¡Pokémon acertado! :tada:",
-            description=f"El Pokémon era... **{english_name}**.",
+            description=f"El Pokémon era... **{spanish_name}**.",
             color=0x76EE00,
         )
         embed.set_image(url="attachment://whosthatpokemon.png")
