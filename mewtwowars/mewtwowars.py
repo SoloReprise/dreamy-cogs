@@ -68,23 +68,35 @@ class MewtwoWars(commands.Cog):
         self.user_points = await self.config.guild(ctx.guild).user_points()
         self.team_points = await self.config.guild(ctx.guild).team_points()
             
+    @commands.group(name="mwranking", invoke_without_command=True)
+    async def mwranking(self, ctx):
+        """Check the Mewtwo Wars ranking."""
+        await self.display_ranking(ctx)
+
     async def display_ranking(self, ctx):
         table = [["Ranking", "Usuario", "Puntos"]]
         
+        # Fetch the user points from the Config storage
+        user_points = await self.config.guild(ctx.guild).user_points()
+
         # Sort the users by their points in descending order
-        sorted_users = sorted(self.user_points.items(), key=lambda x: x[1], reverse=True)[:10]
+        sorted_users = sorted(user_points.items(), key=lambda x: x[1], reverse=True)[:10]
         for idx, (user_id, points) in enumerate(sorted_users):
-            user = ctx.guild.get_member(user_id)
+            user = ctx.guild.get_member(int(user_id))  # Convert user_id from str to int
             if user:
                 team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
                 table.append([f"# {idx + 1}", f"{user.display_name} ({team})", f"{points} puntos"])
             else:
                 table.append([f"# {idx + 1}", "Unknown", f"{points} puntos"])
+
+        # Fetch the team points from Config
+        team_points = await self.config.guild(ctx.guild).team_points()
+
         table_str = tabulate(table, headers="firstrow", tablefmt="grid")
 
         embed = discord.Embed(title="Clasificación Mewtwo Wars")
-        embed.add_field(name="Mewtwo X", value=f"{self.team_points['Mewtwo X']} puntos", inline=True)
-        embed.add_field(name="Mewtwo Y", value=f"{self.team_points['Mewtwo Y']} puntos", inline=True)
+        embed.add_field(name="Mewtwo X", value=f"{team_points['Mewtwo X']} puntos", inline=True)
+        embed.add_field(name="Mewtwo Y", value=f"{team_points['Mewtwo Y']} puntos", inline=True)
         embed.description = f"```\n{table_str}\n```"
         await ctx.send(embed=embed)
 
@@ -93,11 +105,11 @@ class MewtwoWars(commands.Cog):
     async def mwreset(self, ctx):
         """Reset the Mewtwo Wars ranking."""
         
-        # Reset user points and team points
-        self.user_points = {}
-        self.team_points = {
+        # Reset user points and team points in the Config storage
+        await self.config.guild(ctx.guild).user_points.set({})
+        await self.config.guild(ctx.guild).team_points.set({
             'Mewtwo X': 0,
             'Mewtwo Y': 0
-        }
+        })
 
         await ctx.send("¡Clasificación de Mewtwo Wars reiniciada!")
