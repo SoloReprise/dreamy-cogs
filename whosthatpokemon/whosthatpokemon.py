@@ -210,7 +210,7 @@ class WhosThatPokemon(commands.Cog):
         revealed = await self.generate_image(f"{poke_id:>03}", hide=False)
         revealed_img = File(revealed, "whosthatpokemon.png")
 
-        view = WhosThatPokemonView(self.bot, eligible_names)
+        view = WhosThatPokemonView(bot, eligible_names)
         view.message = await ctx.send(
             f"**¡¿Cuál es este Pokémon?!**\nNecesito una respuesta válida en menos de {img_timeout}.",
             file=File(temp, "guessthatpokemon.png"),
