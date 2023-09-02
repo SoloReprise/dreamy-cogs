@@ -28,31 +28,37 @@ class MewtwoWars(commands.Cog):
     @mwpoints.command(name="add")
     async def mwpoints_add(self, ctx, user: discord.Member, points: int):
         """Add points to a user."""
-        if self.is_valid_team(user):
-            self.user_points[user.id] = self.user_points.get(user.id, 0) + points
-            team = 'Mewtwo X' if any(role.id == 1147254156491509780 for role in user.roles) else 'Mewtwo Y'
-            self.team_points[team] += points
-            self.save_data()
-            await ctx.send(f"Se han añadido {points} puntos a {user.display_name}.")
-        else:
-            await ctx.send(f"{user.display_name} no pertenece a ningún equipo válido.")
+        user_points = await self.config.guild(ctx.guild).user_points()
+        user_points[user.id] = user_points.get(str(user.id), 0) + points
+        await self.config.guild(ctx.guild).user_points.set(user_points)
+        
+        team = 'Mewtwo X' if any(role.id == 1147254156491509780 for role in user.roles) else 'Mewtwo Y'
+        team_points = await self.config.guild(ctx.guild).team_points()
+        team_points[team] += points
+        await self.config.guild(ctx.guild).team_points.set(team_points)
+        
+        await ctx.send(f"Se han añadido {points} puntos a {user.display_name}.")
 
     @mwpoints.command(name="delete")
     async def mwpoints_delete(self, ctx, user: discord.Member, points: int):
         """Delete points from a user."""
-        current_points = self.user_points.get(user.id, 0)
-        if self.is_valid_team(user) and current_points - points >= 0:
-            self.user_points[user.id] = current_points - points
-            team = 'Mewtwo X' if any(role.id == 1147254156491509780 for role in user.roles) else 'Mewtwo Y'
-            self.team_points[team] -= points
-            self.save_data()
-            await ctx.send(f"Se han eliminado {points} puntos de {user.display_name}.")
+        user_points = await self.config.guild(ctx.guild).user_points()
+        if str(user.id) in user_points:
+            user_points[str(user.id)] -= points
+            await self.config.guild(ctx.guild).user_points.set(user_points)
         else:
-            await ctx.send(f"{user.display_name} no tiene puntos suficientes o no pertenece a ningún equipo válido.")
-            
-    def is_valid_team(self, user):
-        """Check if user belongs to a valid team."""
-        return any(role.id in [1147254156491509780, 1147253975893159957] for role in user.roles)
+            await ctx.send(f"{user.display_name} no tiene puntos.")
+            return
+
+        team = 'Mewtwo X' if any(role.id == 1147254156491509780 for role in user.roles) else 'Mewtwo Y'
+        team_points = await self.config.guild(ctx.guild).team_points()
+        team_points[team] -= points
+        await self.config.guild(ctx.guild).team_points.set(team_points)
+        
+        await ctx.send(f"Se han eliminado {points} puntos de {user.display_name}.")            
+        def is_valid_team(self, user):
+            """Check if user belongs to a valid team."""
+            return any(role.id in [1147254156491509780, 1147253975893159957] for role in user.roles)
 
     async def save_data(self):
         await self.config.guild(ctx.guild).user_points.set(self.user_points)
