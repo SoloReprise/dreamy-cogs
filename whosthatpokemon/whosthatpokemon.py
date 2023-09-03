@@ -375,3 +375,17 @@ class WhosThatPokemon(commands.Cog):
             await ctx.send("✅ WhosThatPokemon leaderboard has been reset.")
         else:
             await ctx.send("❌ WhosThatPokemon leaderboard reset has been cancelled.")
+
+    @commands.command(name="wtpusesreset")
+    @commands.is_owner()
+    async def reset_uses(self, ctx: commands.Context):
+        """Resetea los usos del comando wtp para todos los usuarios."""
+        
+        # A loop to iterate over all users and reset their usage_count might be costly in terms of performance, especially with a large number of users. 
+        # So, a more efficient method is to reset the value directly in your storage (assuming you're using JSON storage).
+        
+        async with self.config.all_users() as users_data:
+            for user_id, user_values in users_data.items():
+                user_values["usage_count"] = 0
+        
+        await ctx.send("Todos los usos del comando wtp han sido reiniciados.")
