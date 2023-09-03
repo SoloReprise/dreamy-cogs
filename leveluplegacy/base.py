@@ -208,13 +208,17 @@ class UserCommands(MixinMeta, ABC):
                 await ctx.send(_("¡No puedes decirle gg a un bot!"))
             else:
                 user_id = str(user.id)
+                
+                users = self.data[ctx.guild.id]["users"]
+                
+                # Initialize user data if it doesn't exist
+                if user_id not in users:
+                    self.init_user(ctx.guild.id, user_id)
 
                 user_mention = self.data[guild_id]["mention"]
                 users_data = self.data[guild_id]["users"]
-                if user_id not in users_data:
-                    await ctx.send(_("No data available for that user yet!"))
-                    return
-
+                
+                # Now, it's guaranteed that user data exists
                 users_data[user_id]["stars"] += 1
 
                 if self.data[guild_id]["weekly"]["on"]:
