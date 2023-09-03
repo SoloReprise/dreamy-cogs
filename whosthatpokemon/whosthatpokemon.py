@@ -50,16 +50,6 @@ API_URL: Final[str] = "https://pokeapi.co/api/v2"
 class WhosThatPokemon(commands.Cog):
     """¿Puedes adivinar el Pokémon?"""
 
-    async def mention_role_temporarily(role: Role) -> None:
-        """
-        Mention a role after temporarily setting it to mentionable.
-        """
-        try:
-            await role.edit(mentionable=True)
-            await role.guild.default_channel.send(role.mention)
-        finally:
-            await role.edit(mentionable=False)
-
     @tasks.loop(hours=24)
     async def reset_usage_counts(self):
         """Reset the daily usage counts for all users."""
@@ -82,6 +72,16 @@ class WhosThatPokemon(commands.Cog):
         self.config.register_user(**default_user)
         self.reset_usage_counts.start()
 
+   async def mention_role_temporarily(self, role: Role) -> None:
+        """
+        Mention a role after temporarily setting it to mentionable.
+        """
+        try:
+            await role.edit(mentionable=True)
+            await role.guild.default_channel.send(role.mention)
+        finally:
+            await role.edit(mentionable=False)
+            
     async def cog_unload(self) -> None:
         await self.session.close()
 
