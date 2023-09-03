@@ -50,6 +50,15 @@ API_URL: Final[str] = "https://pokeapi.co/api/v2"
 class WhosThatPokemon(commands.Cog):
     """¿Puedes adivinar el Pokémon?"""
 
+    @tasks.loop(hours=24)
+    async def reset_usage_counts(self):
+        """Reset the daily usage counts for all users."""
+        now = datetime.now(timezone.utc)
+        reset_time = datetime.combine(now.date(), time(7, 0, tzinfo=timezone.utc))  # 9 am GMT+2 is 7 am UTC
+        if now < reset_time:
+            await asyncio.sleep((reset_time - now).total_seconds())
+        await self.config.clear_all_users()
+        
     def __init__(self, bot: Red):
         self.bot: Red = bot
         self.session: aiohttp.ClientSession = aiohttp.ClientSession()
@@ -61,15 +70,6 @@ class WhosThatPokemon(commands.Cog):
         }
         self.config.register_user(**default_user)
         self.reset_usage_counts.start()
-
-        @tasks.loop(hours=24)
-        async def reset_usage_counts(self):
-            """Reset the daily usage counts for all users."""
-            now = datetime.now(timezone.utc)
-            reset_time = datetime.combine(now.date(), time(7, 0, tzinfo=timezone.utc))  # 9 am GMT+2 is 7 am UTC
-            if now < reset_time:
-                await asyncio.sleep((reset_time - now).total_seconds())
-            await self.config.clear_all_users()
 
     async def cog_unload(self) -> None:
         await self.session.close()
