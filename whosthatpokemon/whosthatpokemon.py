@@ -214,18 +214,6 @@ class WhosThatPokemon(commands.Cog):
         mewtwo_x_role = discord.utils.get(ctx.guild.roles, id=1147254156491509780)
         mewtwo_y_role = discord.utils.get(ctx.guild.roles, id=1147253975893159957)
 
-        # Now use the function to mention these roles
-        await self.mention_role_temporarily(ctx, mewtwo_wars_role)
-        await self.mention_role_temporarily(ctx, mewtwo_x_role)
-        await self.mention_role_temporarily(ctx, mewtwo_y_role)
-
-        await ctx.send(
-            f"{mewtwo_wars_role.mention}\n{mewtwo_x_role.mention} {mewtwo_y_role.mention}\n¡Un nuevo Pokémon ha aparecido! ¿Os veis capaces de adivinarlo?",
-            allowed_mentions=discord.AllowedMentions(roles=True)  # This will allow role mentions
-        )
-
-        await asyncio.sleep(15)  # waiting for 15 seconds
-
         usage_count = await self.config.user(ctx.author).usage_count() or 0
 
         if usage_count >= 5:
@@ -244,6 +232,18 @@ class WhosThatPokemon(commands.Cog):
         await ctx.send(f"{ctx.author.mention} ¡Tienes {remaining_uses} usos restantes hoy!")
 
         await ctx.typing()
+        
+        await asyncio.sleep(15)  # waiting for 15 seconds
+        
+        # Now use the function to mention these roles
+        await self.mention_role_temporarily(ctx, mewtwo_wars_role)
+        await self.mention_role_temporarily(ctx, mewtwo_x_role)
+        await self.mention_role_temporarily(ctx, mewtwo_y_role)
+
+        await ctx.send(
+            f"{mewtwo_wars_role.mention}\n{mewtwo_x_role.mention} {mewtwo_y_role.mention}\n¡Un nuevo Pokémon ha aparecido! ¿Os veis capaces de adivinarlo?",
+            allowed_mentions=discord.AllowedMentions(roles=True)  # This will allow role mentions
+        )
 
         poke_id = generation or randint(1, 898)
         if_guessed_right = False
