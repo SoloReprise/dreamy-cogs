@@ -244,9 +244,11 @@ class WhosThatPokemon(commands.Cog):
             return await ctx.send("Failed to get species data from PokeAPI.")
         names_data = species_data.get("names", [{}])
         eligible_names = [x["name"].lower() for x in names_data]
-        english_name = [x["name"] for x in names_data if x["language"]["name"] == "es"][
-            0
-        ]
+        # Get name in Spanish or, if not available, in English
+        filtered_names_es = [x["name"] for x in names_data if x["language"]["name"] == "es"]
+        filtered_names_en = [x["name"] for x in names_data if x["language"]["name"] == "en"]
+
+        english_name = filtered_names_es[0] if filtered_names_es else (filtered_names_en[0] if filtered_names_en else "Unknown")
 
         revealed = await self.generate_image(f"{poke_id:>03}", hide=False)
         revealed_img = File(revealed, "whosthatpokemon.png")
