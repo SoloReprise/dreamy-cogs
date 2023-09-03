@@ -198,6 +198,8 @@ class WhosThatPokemon(commands.Cog):
         - `[generation]` - Where you choose any generation from gen 1 to gen 8.
         """
 
+        usage_count = await self.config.user(ctx.author).usage_count() or 0
+
         if usage_count >= 5:
             # Calculate the remaining time until 9 am GMT+2 (or 7 am UTC)
             remaining_time = (datetime.combine(datetime.now().date(), time(7, 0)) + timedelta(days=1)) - datetime.now()
