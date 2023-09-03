@@ -58,7 +58,7 @@ class WhosThatPokemon(commands.Cog):
         if now < reset_time:
             await asyncio.sleep((reset_time - now).total_seconds())
         await self.config.clear_all_users()
-        
+
     def __init__(self, bot: Red):
         self.bot: Red = bot
         self.session: aiohttp.ClientSession = aiohttp.ClientSession()
@@ -67,6 +67,7 @@ class WhosThatPokemon(commands.Cog):
         )
         default_user = {
             "total_correct_guesses": 0,
+            "usage_count": 0
         }
         self.config.register_user(**default_user)
         self.reset_usage_counts.start()
