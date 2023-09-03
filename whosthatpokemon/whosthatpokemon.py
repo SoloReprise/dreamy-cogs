@@ -32,7 +32,7 @@ from typing import Any, Dict, Final, List, Optional
 
 import aiohttp
 import discord
-from discord import File
+from discord import File, Role
 from discord.ext import tasks
 from PIL import Image
 from redbot.core import Config, app_commands, commands
@@ -49,6 +49,16 @@ API_URL: Final[str] = "https://pokeapi.co/api/v2"
 
 class WhosThatPokemon(commands.Cog):
     """¿Puedes adivinar el Pokémon?"""
+
+    async def mention_role_temporarily(role: Role) -> None:
+        """
+        Mention a role after temporarily setting it to mentionable.
+        """
+        try:
+            await role.edit(mentionable=True)
+            await role.guild.default_channel.send(role.mention)
+        finally:
+            await role.edit(mentionable=False)
 
     @tasks.loop(hours=24)
     async def reset_usage_counts(self):
@@ -199,10 +209,15 @@ class WhosThatPokemon(commands.Cog):
         - `[generation]` - Where you choose any generation from gen 1 to gen 8.
         """
 
-        mewtwo_wars_role = ctx.guild.get_role(1147262532231385219)
-        mewtwo_x_role = ctx.guild.get_role(1147254156491509780)
-        mewtwo_y_role = ctx.guild.get_role(1147253975893159957)
-        ...
+        mewtwo_wars_role = discord.utils.get(ctx.guild.roles, id=1147262532231385219)
+        mewtwo_x_role = discord.utils.get(ctx.guild.roles, id=1147254156491509780)
+        mewtwo_y_role = discord.utils.get(ctx.guild.roles, id=1147253975893159957)
+
+        # Now use the function to mention these roles
+        await mention_role_temporarily(mewtwo_wars_role)
+        await mention_role_temporarily(mewtwo_x_role)
+        await mention_role_temporarily(mewtwo_y_role)
+
         await ctx.send(
             f"{mewtwo_wars_role.mention}\n{mewtwo_x_role.mention} {mewtwo_y_role.mention}\n¡Un nuevo Pokémon ha aparecido! ¿Os veis capaces de adivinarlo?",
             allowed_mentions=discord.AllowedMentions(roles=True)  # This will allow role mentions
