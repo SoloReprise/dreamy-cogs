@@ -72,16 +72,16 @@ class WhosThatPokemon(commands.Cog):
         self.config.register_user(**default_user)
         self.reset_usage_counts.start()
 
-   async def mention_role_temporarily(self, role: Role) -> None:
-        """
-        Mention a role after temporarily setting it to mentionable.
-        """
-        try:
-            await role.edit(mentionable=True)
-            await role.guild.default_channel.send(role.mention)
-        finally:
-            await role.edit(mentionable=False)
-            
+    async def mention_role_temporarily(self, role: Role) -> None:
+            """
+            Mention a role after temporarily setting it to mentionable.
+            """
+            try:
+                await role.edit(mentionable=True)
+                await role.guild.default_channel.send(role.mention)
+            finally:
+                await role.edit(mentionable=False)
+
     async def cog_unload(self) -> None:
         await self.session.close()
 
