@@ -186,11 +186,6 @@ class WhosThatPokemon(commands.Cog):
         ctx: commands.Context,
         generation: Generation = None,
     ) -> None:
-        
-        # Introducing the initial phase
-        mewtwo_wars_role = "<@&1147262532231385219>"
-        mewtwo_x_role = "<@&1147254156491509780>"
-        mewtwo_y_role = "<@&1147253975893159957>"
 
         """Guess Who's that Pokémon in 30 seconds!
 
@@ -204,7 +199,14 @@ class WhosThatPokemon(commands.Cog):
         - `[generation]` - Where you choose any generation from gen 1 to gen 8.
         """
 
-        await ctx.send(f"{mewtwo_wars_role}\n{mewtwo_x_role} {mewtwo_y_role}\n¡Un nuevo Pokémon ha aparecido! ¿Os veis capaces de adivinarlo?")
+        mewtwo_wars_role = ctx.guild.get_role(1147262532231385219)
+        mewtwo_x_role = ctx.guild.get_role(1147254156491509780)
+        mewtwo_y_role = ctx.guild.get_role(1147253975893159957)
+        ...
+        await ctx.send(
+            f"{mewtwo_wars_role.mention}\n{mewtwo_x_role.mention} {mewtwo_y_role.mention}\n¡Un nuevo Pokémon ha aparecido! ¿Os veis capaces de adivinarlo?",
+            allowed_mentions=discord.AllowedMentions(roles=True)  # This will allow role mentions
+        )
 
         await asyncio.sleep(15)  # waiting for 15 seconds
 
