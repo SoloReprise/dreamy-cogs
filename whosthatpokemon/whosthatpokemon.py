@@ -186,6 +186,12 @@ class WhosThatPokemon(commands.Cog):
         ctx: commands.Context,
         generation: Generation = None,
     ) -> None:
+        
+        # Introducing the initial phase
+        mewtwo_wars_role = "<@&1147262532231385219>"
+        mewtwo_x_role = "<@&1147254156491509780>"
+        mewtwo_y_role = "<@&1147253975893159957>"
+
         """Guess Who's that Pokémon in 30 seconds!
 
         You can optionally specify generation from `gen1` to `gen8` only.
@@ -197,7 +203,11 @@ class WhosThatPokemon(commands.Cog):
         **Arguments:**
         - `[generation]` - Where you choose any generation from gen 1 to gen 8.
         """
-        
+
+        await ctx.send(f"{mewtwo_wars_role}\n{mewtwo_x_role} {mewtwo_y_role}\n¡Un nuevo Pokémon ha aparecido! ¿Os veis capaz de adivinarlo?")
+
+        await asyncio.sleep(15)  # waiting for 15 seconds
+
         usage_count = await self.config.user(ctx.author).usage_count() or 0
 
         if usage_count >= 5:
