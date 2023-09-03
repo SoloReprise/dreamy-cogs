@@ -73,14 +73,15 @@ class WhosThatPokemon(commands.Cog):
         self.reset_usage_counts.start()
 
     async def mention_role_temporarily(self, ctx, role_id: int):
-            """
-            Mention a role after temporarily setting it to mentionable.
-            """
-            try:
-                await role.edit(mentionable=True)
-                await ctx.send(role.mention)
-            finally:
-                await role.edit(mentionable=False)
+        role = ctx.guild.get_role(role_id)  # Fetch the role using role_id
+        if not role:
+            return  # If the role is not found, simply return
+
+        try:
+            await role.edit(mentionable=True)
+            await ctx.send(role.mention)
+        finally:
+            await role.edit(mentionable=False)
 
     async def cog_unload(self) -> None:
         await self.session.close()
