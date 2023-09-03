@@ -197,7 +197,7 @@ class WhosThatPokemon(commands.Cog):
         **Arguments:**
         - `[generation]` - Where you choose any generation from gen 1 to gen 8.
         """
-
+        
         usage_count = await self.config.user(ctx.author).usage_count() or 0
 
         if usage_count >= 5:
@@ -205,7 +205,7 @@ class WhosThatPokemon(commands.Cog):
             remaining_time = (datetime.combine(datetime.now().date(), time(7, 0)) + timedelta(days=1)) - datetime.now()
             hours, remainder = divmod(remaining_time.seconds, 3600)
             minutes = remainder // 60
-            await ctx.response.send_message(f"Has alcanzado el límite diario de 5 usos. Espera {hours} horas y {minutes} minutos para otro intento.")
+            await ctx.send(f"{ctx.author.mention} Has alcanzado el límite diario de 5 usos. Espera {hours} horas y {minutes} minutos para otro intento.")
             return
 
         # If they haven't hit the limit, increment the count
@@ -213,9 +213,10 @@ class WhosThatPokemon(commands.Cog):
 
         # Notify the user about how many uses they have left
         remaining_uses = 5 - (usage_count + 1)
-        await ctx.response.send_message(f"¡Tienes {remaining_uses} usos restantes hoy!")
+        await ctx.send(f"{ctx.author.mention} ¡Tienes {remaining_uses} usos restantes hoy!")
 
         await ctx.typing()
+
         poke_id = generation or randint(1, 898)
         if_guessed_right = False
 
