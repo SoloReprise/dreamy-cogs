@@ -72,7 +72,7 @@ class WhosThatPokemon(commands.Cog):
         self.config.register_user(**default_user)
         self.reset_usage_counts.start()
 
-    async def mention_role_temporarily(self, role: Role) -> None:
+    async def mention_role_temporarily(self, ctx, role_id: int):
             """
             Mention a role after temporarily setting it to mentionable.
             """
@@ -214,9 +214,9 @@ class WhosThatPokemon(commands.Cog):
         mewtwo_y_role = discord.utils.get(ctx.guild.roles, id=1147253975893159957)
 
         # Now use the function to mention these roles
-        await self.mention_role_temporarily(mewtwo_wars_role)
-        await self.mention_role_temporarily(mewtwo_x_role)
-        await self.mention_role_temporarily(mewtwo_y_role)
+        await self.mention_role_temporarily(ctx, mewtwo_wars_role)
+        await self.mention_role_temporarily(ctx, mewtwo_x_role)
+        await self.mention_role_temporarily(ctx, mewtwo_y_role)
 
         await ctx.send(
             f"{mewtwo_wars_role.mention}\n{mewtwo_x_role.mention} {mewtwo_y_role.mention}\n¡Un nuevo Pokémon ha aparecido! ¿Os veis capaces de adivinarlo?",
