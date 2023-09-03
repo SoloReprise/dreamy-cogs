@@ -55,8 +55,14 @@ class WhosThatPokemon(commands.Cog):
         """Reset the daily usage counts for all users."""
         now = datetime.now(timezone.utc)
         reset_time = datetime.combine(now.date(), time(7, 0, tzinfo=timezone.utc))  # 9 am GMT+2 is 7 am UTC
-        if now < reset_time:
-            await asyncio.sleep((reset_time - now).total_seconds())
+        if now >= reset_time:
+            # Move to the next day if current time is already past the reset time
+            reset_time += timedelta(days=1)
+
+        # Sleep until the reset time
+        await asyncio.sleep((reset_time - now).total_seconds())
+
+        # Reset all user data
         await self.config.clear_all_users()
 
     def __init__(self, bot: Red):
