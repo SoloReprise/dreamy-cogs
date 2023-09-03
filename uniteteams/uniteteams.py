@@ -13,9 +13,9 @@ class UniteTeams(commands.Cog):
         if ctx.guild.owner != ctx.author:
             await ctx.send("¡Solo el dueño del servidor puede usar este comando!")
             return
-        
+            
         if subcommand == "create":
-            await self.create_team(ctx, *args)
+            await self.create_team(ctx, args[0], " ".join(args[1:]))
         elif subcommand == "delete":
             await self.delete_team(ctx, *args)
         else:
