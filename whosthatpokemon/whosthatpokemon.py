@@ -227,7 +227,7 @@ class WhosThatPokemon(commands.Cog):
             remaining_time = (datetime.combine(datetime.now().date(), time(7, 0)) + timedelta(days=1)) - datetime.now()
             hours, remainder = divmod(remaining_time.seconds, 3600)
             minutes = remainder // 60
-            await ctx.send(f"{ctx.author.mention} Has alcanzado el límite diario de 5 usos. Espera {hours} horas y {minutes} minutos para otro intento.")
+            await ctx.send(f"{ctx.author.mention} Has alcanzado el límite diario de 5 usos. Espera {hours} horas y {minutes} minutos para otro intento.", delete_after=7)
             return
 
         # If they haven't hit the limit, increment the count
