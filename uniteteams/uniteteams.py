@@ -25,7 +25,7 @@ class UniteTeams(commands.Cog):
         else:
             await ctx.send("Subcomando desconocido.")
 
-    async def create_team(self, ctx, leader, team_name: str):
+    async def create_team(self, ctx, leader: discord.Member, team_name: str):
         if isinstance(leader, str):
             await ctx.send("¡Por favor menciona a un líder válido!")
             return
