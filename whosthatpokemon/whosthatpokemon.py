@@ -33,6 +33,7 @@ from typing import Any, Dict, Final, List, Optional
 import aiohttp
 import discord
 from discord import File
+from discord.ext import tasks
 from PIL import Image
 from redbot.core import Config, app_commands, commands
 from redbot.core.bot import Red
@@ -59,6 +60,16 @@ class WhosThatPokemon(commands.Cog):
             "total_correct_guesses": 0,
         }
         self.config.register_user(**default_user)
+        self.reset_usage_counts.start()
+
+        @tasks.loop(hours=24)
+        async def reset_usage_counts(self):
+            """Reset the daily usage counts for all users."""
+            now = datetime.now(timezone.utc)
+            reset_time = datetime.combine(now.date(), time(7, 0, tzinfo=timezone.utc))  # 9 am GMT+2 is 7 am UTC
+            if now < reset_time:
+                await asyncio.sleep((reset_time - now).total_seconds())
+            await self.config.clear_all_users()
 
     async def cog_unload(self) -> None:
         await self.session.close()
@@ -185,6 +196,16 @@ class WhosThatPokemon(commands.Cog):
         **Arguments:**
         - `[generation]` - Where you choose any generation from gen 1 to gen 8.
         """
+
+        usage_count = await self.config.user(ctx.author).usage_count() or 0
+        if usage_count >= 5:
+            remaining_time = (datetime.combine(datetime.now().date(), time(7, 0)) + timedelta(days=1)) - datetime.now()
+            hours, remainder = divmod(remaining_time.seconds, 3600)
+            minutes = remainder // 60
+            await ctx.author.send(f"Has alcanzado el límite diario de 5 usos. Espera {hours} horas y {minutes} minutos para otro intento.")
+            return
+        await self.config.user(ctx.author).usage_count.set(usage_count + 1)
+
         await ctx.typing()
         poke_id = generation or randint(1, 898)
         if_guessed_right = False
