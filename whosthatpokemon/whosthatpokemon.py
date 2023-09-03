@@ -230,11 +230,7 @@ class WhosThatPokemon(commands.Cog):
         # Notify the user about how many uses they have left
         remaining_uses = 5 - (usage_count + 1)
         await ctx.send(f"{ctx.author.mention} ¡Tienes {remaining_uses} usos restantes hoy!")
-
-        await ctx.typing()
-        
-        await asyncio.sleep(15)  # waiting for 15 seconds
-        
+                
         # Now use the function to mention these roles
         await self.mention_role_temporarily(ctx, mewtwo_wars_role)
         await self.mention_role_temporarily(ctx, mewtwo_x_role)
@@ -244,6 +240,10 @@ class WhosThatPokemon(commands.Cog):
             f"{mewtwo_wars_role.mention}\n{mewtwo_x_role.mention} {mewtwo_y_role.mention}\n¡Un nuevo Pokémon ha aparecido! ¿Os veis capaces de adivinarlo?",
             allowed_mentions=discord.AllowedMentions(roles=True)  # This will allow role mentions
         )
+
+        await asyncio.sleep(15)  # waiting for 15 seconds
+
+        await ctx.typing()
 
         poke_id = generation or randint(1, 898)
         if_guessed_right = False
