@@ -204,7 +204,7 @@ class WhosThatPokemon(commands.Cog):
         - `[generation]` - Where you choose any generation from gen 1 to gen 8.
         """
 
-        await ctx.send(f"{mewtwo_wars_role}\n{mewtwo_x_role} {mewtwo_y_role}\n¡Un nuevo Pokémon ha aparecido! ¿Os veis capaz de adivinarlo?")
+        await ctx.send(f"{mewtwo_wars_role}\n{mewtwo_x_role} {mewtwo_y_role}\n¡Un nuevo Pokémon ha aparecido! ¿Os veis capaces de adivinarlo?")
 
         await asyncio.sleep(15)  # waiting for 15 seconds
 
