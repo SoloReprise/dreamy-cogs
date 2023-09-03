@@ -78,7 +78,7 @@ class WhosThatPokemon(commands.Cog):
             """
             try:
                 await role.edit(mentionable=True)
-                await role.guild.default_channel.send(role.mention)
+                await ctx.send(role.mention)
             finally:
                 await role.edit(mentionable=False)
 
