@@ -392,22 +392,21 @@ class UniteTeams(commands.Cog):
     @scrimsettings_group.command(name="end")
     async def scrimsettings_end(self, ctx):
         captain_teams = await self.config.guild(ctx.guild).uniteteams()
-        all_captains = [data["leader_id"] for data in captain_teams.values()]  # List of all captains
-
-        # Check if the user is a captain or the guild owner
-        if ctx.author.id not in all_captains and ctx.author != ctx.guild.owner:
-            await ctx.send("¡No tienes permisos para terminar estas scrims!")
-            return
-
+        user_is_captain_of = [team_name for team_name, data in captain_teams.items() if data["leader_id"] == ctx.author.id]
+        
         # Verifica si el comando se está utilizando en un canal de scrim
         if ctx.channel.category and "【" in ctx.channel.category.name and "】" in ctx.channel.category.name:
             teams_involved = ctx.channel.category.name.replace("【", "").replace("】", "").split(" vs ")
             
-            # Obtiene los roles del usuario
-            user_roles = [role.name for role in ctx.author.roles]
+            # Obtiene los ID de los roles del usuario
+            user_role_ids = [role.id for role in ctx.author.roles]
             
-            # Verifica si el usuario tiene el rol de alguno de los equipos involucrados
-            if any(team in user_roles for team in teams_involved):
+            # Obtén los ID de los roles de los equipos involucrados
+            involved_role_ids = [discord.utils.get(ctx.guild.roles, name=team_name).id for team_name in teams_involved if discord.utils.get(ctx.guild.roles, name=team_name)]
+            
+            # Verifica la intersección de los equipos involucrados en la scrim y los equipos de los que el usuario es capitán
+            # Además, verifica si el usuario tiene el rol de alguno de los equipos involucrados
+            if (set(teams_involved).intersection(user_is_captain_of) or any(role_id in user_role_ids for role_id in involved_role_ids) or ctx.author == ctx.guild.owner):
                 # Primero elimina todos los canales dentro de la categoría
                 for channel in ctx.channel.category.channels:
                     await channel.delete(reason=f"Limpieza de canal de scrim por {ctx.author.name}.")
