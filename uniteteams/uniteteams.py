@@ -21,10 +21,10 @@ class UniteTeams(commands.Cog):
             await self.create_team(ctx, leader_or_role, team_name)
 
         elif subcommand == "delete":
-            if not leader_or_role:  # Ensure that the mentioned role is not None
-                await ctx.send("¡Por favor, menciona un equipo válido para eliminar!")
+            if not leader_or_role_name:
+                await ctx.send("¡Por favor, menciona un equipo válido para eliminar o escribe su nombre!")
                 return
-            await self.delete_team(ctx, leader_or_role)
+            await self.delete_team(ctx, leader_or_role_name)
 
         elif subcommand == "list":
             await self.list_teams(ctx)
@@ -61,9 +61,22 @@ class UniteTeams(commands.Cog):
         await self.config.guild(ctx.guild).uniteteams.set_raw(team_name, value={"role_id": role.id, "leader_id": leader.id})
         await ctx.send(f"¡Equipo {team_name} creado con {leader.mention} como líder!")
 
-    async def delete_team(self, ctx, team_role: discord.Role):
+    async def delete_team(self, ctx, leader_or_role_name: str):
+        # Try getting the role by mention first
+        team_role = None
+        try:
+            role_mention = leader_or_role_name.strip("<@&>").strip()
+            team_role = discord.utils.get(ctx.guild.roles, id=int(role_mention))
+        except ValueError:
+            pass
+
+        # If that failed, try getting the role by name
         if not team_role:
-            await ctx.send("¡Por favor, menciona un equipo válido para eliminar!")
+            team_role = discord.utils.get(ctx.guild.roles, name=leader_or_role_name.strip())
+
+        # Now we check if we found a valid role
+        if not team_role:
+            await ctx.send("¡No se encontró ese equipo!")
             return
 
         team_data = await self.config.guild(ctx.guild).uniteteams.get_raw(team_role.name, default=None)
