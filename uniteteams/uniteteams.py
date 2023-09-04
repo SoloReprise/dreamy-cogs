@@ -384,19 +384,23 @@ class UniteTeams(commands.Cog):
             if len(voice_channel1.members) == 0 and len(voice_channel2.members) == 0:  # No members in voice channels
                 await category.delete(reason="Inactivity during scrims.")
 
-    @commands.command()
-    async def scrim_end(self, ctx):
-        captain_teams = await self.config.guild(ctx.guild).uniteteams()
-        user_is_captain_of = [team_name for team_name, data in captain_teams.items() if data["leader_id"] == ctx.author.id]
+@commands.command()
+async def scrim_end(self, ctx):
+    captain_teams = await self.config.guild(ctx.guild).uniteteams()
+    user_is_captain_of = [team_name for team_name, data in captain_teams.items() if data["leader_id"] == ctx.author.id]
+    
+    # Check if the command is being used in a scrim channel
+    if ctx.channel.category and "【" in ctx.channel.category.name and "】" in ctx.channel.category.name:
+        teams_involved = ctx.channel.category.name.replace("【", "").replace("】", "").split(" vs ")
         
-        # Check if the command is being used in a scrim channel
-        if ctx.channel.category and "【" in ctx.channel.category.name and "】" in ctx.channel.category.name:
-            teams_involved = ctx.channel.category.name.replace("【", "").replace("】", "").split(" vs ")
-            
-            # Check intersection of teams involved in the scrim and teams the user is captain of, or if the author is the guild owner
-            if set(teams_involved).intersection(user_is_captain_of) or ctx.author == ctx.guild.owner:
-                await ctx.channel.category.delete(reason=f"Scrim ended by {ctx.author.name}.")
-            else:
-                await ctx.send("¡No tienes permisos para terminar estas scrims!")
+        # Check intersection of teams involved in the scrim and teams the user is captain of, or if the author is the guild owner
+        if set(teams_involved).intersection(user_is_captain_of) or ctx.author == ctx.guild.owner:
+            # Delete all channels within the category first
+            for channel in ctx.channel.category.channels:
+                await channel.delete(reason=f"Scrim channel cleanup by {ctx.author.name}.")
+            # Then delete the category
+            await ctx.channel.category.delete(reason=f"Scrim ended by {ctx.author.name}.")
         else:
-            await ctx.send("¡Este comando solo puede ser utilizado en canales de scrims!")
+            await ctx.send("¡No tienes permisos para terminar estas scrims!")
+    else:
+        await ctx.send("¡Este comando solo puede ser utilizado en canales de scrims!")
