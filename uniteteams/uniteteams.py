@@ -16,12 +16,17 @@ class UniteTeams(commands.Cog):
         
         if subcommand == "create":
             if not leader_or_role_name:
-                await ctx.send("¡Por favor, menciona a un líder y proporciona un nombre de equipo!")
+                await ctx.send("¡Por favor, menciona a un líder y proporciona un nombre y acrónimo de equipo!")
                 return
             
-            # Splitting the leader mention and the team name
-            leader_mention, _, team_name = leader_or_role_name.partition(' ')
+            # Splitting the leader mention, the team name, and the team acronym
+            leader_mention, _, rest = leader_or_role_name.partition(' ')
+            team_name, _, acronym = rest.rpartition(' ')
             
+            if len(acronym) > 5 or not acronym.isupper():
+                await ctx.send("¡El acrónimo debe ser completamente en mayúsculas y tener un máximo de 5 caracteres!")
+                return
+
             leader = None
             try:
                 leader_id = int(leader_mention.strip("<@!>").strip())
@@ -30,7 +35,7 @@ class UniteTeams(commands.Cog):
                 await ctx.send("¡Por favor, menciona a un líder válido!")
                 return
 
-            await self.create_team(ctx, leader, team_name)
+            await self.create_team(ctx, leader, team_name, acronym)
         
         elif subcommand == "delete":
             if not leader_or_role_name:
@@ -74,6 +79,7 @@ class UniteTeams(commands.Cog):
         await self.config.guild(ctx.guild).uniteteams.set_raw(team_name, value={
             "role_id": role.id, 
             "leader_id": leader.id,
+            "acronym": acronym,  # <-- Add this line
             "members": []  # Adding an empty list for members
         })
         await ctx.send(f"¡Equipo {team_name} creado con {leader.mention} como líder!")
@@ -130,8 +136,11 @@ class UniteTeams(commands.Cog):
             members_list = data.get("members", [])
             members = [ctx.guild.get_member(member_id).mention for member_id in members_list if ctx.guild.get_member(member_id)]
             
-            message += f"- {team} (Líder: {leader.mention if leader else 'Desconocido'}, Miembros: {', '.join(members) if members else 'Ninguno'})\n"
-            
+            # Adjusting the format to match the required format:
+            message += f"- **{team}** ({data['acronym']})\n"  # <-- Display acronym
+            message += f"    - Líder: {leader.mention if leader else 'Desconocido'}\n"
+            message += f"    - Miembros: {', '.join(members) if members else 'Ninguno'}\n"
+                
         await ctx.send(message)
 
     async def clean_teams(self, ctx):
