@@ -71,7 +71,10 @@ class UniteTeams(commands.Cog):
 
         await leader.add_roles(role, scrims_role, capitanes_role)
 
-        await self.config.guild(ctx.guild).uniteteams.set_raw(team_name, value={"role_id": role.id, "leader_id": leader.id})
+        await self.config.guild(ctx.guild).uniteteams.set_raw(
+            team_name, 
+            value={"role_id": role.id, "leader_id": leader.id, "members": []}
+        )
         await ctx.send(f"¡Equipo {team_name} creado con {leader.mention} como líder!")
 
     async def delete_team(self, ctx, leader_or_role_name: str):
@@ -114,6 +117,7 @@ class UniteTeams(commands.Cog):
 
     async def list_teams(self, ctx):
         teams_data = await self.config.guild(ctx.guild).uniteteams()
+        
         if not teams_data:
             await ctx.send("¡No hay equipos creados!")
             return
@@ -121,7 +125,8 @@ class UniteTeams(commands.Cog):
         message = "Equipos:\n"
         for team, data in teams_data.items():
             leader = ctx.guild.get_member(data["leader_id"])
-            message += f"- {team} (Líder: {leader.mention if leader else 'Desconocido'})\n"
+            members = [ctx.guild.get_member(member_id).mention for member_id in data["members"] if ctx.guild.get_member(member_id)]
+            message += f"- {team} (Líder: {leader.mention if leader else 'Desconocido'}, Miembros: {', '.join(members) if members else 'None'})\n"
 
         await ctx.send(message)
 
@@ -137,6 +142,22 @@ class UniteTeams(commands.Cog):
 
 
 # TEAMS
+    async def add_team_members(self, ctx, team_name, members):
+        team_data = await self.config.guild(ctx.guild).uniteteams.get_raw(team_name)
+        
+        for member in members:
+            # Get member object from mention
+            member_obj = ctx.guild.get_member(member)
+            
+            if not member_obj:
+                await ctx.send(f"Couldn't find member {member}")
+                continue
+
+            if member_obj.id not in team_data["members"]:
+                team_data["members"].append(member_obj.id)
+
+        await self.config.guild(ctx.guild).uniteteams.set_raw(team_name, value=team_data)
+
     @commands.guild_only()
     @commands.command()
     async def team(self, ctx, subcommand: str = None, *args):
@@ -161,6 +182,7 @@ class UniteTeams(commands.Cog):
         
         # Subcommand: add
         if subcommand == "add":
+            await self.add_team_members(ctx, user_team, args)
             members_to_add = [member for member in ctx.message.mentions]
             if not members_to_add:
                 await ctx.send("¡Por favor menciona a los miembros que deseas agregar!")
