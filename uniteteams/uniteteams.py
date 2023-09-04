@@ -48,8 +48,7 @@ class UniteTeams(commands.Cog):
         else:
             await ctx.send("Subcomando desconocido.")
 
-    async def create_team(self, ctx, leader: discord.Member, team_name: str):
-        # Split the team_name to capture the acronym
+    async def create_team(self, ctx, leader: discord.Member, team_name: str):        # Split the team_name to capture the acronym
         *team_name_parts, acronym = team_name.split()
 
         # Join back the team name parts without the acronym
@@ -82,10 +81,13 @@ class UniteTeams(commands.Cog):
 
         await leader.add_roles(role, scrims_role, capitanes_role)
 
+        # Extract acronym from the team name
+        acronym = team_name.split()[-1].upper()
+
         await self.config.guild(ctx.guild).uniteteams.set_raw(team_name, value={
-            "role_id": role.id, 
+            "role_id": role.id,
             "leader_id": leader.id,
-            "acronym": acronym,
+            "acronym": acronym,  # Store the acronym in the config data
             "members": []  # Adding an empty list for members
         })
         await ctx.send(f"¡Equipo {team_name} ({acronym}) creado con {leader.mention} como líder!")
@@ -143,7 +145,8 @@ class UniteTeams(commands.Cog):
             members_list = data.get("members", [])
             members = [ctx.guild.get_member(member_id).mention for member_id in members_list if ctx.guild.get_member(member_id)]
 
-            message += f"- **{team}** ({acronym})\n  - Líder: {leader.mention if leader else 'Desconocido'}\n  - Miembros: {', '.join(members) if members else 'Ninguno'}\n"
+            acronym = data.get("acronym", "N/A")  # Get the acronym, default to "N/A" if not found
+            message += f"- **{team}** ({acronym}) (Líder: {leader.mention if leader else 'Desconocido'}, Miembros: {', '.join(members) if members else 'Ninguno'})\n"
 
         await ctx.send(message)
 
@@ -223,6 +226,18 @@ class UniteTeams(commands.Cog):
             await ctx.send("¡Por favor proporciona un subcomando válido (add, delete, rename)!")
             return
         
+        elif subcommand == "acronym":
+            new_acronym = " ".join(args).upper()
+            if not new_acronym or len(new_acronym.split()) > 1 or len(new_acronym) > 5:
+                await ctx.send("¡Por favor proporciona un acrónimo válido de una sola palabra y no más de 5 caracteres!")
+                return
+
+            team_data = await self.config.guild(ctx.guild).uniteteams.get_raw(user_team)
+            team_data["acronym"] = new_acronym
+            await self.config.guild(ctx.guild).uniteteams.set_raw(user_team, value=team_data)
+            
+            await ctx.send(f"El acrónimo del equipo {user_team} ha sido actualizado a {new_acronym}.")
+    
         # Subcommand: add
         if subcommand == "add":
             await self.add_team_members(ctx, user_team, args)
