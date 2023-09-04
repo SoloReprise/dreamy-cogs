@@ -139,9 +139,9 @@ class UniteTeams(commands.Cog):
 # TEAMS
     @commands.guild_only()
     @commands.command()
-    async def team(self, ctx, subcommand: str, *args):
+    async def team(self, ctx, subcommand: str = None, *args):
         """Command usable only by the Captain of each team."""
-        
+
         # Ensure the user is a captain.
         captain_teams = await self.config.guild(ctx.guild).uniteteams()
         user_team = None
@@ -149,9 +149,14 @@ class UniteTeams(commands.Cog):
             if data["leader_id"] == ctx.author.id:
                 user_team = team_name
                 break
-        
+
         if not user_team:
             await ctx.send("¡No eres capitán de ningún equipo!")
+            return
+
+        # If no subcommand is provided, show an error.
+        if not subcommand:
+            await ctx.send("¡Por favor proporciona un subcomando válido (add, delete, rename)!")
             return
         
         # Subcommand: add
