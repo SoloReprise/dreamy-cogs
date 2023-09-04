@@ -9,17 +9,21 @@ class UniteTeams(commands.Cog):
 
     @commands.guild_only()
     @commands.command()
-    async def uniteteams(self, ctx, subcommand: str, *args):
+    async def uniteteams(self, ctx, subcommand: str, leader: discord.Member = None, *, team_name: str = None):
         if ctx.guild.owner != ctx.author:
             await ctx.send("¡Solo el dueño del servidor puede usar este comando!")
             return
         
         if subcommand == "create":
-            await self.create_team(ctx, args[0], " ".join(args[1:]))
+            if not leader or not team_name:
+                await ctx.send("¡Por favor, menciona a un líder y proporciona un nombre de equipo!")
+                return
+            
+            await self.create_team(ctx, leader, team_name)
         elif subcommand == "delete":
-            await self.delete_team(ctx, *args)
-        elif subcommand == "list":
+            await self.delete_team(ctx, team_name)  # Assuming team_name here will be a role        elif subcommand == "list":
             await self.list_teams(ctx)
+
         elif subcommand == "clean":
             await self.clean_teams(ctx)
         else:
