@@ -393,8 +393,8 @@ class UniteTeams(commands.Cog):
         if ctx.channel.category and "【" in ctx.channel.category.name and "】" in ctx.channel.category.name:
             teams_involved = ctx.channel.category.name.replace("【", "").replace("】", "").split(" vs ")
             
-            # Check intersection of teams involved in the scrim and teams the user is captain of
-            if set(teams_involved).intersection(user_is_captain_of):
+            # Check intersection of teams involved in the scrim and teams the user is captain of, or if the author is the guild owner
+            if set(teams_involved).intersection(user_is_captain_of) or ctx.author == ctx.guild.owner:
                 await ctx.channel.category.delete(reason=f"Scrim ended by {ctx.author.name}.")
             else:
                 await ctx.send("¡No tienes permisos para terminar estas scrims!")
