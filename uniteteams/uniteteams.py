@@ -21,7 +21,10 @@ class UniteTeams(commands.Cog):
             await self.create_team(ctx, leader_or_role, team_name)
 
         elif subcommand == "delete":
-            await self.delete_team(ctx, leader_or_role)  # Assuming leader_or_role here will be a role
+            if not leader_or_role:  # Ensure that the mentioned role is not None
+                await ctx.send("¡Por favor, menciona un equipo válido para eliminar!")
+                return
+            await self.delete_team(ctx, leader_or_role)
 
         elif subcommand == "list":
             await self.list_teams(ctx)
@@ -59,6 +62,10 @@ class UniteTeams(commands.Cog):
         await ctx.send(f"¡Equipo {team_name} creado con {leader.mention} como líder!")
 
     async def delete_team(self, ctx, team_role: discord.Role):
+        if not team_role:
+            await ctx.send("¡Por favor, menciona un equipo válido para eliminar!")
+            return
+
         team_data = await self.config.guild(ctx.guild).uniteteams.get_raw(team_role.name, default=None)
         if not team_data:
             await ctx.send("¡Este equipo no existe!")
