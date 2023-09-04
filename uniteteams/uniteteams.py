@@ -388,11 +388,13 @@ class UniteTeams(commands.Cog):
     async def scrim_end(self, ctx):
         captain_teams = await self.config.guild(ctx.guild).uniteteams()
         user_is_captain_of = [team_name for team_name, data in captain_teams.items() if data["leader_id"] == ctx.author.id]
-
+        
         # Check if the command is being used in a scrim channel
-        if "【" in ctx.channel.category.name and "】" in ctx.channel.category.name:
+        if ctx.channel.category and "【" in ctx.channel.category.name and "】" in ctx.channel.category.name:
             teams_involved = ctx.channel.category.name.replace("【", "").replace("】", "").split(" vs ")
-            if any(team in user_is_captain_of for team in teams_involved):  # If the user is a captain of either team
+            
+            # Check intersection of teams involved in the scrim and teams the user is captain of
+            if set(teams_involved).intersection(user_is_captain_of):
                 await ctx.channel.category.delete(reason=f"Scrim ended by {ctx.author.name}.")
             else:
                 await ctx.send("¡No tienes permisos para terminar estas scrims!")
