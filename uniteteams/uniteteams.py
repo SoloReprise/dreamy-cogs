@@ -1,4 +1,6 @@
 import discord
+from discord.utils import get
+import asyncio
 from redbot.core import commands, Config
 
 class UniteTeams(commands.Cog):
@@ -297,3 +299,99 @@ class UniteTeams(commands.Cog):
 
         else:
             await ctx.send("Subcomando desconocido.")
+
+    ## Scrims
+    @commands.guild_only()
+    @commands.command(aliases=["scrims"])
+    async def scrim(self, ctx, *, target: Union[discord.Member, discord.Role, str]):
+        # Ensure the user is a captain
+        captain_teams = await self.config.guild(ctx.guild).uniteteams()
+        challenger_team = None
+        for team_name, data in captain_teams.items():
+            if data["leader_id"] == ctx.author.id:
+                challenger_team = team_name
+                break
+
+        if not challenger_team:
+            await ctx.send("¡No eres capitán de ningún equipo!")
+            return
+
+        # Identify the challenged team
+        if isinstance(target, discord.Member):  # captain mention
+            challenged_team = [team for team, data in captain_teams.items() if data["leader_id"] == target.id][0]
+        elif isinstance(target, discord.Role):  # role mention
+            challenged_team = target.name
+        else:  # team name
+            challenged_team = target
+
+        if not challenged_team or challenged_team == challenger_team:
+            await ctx.send("¡No puedes retarte a ti mismo!")
+            return
+
+        # Create challenge message
+        challenge_msg = await ctx.send(
+            f"¡Atención, {target.mention}! {challenger_team} ha retado a {challenged_team} a unas scrims! ¿Aceptas el desafío?"
+        )
+        await challenge_msg.add_reaction("✅")
+        await challenge_msg.add_reaction("❌")
+
+        def check(reaction, user):
+            return user == target and str(reaction.emoji) in ["✅", "❌"] and reaction.message.id == challenge_msg.id
+
+        try:
+            reaction, user = await self.bot.wait_for('reaction_add', timeout=60.0, check=check)
+        except asyncio.TimeoutError:
+            await ctx.send("El tiempo ha terminado para aceptar el desafío.")
+        else:
+            if str(reaction.emoji) == "✅":
+                # Create category and channels
+                category_name = f"【 {captain_teams[challenger_team]['acronym']} vs {captain_teams[challenged_team]['acronym']} 】"
+                category = await ctx.guild.create_category_channel(category_name)
+                
+                overwrites = {
+                    ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                    get(ctx.guild.roles, id=1127785805969113238): discord.PermissionOverwrite(read_messages=True, send_messages=True),  # Mod role
+                    get(ctx.guild.roles, name=challenger_team): discord.PermissionOverwrite(read_messages=True, send_messages=True),
+                    get(ctx.guild.roles, name=challenged_team): discord.PermissionOverwrite(read_messages=True, send_messages=True)
+                }
+                
+                text_channel = await ctx.guild.create_text_channel('❃║scrim-general', category=category, overwrites=overwrites)
+                await text_channel.send(
+                    f"¡Atención, {get(ctx.guild.roles, name=challenger_team).mention} y {get(ctx.guild.roles, name=challenged_team).mention}! "
+                    f"¡Ya pueden empezar vuestras scrims! Tenéis este chat para organizaros como deseéis. GLHF!"
+                )
+                voice_channel1 = await ctx.guild.create_voice_channel(f'❃║{challenger_team}', category=category, overwrites=overwrites)
+                voice_channel2 = await ctx.guild.create_voice_channel(f'❃║{challenged_team}', category=category, overwrites=overwrites)
+                
+                await text_channel.send(f"¡Atención, {get(ctx.guild.roles, name=challenger_team).mention} y {get(ctx.guild.roles, name=challenged_team).mention}! ¡Ya pueden empezar vuestras scrims! Tenéis este chat para organizaros como deseéis. GLHF!")
+                # Start a background task for activity monitoring
+                self.bot.loop.create_task(self.monitor_scrim_activity(text_channel, voice_channel1, voice_channel2, category))
+            
+            elif str(reaction.emoji) == "❌":
+                await ctx.send("Desafío rechazado.")
+
+    async def monitor_scrim_activity(self, text_channel, voice_channel1, voice_channel2, category):
+        await asyncio.sleep(1800)  # Wait for 30 minutes
+
+        # Check for inactivity
+        last_message = await text_channel.history(limit=1).flatten()
+        last_message = last_message[0] if last_message else None
+        
+        if not last_message or (datetime.utcnow() - last_message.created_at).seconds >= 1800:  # No new messages in the last 30 mins
+            if len(voice_channel1.members) == 0 and len(voice_channel2.members) == 0:  # No members in voice channels
+                await category.delete(reason="Inactivity during scrims.")
+                
+    @commands.command()
+    async def scrim_end(self, ctx):
+        captain_teams = await self.config.guild(ctx.guild).uniteteams()
+        user_is_captain_of = [team_name for team_name, data in captain_teams.items() if data["leader_id"] == ctx.author.id]
+        
+        # Check if the command is being used in a scrim channel
+        if "【" in ctx.channel.category.name and "】" in ctx.channel.category.name:
+            teams_involved = ctx.channel.category.name.replace("【", "").replace("】", "").split(" vs ")
+            if any(team in user_is_captain_of for team in teams_involved):  # If the user is a captain of either team
+                await ctx.channel.category.delete(reason=f"Scrim ended by {ctx.author.name}.")
+            else:
+                await ctx.send("¡No tienes permisos para terminar estas scrims!")
+        else:
+            await ctx.send("¡Este comando solo puede ser utilizado en canales de scrims!")
