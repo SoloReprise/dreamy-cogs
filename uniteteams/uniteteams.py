@@ -75,30 +75,40 @@ class UniteTeams(commands.Cog):
         await ctx.send(f"¡Equipo {team_name} creado con {leader.mention} como líder!")
 
     async def delete_team(self, ctx, leader_or_role_name: str):
-        # Try getting the role by mention first
-        team_role = None
-        try:
-            role_mention = leader_or_role_name.strip("<@&>").strip()
-            team_role = discord.utils.get(ctx.guild.roles, id=int(role_mention))
-        except ValueError:
-            pass
+        # If the input is a mention, let's try to process it as such.
+        if leader_or_role_name.startswith("<@") and leader_or_role_name.endswith(">"):
+            leader_or_role_name = leader_or_role_name.strip("<@!>")  # Strip to get the ID
+            team_role = discord.utils.get(ctx.guild.roles, id=int(leader_or_role_name))
+        else:
+            team_role = discord.utils.get(ctx.guild.roles, name=leader_or_role_name)
 
-        # If that failed, try getting the role by name
+        # If we didn't find a role based on the input, send an error message
         if not team_role:
-            team_role = discord.utils.get(ctx.guild.roles, name=leader_or_role_name.strip())
-
-        # Now we check if we found a valid role
-        if not team_role:
-            await ctx.send("¡No se encontró ese equipo!")
+            await ctx.send("¡Este equipo no existe!")
             return
 
         team_data = await self.config.guild(ctx.guild).uniteteams.get_raw(team_role.name, default=None)
         if not team_data:
-            await ctx.send("¡Este equipo no existe!")
+            await ctx.send("¡Este equipo no está registrado!")
             return
 
-        await team_role.delete()
+        # Remove the specified roles from the leader
+        leader = ctx.guild.get_member(team_data["leader_id"])
+        if leader:
+            scrims_role = ctx.guild.get_role(1147980466205507668)
+            capitanes_role = ctx.guild.get_role(1147984884997050418)
+            
+            roles_to_remove = []
+            if scrims_role:
+                roles_to_remove.append(scrims_role)
+            if capitanes_role:
+                roles_to_remove.append(capitanes_role)
 
+            if roles_to_remove:
+                await leader.remove_roles(*roles_to_remove)
+
+        # Delete the team role and clear from the config
+        await team_role.delete()
         await self.config.guild(ctx.guild).uniteteams.clear_raw(team_role.name)
         await ctx.send(f"¡Equipo {team_role.name} eliminado!")
 
