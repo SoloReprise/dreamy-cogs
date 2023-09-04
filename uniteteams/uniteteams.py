@@ -118,17 +118,20 @@ class UniteTeams(commands.Cog):
 
     async def list_teams(self, ctx):
         teams_data = await self.config.guild(ctx.guild).uniteteams()
-        
         if not teams_data:
             await ctx.send("¡No hay equipos creados!")
             return
-
+        
         message = "Equipos:\n"
         for team, data in teams_data.items():
             leader = ctx.guild.get_member(data["leader_id"])
-            members = [ctx.guild.get_member(member_id).mention for member_id in data["members"] if ctx.guild.get_member(member_id)]
-            message += f"- {team} (Líder: {leader.mention if leader else 'Desconocido'}, Miembros: {', '.join(members) if members else 'None'})\n"
 
+            # Check if "members" key exists in the data, if not, create an empty list
+            members_list = data.get("members", [])
+            members = [ctx.guild.get_member(member_id).mention for member_id in members_list if ctx.guild.get_member(member_id)]
+            
+            message += f"- {team} (Líder: {leader.mention if leader else 'Desconocido'}, Miembros: {', '.join(members) if members else 'Ninguno'})\n"
+            
         await ctx.send(message)
 
     async def clean_teams(self, ctx):
