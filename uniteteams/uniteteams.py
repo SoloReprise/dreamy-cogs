@@ -193,6 +193,9 @@ class UniteTeams(commands.Cog):
 
         team_data = teams_data[user_team]
         leader = ctx.guild.get_member(team_data["leader_id"])
+
+        # Extract acronym
+        acronym = team_data.get("acronym", "N/A")  # Get the acronym, default to "N/A" if not found
         
         # Check if "members" key exists in the team_data, if not, create an empty list
         members_list = team_data.get("members", [])
@@ -200,6 +203,7 @@ class UniteTeams(commands.Cog):
         
         await ctx.send(
             f"Equipo: **{user_team}**\n"
+            f"Acrónimo: **{acronym}**\n"  # Displaying the acronym here
             f"Líder: {leader.mention}\n"
             f"Miembros: {', '.join(members) if members else 'Ninguno'}"
         )
