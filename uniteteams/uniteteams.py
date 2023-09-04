@@ -71,10 +71,11 @@ class UniteTeams(commands.Cog):
 
         await leader.add_roles(role, scrims_role, capitanes_role)
 
-        await self.config.guild(ctx.guild).uniteteams.set_raw(
-            team_name, 
-            value={"role_id": role.id, "leader_id": leader.id, "members": []}
-        )
+        await self.config.guild(ctx.guild).uniteteams.set_raw(team_name, value={
+            "role_id": role.id, 
+            "leader_id": leader.id,
+            "members": []  # Adding an empty list for members
+        })
         await ctx.send(f"¡Equipo {team_name} creado con {leader.mention} como líder!")
 
     async def delete_team(self, ctx, leader_or_role_name: str):
@@ -173,7 +174,10 @@ class UniteTeams(commands.Cog):
 
         team_data = teams_data[user_team]
         leader = ctx.guild.get_member(team_data["leader_id"])
-        members = [ctx.guild.get_member(member_id).mention for member_id in team_data["members"] if ctx.guild.get_member(member_id)]
+        
+        # Check if "members" key exists in the team_data, if not, create an empty list
+        members_list = team_data.get("members", [])
+        members = [ctx.guild.get_member(member_id).mention for member_id in members_list if ctx.guild.get_member(member_id)]
         
         await ctx.send(
             f"Equipo: **{user_team}**\n"
