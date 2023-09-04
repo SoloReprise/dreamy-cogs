@@ -158,6 +158,29 @@ class UniteTeams(commands.Cog):
 
         await self.config.guild(ctx.guild).uniteteams.set_raw(team_name, value=team_data)
 
+    async def list_team_members(self, ctx):
+        # Check if the user is a captain of any team
+        teams_data = await self.config.guild(ctx.guild).uniteteams()
+        user_team = None
+        for team, data in teams_data.items():
+            if ctx.author.id == data["leader_id"]:
+                user_team = team
+                break
+
+        if not user_team:
+            await ctx.send("¡No eres el capitán de ningún equipo!")
+            return
+
+        team_data = teams_data[user_team]
+        leader = ctx.guild.get_member(team_data["leader_id"])
+        members = [ctx.guild.get_member(member_id).mention for member_id in team_data["members"] if ctx.guild.get_member(member_id)]
+        
+        await ctx.send(
+            f"Equipo: **{user_team}**\n"
+            f"Líder: {leader.mention}\n"
+            f"Miembros: {', '.join(members) if members else 'Ninguno'}"
+        )
+
     @commands.guild_only()
     @commands.command()
     async def team(self, ctx, subcommand: str = None, *args):
@@ -208,7 +231,11 @@ class UniteTeams(commands.Cog):
             for member in members_to_remove:
                 await member.remove_roles(scrims_role, team_role)
             await ctx.send(f"Miembros eliminados del equipo {user_team}.")
-        
+
+        # Subcommand: list        
+        if subcommand == "list":
+            await self.list_team_members(ctx)
+
         # Subcommand: rename
         elif subcommand == "rename":
             new_name = " ".join(args)
