@@ -4,6 +4,7 @@ from redbot.core import commands, Config
 class UniteTeams(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.config = Config.get_conf(self, identifier=1234567810)
         self.config.register_guild(uniteteams={})
 
     @commands.guild_only()
