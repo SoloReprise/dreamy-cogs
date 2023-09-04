@@ -134,3 +134,73 @@ class UniteTeams(commands.Cog):
 
         await self.config.guild(ctx.guild).uniteteams.clear()
         await ctx.send("¡Todos los equipos han sido eliminados!")
+
+
+# TEAMS
+    @commands.guild_only()
+    @commands.command()
+    async def team(self, ctx, subcommand: str, *args):
+        """Command usable only by the Captain of each team."""
+        
+        # Ensure the user is a captain.
+        captain_teams = await self.config.guild(ctx.guild).uniteteams()
+        user_team = None
+        for team_name, data in captain_teams.items():
+            if data["leader_id"] == ctx.author.id:
+                user_team = team_name
+                break
+        
+        if not user_team:
+            await ctx.send("¡No eres capitán de ningún equipo!")
+            return
+        
+        # Subcommand: add
+        if subcommand == "add":
+            members_to_add = [member for member in ctx.message.mentions]
+            if not members_to_add:
+                await ctx.send("¡Por favor menciona a los miembros que deseas agregar!")
+                return
+            
+            # Add roles to mentioned members
+            scrims_role = ctx.guild.get_role(1147980466205507668)
+            team_role = discord.utils.get(ctx.guild.roles, name=user_team)
+            for member in members_to_add:
+                await member.add_roles(scrims_role, team_role)
+            await ctx.send(f"Miembros añadidos al equipo {user_team}.")
+        
+        # Subcommand: delete
+        elif subcommand == "delete":
+            members_to_remove = [member for member in ctx.message.mentions]
+            if not members_to_remove:
+                await ctx.send("¡Por favor menciona a los miembros que deseas eliminar!")
+                return
+            
+            # Remove roles from mentioned members
+            scrims_role = ctx.guild.get_role(1147980466205507668)
+            team_role = discord.utils.get(ctx.guild.roles, name=user_team)
+            for member in members_to_remove:
+                await member.remove_roles(scrims_role, team_role)
+            await ctx.send(f"Miembros eliminados del equipo {user_team}.")
+        
+        # Subcommand: rename
+        elif subcommand == "rename":
+            new_name = " ".join(args)
+            if not new_name:
+                await ctx.send("¡Por favor proporciona un nuevo nombre para el equipo!")
+                return
+            
+            team_role = discord.utils.get(ctx.guild.roles, name=user_team)
+            if not team_role:
+                await ctx.send("¡Error al obtener el rol del equipo!")
+                return
+            
+            await team_role.edit(name=new_name)
+            # Update the name in the config
+            team_data = await self.config.guild(ctx.guild).uniteteams.get_raw(user_team)
+            await self.config.guild(ctx.guild).uniteteams.set_raw(new_name, value=team_data)
+            await self.config.guild(ctx.guild).uniteteams.clear_raw(user_team)
+            
+            await ctx.send(f"El equipo {user_team} ahora se llama {new_name}.")
+
+        else:
+            await ctx.send("Subcomando desconocido.")
