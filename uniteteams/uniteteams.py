@@ -5,7 +5,7 @@ class UniteTeams(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=1234567890)
-        self.config.register_guild(teams=[])
+        self.config.register_guild(teams={})
 
     @commands.guild_only()
     @commands.command()
