@@ -16,17 +16,12 @@ class UniteTeams(commands.Cog):
         
         if subcommand == "create":
             if not leader_or_role_name:
-                await ctx.send("¡Por favor, menciona a un líder y proporciona un nombre y acrónimo de equipo!")
+                await ctx.send("¡Por favor, menciona a un líder y proporciona un nombre de equipo!")
                 return
             
-            # Splitting the leader mention, the team name, and the team acronym
-            leader_mention, _, rest = leader_or_role_name.partition(' ')
-            team_name, _, acronym = rest.rpartition(' ')
+            # Splitting the leader mention and the team name
+            leader_mention, _, team_name = leader_or_role_name.partition(' ')
             
-            if len(acronym) > 5 or not acronym.isupper():
-                await ctx.send("¡El acrónimo debe ser completamente en mayúsculas y tener un máximo de 5 caracteres!")
-                return
-
             leader = None
             try:
                 leader_id = int(leader_mention.strip("<@!>").strip())
@@ -35,7 +30,7 @@ class UniteTeams(commands.Cog):
                 await ctx.send("¡Por favor, menciona a un líder válido!")
                 return
 
-            await self.create_team(ctx, leader, team_name, acronym)
+            await self.create_team(ctx, leader, team_name)
         
         elif subcommand == "delete":
             if not leader_or_role_name:
@@ -54,6 +49,17 @@ class UniteTeams(commands.Cog):
             await ctx.send("Subcomando desconocido.")
 
     async def create_team(self, ctx, leader: discord.Member, team_name: str):
+        # Split the team_name to capture the acronym
+        *team_name_parts, acronym = team_name.split()
+
+        # Join back the team name parts without the acronym
+        team_name = ' '.join(team_name_parts)
+
+        # Validate the acronym
+        if len(acronym) > 5 or not acronym.isupper():
+            await ctx.send("El acrónimo debe estar en mayúsculas, contener a lo sumo 5 caracteres y puede incluir símbolos.")
+            return
+        
         if not isinstance(leader, discord.Member):
             await ctx.send("¡Por favor menciona a un líder válido!")
             return
@@ -79,10 +85,10 @@ class UniteTeams(commands.Cog):
         await self.config.guild(ctx.guild).uniteteams.set_raw(team_name, value={
             "role_id": role.id, 
             "leader_id": leader.id,
-            "acronym": acronym,  # <-- Add this line
+            "acronym": acronym,
             "members": []  # Adding an empty list for members
         })
-        await ctx.send(f"¡Equipo {team_name} creado con {leader.mention} como líder!")
+        await ctx.send(f"¡Equipo {team_name} ({acronym}) creado con {leader.mention} como líder!")
 
     async def delete_team(self, ctx, leader_or_role_name: str):
         # If the input is a mention (for a role), let's try to process it as such.
@@ -131,16 +137,14 @@ class UniteTeams(commands.Cog):
         message = "Equipos:\n"
         for team, data in teams_data.items():
             leader = ctx.guild.get_member(data["leader_id"])
+            acronym = data.get("acronym", "N/A")  # Just to be safe, in case an acronym wasn't added
 
             # Check if "members" key exists in the data, if not, create an empty list
             members_list = data.get("members", [])
             members = [ctx.guild.get_member(member_id).mention for member_id in members_list if ctx.guild.get_member(member_id)]
-            
-            # Adjusting the format to match the required format:
-            message += f"- **{team}** ({data['acronym']})\n"  # <-- Display acronym
-            message += f"    - Líder: {leader.mention if leader else 'Desconocido'}\n"
-            message += f"    - Miembros: {', '.join(members) if members else 'Ninguno'}\n"
-                
+
+            message += f"- **{team}** ({acronym})\n  - Líder: {leader.mention if leader else 'Desconocido'}\n  - Miembros: {', '.join(members) if members else 'Ninguno'}\n"
+
         await ctx.send(message)
 
     async def clean_teams(self, ctx):
