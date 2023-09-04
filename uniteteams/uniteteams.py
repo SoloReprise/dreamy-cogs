@@ -350,8 +350,8 @@ class UniteTeams(commands.Cog):
             if str(reaction.emoji) == "✅":
                 # Create category and channels
                 category_name = f"【 {captain_teams[challenger_team]['acronym']} vs {captain_teams[challenged_team]['acronym']} 】"
-                category = await ctx.guild.create_category_channel(category_name)
-
+                category_position = get(ctx.guild.categories, id=1127625556247203861).position
+                category = await ctx.guild.create_category_channel(category_name, position=category_position)
                 overwrites = {
                     ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
                     get(ctx.guild.roles, id=1127785805969113238): discord.PermissionOverwrite(read_messages=True, send_messages=True),  # Mod role
