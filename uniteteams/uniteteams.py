@@ -75,9 +75,9 @@ class UniteTeams(commands.Cog):
         await ctx.send(f"¡Equipo {team_name} creado con {leader.mention} como líder!")
 
     async def delete_team(self, ctx, leader_or_role_name: str):
-        # If the input is a mention, let's try to process it as such.
-        if leader_or_role_name.startswith("<@") and leader_or_role_name.endswith(">"):
-            leader_or_role_name = leader_or_role_name.strip("<@!>")  # Strip to get the ID
+        # If the input is a mention (for a role), let's try to process it as such.
+        if leader_or_role_name.startswith("<@&") and leader_or_role_name.endswith(">"):
+            leader_or_role_name = leader_or_role_name.strip("<@&>")  # Strip to get the ID
             team_role = discord.utils.get(ctx.guild.roles, id=int(leader_or_role_name))
         else:
             team_role = discord.utils.get(ctx.guild.roles, name=leader_or_role_name)
