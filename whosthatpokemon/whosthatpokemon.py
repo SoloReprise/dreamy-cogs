@@ -209,21 +209,20 @@ class WhosThatPokemon(commands.Cog):
         is_shiny = random.randint(1, 50) == 1
 
         if is_ditto_game:
-            if generation:
-                disguise_poke_id = generation
-            else:
-                disguise_poke_id = randint(1, 1010)
-            
+            disguise_poke_id = randint(1, 1010) if generation is None else generation
             if disguise_poke_id == 132:
                 is_ditto_disguised = False  # Ditto is not disguised
                 poke_id = 132
             else:
                 is_ditto_disguised = True  # Ditto is disguised
                 poke_id = disguise_poke_id
-                temp = await self.generate_image(f"{disguise_poke_id:>03}", is_shiny, hide=True)
+                temp = await self.generate_image(f"{poke_id:03}", is_shiny, hide=True)
         else:
-            poke_id = generation if generation else randint(1, 1010)
-            temp = await self.generate_image(f"{poke_id:>03}", is_shiny, hide=True)
+            if generation is None:
+                poke_id = randint(1, 1010)
+            else:
+                poke_id = generation
+            temp = await self.generate_image(f"{poke_id:03}", is_shiny, hide=True)
 
         if temp is None:
             return await ctx.send("Failed to generate whosthatpokemon card image.")
