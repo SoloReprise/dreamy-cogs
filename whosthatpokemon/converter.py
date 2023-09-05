@@ -1,5 +1,5 @@
 from random import randint
-
+import random
 from redbot.core import commands
 
 
@@ -10,13 +10,12 @@ class Generation(commands.Converter):
         if argument.lower() not in allowed_gens:
             ctx.command.reset_cooldown(ctx)
             raise commands.BadArgument("Only `gen1` to `gen8`, `arceus`, and `gen9` values are allowed.")
-        
+                
         if argument.lower() == "gen1":
             # Generate a random ID between 1 and 151, excluding Ditto (ID 132)
-            poke_id = randint(1, 151)
-            while poke_id == 132:
-                poke_id = randint(1, 151)
-            return poke_id
+            excluded_ids = {132}
+            available_ids = set(range(1, 152)) - excluded_ids
+            return random.choice(list(available_ids))
         elif argument.lower() == "gen2":
             return randint(152, 251)
         elif argument.lower() == "gen3":
