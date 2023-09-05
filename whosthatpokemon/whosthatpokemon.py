@@ -140,16 +140,16 @@ class WhosThatPokemon(commands.Cog):
     )
     @app_commands.choices(
         generation=[
-            app_commands.Choice(name="Generation 1", value=Generation.gen1),
-            app_commands.Choice(name="Generation 2", value=Generation.gen2),
-            app_commands.Choice(name="Generation 3", value=Generation.gen3),
-            app_commands.Choice(name="Generation 4", value=Generation.gen4),
-            app_commands.Choice(name="Generation 5", value=Generation.gen5),
-            app_commands.Choice(name="Generation 6", value=Generation.gen6),
-            app_commands.Choice(name="Generation 7", value=Generation.gen7),
-            app_commands.Choice(name="Generation 8", value=Generation.gen8),
-            app_commands.Choice(name="Leyendas: Arceus", value=Generation.arceus),
-            app_commands.Choice(name="Generation 9", value=Generation.gen9),
+            app_commands.Choice(name="Generation 1", value="gen1"),
+            app_commands.Choice(name="Generation 2", value="gen2"),
+            app_commands.Choice(name="Generation 3", value="gen3"),
+            app_commands.Choice(name="Generation 4", value="gen4"),
+            app_commands.Choice(name="Generation 5", value="gen5"),
+            app_commands.Choice(name="Generation 6", value="gen6"),
+            app_commands.Choice(name="Generation 7", value="gen7"),
+            app_commands.Choice(name="Generation 8", value="gen8"),
+            app_commands.Choice(name="Leyendas: Arceus", value="arceus"),
+            app_commands.Choice(name="Generation 9", value="gen9"),
         ]
     )
     @commands.cooldown(1, 30, commands.BucketType.user)
