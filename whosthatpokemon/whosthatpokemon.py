@@ -273,8 +273,10 @@ class WhosThatPokemon(commands.Cog):
 
         if is_ditto_disguised:  # Change the image URL in the embed if Ditto was disguised
             embed.set_image(url="attachment://whosthatpokemon.png")
+            revealed_img = File(await self.generate_image("132", shiny=is_shiny, hide=False), "whosthatpokemon.png")
         else:
             embed.set_image(url="attachment://guessthatpokemon.png")
+            revealed_img = File(revealed, "guessthatpokemon.png")
 
         embed.set_footer(text=f"Author: {ctx.author}", icon_url=ctx.author.avatar.url)
 
