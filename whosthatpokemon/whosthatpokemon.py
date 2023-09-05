@@ -209,11 +209,7 @@ class WhosThatPokemon(commands.Cog):
         is_shiny = random.randint(1, 50) == 1
 
         if is_ditto_game:
-            if not generation:  # If generation is not provided, set the boundaries to 1-1010
-                disguise_poke_id = randint(1, 1010)
-            else:  # Use the boundaries of the provided generation
-                disguise_poke_id = randint(generation.start, generation.end)
-                
+            disguise_poke_id = randint(1, 1010) if not generation else generation
             if disguise_poke_id == 132:
                 is_ditto_disguised = False  # Ditto is not disguised
                 poke_id = 132
@@ -222,12 +218,15 @@ class WhosThatPokemon(commands.Cog):
                 poke_id = disguise_poke_id
                 temp = await self.generate_image(f"{disguise_poke_id:>03}", is_shiny, hide=True)
         else:
-            if not generation:
+            if generation is None:
                 poke_id = randint(1, 1010)
             else:
-                poke_id = randint(generation.start, generation.end)
-            temp = await self.generate_image(f"{poke_id:>03}", is_shiny, hide=True)
+                poke_id = generation if generation is not None else randint(1, 1010)
+            temp = await self.generate_image(poke_id, is_shiny, hide=True)
 
+        if temp is None:
+            return await ctx.send("Failed to generate whosthatpokemon card image.")
+            
         # Took this from Core's event file.
         # https://github.com/Cog-Creators/Red-DiscordBot/blob/41d89c7b54a1f231a01f79655c20d4acf1799633/redbot/core/_events.py#L424-L426
         img_timeout = discord.utils.format_dt(
