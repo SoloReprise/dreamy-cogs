@@ -208,24 +208,24 @@ class WhosThatPokemon(commands.Cog):
         is_ditto_disguised = False  # Initialize to False
         is_shiny = random.randint(1, 50) == 1
 
-        if is_ditto_game:
-            disguise_poke_id = randint(1, 1010) if generation is None else generation
-            if disguise_poke_id == 132:
-                is_ditto_disguised = False  # Ditto is not disguised
-                poke_id = 132
-            else:
+        MAX_RETRIES = 5  # Adjust this based on how many retries you'd like
+
+        for _ in range(MAX_RETRIES):
+            if is_ditto_game:
+                disguise_poke_id = randint(1, 1010) if generation is None else generation
+                while disguise_poke_id == 132:  # To ensure we don't pick Ditto in disguise mode
+                    disguise_poke_id = randint(1, 1010) if generation is None else generation
                 is_ditto_disguised = True  # Ditto is disguised
                 poke_id = disguise_poke_id
                 temp = await self.generate_image(f"{poke_id:03}", is_shiny, hide=True)
-        else:
-            if generation is None:
-                poke_id = randint(1, 1010)
             else:
-                poke_id = generation
-            temp = await self.generate_image(f"{poke_id:03}", is_shiny, hide=True)
-
-        if temp is None:
-            return await ctx.send("Failed to generate whosthatpokemon card image.")
+                poke_id = randint(1, 1010) if generation is None else generation
+                temp = await self.generate_image(f"{poke_id:03}", is_shiny, hide=True)
+            
+            if temp is not None:
+                break
+        else:  # This else block runs when the for loop completes without a 'break'
+            return await ctx.send("Failed to generate whosthatpokemon card image multiple times.")
             
         # Took this from Core's event file.
         # https://github.com/Cog-Creators/Red-DiscordBot/blob/41d89c7b54a1f231a01f79655c20d4acf1799633/redbot/core/_events.py#L424-L426
