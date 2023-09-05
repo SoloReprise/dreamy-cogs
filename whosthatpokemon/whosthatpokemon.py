@@ -417,23 +417,24 @@ class WhosThatPokemon(commands.Cog):
 ## WTPADMINTEST
     @commands.command(name="wtpadmin", hidden=True)
     @commands.has_permissions(administrator=True)
-    async def whosthatpokemon_admin(self, ctx: commands.Context, poke_id: str, *, hide: bool = False):
-        """Admin version of the WhosThatPokemon command."""
-        temp = await self.generate_image_new(poke_id, hide=hide)
+    async def whosthatpokemon_admin(self, ctx: commands.Context, poke_id: str, *, hide: bool = False, shiny: bool = False):
+        """Admin version of the WhosThatPokemon command with shiny option."""
+        temp = await self.generate_image_new(poke_id, hide=hide, shiny=shiny)
         if temp is None:
             return await ctx.send("Failed to generate new WhosThatPokemon card image.")
         
         await ctx.send(file=File(temp, "new_whosthatpokemon.png"))
 
-    async def generate_image_new(self, poke_id: str, *, hide: bool) -> Optional[BytesIO]:
+    async def generate_image_new(self, poke_id: str, *, hide: bool, shiny: bool = False) -> Optional[BytesIO]:
         # Fetch pokemon data from the API
         response = await self.session.get(f"https://pokeapi.co/api/v2/pokemon/{poke_id}")
         if response.status != 200:
             return None
         pkmn_data = await response.json()
         
-        # Get the official artwork URL
-        base_url = pkmn_data['sprites']['other']['official-artwork']['front_default']
+        # Determine the URL based on shiny option
+        base_url = pkmn_data['sprites']['other']['official-artwork']['front_shiny'] if shiny else pkmn_data['sprites']['other']['official-artwork']['front_default']
+        
         if base_url is None:
             return None
         
