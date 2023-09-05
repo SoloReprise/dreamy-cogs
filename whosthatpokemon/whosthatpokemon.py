@@ -209,7 +209,7 @@ class WhosThatPokemon(commands.Cog):
         is_shiny = random.randint(1, 1) == 1
 
         if is_ditto_game:
-            disguise_poke_id = randint(1, 1010) if generation is None else generation.value
+            disguise_poke_id = randint(1, 1010) if generation is None else generation
             if disguise_poke_id == 132:
                 is_ditto_disguised = False  # Ditto is not disguised
                 poke_id = 132
