@@ -205,7 +205,7 @@ class WhosThatPokemon(commands.Cog):
 
         await ctx.typing()
 
-        is_ditto_game = random.randint(1, 25) == 1
+        is_ditto_game = random.randint(1, 1) == 1
         is_shiny = random.randint(1, 1) == 1
 
         # Choose if Ditto will appear without disguise or disguised as another Pokémon.
@@ -247,7 +247,7 @@ class WhosThatPokemon(commands.Cog):
         else:
             revealed = await self.generate_image(f"{poke_id:>03}", shiny=is_shiny, hide=False)
             english_name = filtered_names_es[0] if filtered_names_es else (filtered_names_en[0] if filtered_names_en else "Unknown")
-            
+
         revealed = await self.generate_image(f"{poke_id:>03}", shiny=is_shiny, hide=False)
         revealed_img = File(revealed, "whosthatpokemon.png")
 

@@ -80,11 +80,31 @@ class WhosThatPokemonView(discord.ui.View):
                 points = 5 if self.is_shiny else 1  # Corrected here
                 await mewtwo_cog.add_points(guild, self.winner, points)
                 
-            # Modify the followup message based on shiny status
-            point_text = "¡**5 puntos**" if self.is_shiny else "¡**1 punto**"  # And here
-            await interaction.followup.send(
-                content=f"¡{self.winner.mention} ha acertado el Pokémon! {point_text} para el Equipo {matching_role.name}!"
-            )
+            # Add points to the winner using the MewtwoWars cog
+            mewtwo_cog = self.bot.get_cog('MewtwoWars') # Assuming the cog's name is 'MewtwoWars'
+            if mewtwo_cog:
+                guild = interaction.guild
+
+                # Determine points based on Pokémon type and shininess
+                if self.pokemon_name == "Ditto" and self.is_shiny:
+                    points = 12
+                    point_text = "¡**12 puntos**"
+                elif self.pokemon_name == "Ditto":
+                    points = 5
+                    point_text = "¡**5 puntos**"
+                elif self.is_shiny:
+                    points = 8
+                    point_text = "¡**8 puntos**"
+                else:
+                    points = 1
+                    point_text = "¡**1 punto**"
+
+                await mewtwo_cog.add_points(guild, self.winner, points)
+                            
+                # Modify the followup message based on points
+                await interaction.followup.send(
+                    content=f"¡{self.winner.mention} ha acertado el Pokémon! {point_text} para el Equipo {matching_role.name}!"
+                )
 
     async def on_error(
         self,
