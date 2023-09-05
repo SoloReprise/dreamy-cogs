@@ -238,9 +238,9 @@ class WhosThatPokemon(commands.Cog):
         else:
             species_data = await self.get_data(f"{API_URL}/pokemon-species/{poke_id}")
         if species_data.get("http_code"):
-            print("Failed to get species data from PokeAPI.")  # Debugging line
+            await ctx.send("Failed to get species data from PokeAPI.")  # Debugging message
             return await ctx.send("Failed to get species data from PokeAPI.")
-        print("Species Data:", species_data)  # Debugging line
+        await ctx.send("Species Data:", species_data)  # Debugging message
         names_data = species_data.get("names", [{}])
         eligible_names = [x["name"].lower() for x in names_data]
         # Get name in Spanish or, if not available, in English
@@ -260,7 +260,7 @@ class WhosThatPokemon(commands.Cog):
             english_name = filtered_names_es[0] if filtered_names_es else (filtered_names_en[0] if filtered_names_en else "Unknown")
 
         if revealed is None:
-            await ctx.send("Sorry, there was an error retrieving the Pokémon image.")  # Debugging line
+            await ctx.send("Sorry, there was an error retrieving the Pokémon image.")  # Debugging message
             return
         revealed_img = File(revealed, "whosthatpokemon.png")
 
