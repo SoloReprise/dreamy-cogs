@@ -77,6 +77,7 @@ class WhosThatPokemon(commands.Cog):
         }
         self.config.register_user(**default_user)
         self.reset_usage_counts.start()
+        self.is_shiny = is_shiny  # store shiny status
 
     async def mention_role_temporarily(self, ctx, role_id: int):
         role = ctx.guild.get_role(role_id)  # Fetch the role using role_id
