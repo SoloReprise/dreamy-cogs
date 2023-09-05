@@ -205,7 +205,7 @@ class WhosThatPokemon(commands.Cog):
 
         await ctx.typing()
 
-        poke_id = generation or randint(1, 1010)
+        poke_id = generation if generation is not None else randint(1, 1010)
         is_shiny = random.randint(1, 1) == 1
         if_guessed_right = False
 
