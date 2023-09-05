@@ -204,9 +204,9 @@ class WhosThatPokemon(commands.Cog):
 
         await ctx.typing()
 
-        is_ditto_game = random.randint(1, 1) == 1
+        is_ditto_game = random.randint(1, 15) == 1
         is_ditto_disguised = False  # Initialize to False
-        is_shiny = random.randint(1, 1) == 1
+        is_shiny = random.randint(1, 50) == 1
 
         if is_ditto_game:
             disguise_poke_id = randint(1, 1010) if generation is None else generation
