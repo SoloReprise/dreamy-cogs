@@ -256,7 +256,7 @@ class WhosThatPokemon(commands.Cog):
         else:
             revealed_img = File(revealed, "whosthatpokemon.png")
 
-        view = WhosThatPokemonView(self.bot, eligible_names, is_shiny)
+        view = WhosThatPokemonView(self.bot, eligible_names, is_shiny, english_name)
         view.message = await ctx.send(
             f"**¡¿Cuál es este Pokémon?!**\nNecesito una respuesta válida en menos de {img_timeout}.",
             file=File(temp, "guessthatpokemon.png"),

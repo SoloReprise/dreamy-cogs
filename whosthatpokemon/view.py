@@ -28,6 +28,7 @@ class WhosThatPokemonView(discord.ui.View):
         self.bot = bot
         self.eligible_names = eligible_names
         self.is_shiny = is_shiny
+        self.pokemon_name = pokemon_name
         self.winner = None
         super().__init__(timeout=300.0)
 
