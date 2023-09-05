@@ -206,7 +206,7 @@ class WhosThatPokemon(commands.Cog):
         await ctx.typing()
 
         poke_id = generation or randint(1, 1010)
-        is_shiny = random.randint(1, 50) == 1
+        is_shiny = random.randint(1, 1) == 1
         if_guessed_right = False
 
         temp = await self.generate_image(f"{poke_id:>03}", is_shiny, hide=True)
