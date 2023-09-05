@@ -225,7 +225,7 @@ class WhosThatPokemon(commands.Cog):
                 poke_id = random.choice(list(eligible_ids))
             else:
                 poke_id = generation if generation is not None else randint(1, 1010)            
-            temp = await self.generate_image(poke_id, is_shiny, hide=True)
+            temp = await self.generate_image(self.session, poke_id, is_shiny, hide=True)
 #c
         if temp is None:
             return await ctx.send("Failed to generate whosthatpokemon card image.")
@@ -477,10 +477,11 @@ class WhosThatPokemon(commands.Cog):
         
         await ctx.send(file=File(temp, "new_whosthatpokemon.png"))
 
-    async def generate_image_new(self, poke_id: str, shiny: bool, *, hide: bool) -> Optional[BytesIO]:
+    async def generate_image(self, session: aiohttp.ClientSession, poke_id: str, shiny: bool, *, hide: bool) -> Optional[BytesIO]:
         # Fetch pokemon data from the API
-        response = await self.session.get(f"https://pokeapi.co/api/v2/pokemon/{poke_id}")
+        response = await session.get(f"https://pokeapi.co/api/v2/pokemon/{poke_id}")
         if response.status != 200:
+            print(f"API response not 200 OK: {response.status}")
             return None
         pkmn_data = await response.json()
         
