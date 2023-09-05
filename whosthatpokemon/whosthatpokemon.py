@@ -168,7 +168,6 @@ class WhosThatPokemon(commands.Cog):
         **Arguments:**
         - `[generation]` - Where you choose any generation from gen 1 to gen 8.
         """
-        async with aiohttp.ClientSession() as session:
 
         mewtwo_wars_role = discord.utils.get(ctx.guild.roles, id=1147262532231385219)
         mewtwo_x_role = discord.utils.get(ctx.guild.roles, id=1147254156491509780)
@@ -217,17 +216,14 @@ class WhosThatPokemon(commands.Cog):
             else:
                 is_ditto_disguised = True  # Ditto is disguised
                 poke_id = disguise_poke_id
-                temp = await self.generate_image(session, disguise_poke_id, is_shiny, hide=True)
+                temp = await self.generate_image(f"{disguise_poke_id:>03}", is_shiny, hide=True)
         else:
             if generation is None:
                 poke_id = randint(1, 1010)
-            elif generation == "gen1":
-                eligible_ids = set(range(1, 152)) - {132}  # Exclude Ditto's ID (132)
-                poke_id = random.choice(list(eligible_ids))
             else:
-                poke_id = generation if generation is not None else randint(1, 1010)            
-            temp = await self.generate_image(session, poke_id, is_shiny, hide=True)
-#c
+                poke_id = generation if generation is not None else randint(1, 1010)
+            temp = await self.generate_image(poke_id, is_shiny, hide=True)
+
         if temp is None:
             return await ctx.send("Failed to generate whosthatpokemon card image.")
             
@@ -408,13 +404,13 @@ class WhosThatPokemon(commands.Cog):
         
         await ctx.send("Todos los usos del comando wtp han sido reiniciados.")
         
-    async def generate_image(self, session, poke_id: str, shiny: bool, hide: bool) -> Optional[BytesIO]:
-        # Fetch pokemon data from the API using the provided poke_id
-        async with session.get(f"https://pokeapi.co/api/v2/pokemon/{poke_id}") as response:
-            if response.status != 200:
-                print(f"API response not 200 OK: {response.status}")
-                return None
-            pkmn_data = await response.json()
+    async def generate_image(self, poke_id: str, shiny: bool, *, hide: bool) -> Optional[BytesIO]:
+        # Fetch pokemon data from the API
+        response = await self.session.get(f"https://pokeapi.co/api/v2/pokemon/{poke_id}")
+        if response.status != 200:
+            print(f"API response not 200 OK: {response.status}")
+            return None
+        pkmn_data = await response.json()
         
         # Determine the artwork URL based on whether shiny is True or False
         if shiny:
@@ -478,11 +474,10 @@ class WhosThatPokemon(commands.Cog):
         
         await ctx.send(file=File(temp, "new_whosthatpokemon.png"))
 
-    async def generate_image(self, session: aiohttp.ClientSession, poke_id: str, shiny: bool, *, hide: bool) -> Optional[BytesIO]:
+    async def generate_image_new(self, poke_id: str, shiny: bool, *, hide: bool) -> Optional[BytesIO]:
         # Fetch pokemon data from the API
-        response = await session.get(f"https://pokeapi.co/api/v2/pokemon/{poke_id}")
+        response = await self.session.get(f"https://pokeapi.co/api/v2/pokemon/{poke_id}")
         if response.status != 200:
-            print(f"API response not 200 OK: {response.status}")
             return None
         pkmn_data = await response.json()
         
