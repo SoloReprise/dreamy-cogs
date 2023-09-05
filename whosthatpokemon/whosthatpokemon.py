@@ -373,6 +373,7 @@ class WhosThatPokemon(commands.Cog):
         # Fetch pokemon data from the API
         response = await self.session.get(f"https://pokeapi.co/api/v2/pokemon/{poke_id}")
         if response.status != 200:
+            print(f"API response not 200 OK: {response.status}")
             return None
         pkmn_data = await response.json()
         
@@ -385,6 +386,7 @@ class WhosThatPokemon(commands.Cog):
             base_url = pkmn_data['sprites']['other']['official-artwork']['front_default']
 
         if base_url is None:
+            print("Base URL for the Pokémon image not found.")
             return None
             
         base_image = Image.open(bundled_data_path(self) / "template.webp").convert("RGBA")
@@ -393,9 +395,11 @@ class WhosThatPokemon(commands.Cog):
         try:
             async with self.session.get(base_url) as response:
                 if response.status != 200:
+                    print(f"Failed to fetch the Pokémon image: {response.status}")
                     return None
                 data = await response.read()
         except asyncio.TimeoutError:
+            print("Timed out while trying to fetch the Pokémon image.")
             return None
 
         pbytes = BytesIO(data)
