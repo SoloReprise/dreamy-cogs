@@ -247,14 +247,15 @@ class WhosThatPokemon(commands.Cog):
         # Update revealing image generation when it's a Ditto game
         if is_ditto_game:
             if is_ditto_disguised:
+                revealed = await self.generate_image(f"{poke_id:>03}", shiny=is_shiny, hide=False)  # Show Ditto without disguise
+                english_name = "Ditto"
+            else:
                 revealed = await self.generate_image(f"{disguise_poke_id:>03}", shiny=is_shiny, hide=False)
                 english_name = filtered_names_es[0] if filtered_names_es else (filtered_names_en[0] if filtered_names_en else "Unknown")
-            else:
-                revealed = await self.generate_image("132", shiny=is_shiny, hide=False)  # Use "132" for Ditto's ID
-                english_name = "Ditto"
         else:
             revealed = await self.generate_image(f"{poke_id:>03}", shiny=is_shiny, hide=False)
             english_name = filtered_names_es[0] if filtered_names_es else (filtered_names_en[0] if filtered_names_en else "Unknown")
+
         revealed_img = File(revealed, "whosthatpokemon.png")
 
         view = WhosThatPokemonView(self.bot, eligible_names, is_shiny, english_name)
@@ -269,9 +270,8 @@ class WhosThatPokemon(commands.Cog):
             description=f"El Pokémon era... **{english_name}**.",
             color=0x76EE00,
         )
-        embed.set_image(url="attachment://whosthatpokemon.png")
-        embed.set_footer(text=f"Author: {ctx.author}", icon_url=ctx.author.avatar.url)
-        # because we want it to timeout and not tell the user that they got it right.
+        embed.set_image(url="attachment://whosthatpokemon.png")  # Use the revealed image URL here
+        embed.set_footer(text=f"Author: {ctx.author}", icon_url=ctx.author.avatar.url)        # because we want it to timeout and not tell the user that they got it right.
         # This is probably not the best way to do it, but it works perfectly fine.
         timeout = await view.wait()
         if timeout:
