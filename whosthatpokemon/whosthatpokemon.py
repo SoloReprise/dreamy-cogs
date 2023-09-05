@@ -216,7 +216,7 @@ class WhosThatPokemon(commands.Cog):
             else:
                 is_ditto_disguised = True  # Ditto is disguised
                 poke_id = disguise_poke_id
-                temp = await self.generate_image(f"{disguise_poke_id:>03}", is_shiny, hide=True)
+                temp = await self.generate_image(disguise_poke_id, is_shiny, hide=True)
         else:
             if generation is None:
                 poke_id = randint(1, 1010)
@@ -407,8 +407,8 @@ class WhosThatPokemon(commands.Cog):
         
         await ctx.send("Todos los usos del comando wtp han sido reiniciados.")
         
-    async def generate_image(self, poke_id: str, shiny: bool, *, hide: bool) -> Optional[BytesIO]:
-        # Fetch pokemon data from the API
+    async def generate_image(self, poke_id: str, shiny: bool, hide: bool) -> Optional[BytesIO]:
+        # Fetch pokemon data from the API using the provided poke_id
         response = await self.session.get(f"https://pokeapi.co/api/v2/pokemon/{poke_id}")
         if response.status != 200:
             print(f"API response not 200 OK: {response.status}")
