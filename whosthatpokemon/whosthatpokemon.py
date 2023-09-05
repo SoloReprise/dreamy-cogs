@@ -134,7 +134,7 @@ class WhosThatPokemon(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @app_commands.command()
+    @commands.hybrid_command(aliases=["wtp"])
     @app_commands.describe(
         generation=("Optionally choose generation from gen1 to gen9.")
     )
