@@ -241,7 +241,7 @@ class WhosThatPokemon(commands.Cog):
             debug_message = "Failed to get species data from PokeAPI."
             await ctx.send(debug_message)
             return await ctx.send("Failed to get species data from PokeAPI.")
-        debug_message = f"Species Data: {species_data}"  # Construct the debug message
+        debug_message = f"Species Data:\n```\n{species_data}\n```"  # Construct the debug message with a code block
         await ctx.send(debug_message)  # Send the debug message
         names_data = species_data.get("names", [{}])
         eligible_names = [x["name"].lower() for x in names_data]
