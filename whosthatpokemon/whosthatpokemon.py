@@ -223,7 +223,7 @@ class WhosThatPokemon(commands.Cog):
             else:
                 poke_id = generation if generation is not None else randint(1, 1010)
             temp = await self.generate_image(poke_id, is_shiny, hide=True)
-
+#c
         if temp is None:
             return await ctx.send("Failed to generate whosthatpokemon card image.")
             
