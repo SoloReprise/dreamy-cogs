@@ -213,7 +213,9 @@ class WhosThatPokemon(commands.Cog):
             disguise_poke_id = randint(1, 1010) if not generation else generation
             if disguise_poke_id == 132:  # 132 is Ditto's ID
                 is_ditto_game = False  # We just show Ditto without any disguise
+                poke_id = 132
             else:
+                poke_id = disguise_poke_id
                 temp = await self.generate_image(f"{disguise_poke_id:>03}", is_shiny, hide=True)
         else:
             poke_id = generation if generation is not None else randint(1, 1010)
