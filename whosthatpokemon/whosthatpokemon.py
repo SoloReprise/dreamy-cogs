@@ -206,12 +206,14 @@ class WhosThatPokemon(commands.Cog):
 
         await ctx.typing()
 
-        is_ditto_game = random.randint(1, 25) == 1
+        is_ditto_game = random.randint(1, 1) == 1
         is_ditto_disguised = False  # Initialize to False
-        is_shiny = random.randint(1, 50) == 1
+        is_shiny = random.randint(1, 1) == 1
 
         if is_ditto_game:
-            disguise_poke_id = randint(1, 1010) if generation is None else generation.value
+            disguise_poke_id = (
+                randint(1, 1010) if generation is None else generation.value
+            )
             if disguise_poke_id == 132:
                 is_ditto_disguised = False  # Ditto is not disguised
                 poke_id = 132
@@ -220,7 +222,10 @@ class WhosThatPokemon(commands.Cog):
                 poke_id = disguise_poke_id
                 temp = await self.generate_image(f"{disguise_poke_id:>03}", is_shiny, hide=True)
         else:
-            poke_id = generation.value if generation is not None else randint(1, 1010)
+            if generation is None:
+                poke_id = randint(1, 1010)
+            else:
+                poke_id = generation.value
             temp = await self.generate_image(f"{poke_id:>03}", is_shiny, hide=True)
 
         if temp is None:
