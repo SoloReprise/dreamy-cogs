@@ -417,27 +417,30 @@ class WhosThatPokemon(commands.Cog):
 ## WTPADMINTEST
     @commands.command(name="wtpadmin", hidden=True)
     @commands.has_permissions(administrator=True)
-    async def whosthatpokemon_admin(self, ctx: commands.Context, poke_id: str, *, hide: bool = False, shiny: bool = False):
+    async def whosthatpokemon_admin(self, ctx: commands.Context, poke_id: str, shiny: bool = False, *, hide: bool = False):
         """Admin version of the WhosThatPokemon command with shiny option."""
-        temp = await self.generate_image_new(poke_id, hide=hide, shiny=shiny)
+        temp = await self.generate_image_new(poke_id, shiny=shiny, hide=hide)
         if temp is None:
             return await ctx.send("Failed to generate new WhosThatPokemon card image.")
         
         await ctx.send(file=File(temp, "new_whosthatpokemon.png"))
 
-    async def generate_image_new(self, poke_id: str, *, hide: bool, shiny: bool = False) -> Optional[BytesIO]:
+    async def generate_image_new(self, poke_id: str, shiny: bool, *, hide: bool) -> Optional[BytesIO]:
         # Fetch pokemon data from the API
         response = await self.session.get(f"https://pokeapi.co/api/v2/pokemon/{poke_id}")
         if response.status != 200:
             return None
         pkmn_data = await response.json()
         
-        # Determine the URL based on shiny option
-        base_url = pkmn_data['sprites']['other']['official-artwork']['front_shiny'] if shiny else pkmn_data['sprites']['other']['official-artwork']['front_default']
+        # Determine the artwork URL based on whether shiny is True or False
+        if shiny:
+            base_url = pkmn_data['sprites']['other']['official-artwork']['front_shiny']
+        else:
+            base_url = pkmn_data['sprites']['other']['official-artwork']['front_default']
         
         if base_url is None:
             return None
-        
+            
         base_image = Image.open(bundled_data_path(self) / "template.webp").convert("RGBA")
         bg_width, bg_height = base_image.size
         
