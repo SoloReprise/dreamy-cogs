@@ -220,8 +220,11 @@ class WhosThatPokemon(commands.Cog):
         else:
             if generation is None:
                 poke_id = randint(1, 1010)
+            elif generation == "gen1":
+                eligible_ids = set(range(1, 152)) - {132}  # Exclude Ditto's ID (132)
+                poke_id = random.choice(list(eligible_ids))
             else:
-                poke_id = generation if generation is not None else randint(1, 1010)
+                poke_id = generation if generation is not None else randint(1, 1010)            
             temp = await self.generate_image(poke_id, is_shiny, hide=True)
 #c
         if temp is None:
