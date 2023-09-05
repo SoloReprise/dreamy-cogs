@@ -233,17 +233,25 @@ class WhosThatPokemon(commands.Cog):
         if is_ditto_game:
             species_data = await self.get_data(f"{API_URL}/pokemon-species/132")  # 132 is Ditto's ID
             eligible_names.append("ditto")
+        else:
+            species_data = await self.get_data(f"{API_URL}/pokemon-species/{poke_id}")
+        if species_data.get("http_code"):
+            return await ctx.send("Failed to get species data from PokeAPI.")
+        names_data = species_data.get("names", [{}])
+        eligible_names = [x["name"].lower() for x in names_data]
+        # Get name in Spanish or, if not available, in English
+        filtered_names_es = [x["name"] for x in names_data if x["language"]["name"] == "es"]
+        filtered_names_en = [x["name"] for x in names_data if x["language"]["name"] == "en"]
+
+        # Update revealing image generation when it's a Ditto game
+        if is_ditto_game:
             revealed = await self.generate_image(f"132:>03", shiny=is_shiny, hide=False)  # Ditto's ID is 132
             english_name = "Ditto"
         else:
-            species_data = await self.get_data(f"{API_URL}/pokemon-species/{poke_id}")
-            names_data = species_data.get("names", [{}])
-            eligible_names = [x["name"].lower() for x in names_data]
-            filtered_names_es = [x["name"] for x in names_data if x["language"]["name"] == "es"]
-            filtered_names_en = [x["name"] for x in names_data if x["language"]["name"] == "en"]
             revealed = await self.generate_image(f"{poke_id:>03}", shiny=is_shiny, hide=False)
             english_name = filtered_names_es[0] if filtered_names_es else (filtered_names_en[0] if filtered_names_en else "Unknown")
 
+        revealed = await self.generate_image(f"{poke_id:>03}", shiny=is_shiny, hide=False)
         revealed_img = File(revealed, "whosthatpokemon.png")
 
         view = WhosThatPokemonView(self.bot, eligible_names, is_shiny)
