@@ -156,8 +156,9 @@ class WhosThatPokemon(commands.Cog):
     @commands.max_concurrency(1, commands.BucketType.channel)
     @commands.bot_has_permissions(attach_files=True, embed_links=True)
     @commands.mod_or_permissions(administrator=True)
-    async def whosthatpokemon(self, ctx: commands.Context, generation: Generation = None) -> None:
-
+    async def whosthatpokemon(
+        self, ctx: commands.Context, generation: Generation = None
+    ) -> None:
         """Guess Who's that Pokémon in 30 seconds!
 
         You can optionally specify generation from `gen1` to `gen8` only.
@@ -210,7 +211,7 @@ class WhosThatPokemon(commands.Cog):
         is_shiny = random.randint(1, 50) == 1
 
         if is_ditto_game:
-            disguise_poke_id = randint(1, 1010) if not generation else generation
+            disguise_poke_id = randint(1, 1010) if generation is None else generation.value
             if disguise_poke_id == 132:
                 is_ditto_disguised = False  # Ditto is not disguised
                 poke_id = 132
@@ -219,7 +220,7 @@ class WhosThatPokemon(commands.Cog):
                 poke_id = disguise_poke_id
                 temp = await self.generate_image(f"{disguise_poke_id:>03}", is_shiny, hide=True)
         else:
-            poke_id = generation if generation is not None else randint(1, 1010)
+            poke_id = generation.value if generation is not None else randint(1, 1010)
             temp = await self.generate_image(f"{poke_id:>03}", is_shiny, hide=True)
 
         if temp is None:
