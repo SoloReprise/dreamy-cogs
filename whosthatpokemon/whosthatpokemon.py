@@ -209,14 +209,13 @@ class WhosThatPokemon(commands.Cog):
         is_ditto_disguised = False  # Initialize to False
         is_shiny = random.randint(1, 1) == 1
 
-        # Choose if Ditto will appear without disguise or disguised as another Pokémon.
         if is_ditto_game:
             disguise_poke_id = randint(1, 1010) if not generation else generation
             if disguise_poke_id == 132:
-                is_ditto_game = False
+                is_ditto_disguised = False  # Ditto is not disguised
                 poke_id = 132
             else:
-                is_ditto_disguised = True  # Set to True when Ditto is disguised
+                is_ditto_disguised = True  # Ditto is disguised
                 poke_id = disguise_poke_id
                 temp = await self.generate_image(f"{disguise_poke_id:>03}", is_shiny, hide=True)
         else:
@@ -238,11 +237,7 @@ class WhosThatPokemon(commands.Cog):
         else:
             species_data = await self.get_data(f"{API_URL}/pokemon-species/{poke_id}")
         if species_data.get("http_code"):
-            debug_message = "Failed to get species data from PokeAPI."
-            await ctx.send(debug_message)
             return await ctx.send("Failed to get species data from PokeAPI.")
-        debug_message = f"Species Data:\n```\n{species_data}\n```"  # Construct the debug message with a code block
-        await ctx.send(debug_message)  # Send the debug message
         names_data = species_data.get("names", [{}])
         eligible_names = [x["name"].lower() for x in names_data]
         # Get name in Spanish or, if not available, in English
@@ -251,19 +246,15 @@ class WhosThatPokemon(commands.Cog):
 
         # Update revealing image generation when it's a Ditto game
         if is_ditto_game:
-            if is_ditto_disguised:  # You need to set this variable when determining if Ditto is disguised or not
-                revealed = await self.generate_image(f"132:>03", shiny=is_shiny, hide=False)  # Ditto's ID is 132
-                english_name = "Ditto"
-            else:
+            if is_ditto_disguised:
                 revealed = await self.generate_image(f"{disguise_poke_id:>03}", shiny=is_shiny, hide=False)
-                # Set english_name to the name of the disguised Pokémon
+                english_name = filtered_names_es[0] if filtered_names_es else (filtered_names_en[0] if filtered_names_en else "Unknown")
+            else:
+                revealed = await self.generate_image("132", shiny=is_shiny, hide=False)  # Use "132" for Ditto's ID
+                english_name = "Ditto"
         else:
             revealed = await self.generate_image(f"{poke_id:>03}", shiny=is_shiny, hide=False)
             english_name = filtered_names_es[0] if filtered_names_es else (filtered_names_en[0] if filtered_names_en else "Unknown")
-
-        if revealed is None:
-            await ctx.send("Sorry, there was an error retrieving the Pokémon image.")  # Debugging message
-            return
         revealed_img = File(revealed, "whosthatpokemon.png")
 
         view = WhosThatPokemonView(self.bot, eligible_names, is_shiny, english_name)
