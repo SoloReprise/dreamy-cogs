@@ -27,6 +27,7 @@ SOFTWARE.
 import asyncio
 from datetime import datetime, timedelta, timezone, time
 from io import BytesIO
+import random
 from random import randint
 from typing import Any, Dict, Final, List, Optional
 
@@ -77,7 +78,6 @@ class WhosThatPokemon(commands.Cog):
         }
         self.config.register_user(**default_user)
         self.reset_usage_counts.start()
-        self.is_shiny = is_shiny  # store shiny status
 
     async def mention_role_temporarily(self, ctx, role_id: int):
         role = ctx.guild.get_role(role_id)  # Fetch the role using role_id
@@ -156,11 +156,7 @@ class WhosThatPokemon(commands.Cog):
     @commands.max_concurrency(1, commands.BucketType.channel)
     @commands.bot_has_permissions(attach_files=True, embed_links=True)
     @commands.mod_or_permissions(administrator=True)
-    async def whosthatpokemon(
-        self,
-        ctx: commands.Context,
-        generation: Generation = None,
-    ) -> None:
+    async def whosthatpokemon(self, ctx: commands.Context, generation: Generation = None) -> None:
 
         """Guess Who's that Pokémon in 30 seconds!
 
@@ -210,14 +206,13 @@ class WhosThatPokemon(commands.Cog):
         await ctx.typing()
 
         poke_id = generation or randint(1, 1010)
-        is_shiny = True if randint(1, 50) == 1 else False
-        view.is_shiny = is_shiny
+        is_shiny = random.randint(1, 50) == 1
         if_guessed_right = False
 
-        temp = await self.generate_image(f"{poke_id:>03}", shiny=is_shiny, hide=True)
+        temp = await self.generate_image(f"{poke_id:>03}", is_shiny, hide=True)
         if temp is None:
             return await ctx.send("Failed to generate whosthatpokemon card image.")
-
+    
         # Took this from Core's event file.
         # https://github.com/Cog-Creators/Red-DiscordBot/blob/41d89c7b54a1f231a01f79655c20d4acf1799633/redbot/core/_events.py#L424-L426
         img_timeout = discord.utils.format_dt(
@@ -237,7 +232,7 @@ class WhosThatPokemon(commands.Cog):
         revealed = await self.generate_image(f"{poke_id:>03}", shiny=is_shiny, hide=False)
         revealed_img = File(revealed, "whosthatpokemon.png")
 
-        view = WhosThatPokemonView(self.bot, eligible_names)
+        view = WhosThatPokemonView(self.bot, eligible_names, is_shiny)
         view.message = await ctx.send(
             f"**¡¿Cuál es este Pokémon?!**\nNecesito una respuesta válida en menos de {img_timeout}.",
             file=File(temp, "guessthatpokemon.png"),
