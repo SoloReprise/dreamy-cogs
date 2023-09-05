@@ -257,9 +257,6 @@ class WhosThatPokemon(commands.Cog):
             revealed = await self.generate_image(f"{poke_id:>03}", shiny=is_shiny, hide=False)
             english_name = filtered_names_es[0] if filtered_names_es else (filtered_names_en[0] if filtered_names_en else "Unknown")
 
-        if revealed is None:
-            await ctx.send("Sorry, there was an error retrieving the Pokémon image.")
-            return
         revealed_img = File(revealed, "whosthatpokemon.png")
 
         view = WhosThatPokemonView(self.bot, eligible_names, is_shiny, english_name)
