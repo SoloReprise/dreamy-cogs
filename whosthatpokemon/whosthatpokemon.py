@@ -221,7 +221,7 @@ class WhosThatPokemon(commands.Cog):
             if generation is None:
                 poke_id = randint(1, 1010)
             else:
-                poke_id = generation.value
+                poke_id = generation
             temp = await self.generate_image(f"{poke_id:>03}", is_shiny, hide=True)
 
         if temp is None:
