@@ -208,10 +208,12 @@ class WhosThatPokemon(commands.Cog):
 
         await ctx.typing()
 
-        poke_id = generation or randint(1, 898)
+        poke_id = generation or randint(1, 1010)
+        is_shiny = True if randint(1, 50) == 1 else False
+        view.is_shiny = is_shiny
         if_guessed_right = False
 
-        temp = await self.generate_image(f"{poke_id:>03}", hide=True)
+        temp = await self.generate_image(f"{poke_id:>03}", shiny=is_shiny, hide=True)
         if temp is None:
             return await ctx.send("Failed to generate whosthatpokemon card image.")
 
@@ -231,7 +233,7 @@ class WhosThatPokemon(commands.Cog):
 
         english_name = filtered_names_es[0] if filtered_names_es else (filtered_names_en[0] if filtered_names_en else "Unknown")
 
-        revealed = await self.generate_image(f"{poke_id:>03}", hide=False)
+        revealed = await self.generate_image(f"{poke_id:>03}", shiny=is_shiny, hide=False)
         revealed_img = File(revealed, "whosthatpokemon.png")
 
         view = WhosThatPokemonView(self.bot, eligible_names)
