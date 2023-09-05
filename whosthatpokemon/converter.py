@@ -12,7 +12,11 @@ class Generation(commands.Converter):
             raise commands.BadArgument("Only `gen1` to `gen8`, `arceus`, and `gen9` values are allowed.")
         
         if argument.lower() == "gen1":
-            return randint(1, 151)
+            # Generate a random ID between 1 and 151, excluding Ditto (ID 132)
+            poke_id = randint(1, 151)
+            while poke_id == 132:
+                poke_id = randint(1, 151)
+            return poke_id
         elif argument.lower() == "gen2":
             return randint(152, 251)
         elif argument.lower() == "gen3":
