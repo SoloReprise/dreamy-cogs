@@ -187,7 +187,7 @@ class WhosThatPokemon(commands.Cog):
         await self.config.user(ctx.author).usage_count.set(usage_count + 1)
 
         # Notify the user about how many uses they have left
-        remaining_uses = 5 - (usage_count + 1)
+        remaining_uses = 10 - (usage_count + 1)
         await ctx.send(f"{ctx.author.mention} ¡Tienes {remaining_uses} usos restantes hoy!", delete_after=7)
                 
         # Now use the function to mention these roles
