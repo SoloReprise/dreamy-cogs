@@ -238,9 +238,11 @@ class WhosThatPokemon(commands.Cog):
         else:
             species_data = await self.get_data(f"{API_URL}/pokemon-species/{poke_id}")
         if species_data.get("http_code"):
-            await ctx.send("Failed to get species data from PokeAPI.")  # Debugging message
+            debug_message = "Failed to get species data from PokeAPI."
+            await ctx.send(debug_message)
             return await ctx.send("Failed to get species data from PokeAPI.")
-        await ctx.send("Species Data:", species_data)  # Debugging message
+        debug_message = f"Species Data: {species_data}"  # Construct the debug message
+        await ctx.send(debug_message)  # Send the debug message
         names_data = species_data.get("names", [{}])
         eligible_names = [x["name"].lower() for x in names_data]
         # Get name in Spanish or, if not available, in English
