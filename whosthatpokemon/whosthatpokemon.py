@@ -370,14 +370,28 @@ class WhosThatPokemon(commands.Cog):
             await self.config.user_from_id(user_id).usage_count.set(0)
         
         await ctx.send("Todos los usos del comando wtp han sido reiniciados.")
-    async def generate_image(self, poke_id: str, *, hide: bool) -> Optional[BytesIO]:
-        base_image = Image.open(bundled_data_path(self) / "template.webp").convert(
-            "RGBA"
-        )
+        
+    async def generate_image(self, poke_id: str, shiny: bool, *, hide: bool) -> Optional[BytesIO]:
+        # Fetch pokemon data from the API
+        response = await self.session.get(f"https://pokeapi.co/api/v2/pokemon/{poke_id}")
+        if response.status != 200:
+            return None
+        pkmn_data = await response.json()
+        
+        # Determine the artwork URL based on whether shiny is True or False
+        if shiny:
+            base_url = pkmn_data.get('sprites', {}).get('other', {}).get('official-artwork', {}).get('front_shiny')
+            if not base_url:
+                base_url = pkmn_data['sprites']['other']['official-artwork']['front_default']
+        else:
+            base_url = pkmn_data['sprites']['other']['official-artwork']['front_default']
+
+        if base_url is None:
+            return None
+            
+        base_image = Image.open(bundled_data_path(self) / "template.webp").convert("RGBA")
         bg_width, bg_height = base_image.size
-        base_url = (
-            f"https://assets.pokemon.com/assets/cms2/img/pokedex/full/{poke_id}.png"
-        )
+        
         try:
             async with self.session.get(base_url) as response:
                 if response.status != 200:
@@ -389,17 +403,15 @@ class WhosThatPokemon(commands.Cog):
         pbytes = BytesIO(data)
         poke_image = Image.open(pbytes)
         poke_width, poke_height = poke_image.size
-        poke_image_resized = poke_image.resize(
-            (int(poke_width * 1.6), int(poke_height * 1.6))
-        )
+        poke_image_resized = poke_image.resize((int(poke_width * 1.6), int(poke_height * 1.6)))
 
         if hide:
-            p_load = poke_image_resized.load()  # type: ignore
+            p_load = poke_image_resized.load()
             for y in range(poke_image_resized.size[1]):
                 for x in range(poke_image_resized.size[0]):
-                    if p_load[x, y] == (0, 0, 0, 0):  # type: ignore
+                    if p_load[x, y] == (0, 0, 0, 0):
                         continue
-                    p_load[x, y] = (1, 1, 1)  # type: ignore
+                    p_load[x, y] = (1, 1, 1)
 
         paste_w = int((bg_width - poke_width) / 10)
         paste_h = int((bg_height - poke_height) / 4)
@@ -413,7 +425,7 @@ class WhosThatPokemon(commands.Cog):
         base_image.close()
         poke_image.close()
         return temp
-
+    
 ## WTPADMINTEST
     @commands.command(name="wtpadmin", hidden=True)
     @commands.has_permissions(administrator=True)
