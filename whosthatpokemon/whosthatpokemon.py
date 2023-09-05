@@ -110,49 +110,6 @@ class WhosThatPokemon(commands.Cog):
         except asyncio.TimeoutError:
             return {"http_code": 408}
 
-    async def generate_image(self, poke_id: str, *, hide: bool) -> Optional[BytesIO]:
-        base_image = Image.open(bundled_data_path(self) / "template.webp").convert(
-            "RGBA"
-        )
-        bg_width, bg_height = base_image.size
-        base_url = (
-            f"https://assets.pokemon.com/assets/cms2/img/pokedex/full/{poke_id}.png"
-        )
-        try:
-            async with self.session.get(base_url) as response:
-                if response.status != 200:
-                    return None
-                data = await response.read()
-        except asyncio.TimeoutError:
-            return None
-
-        pbytes = BytesIO(data)
-        poke_image = Image.open(pbytes)
-        poke_width, poke_height = poke_image.size
-        poke_image_resized = poke_image.resize(
-            (int(poke_width * 1.6), int(poke_height * 1.6))
-        )
-
-        if hide:
-            p_load = poke_image_resized.load()  # type: ignore
-            for y in range(poke_image_resized.size[1]):
-                for x in range(poke_image_resized.size[0]):
-                    if p_load[x, y] == (0, 0, 0, 0):  # type: ignore
-                        continue
-                    p_load[x, y] = (1, 1, 1)  # type: ignore
-
-        paste_w = int((bg_width - poke_width) / 10)
-        paste_h = int((bg_height - poke_height) / 4)
-
-        base_image.paste(poke_image_resized, (paste_w, paste_h), poke_image_resized)
-
-        temp = BytesIO()
-        base_image.save(temp, "png")
-        temp.seek(0)
-        pbytes.close()
-        base_image.close()
-        poke_image.close()
-        return temp
 
     # _____ ________  ______  ___  ___   _   _______  _____
     # /  __ \  _  |  \/  ||  \/  | / _ \ | \ | |  _  \/  ___|
@@ -413,3 +370,106 @@ class WhosThatPokemon(commands.Cog):
             await self.config.user_from_id(user_id).usage_count.set(0)
         
         await ctx.send("Todos los usos del comando wtp han sido reiniciados.")
+    async def generate_image(self, poke_id: str, *, hide: bool) -> Optional[BytesIO]:
+        base_image = Image.open(bundled_data_path(self) / "template.webp").convert(
+            "RGBA"
+        )
+        bg_width, bg_height = base_image.size
+        base_url = (
+            f"https://assets.pokemon.com/assets/cms2/img/pokedex/full/{poke_id}.png"
+        )
+        try:
+            async with self.session.get(base_url) as response:
+                if response.status != 200:
+                    return None
+                data = await response.read()
+        except asyncio.TimeoutError:
+            return None
+
+        pbytes = BytesIO(data)
+        poke_image = Image.open(pbytes)
+        poke_width, poke_height = poke_image.size
+        poke_image_resized = poke_image.resize(
+            (int(poke_width * 1.6), int(poke_height * 1.6))
+        )
+
+        if hide:
+            p_load = poke_image_resized.load()  # type: ignore
+            for y in range(poke_image_resized.size[1]):
+                for x in range(poke_image_resized.size[0]):
+                    if p_load[x, y] == (0, 0, 0, 0):  # type: ignore
+                        continue
+                    p_load[x, y] = (1, 1, 1)  # type: ignore
+
+        paste_w = int((bg_width - poke_width) / 10)
+        paste_h = int((bg_height - poke_height) / 4)
+
+        base_image.paste(poke_image_resized, (paste_w, paste_h), poke_image_resized)
+
+        temp = BytesIO()
+        base_image.save(temp, "png")
+        temp.seek(0)
+        pbytes.close()
+        base_image.close()
+        poke_image.close()
+        return temp
+
+## WTPADMINTEST
+    @commands.command(name="wtpadmin", hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def whosthatpokemon_admin(self, ctx: commands.Context, poke_id: str, *, hide: bool = False):
+        """Admin version of the WhosThatPokemon command."""
+        temp = await self.generate_image_new(poke_id, hide=hide)
+        if temp is None:
+            return await ctx.send("Failed to generate new WhosThatPokemon card image.")
+        
+        await ctx.send(file=File(temp, "new_whosthatpokemon.png"))
+
+    async def generate_image_new(self, poke_id: str, *, hide: bool) -> Optional[BytesIO]:
+        # Fetch pokemon data from the API
+        response = await self.session.get(f"https://pokeapi.co/api/v2/pokemon/{poke_id}")
+        if response.status != 200:
+            return None
+        pkmn_data = await response.json()
+        
+        # Get the official artwork URL
+        base_url = pkmn_data['sprites']['other']['official-artwork']['front_default']
+        if base_url is None:
+            return None
+        
+        base_image = Image.open(bundled_data_path(self) / "template.webp").convert("RGBA")
+        bg_width, bg_height = base_image.size
+        
+        try:
+            async with self.session.get(base_url) as response:
+                if response.status != 200:
+                    return None
+                data = await response.read()
+        except asyncio.TimeoutError:
+            return None
+
+        pbytes = BytesIO(data)
+        poke_image = Image.open(pbytes)
+        poke_width, poke_height = poke_image.size
+        poke_image_resized = poke_image.resize((int(poke_width * 1.6), int(poke_height * 1.6)))
+
+        if hide:
+            p_load = poke_image_resized.load()
+            for y in range(poke_image_resized.size[1]):
+                for x in range(poke_image_resized.size[0]):
+                    if p_load[x, y] == (0, 0, 0, 0):
+                        continue
+                    p_load[x, y] = (1, 1, 1)
+
+        paste_w = int((bg_width - poke_width) / 10)
+        paste_h = int((bg_height - poke_height) / 4)
+
+        base_image.paste(poke_image_resized, (paste_w, paste_h), poke_image_resized)
+
+        temp = BytesIO()
+        base_image.save(temp, "png")
+        temp.seek(0)
+        pbytes.close()
+        base_image.close()
+        poke_image.close()
+        return temp
