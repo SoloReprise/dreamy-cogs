@@ -24,9 +24,10 @@ class WhosThatPokemonModal(discord.ui.Modal, title="Whos That Pokémon?"):
 
 #MewtwoWars, bot
 class WhosThatPokemonView(discord.ui.View):
-    def __init__(self, bot, eligible_names: List[Any]) -> None:
+    def __init__(self, bot, eligible_names: List[Any], is_shiny: bool) -> None:
         self.bot = bot
         self.eligible_names = eligible_names
+        self.is_shiny = is_shiny
         self.winner = None
         super().__init__(timeout=300.0)
 
