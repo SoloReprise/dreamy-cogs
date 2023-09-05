@@ -206,15 +206,17 @@ class WhosThatPokemon(commands.Cog):
         await ctx.typing()
 
         is_ditto_game = random.randint(1, 1) == 1
+        is_ditto_disguised = False  # Initialize to False
         is_shiny = random.randint(1, 1) == 1
 
         # Choose if Ditto will appear without disguise or disguised as another Pokémon.
         if is_ditto_game:
             disguise_poke_id = randint(1, 1010) if not generation else generation
-            if disguise_poke_id == 132:  # 132 is Ditto's ID
-                is_ditto_game = False  # We just show Ditto without any disguise
+            if disguise_poke_id == 132:
+                is_ditto_game = False
                 poke_id = 132
             else:
+                is_ditto_disguised = True  # Set to True when Ditto is disguised
                 poke_id = disguise_poke_id
                 temp = await self.generate_image(f"{disguise_poke_id:>03}", is_shiny, hide=True)
         else:
@@ -245,16 +247,20 @@ class WhosThatPokemon(commands.Cog):
 
         # Update revealing image generation when it's a Ditto game
         if is_ditto_game:
-            revealed = await self.generate_image(f"132:>03", shiny=is_shiny, hide=False)  # Ditto's ID is 132
-            english_name = "Ditto"
+            if is_ditto_disguised:  # You need to set this variable when determining if Ditto is disguised or not
+                revealed = await self.generate_image(f"132:>03", shiny=is_shiny, hide=False)  # Ditto's ID is 132
+                english_name = "Ditto"
+            else:
+                revealed = await self.generate_image(f"{disguise_poke_id:>03}", shiny=is_shiny, hide=False)
+                # Set english_name to the name of the disguised Pokémon
         else:
             revealed = await self.generate_image(f"{poke_id:>03}", shiny=is_shiny, hide=False)
             english_name = filtered_names_es[0] if filtered_names_es else (filtered_names_en[0] if filtered_names_en else "Unknown")
 
         if revealed is None:
             await ctx.send("Sorry, there was an error retrieving the Pokémon image.")
-        else:
-            revealed_img = File(revealed, "whosthatpokemon.png")
+            return
+        revealed_img = File(revealed, "whosthatpokemon.png")
 
         view = WhosThatPokemonView(self.bot, eligible_names, is_shiny, english_name)
         view.message = await ctx.send(
