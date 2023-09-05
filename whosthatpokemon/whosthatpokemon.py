@@ -213,6 +213,7 @@ class WhosThatPokemon(commands.Cog):
             if disguise_poke_id == 132:
                 is_ditto_disguised = False  # Ditto is not disguised
                 poke_id = 132
+                temp = await self.generate_image(f"{poke_id:>03}", is_shiny, hide=True)  # Add this line
             else:
                 is_ditto_disguised = True  # Ditto is disguised
                 poke_id = disguise_poke_id
@@ -250,10 +251,8 @@ class WhosThatPokemon(commands.Cog):
         if is_ditto_game:
             if is_ditto_disguised:
                 revealed = await self.generate_image("132", shiny=is_shiny, hide=False)  # Show Ditto without disguise
-                english_name = "Ditto"
             else:
-                revealed = await self.generate_image(f"{disguise_poke_id:>03}", shiny=is_shiny, hide=False)
-                english_name = filtered_names_es[0] if filtered_names_es else (filtered_names_en[0] if filtered_names_en else "Unknown")
+                revealed = await self.generate_image(f"{poke_id:>03}", shiny=is_shiny, hide=False)  # Add this line
         else:
             revealed = await self.generate_image(f"{poke_id:>03}", shiny=is_shiny, hide=False)
             english_name = filtered_names_es[0] if filtered_names_es else (filtered_names_en[0] if filtered_names_en else "Unknown")
