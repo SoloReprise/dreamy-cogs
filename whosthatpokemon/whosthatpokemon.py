@@ -227,6 +227,7 @@ class WhosThatPokemon(commands.Cog):
         img_timeout = discord.utils.format_dt(
             datetime.now(timezone.utc) + timedelta(minutes=5), "R"
         )
+        eligible_names = []
         if is_ditto_game:
             species_data = await self.get_data(f"{API_URL}/pokemon-species/132")  # 132 is Ditto's ID
             eligible_names.append("ditto")
