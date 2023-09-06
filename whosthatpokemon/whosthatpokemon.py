@@ -29,7 +29,8 @@ from datetime import datetime, timedelta, timezone, time
 from io import BytesIO
 import random
 from random import randint
-from typing import Any, Dict, Final, List, Optional
+from typing import Any, Dict, Final, List, Optional, Union
+
 
 import aiohttp
 import discord
@@ -406,23 +407,30 @@ class WhosThatPokemon(commands.Cog):
 
     @commands.command(name="wtpusesadd")
     @commands.is_owner()
-    async def add_wtp_uses(self, ctx: commands.Context, user: discord.Member, extra_uses: int):
-        """Agrega usos extras al comando 'quién es ese Pokémon' a un usuario específico.
+    async def add_wtp_uses(self, ctx: commands.Context, target: Union[discord.Member, discord.Role], extra_uses: int):
+        """Agrega usos extras al comando 'quién es ese Pokémon' a un usuario o rol específico.
 
         Parámetros:
-        - user: El usuario al que deseas otorgar usos extras.
+        - target: El usuario o rol al que deseas otorgar usos extras.
         - extra_uses: La cantidad de usos que quieres agregar.
         """
 
         if extra_uses <= 0:
             return await ctx.send("Por favor, proporciona un número positivo para los usos extra.")
 
-        current_uses = await self.config.user(user).usage_count()
-        new_uses = max(0, current_uses - extra_uses)  # Reducir del conteo usado efectivamente les da usos extra
+        targets = []
 
-        await self.config.user(user).usage_count.set(new_uses)
+        if isinstance(target, discord.Member):
+            targets.append(target)
+        elif isinstance(target, discord.Role):
+            targets.extend(target.members)
 
-        await ctx.send(f"Se han agregado exitosamente {extra_uses} usos extra a {user.name}. Ahora efectivamente tiene {10 - new_uses} usos totales para hoy.")
+        for member in targets:
+            current_uses = await self.config.user(member).usage_count()
+            new_uses = max(0, current_uses - extra_uses)  # Reducir del conteo usado efectivamente les da usos extra
+            await self.config.user(member).usage_count.set(new_uses)
+
+        await ctx.send(f"Se han agregado exitosamente {extra_uses} usos extra a {target.name}. Ahora efectivamente tienen {10 - new_uses} usos totales para hoy.")
 
     @commands.command(name="wtpusesleft")
     @commands.cooldown(1, 5, commands.BucketType.user)
