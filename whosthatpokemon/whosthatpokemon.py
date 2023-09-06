@@ -407,35 +407,35 @@ class WhosThatPokemon(commands.Cog):
     @commands.command(name="wtpusesadd")
     @commands.is_owner()
     async def add_wtp_uses(self, ctx: commands.Context, user: discord.Member, extra_uses: int):
-        """Adds extra uses for the who's that pokemon command to a specific user.
+        """Agrega usos extras al comando 'quién es ese Pokémon' a un usuario específico.
 
-        Parameters:
-        - user: The user you want to grant extra uses to.
-        - extra_uses: The number of uses you want to add.
+        Parámetros:
+        - user: El usuario al que deseas otorgar usos extras.
+        - extra_uses: La cantidad de usos que quieres agregar.
         """
 
         if extra_uses <= 0:
-            return await ctx.send("Please provide a positive number for extra uses.")
+            return await ctx.send("Por favor, proporciona un número positivo para los usos extra.")
 
         current_uses = await self.config.user(user).usage_count()
-        new_uses = max(0, current_uses - extra_uses)  # Reducing from the used count effectively gives them extra uses
+        new_uses = max(0, current_uses - extra_uses)  # Reducir del conteo usado efectivamente les da usos extra
 
         await self.config.user(user).usage_count.set(new_uses)
 
-        await ctx.send(f"Successfully added {extra_uses} extra uses to {user.name}. They now effectively have {10 - new_uses} total uses for today.")
+        await ctx.send(f"Se han agregado exitosamente {extra_uses} usos extra a {user.name}. Ahora efectivamente tiene {10 - new_uses} usos totales para hoy.")
 
     @commands.command(name="wtpusesleft")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def wtp_uses_left(self, ctx: commands.Context):
-        """Check how many uses of the `whosthatpokemon` command you have left for today."""
-        
+        """Verifica cuántos usos del comando 'quién es ese Pokémon' te quedan para hoy."""
+
         usage_count = await self.config.user(ctx.author).usage_count() or 0
         remaining_uses = 10 - usage_count
-        
+
         if remaining_uses <= 0:
-            await ctx.send(f"{ctx.author.mention}, you have used up all your attempts for today!")
+            await ctx.send(f"{ctx.author.mention}, ¡Has agotado todos tus intentos para hoy!")
         else:
-            await ctx.send(f"{ctx.author.mention}, you have {remaining_uses} uses left for today.")
+            await ctx.send(f"{ctx.author.mention}, te quedan {remaining_uses} usos para hoy.")
         
     async def generate_image(self, poke_id: str, shiny: bool, *, hide: bool) -> Optional[BytesIO]:
         # Fetch pokemon data from the API
