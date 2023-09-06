@@ -87,7 +87,7 @@ class MewtwoWars(commands.Cog):
                 team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
                 table.append([f"# {idx + 1}", f"{user.display_name} ({team})", f"{points} puntos"])
             else:
-                table.append([f"# {idx + 1}-200", "Unknown", f"{points} puntos"])
+                table.append([f"# {idx + 1}", "Unknown", f"{points} puntos"])
 
         # Fetch the team points from Config
         team_points = await self.config.guild(ctx.guild).team_points()
