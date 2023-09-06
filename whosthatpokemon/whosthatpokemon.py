@@ -423,6 +423,19 @@ class WhosThatPokemon(commands.Cog):
         await self.config.user(user).usage_count.set(new_uses)
 
         await ctx.send(f"Successfully added {extra_uses} extra uses to {user.name}. They now effectively have {10 - new_uses} total uses for today.")
+
+    @commands.command(name="wtpusesleft")
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def wtp_uses_left(self, ctx: commands.Context):
+        """Check how many uses of the `whosthatpokemon` command you have left for today."""
+        
+        usage_count = await self.config.user(ctx.author).usage_count() or 0
+        remaining_uses = 10 - usage_count
+        
+        if remaining_uses <= 0:
+            await ctx.send(f"{ctx.author.mention}, you have used up all your attempts for today!")
+        else:
+            await ctx.send(f"{ctx.author.mention}, you have {remaining_uses} uses left for today.")
         
     async def generate_image(self, poke_id: str, shiny: bool, *, hide: bool) -> Optional[BytesIO]:
         # Fetch pokemon data from the API
