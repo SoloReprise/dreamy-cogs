@@ -404,21 +404,18 @@ class WhosThatPokemon(commands.Cog):
         
         await ctx.send("Todos los usos del comando wtp han sido reiniciados.")
 
-    @commands.command(name="wtpadduses")
+    @commands.command(name="addwtpuses")
     @commands.is_owner()
-    async def add_uses(self, ctx: commands.Context, target: discord.Member, uses_to_add: int):
-        """
-        Añade usos al contador del comando wtp para un usuario específico.
-        """
+    async def add_uses(self, ctx: commands.Context, user: discord.User, num_of_uses: int):
+        """Añade usos al comando wtp a un usuario especificado."""
         
-        # Get the current usage_count for the user
-        current_uses = await self.config.user(target).usage_count()
-
-        # Add the specified amount to the current uses
-        new_uses = current_uses + uses_to_add
-
-        # Set the new count for the user
-        await self.config.user(target).usage_count.set(new_uses)
+        # Fetch the current usage_count of the user
+        current_uses = await self.config.user(user).usage_count() or 0
+        
+        # Add the provided num_of_uses to the user's current uses
+        await self.config.user(user).usage_count.set(current_uses + num_of_uses)
+        
+        await ctx.send(f"Se han añadido {num_of_uses} usos al usuario {user.mention}. Ahora tiene {current_uses + num_of_uses} usos.")
 
         await ctx.send(f"Se han añadido {uses_to_add} usos a {target.display_name}. Ahora tiene un total de {new_uses} usos.")
         
