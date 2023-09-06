@@ -403,6 +403,24 @@ class WhosThatPokemon(commands.Cog):
             await self.config.user_from_id(user_id).usage_count.set(0)
         
         await ctx.send("Todos los usos del comando wtp han sido reiniciados.")
+
+    @commands.command(name="wtpadduses")
+    @commands.is_owner()
+    async def add_uses(self, ctx: commands.Context, target: discord.Member, uses_to_add: int):
+        """
+        Añade usos al contador del comando wtp para un usuario específico.
+        """
+        
+        # Get the current usage_count for the user
+        current_uses = await self.config.user(target).usage_count()
+
+        # Add the specified amount to the current uses
+        new_uses = current_uses + uses_to_add
+
+        # Set the new count for the user
+        await self.config.user(target).usage_count.set(new_uses)
+
+        await ctx.send(f"Se han añadido {uses_to_add} usos a {target.display_name}. Ahora tiene un total de {new_uses} usos.")
         
     async def generate_image(self, poke_id: str, shiny: bool, *, hide: bool) -> Optional[BytesIO]:
         # Fetch pokemon data from the API
