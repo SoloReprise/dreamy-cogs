@@ -405,6 +405,19 @@ class WhosThatPokemon(commands.Cog):
         
         await ctx.send("Todos los usos del comando wtp han sido reiniciados.")
 
+    @commands.command(name="checkuses")
+    @commands.is_owner()
+    async def check_user_uses(self, ctx: commands.Context, user: discord.Member):
+        """Check how many uses of the `whosthatpokemon` command a specific user has left for today."""
+        
+        usage_count = await self.config.user(user).usage_count() or 0
+        remaining_uses = 10 - usage_count
+
+        if remaining_uses <= 0:
+            await ctx.send(f"{user.name} ha agotado todos sus intentos por hoy.")
+        else:
+            await ctx.send(f"{user.name} tiene {remaining_uses} usos restantes para hoy.")
+
     @commands.command(name="wtpusesadd")
     @commands.is_owner()
     async def add_wtp_uses(self, ctx: commands.Context, target: Union[discord.Member, discord.Role], extra_uses: int):
