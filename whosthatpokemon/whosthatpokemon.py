@@ -430,7 +430,10 @@ class WhosThatPokemon(commands.Cog):
             new_uses = max(0, current_uses - extra_uses)  # Reducir del conteo usado efectivamente les da usos extra
             await self.config.user(member).usage_count.set(new_uses)
 
-        await ctx.send(f"Se han agregado exitosamente {extra_uses} usos extra a {target.name}. Ahora efectivamente tienen {10 - new_uses} usos totales para hoy.")
+        if isinstance(target, discord.Member):
+            await ctx.send(f"Se han agregado exitosamente {extra_uses} usos extra a {target.name}. Ahora efectivamente tiene {10 - new_uses} usos totales para hoy.")
+        elif isinstance(target, discord.Role):
+            await ctx.send(f"Se han agregado exitosamente {extra_uses} usos extra a todos los miembros del rol {target.name}.")
 
     @commands.command(name="wtpusesleft")
     @commands.cooldown(1, 5, commands.BucketType.user)
