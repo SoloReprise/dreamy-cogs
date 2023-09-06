@@ -73,14 +73,7 @@ class WhosThatPokemonView(discord.ui.View):
             button.label = "Pokémon acertado"
             button.style = discord.ButtonStyle.success
             await self.message.edit(view=self)
-
-            # Add points to the winner using the MewtwoWars cog
-            mewtwo_cog = self.bot.get_cog('MewtwoWars') # Assuming the cog's name is 'MewtwoWars'
-            if mewtwo_cog:
-                guild = interaction.guild
-                points = 5 if self.is_shiny else 1  # Corrected here
-                await mewtwo_cog.add_points(guild, self.winner, points)
-                
+              
             # Add points to the winner using the MewtwoWars cog
             mewtwo_cog = self.bot.get_cog('MewtwoWars') # Assuming the cog's name is 'MewtwoWars'
             if mewtwo_cog:
