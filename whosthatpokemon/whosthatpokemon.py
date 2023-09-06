@@ -404,20 +404,25 @@ class WhosThatPokemon(commands.Cog):
         
         await ctx.send("Todos los usos del comando wtp han sido reiniciados.")
 
-    @commands.command(name="addwtpuses")
+    @commands.command(name="wtpusesadd")
     @commands.is_owner()
-    async def add_uses(self, ctx: commands.Context, user: discord.User, num_of_uses: int):
-        """Añade usos al comando wtp a un usuario especificado."""
-        
-        # Fetch the current usage_count of the user
-        current_uses = await self.config.user(user).usage_count() or 0
-        
-        # Add the provided num_of_uses to the user's current uses
-        await self.config.user(user).usage_count.set(current_uses + num_of_uses)
-        
-        await ctx.send(f"Se han añadido {num_of_uses} usos al usuario {user.mention}. Ahora tiene {current_uses + num_of_uses} usos.")
+    async def add_wtp_uses(self, ctx: commands.Context, user: discord.Member, extra_uses: int):
+        """Adds extra uses for the who's that pokemon command to a specific user.
 
-        await ctx.send(f"Se han añadido {uses_to_add} usos a {target.display_name}. Ahora tiene un total de {new_uses} usos.")
+        Parameters:
+        - user: The user you want to grant extra uses to.
+        - extra_uses: The number of uses you want to add.
+        """
+
+        if extra_uses <= 0:
+            return await ctx.send("Please provide a positive number for extra uses.")
+
+        current_uses = await self.config.user(user).usage_count()
+        new_uses = max(0, current_uses - extra_uses)  # Reducing from the used count effectively gives them extra uses
+
+        await self.config.user(user).usage_count.set(new_uses)
+
+        await ctx.send(f"Successfully added {extra_uses} extra uses to {user.name}. They now effectively have {10 - new_uses} total uses for today.")
         
     async def generate_image(self, poke_id: str, shiny: bool, *, hide: bool) -> Optional[BytesIO]:
         # Fetch pokemon data from the API
