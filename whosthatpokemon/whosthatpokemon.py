@@ -79,7 +79,7 @@ class WhosThatPokemon(commands.Cog):
         }
         self.config.register_user(**default_user)
         self.reset_usage_counts.start()
-
+        
     async def mention_role_temporarily(self, ctx, role_id: int):
         role = ctx.guild.get_role(role_id)  # Fetch the role using role_id
         if not role:
@@ -120,6 +120,7 @@ class WhosThatPokemon(commands.Cog):
     # | \__/\ \_/ / |  | || |  | || | | || |\  | |/ / /\__/ /
     # \____/\___/\_|  |_/\_|  |_/\_| |_/\_| \_/___/  \____/
     @commands.command(name="wtpversion", hidden=True)
+    @commands.is_owner()
     @commands.bot_has_permissions(embed_links=True)
     async def whosthatpokemon_version(self, ctx: commands.Context) -> None:
         """Shows the version of the cog"""
@@ -156,7 +157,7 @@ class WhosThatPokemon(commands.Cog):
     @commands.cooldown(1, 30, commands.BucketType.user)
     @commands.max_concurrency(1, commands.BucketType.channel)
     @commands.bot_has_permissions(attach_files=True, embed_links=True)
-    @commands.mod_or_permissions(administrator=True)
+    @commands.is_owner()
     async def whosthatpokemon(self, ctx: commands.Context, generation: Generation = None) -> None:
         """Guess Who's that Pokémon in 30 seconds!
 
