@@ -6,7 +6,7 @@ from tabulate import tabulate
 import json
 
 
-class RankingPaginator(discord.ui.View):
+class RankingView(discord.ui.View):
     def __init__(self, ctx, pages):
         super().__init__(timeout=180.0)
         self.ctx = ctx
@@ -25,9 +25,15 @@ class RankingPaginator(discord.ui.View):
             self.current_page += 1
             await interaction.response.edit_message(embed=self.pages[self.current_page])
 
-    async def start(self):
-        await self.ctx.send(embed=self.pages[self.current_page], view=self)
-        
+    async def on_error(
+        self,
+        interaction: discord.Interaction,
+        error: Exception,
+        item: discord.ui.Item,
+    ) -> None:
+        await interaction.response.send_message(f"An error occurred: {error}", ephemeral=True)
+        log.error("Error in RankingView: %s", error, exc_info=True)            
+
 class MewtwoWars(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -124,8 +130,8 @@ class MewtwoWars(commands.Cog):
 
             pages.append(embed)
 
-        paginator = RankingPaginator(ctx, pages)
-        await paginator.start()
+        view = RankingView(ctx, pages)
+        await ctx.send(embed=pages[0], view=view)
 
     @commands.command(name="mwreset")
     @commands.is_owner()  # Ensure only the bot owner can run this
