@@ -124,7 +124,7 @@ class MewtwoWars(commands.Cog):
 
             pages.append(embed)
 
-        paginator = self.RankingPaginator(ctx, pages)
+        paginator = RankingPaginator(ctx, pages)
         await paginator.start()
 
     @commands.command(name="mwreset")
