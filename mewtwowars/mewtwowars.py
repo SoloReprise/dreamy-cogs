@@ -83,16 +83,18 @@ class MewtwoWars(commands.Cog):
         user_points = await self.config.guild(ctx.guild).user_points()
 
         # Sort the users by their points in descending order
-        sorted_users = sorted(user_points.items(), key=lambda x: x[1], reverse=True)
+        filtered_users = {user_id: points for user_id, points in user_points.items() if points > 0}
+        sorted_users = sorted(filtered_users.items(), key=lambda x: x[1], reverse=True)
 
         start_index = page * ITEMS_PER_PAGE
         end_index = start_index + ITEMS_PER_PAGE
 
         for idx, (user_id, points) in enumerate(sorted_users[start_index:end_index]):
-            user = ctx.guild.get_member(int(user_id))  # Convert user_id from str to int
+            user = ctx.guild.get_member(int(user_id))
             if user:
                 team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
-                table.append([f"# {start_index + idx + 1}", f"{user.display_name} ({team})", f"{points} puntos"])
+                handle = f"{user.name}#{user.discriminator}"  # This gets the Discord handle
+                table.append([f"# {start_index + idx + 1}", f"{handle} ({team})", f"{points} puntos"])
             else:
                 table.append([f"# {start_index + idx + 1}", "Unknown", f"{points} puntos"])
 
