@@ -67,86 +67,64 @@ class MewtwoWars(commands.Cog):
     async def load_data(self):
         self.user_points = await self.config.guild(ctx.guild).user_points()
         self.team_points = await self.config.guild(ctx.guild).team_points()
-
-    class ReactionPaginator:
-
-        def __init__(self, ctx, data, page_size):
-            self.ctx = ctx
-            self.data = data
-            self.page_size = page_size
-            self.current_page = 0
-
-        async def display_page(self):
-            """Displays content for the current page."""
-            start_index = self.current_page * self.page_size
-            end_index = start_index + self.page_size
-
-            table = [["Ranking", "Usuario", "Puntos"]] + self.data[start_index:end_index]
-            table_str = tabulate(table, headers="firstrow", tablefmt="grid")
-
-            embed = discord.Embed(title="Clasificación Mewtwo Wars")
-            embed.description = f"```\n{table_str}\n```"
-            return await self.ctx.send(embed=embed)
-
-        async def run(self):
-            """Starts the paginator."""
-            message = await self.display_page()
-
-            await message.add_reaction("⬅️")
-            await message.add_reaction("➡️")
-
-            def check(reaction, user):
-                return user == self.ctx.author and str(reaction.emoji) in ["⬅️", "➡️"]
-
-            while True:
-                try:
-                    reaction, user = await self.ctx.bot.wait_for('reaction_add', timeout=60.0, check=check)
-
-                    if str(reaction.emoji) == "⬅️" and self.current_page > 0:
-                        self.current_page -= 1
-                    elif str(reaction.emoji) == "➡️" and (self.current_page + 1) < len(self.data) / self.page_size:
-                        self.current_page += 1
-
-                    await message.edit(embed=(await self.display_page()).embed)
-                    await message.remove_reaction(reaction, user)
-                except asyncio.TimeoutError:
-                    await message.clear_reactions()
-                    break
-
+            
     @commands.group(name="mwranking", invoke_without_command=True)
     async def mwranking(self, ctx):
         """Check the Mewtwo Wars ranking."""
         await self.display_ranking(ctx)
 
+    class RankingPaginator(discord.ui.View):
+        def __init__(self, ctx, pages):
+            super().__init__(timeout=180.0)
+            self.ctx = ctx
+            self.current_page = 0
+            self.pages = pages
+
+        @discord.ui.button(label="◀️", style=discord.ButtonStyle.secondary)
+        async def go_previous(self, button: discord.ui.Button, interaction: discord.Interaction):
+            if self.current_page > 0:
+                self.current_page -= 1
+                await interaction.response.edit_message(embed=self.pages[self.current_page])
+
+        @discord.ui.button(label="▶️", style=discord.ButtonStyle.secondary)
+        async def go_next(self, button: discord.ui.Button, interaction: discord.Interaction):
+            if self.current_page < len(self.pages) - 1:
+                self.current_page += 1
+                await interaction.response.edit_message(embed=self.pages[self.current_page])
+
+        async def start(self):
+            await self.ctx.send(embed=self.pages[self.current_page], view=self)
+
     async def display_ranking(self, ctx):
         table = [["Ranking", "Usuario", "Puntos"]]
-        
-        # Fetch the user points from the Config storage
         user_points = await self.config.guild(ctx.guild).user_points()
+        sorted_users = sorted(user_points.items(), key=lambda x: x[1], reverse=True)
+        
+        # Split users into chunks of 10 for pagination
+        chunks = [sorted_users[i:i + 10] for i in range(0, len(sorted_users), 10)]
+        
+        pages = []
+        for chunk in chunks:
+            table = [["Ranking", "Usuario", "Puntos"]]
+            for idx, (user_id, points) in enumerate(chunk, start=1):
+                user = ctx.guild.get_member(int(user_id))
+                if user:
+                    team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
+                    table.append([f"# {idx}", f"{user.display_name} ({team})", f"{points} puntos"])
+            
+            table_str = tabulate(table, headers="firstrow", tablefmt="grid")
+            embed = discord.Embed(title="Clasificación Mewtwo Wars")
+            embed.description = f"```\n{table_str}\n```"
+            
+            # Add the team points here if you want them to be displayed on every page
+            team_points = await self.config.guild(ctx.guild).team_points()
+            embed.add_field(name="Mewtwo X", value=f"{team_points['Mewtwo X']} puntos", inline=True)
+            embed.add_field(name="Mewtwo Y", value=f"{team_points['Mewtwo Y']} puntos", inline=True)
 
-        # Sort the users by their points in descending order
-        sorted_users = sorted(user_points.items(), key=lambda x: x[1], reverse=True)[:10]
-        for idx, (user_id, points) in enumerate(sorted_users):
-            user = ctx.guild.get_member(int(user_id))  # Convert user_id from str to int
-            if user:
-                team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
-                table.append([f"# {idx + 1}", f"{user.display_name} ({team})", f"{points} puntos"])
-            else:
-                table.append([f"# {idx + 1}", "Unknown", f"{points} puntos"])
+            pages.append(embed)
 
-        # Fetch the team points from Config
-        # Construct the data for the paginator
-        data = []
-        for idx, (user_id, points) in enumerate(sorted_users):
-            user = ctx.guild.get_member(int(user_id))
-            if user:
-                team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
-                data.append([f"# {idx + 1}", f"{user.display_name} ({team})", f"{points} puntos"])
-            else:
-                data.append([f"# {idx + 1}", "Unknown", f"{points} puntos"])
-
-        paginator = ReactionPaginator(ctx, data, page_size=10)
-        await paginator.run()
+        paginator = RankingPaginator(ctx, pages)
+        await paginator.start()
 
     @commands.command(name="mwreset")
     @commands.is_owner()  # Ensure only the bot owner can run this
