@@ -4,6 +4,9 @@ from redbot.core import Config, commands
 from collections import defaultdict
 from tabulate import tabulate
 import json
+import asyncio
+
+ITEMS_PER_PAGE = 10
 
 class MewtwoWars(commands.Cog):
     def __init__(self, bot):
@@ -71,23 +74,27 @@ class MewtwoWars(commands.Cog):
     @commands.group(name="mwranking", invoke_without_command=True)
     async def mwranking(self, ctx):
         """Check the Mewtwo Wars ranking."""
-        await self.display_ranking(ctx)
+        await self.display_ranking(ctx, 0)
 
-    async def display_ranking(self, ctx):
+    async def display_ranking(self, ctx, page):
         table = [["Ranking", "Usuario", "Puntos"]]
         
         # Fetch the user points from the Config storage
         user_points = await self.config.guild(ctx.guild).user_points()
 
         # Sort the users by their points in descending order
-        sorted_users = sorted(user_points.items(), key=lambda x: x[1], reverse=True)[:10]
-        for idx, (user_id, points) in enumerate(sorted_users):
+        sorted_users = sorted(user_points.items(), key=lambda x: x[1], reverse=True)
+
+        start_index = page * ITEMS_PER_PAGE
+        end_index = start_index + ITEMS_PER_PAGE
+
+        for idx, (user_id, points) in enumerate(sorted_users[start_index:end_index]):
             user = ctx.guild.get_member(int(user_id))  # Convert user_id from str to int
             if user:
                 team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
-                table.append([f"# {idx + 1}", f"{user.display_name} ({team})", f"{points} puntos"])
+                table.append([f"# {start_index + idx + 1}", f"{user.display_name} ({team})", f"{points} puntos"])
             else:
-                table.append([f"# {idx + 1}", "Unknown", f"{points} puntos"])
+                table.append([f"# {start_index + idx + 1}", "Unknown", f"{points} puntos"])
 
         # Fetch the team points from Config
         team_points = await self.config.guild(ctx.guild).team_points()
@@ -98,7 +105,34 @@ class MewtwoWars(commands.Cog):
         embed.add_field(name="Mewtwo X", value=f"{team_points['Mewtwo X']} puntos", inline=True)
         embed.add_field(name="Mewtwo Y", value=f"{team_points['Mewtwo Y']} puntos", inline=True)
         embed.description = f"```\n{table_str}\n```"
-        await ctx.send(embed=embed)
+        
+        msg = await ctx.send(embed=embed)
+        
+        # Add reaction controls for pagination if there are more pages to show
+        if page > 0:
+            await msg.add_reaction("⬅️")
+        if (page + 1) * ITEMS_PER_PAGE < len(sorted_users):
+            await msg.add_reaction("➡️")
+        
+        def check(reaction, user):
+            return user == ctx.author and str(reaction.emoji) in ["⬅️", "➡️"]
+
+        while True:
+            try:
+                reaction, user = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
+                
+                if str(reaction.emoji) == "⬅️" and page > 0:
+                    await msg.delete()  # delete the current message
+                    await self.display_ranking(ctx, page - 1)
+                    return
+                elif str(reaction.emoji) == "➡️" and (page + 1) * ITEMS_PER_PAGE < len(sorted_users):
+                    await msg.delete()  # delete the current message
+                    await self.display_ranking(ctx, page + 1)
+                    return
+                await msg.remove_reaction(reaction, user)
+            except asyncio.TimeoutError:
+                await msg.clear_reactions()
+                break
 
     @commands.command(name="mwreset")
     @commands.is_owner()  # Ensure only the bot owner can run this
