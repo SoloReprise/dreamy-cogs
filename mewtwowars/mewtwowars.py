@@ -105,19 +105,16 @@ class MewtwoWars(commands.Cog):
             for idx, (user_id, points) in enumerate(sorted_users[start_index:end_index]):
                 user = ctx.guild.get_member(int(user_id))
                 if user:
-                    team = "Mewtwo X" if any(role.id == 1147254156491509780 for role in user.roles) else "Mewtwo Y"
-                    handle = f"{user.name}#{user.discriminator}"
+                    team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
+                    handle = f"{user.name}"
                     table.append([f"# {start_index + idx + 1}", f"{handle} ({team})", f"{points} puntos"])
-                    
-                    # Update team points
-                    team_points[team] += points
 
             table_str = tabulate(table, headers="firstrow", tablefmt="grid")
 
             embed = discord.Embed(title="Clasificación Mewtwo Wars")
             embed.description = f"```\n{table_str}\n```"
 
-            # Include team points in the embed
+            # Include total team points in the embed
             for team, points in team_points.items():
                 embed.add_field(name=team, value=f"{points} puntos", inline=True)
 
