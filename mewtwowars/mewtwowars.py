@@ -5,6 +5,29 @@ from collections import defaultdict
 from tabulate import tabulate
 import json
 
+
+class RankingPaginator(discord.ui.View):
+    def __init__(self, ctx, pages):
+          super().__init__(timeout=180.0)
+          self.ctx = ctx
+          self.current_page = 0
+          self.pages = pages
+
+    @discord.ui.button(label="◀️", style=discord.ButtonStyle.secondary)
+    async def go_previous(self, button: discord.ui.Button, interaction: discord.Interaction):
+        if self.current_page > 0:
+            self.current_page -= 1
+            await interaction.response.edit_message(embed=self.pages[self.current_page])
+
+    @discord.ui.button(label="▶️", style=discord.ButtonStyle.secondary)
+    async def go_next(self, button: discord.ui.Button, interaction: discord.Interaction):
+        if self.current_page < len(self.pages) - 1:
+            self.current_page += 1
+            await interaction.response.edit_message(embed=self.pages[self.current_page])
+
+    async def start(self):
+        await self.ctx.send(embed=self.pages[self.current_page], view=self)
+
 class MewtwoWars(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -72,28 +95,6 @@ class MewtwoWars(commands.Cog):
     async def mwranking(self, ctx):
         """Check the Mewtwo Wars ranking."""
         await self.display_ranking(ctx)
-
-    class RankingPaginator(discord.ui.View):
-        def __init__(self, ctx, pages):
-            super().__init__(timeout=180.0)
-            self.ctx = ctx
-            self.current_page = 0
-            self.pages = pages
-
-        @discord.ui.button(label="◀️", style=discord.ButtonStyle.secondary)
-        async def go_previous(self, button: discord.ui.Button, interaction: discord.Interaction):
-            if self.current_page > 0:
-                self.current_page -= 1
-                await interaction.response.edit_message(embed=self.pages[self.current_page])
-
-        @discord.ui.button(label="▶️", style=discord.ButtonStyle.secondary)
-        async def go_next(self, button: discord.ui.Button, interaction: discord.Interaction):
-            if self.current_page < len(self.pages) - 1:
-                self.current_page += 1
-                await interaction.response.edit_message(embed=self.pages[self.current_page])
-
-        async def start(self):
-            await self.ctx.send(embed=self.pages[self.current_page], view=self)
 
     async def display_ranking(self, ctx):
         table = [["Ranking", "Usuario", "Puntos"]]
