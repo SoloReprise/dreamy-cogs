@@ -77,6 +77,9 @@ class MewtwoWars(commands.Cog):
         await self.display_ranking(ctx, 0)
 
     async def display_ranking(self, ctx, page=0):
+        # Fetch the user points from the Config storage
+        user_points = await self.config.guild(ctx.guild).user_points()
+
         table = [["Ranking", "Usuario", "Puntos"]]
         
         # Filter and sort users
