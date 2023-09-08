@@ -84,8 +84,13 @@ class MewtwoWars(commands.Cog):
         filtered_users = {user_id: points for user_id, points in user_points.items() if points > 0}
         sorted_users = sorted(filtered_users.items(), key=lambda x: x[1], reverse=True)
 
-        # Initialize team points
-        team_points = {"Mewtwo X": 0, "Mewtwo Y": 0}
+        # Fetch the team points
+        team_points = await self.config.guild(ctx.guild).team_points()
+
+        # Ensure both 'X' and 'Y' teams are present in the dictionary
+        for team in ["Mewtwo X", "Mewtwo Y"]:
+            if team not in team_points:
+                team_points[team] = 0
 
         table = [["Ranking", "Usuario", "Puntos"]]
         msg = None
