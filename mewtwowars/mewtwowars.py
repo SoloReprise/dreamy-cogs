@@ -5,35 +5,6 @@ from collections import defaultdict
 from tabulate import tabulate
 import json
 
-
-class RankingView(discord.ui.View):
-    def __init__(self, ctx, pages):
-        super().__init__(timeout=180.0)
-        self.ctx = ctx
-        self.current_page = 0
-        self.pages = pages
-
-    @discord.ui.button(label="◀️", style=discord.ButtonStyle.secondary)
-    async def go_previous(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if self.current_page > 0:
-            self.current_page -= 1
-            await interaction.message.edit(embed=self.pages[self.current_page])
-
-    @discord.ui.button(label="▶️", style=discord.ButtonStyle.secondary)
-    async def go_next(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if self.current_page < len(self.pages) - 1:
-            self.current_page += 1
-            await interaction.message.edit(embed=self.pages[self.current_page])
-                                        
-    async def on_error(
-        self,
-        interaction: discord.Interaction,
-        error: Exception,
-        item: discord.ui.Item,
-    ) -> None:
-        await interaction.response.send_message(f"An error occurred: {error}", ephemeral=True)
-        log.error("Error in RankingView: %s", error, exc_info=True
-                                  
 class MewtwoWars(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -104,34 +75,30 @@ class MewtwoWars(commands.Cog):
 
     async def display_ranking(self, ctx):
         table = [["Ranking", "Usuario", "Puntos"]]
+        
+        # Fetch the user points from the Config storage
         user_points = await self.config.guild(ctx.guild).user_points()
-        sorted_users = sorted(user_points.items(), key=lambda x: x[1], reverse=True)
-        
-        # Split users into chunks of 10 for pagination
-        chunks = [sorted_users[i:i + 10] for i in range(0, len(sorted_users), 10)]
-        
-        pages = []
-        for chunk in chunks:
-            table = [["Ranking", "Usuario", "Puntos"]]
-            for idx, (user_id, points) in enumerate(chunk, start=1):
-                user = ctx.guild.get_member(int(user_id))
-                if user:
-                    team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
-                    table.append([f"# {idx}", f"{user.display_name} ({team})", f"{points} puntos"])
-            
-            table_str = tabulate(table, headers="firstrow", tablefmt="grid")
-            embed = discord.Embed(title="Clasificación Mewtwo Wars")
-            embed.description = f"```\n{table_str}\n```"
-            
-            # Add the team points here if you want them to be displayed on every page
-            team_points = await self.config.guild(ctx.guild).team_points()
-            embed.add_field(name="Mewtwo X", value=f"{team_points['Mewtwo X']} puntos", inline=True)
-            embed.add_field(name="Mewtwo Y", value=f"{team_points['Mewtwo Y']} puntos", inline=True)
 
-            pages.append(embed)
+        # Sort the users by their points in descending order
+        sorted_users = sorted(user_points.items(), key=lambda x: x[1], reverse=True)[:10]
+        for idx, (user_id, points) in enumerate(sorted_users):
+            user = ctx.guild.get_member(int(user_id))  # Convert user_id from str to int
+            if user:
+                team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
+                table.append([f"# {idx + 1}", f"{user.display_name} ({team})", f"{points} puntos"])
+            else:
+                table.append([f"# {idx + 1}", "Unknown", f"{points} puntos"])
 
-        view = RankingView(ctx, pages)
-        await ctx.send(embed=pages[0], view=view)
+        # Fetch the team points from Config
+        team_points = await self.config.guild(ctx.guild).team_points()
+
+        table_str = tabulate(table, headers="firstrow", tablefmt="grid")
+
+        embed = discord.Embed(title="Clasificación Mewtwo Wars")
+        embed.add_field(name="Mewtwo X", value=f"{team_points['Mewtwo X']} puntos", inline=True)
+        embed.add_field(name="Mewtwo Y", value=f"{team_points['Mewtwo Y']} puntos", inline=True)
+        embed.description = f"```\n{table_str}\n```"
+        await ctx.send(embed=embed)
 
     @commands.command(name="mwreset")
     @commands.is_owner()  # Ensure only the bot owner can run this
