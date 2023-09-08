@@ -84,8 +84,10 @@ class MewtwoWars(commands.Cog):
         filtered_users = {user_id: points for user_id, points in user_points.items() if points > 0}
         sorted_users = sorted(filtered_users.items(), key=lambda x: x[1], reverse=True)
 
+        # Calculate team points
+        team_points = {"Mewtwo X": 0, "Mewtwo Y": 0}
+
         table = [["Ranking", "Usuario", "Puntos"]]
-        team_totals = {"X": 0, "Y": 0}  # Initialize team totals
         msg = None
 
         while True:  # This loop allows for moving back and forth between pages.
@@ -101,17 +103,18 @@ class MewtwoWars(commands.Cog):
                     team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
                     handle = f"{user.name}#{user.discriminator}"
                     table.append([f"# {start_index + idx + 1}", f"{handle} ({team})", f"{points} puntos"])
-                    # Update team totals
-                    team_totals[team] += points
-
-            # Add team totals to the table
-            table.append(["", "Total X", f"{team_totals['X']} puntos"])
-            table.append(["", "Total Y", f"{team_totals['Y']} puntos"])
+                    
+                    # Update team points
+                    team_points[team] += points
 
             table_str = tabulate(table, headers="firstrow", tablefmt="grid")
 
             embed = discord.Embed(title="Clasificación Mewtwo Wars")
             embed.description = f"```\n{table_str}\n```"
+
+            # Include team points in the embed
+            for team, points in team_points.items():
+                embed.add_field(name=team, value=f"{points} puntos", inline=True)
 
             # This check ensures that the reacting user is the one who invoked the command
             # and that they're reacting with the appropriate emoji.
@@ -120,7 +123,7 @@ class MewtwoWars(commands.Cog):
 
             if not msg:  # If the message isn't sent yet, send it.
                 msg = await ctx.send(embed=embed)
-            else:  # Otherwise, edit the existing message.
+            else:  # Otherwise edit the existing message.
                 await msg.edit(embed=embed)
 
             # Clear previous reactions and set up the new ones.
