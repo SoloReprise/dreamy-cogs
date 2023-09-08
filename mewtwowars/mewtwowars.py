@@ -32,8 +32,8 @@ class RankingView(discord.ui.View):
         item: discord.ui.Item,
     ) -> None:
         await interaction.response.send_message(f"An error occurred: {error}", ephemeral=True)
-        log.error("Error in RankingView: %s", error, exc_info=True)            
-                
+        log.error("Error in RankingView: %s", error, exc_info=True
+                                  
 class MewtwoWars(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
