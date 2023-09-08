@@ -67,6 +67,11 @@ class MewtwoWars(commands.Cog):
     async def load_data(self):
         self.user_points = await self.config.guild(ctx.guild).user_points()
         self.team_points = await self.config.guild(ctx.guild).team_points()
+            
+    @commands.group(name="mwranking", invoke_without_command=True)
+    async def mwranking(self, ctx):
+        """Check the Mewtwo Wars ranking."""
+        await self.display_ranking(ctx)
 
     class RankingPaginator(discord.ui.View):
         def __init__(self, ctx, pages):
@@ -74,11 +79,6 @@ class MewtwoWars(commands.Cog):
             self.ctx = ctx
             self.current_page = 0
             self.pages = pages
-             
-    @commands.group(name="mwranking", invoke_without_command=True)
-    async def mwranking(self, ctx):
-        """Check the Mewtwo Wars ranking."""
-        await self.display_ranking(ctx)
 
         @discord.ui.button(label="◀️", style=discord.ButtonStyle.secondary)
         async def go_previous(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -123,7 +123,7 @@ class MewtwoWars(commands.Cog):
 
             pages.append(embed)
 
-        paginator = RankingPaginator(ctx, pages)
+        paginator = self.RankingPaginator(ctx, pages)
         await paginator.start()
 
     @commands.command(name="mwreset")
