@@ -93,7 +93,7 @@ class MewtwoWars(commands.Cog):
             user = ctx.guild.get_member(int(user_id))
             if user:
                 team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
-                handle = f"{user.name}#{user.discriminator}"  # This gets the Discord handle
+                handle = f"{user.name}"  # This gets the Discord handle
                 table.append([f"# {start_index + idx + 1}", f"{handle} ({team})", f"{points} puntos"])
             else:
                 table.append([f"# {start_index + idx + 1}", "Unknown", f"{points} puntos"])
