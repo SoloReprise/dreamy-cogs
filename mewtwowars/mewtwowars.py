@@ -87,7 +87,7 @@ class MewtwoWars(commands.Cog):
         # Fetch the team points
         team_points = await self.config.guild(ctx.guild).team_points()
 
-        # Ensure both 'X' and 'Y' teams are present in the dictionary
+        # Ensure both 'Mewtwo X' and 'Mewtwo Y' teams are present in the dictionary
         for team in ["Mewtwo X", "Mewtwo Y"]:
             if team not in team_points:
                 team_points[team] = 0
@@ -105,7 +105,7 @@ class MewtwoWars(commands.Cog):
             for idx, (user_id, points) in enumerate(sorted_users[start_index:end_index]):
                 user = ctx.guild.get_member(int(user_id))
                 if user:
-                    team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
+                    team = "Mewtwo X" if any(role.id == 1147254156491509780 for role in user.roles) else "Mewtwo Y"
                     handle = f"{user.name}#{user.discriminator}"
                     table.append([f"# {start_index + idx + 1}", f"{handle} ({team})", f"{points} puntos"])
                     
