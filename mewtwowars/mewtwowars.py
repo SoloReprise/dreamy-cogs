@@ -67,31 +67,56 @@ class MewtwoWars(commands.Cog):
     async def load_data(self):
         self.user_points = await self.config.guild(ctx.guild).user_points()
         self.team_points = await self.config.guild(ctx.guild).team_points()
-            
+
+    class ReactionPaginator:
+
+        def __init__(self, ctx, data, page_size):
+            self.ctx = ctx
+            self.data = data
+            self.page_size = page_size
+            self.current_page = 0
+
+        async def display_page(self):
+            """Displays content for the current page."""
+            start_index = self.current_page * self.page_size
+            end_index = start_index + self.page_size
+
+            table = [["Ranking", "Usuario", "Puntos"]] + self.data[start_index:end_index]
+            table_str = tabulate(table, headers="firstrow", tablefmt="grid")
+
+            embed = discord.Embed(title="Clasificación Mewtwo Wars")
+            embed.description = f"```\n{table_str}\n```"
+            return await self.ctx.send(embed=embed)
+
+        async def run(self):
+            """Starts the paginator."""
+            message = await self.display_page()
+
+            await message.add_reaction("⬅️")
+            await message.add_reaction("➡️")
+
+            def check(reaction, user):
+                return user == self.ctx.author and str(reaction.emoji) in ["⬅️", "➡️"]
+
+            while True:
+                try:
+                    reaction, user = await self.ctx.bot.wait_for('reaction_add', timeout=60.0, check=check)
+
+                    if str(reaction.emoji) == "⬅️" and self.current_page > 0:
+                        self.current_page -= 1
+                    elif str(reaction.emoji) == "➡️" and (self.current_page + 1) < len(self.data) / self.page_size:
+                        self.current_page += 1
+
+                    await message.edit(embed=(await self.display_page()).embed)
+                    await message.remove_reaction(reaction, user)
+                except asyncio.TimeoutError:
+                    await message.clear_reactions()
+                    break
+
     @commands.group(name="mwranking", invoke_without_command=True)
     async def mwranking(self, ctx):
         """Check the Mewtwo Wars ranking."""
         await self.display_ranking(ctx)
-
-    class RankingPaginationView(discord.ui.View):
-        def __init__(self, ctx, pages):
-            super().__init__()
-            self.ctx = ctx
-            self.pages = pages
-            self.current_page = 0
-
-        @discord.ui.button(label="Previous", style=discord.ButtonStyle.grey)
-        async def previous_button(self, button: discord.ui.Button, interaction: discord.Interaction):
-            if self.current_page > 0:
-                self.current_page -= 1
-                await interaction.response.edit_message(embed=self.pages[self.current_page])
-
-        @discord.ui.button(label="Next", style=discord.ButtonStyle.grey)
-        async def next_button(self, button: discord.ui.Button, interaction: discord.Interaction):
-            if self.current_page < len(self.pages) - 1:
-                self.current_page += 1
-                await interaction.response.edit_message(embed=self.pages[self.current_page])
-
 
     async def display_ranking(self, ctx):
         table = [["Ranking", "Usuario", "Puntos"]]
@@ -100,10 +125,7 @@ class MewtwoWars(commands.Cog):
         user_points = await self.config.guild(ctx.guild).user_points()
 
         # Sort the users by their points in descending order
-        sorted_users = sorted(user_points.items(), key=lambda x: x[1], reverse=True)
-        
-        # Prepare the pages
-        pages = []
+        sorted_users = sorted(user_points.items(), key=lambda x: x[1], reverse=True)[:10]
         for idx, (user_id, points) in enumerate(sorted_users):
             user = ctx.guild.get_member(int(user_id))  # Convert user_id from str to int
             if user:
@@ -111,30 +133,20 @@ class MewtwoWars(commands.Cog):
                 table.append([f"# {idx + 1}", f"{user.display_name} ({team})", f"{points} puntos"])
             else:
                 table.append([f"# {idx + 1}", "Unknown", f"{points} puntos"])
-            
-            # Create a new page every 10 entries
-            if (idx + 1) % 10 == 0:
-                table_str = tabulate(table, headers="firstrow", tablefmt="grid")
-                embed = discord.Embed(title=f"Clasificación Mewtwo Wars (Página {len(pages)+1})")
-                embed.description = f"```\n{table_str}\n```"
-                pages.append(embed)
-                table = [["Ranking", "Usuario", "Puntos"]]
 
-        # If there's a last page with less than 10 entries, add it
-        if len(table) > 1:
-            table_str = tabulate(table, headers="firstrow", tablefmt="grid")
-            embed = discord.Embed(title=f"Clasificación Mewtwo Wars (Página {len(pages)+1})")
-            embed.description = f"```\n{table_str}\n```"
-            pages.append(embed)
-        
         # Fetch the team points from Config
-        team_points = await self.config.guild(ctx.guild).team_points()
-        for page in pages:
-            page.add_field(name="Mewtwo X", value=f"{team_points['Mewtwo X']} puntos", inline=True)
-            page.add_field(name="Mewtwo Y", value=f"{team_points['Mewtwo Y']} puntos", inline=True)
-        
-        view = RankingPaginationView(ctx, pages)
-        await ctx.send(embed=pages[0], view=view)
+        # Construct the data for the paginator
+        data = []
+        for idx, (user_id, points) in enumerate(sorted_users):
+            user = ctx.guild.get_member(int(user_id))
+            if user:
+                team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
+                data.append([f"# {idx + 1}", f"{user.display_name} ({team})", f"{points} puntos"])
+            else:
+                data.append([f"# {idx + 1}", "Unknown", f"{points} puntos"])
+
+        paginator = ReactionPaginator(ctx, data, page_size=10)
+        await paginator.run()
 
     @commands.command(name="mwreset")
     @commands.is_owner()  # Ensure only the bot owner can run this
