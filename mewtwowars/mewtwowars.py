@@ -8,10 +8,10 @@ import json
 
 class RankingPaginator(discord.ui.View):
     def __init__(self, ctx, pages):
-          super().__init__(timeout=180.0)
-          self.ctx = ctx
-          self.current_page = 0
-          self.pages = pages
+        super().__init__(timeout=180.0)
+        self.ctx = ctx
+        self.current_page = 0
+        self.pages = pages
 
     @discord.ui.button(label="◀️", style=discord.ButtonStyle.secondary)
     async def go_previous(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -27,7 +27,7 @@ class RankingPaginator(discord.ui.View):
 
     async def start(self):
         await self.ctx.send(embed=self.pages[self.current_page], view=self)
-
+        
 class MewtwoWars(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
