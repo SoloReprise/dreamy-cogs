@@ -17,14 +17,14 @@ class RankingView(discord.ui.View):
     async def go_previous(self, button: discord.ui.Button, interaction: discord.Interaction):
         if self.current_page > 0:
             self.current_page -= 1
-            await interaction.edit_original_message(embed=self.pages[self.current_page])
+            await interaction.response.edit_message(embed=self.pages[self.current_page])
 
     @discord.ui.button(label="▶️", style=discord.ButtonStyle.secondary)
     async def go_next(self, button: discord.ui.Button, interaction: discord.Interaction):
         if self.current_page < len(self.pages) - 1:
             self.current_page += 1
-            await interaction.edit_original_message(embed=self.pages[self.current_page])
-                            
+            await interaction.response.edit_message(embed=self.pages[self.current_page])
+                                        
     async def on_error(
         self,
         interaction: discord.Interaction,
@@ -33,7 +33,7 @@ class RankingView(discord.ui.View):
     ) -> None:
         await interaction.response.send_message(f"An error occurred: {error}", ephemeral=True)
         log.error("Error in RankingView: %s", error, exc_info=True)            
-
+        
 class MewtwoWars(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
