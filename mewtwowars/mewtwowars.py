@@ -98,7 +98,7 @@ class MewtwoWars(commands.Cog):
                 user = ctx.guild.get_member(int(user_id))
                 if user:
                     team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
-                    handle = f"{user.name}#{user.discriminator}"
+                    handle = f"{user.name}"
                     table.append([f"# {start_index + idx + 1}", f"{handle} ({team})", f"{points} puntos"])
 
             table_str = tabulate(table, headers="firstrow", tablefmt="grid")
