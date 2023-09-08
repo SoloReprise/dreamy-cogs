@@ -77,15 +77,14 @@ class MewtwoWars(commands.Cog):
         await self.display_ranking(ctx, 0)
 
     async def display_ranking(self, ctx, page=0):
-        # Fetch the user points from the Config storage
+        # Fetch the user points from the Config storage FIRST
         user_points = await self.config.guild(ctx.guild).user_points()
 
-        table = [["Ranking", "Usuario", "Puntos"]]
-        
         # Filter and sort users
         filtered_users = {user_id: points for user_id, points in user_points.items() if points > 0}
         sorted_users = sorted(filtered_users.items(), key=lambda x: x[1], reverse=True)
 
+        table = [["Ranking", "Usuario", "Puntos"]]
         msg = None
 
         while True:  # This loop allows for moving back and forth between pages.
