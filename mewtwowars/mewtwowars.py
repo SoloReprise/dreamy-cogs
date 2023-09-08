@@ -85,6 +85,7 @@ class MewtwoWars(commands.Cog):
         sorted_users = sorted(filtered_users.items(), key=lambda x: x[1], reverse=True)
 
         table = [["Ranking", "Usuario", "Puntos"]]
+        team_totals = {"X": 0, "Y": 0}  # Initialize team totals
         msg = None
 
         while True:  # This loop allows for moving back and forth between pages.
@@ -98,8 +99,14 @@ class MewtwoWars(commands.Cog):
                 user = ctx.guild.get_member(int(user_id))
                 if user:
                     team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
-                    handle = f"{user.name}"
+                    handle = f"{user.name}#{user.discriminator}"
                     table.append([f"# {start_index + idx + 1}", f"{handle} ({team})", f"{points} puntos"])
+                    # Update team totals
+                    team_totals[team] += points
+
+            # Add team totals to the table
+            table.append(["", "Total X", f"{team_totals['X']} puntos"])
+            table.append(["", "Total Y", f"{team_totals['Y']} puntos"])
 
             table_str = tabulate(table, headers="firstrow", tablefmt="grid")
 
@@ -113,7 +120,7 @@ class MewtwoWars(commands.Cog):
 
             if not msg:  # If the message isn't sent yet, send it.
                 msg = await ctx.send(embed=embed)
-            else:  # Otherwise edit the existing message.
+            else:  # Otherwise, edit the existing message.
                 await msg.edit(embed=embed)
 
             # Clear previous reactions and set up the new ones.
