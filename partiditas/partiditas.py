@@ -119,13 +119,13 @@ class Partiditas(commands.Cog):
         # Extract members with the provided roles.
         members_with_role1 = [member for member in guild.members if role1 in member.roles]
         if role2:
-            members_with_role2 = [member for member in guild.members if role2 in member.roles and member not in members_with_role1]
+            members_with_role2 = [member for member in guild.members if role2 in member.roles]
         else:
             members_with_role2 = []
 
-        total_members_needed = num_teams * members_per_team
-        if len(members_with_role1) + len(members_with_role2) < total_members_needed:
-            await ctx.send("No hay suficientes miembros con los roles especificados.")
+        # Check if we have enough members from each role to form the teams
+        if len(members_with_role1) < members_per_team or len(members_with_role2) < members_per_team:
+            await ctx.send("No hay suficientes miembros en uno de los roles especificados para formar equipos.")
             return
 
         # Shuffle the members to ensure randomization.
