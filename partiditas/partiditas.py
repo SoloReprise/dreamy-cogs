@@ -312,6 +312,7 @@ class Partiditas(commands.Cog):
     async def guerra(self, ctx):
         embed = discord.Embed(
             title="Guerra campal",
+            color=0x7eaf4c,
             description="¡Es la hora de la Guerra Campal! ¡Es hora de defender a tu Mewtwo! Muestra tu lealtad a tu equipo y defiende tu color. ¿Rojo o azul? ¿X o Y?. ¡Hoy comienza a decidirse todo!\n\n¡Reacciona con :yellow_circle: a este mensaje para confirmar tu disponibilidad!"
         )
         message = await ctx.send(embed=embed)
