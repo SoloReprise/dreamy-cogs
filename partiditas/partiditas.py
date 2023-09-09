@@ -171,6 +171,8 @@ class Partiditas(commands.Cog):
 
                 teams.append(current_team)
 
+        self.combined_teams = [teams[i:i+2] for i in range(0, len(teams), 2)]  # Group teams into battling pairs
+        
         selected_players_mentions = [member.mention for member in all_selected_players]
         #await ctx.send(f"Jugadores seleccionados:\n{', '.join(selected_players_mentions)}")
 
@@ -270,8 +272,8 @@ class Partiditas(commands.Cog):
         # Create a list of team leaders based on odd teams.
         self.team_leaders = [team[0] for index, team in enumerate(teams, start=1) if index % 2 == 1]
         for leader in self.team_leaders:
-            await leader.send("¡Hola! Se te ha encargado la tarea de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")    
-
+            await leader.send("¡Hola! Se te ha encargado la tarea de crear la sala para el combate. Por favor, envíamelo para que pueda reenviárselo al resto de jugadores.")
+       
         for index, team in enumerate(teams, start=1):
             if index % 2 == 1:  # Odd team
                 leader = team[0]
@@ -294,12 +296,13 @@ class Partiditas(commands.Cog):
                 await message.author.send("Código recibido. Se lo enviaré al resto de jugadores.")
 
                 # Fetch the team of the leader.
-                team_idx = [i for i, team in enumerate(self.combined_teams) if message.author in team][0]
+                team_idx = [i for i, combined_team in enumerate(self.combined_teams) for team in combined_team if message.author in team][0]
                 
                 # Relay code to both the teams (odd and even).
-                for member in self.combined_teams[team_idx] + self.combined_teams[team_idx + 1]:
-                    await member.send(f"Código para el combate proporcionado por {message.author.display_name}: {message.content}")
+                for team in self.combined_teams[team_idx]:
+                    for member in team:
+                        if member != message.author:  # Exclude the leader
+                            await member.send(f"Código para el combate proporcionado por {message.author.display_name}: {message.content}")
 
             else:
                 await message.author.send("El código proporcionado no es válido. Por favor, envía un número de 8 dígitos.")
-
