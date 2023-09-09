@@ -270,7 +270,7 @@ class Partiditas(commands.Cog):
         for index, team in enumerate(teams, start=1):
             voice_channel_name = f"◇║Equipo {index}"
             overwrites = {
-                guild.default_role: discord.PermissionOverwrite(connect=False),
+                guild.default_role: discord.PermissionOverwrite(connect=True),
                 guild.me: discord.PermissionOverwrite(connect=True)
             }
             voice_channel = await category.create_voice_channel(voice_channel_name, overwrites=overwrites)
