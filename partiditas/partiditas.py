@@ -29,7 +29,7 @@ class Partiditas(commands.Cog):
         voice_channels = [channel for channel in guild.voice_channels if "◇║Equipo" in channel.name]
 
         # Inform all players in the matches
-        all_players = [player for team in self.combined_teams for player in team]
+        all_players = [player for pair in self.combined_teams for team in pair for player in team]
         for player in all_players:
             await player.send("Combate cancelado. Entra en United Legacy para saber más.")
 
