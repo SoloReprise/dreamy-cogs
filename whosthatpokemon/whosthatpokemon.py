@@ -27,8 +27,10 @@ SOFTWARE.
 import asyncio
 from datetime import datetime, timedelta, timezone, time
 from io import BytesIO
+import random
 from random import randint
-from typing import Any, Dict, Final, List, Optional
+from typing import Any, Dict, Final, List, Optional, Union
+
 
 import aiohttp
 import discord
@@ -77,7 +79,7 @@ class WhosThatPokemon(commands.Cog):
         }
         self.config.register_user(**default_user)
         self.reset_usage_counts.start()
-
+        
     async def mention_role_temporarily(self, ctx, role_id: int):
         role = ctx.guild.get_role(role_id)  # Fetch the role using role_id
         if not role:
@@ -110,49 +112,6 @@ class WhosThatPokemon(commands.Cog):
         except asyncio.TimeoutError:
             return {"http_code": 408}
 
-    async def generate_image(self, poke_id: str, *, hide: bool) -> Optional[BytesIO]:
-        base_image = Image.open(bundled_data_path(self) / "template.webp").convert(
-            "RGBA"
-        )
-        bg_width, bg_height = base_image.size
-        base_url = (
-            f"https://assets.pokemon.com/assets/cms2/img/pokedex/full/{poke_id}.png"
-        )
-        try:
-            async with self.session.get(base_url) as response:
-                if response.status != 200:
-                    return None
-                data = await response.read()
-        except asyncio.TimeoutError:
-            return None
-
-        pbytes = BytesIO(data)
-        poke_image = Image.open(pbytes)
-        poke_width, poke_height = poke_image.size
-        poke_image_resized = poke_image.resize(
-            (int(poke_width * 1.6), int(poke_height * 1.6))
-        )
-
-        if hide:
-            p_load = poke_image_resized.load()  # type: ignore
-            for y in range(poke_image_resized.size[1]):
-                for x in range(poke_image_resized.size[0]):
-                    if p_load[x, y] == (0, 0, 0, 0):  # type: ignore
-                        continue
-                    p_load[x, y] = (1, 1, 1)  # type: ignore
-
-        paste_w = int((bg_width - poke_width) / 10)
-        paste_h = int((bg_height - poke_height) / 4)
-
-        base_image.paste(poke_image_resized, (paste_w, paste_h), poke_image_resized)
-
-        temp = BytesIO()
-        base_image.save(temp, "png")
-        temp.seek(0)
-        pbytes.close()
-        base_image.close()
-        poke_image.close()
-        return temp
 
     # _____ ________  ______  ___  ___   _   _______  _____
     # /  __ \  _  |  \/  ||  \/  | / _ \ | \ | |  _  \/  ___|
@@ -161,6 +120,7 @@ class WhosThatPokemon(commands.Cog):
     # | \__/\ \_/ / |  | || |  | || | | || |\  | |/ / /\__/ /
     # \____/\___/\_|  |_/\_|  |_/\_| |_/\_| \_/___/  \____/
     @commands.command(name="wtpversion", hidden=True)
+    @commands.is_owner()
     @commands.bot_has_permissions(embed_links=True)
     async def whosthatpokemon_version(self, ctx: commands.Context) -> None:
         """Shows the version of the cog"""
@@ -197,13 +157,8 @@ class WhosThatPokemon(commands.Cog):
     @commands.cooldown(1, 30, commands.BucketType.user)
     @commands.max_concurrency(1, commands.BucketType.channel)
     @commands.bot_has_permissions(attach_files=True, embed_links=True)
-    @commands.mod_or_permissions(administrator=True)
-    async def whosthatpokemon(
-        self,
-        ctx: commands.Context,
-        generation: Generation = None,
-    ) -> None:
-
+    @commands.is_owner()
+    async def whosthatpokemon(self, ctx: commands.Context, generation: Generation = None) -> None:
         """Guess Who's that Pokémon in 30 seconds!
 
         You can optionally specify generation from `gen1` to `gen8` only.
@@ -222,7 +177,7 @@ class WhosThatPokemon(commands.Cog):
 
         usage_count = await self.config.user(ctx.author).usage_count() or 0
 
-        if usage_count >= 5:
+        if usage_count >= 10:
             # Calculate the remaining time until 9 am GMT+2 (or 7 am UTC)
             remaining_time = (datetime.combine(datetime.now().date(), time(7, 0)) + timedelta(days=1)) - datetime.now()
             hours, remainder = divmod(remaining_time.seconds, 3600)
@@ -234,7 +189,7 @@ class WhosThatPokemon(commands.Cog):
         await self.config.user(ctx.author).usage_count.set(usage_count + 1)
 
         # Notify the user about how many uses they have left
-        remaining_uses = 5 - (usage_count + 1)
+        remaining_uses = 10 - (usage_count + 1)
         await ctx.send(f"{ctx.author.mention} ¡Tienes {remaining_uses} usos restantes hoy!", delete_after=7)
                 
         # Now use the function to mention these roles
@@ -251,19 +206,40 @@ class WhosThatPokemon(commands.Cog):
 
         await ctx.typing()
 
-        poke_id = generation or randint(1, 898)
-        if_guessed_right = False
+        is_ditto_game = random.randint(1, 15) == 1
+        is_ditto_disguised = False  # Initialize to False
+        is_shiny = random.randint(1, 50) == 1
 
-        temp = await self.generate_image(f"{poke_id:>03}", hide=True)
-        if temp is None:
-            return await ctx.send("Failed to generate whosthatpokemon card image.")
+        MAX_RETRIES = 5  # Adjust this based on how many retries you'd like
 
+        for _ in range(MAX_RETRIES):
+            if is_ditto_game:
+                disguise_poke_id = randint(1, 1010) if generation is None else generation
+                while disguise_poke_id == 132:  # To ensure we don't pick Ditto in disguise mode
+                    disguise_poke_id = randint(1, 1010) if generation is None else generation
+                is_ditto_disguised = True  # Ditto is disguised
+                poke_id = disguise_poke_id
+                temp = await self.generate_image(f"{poke_id:03}", is_shiny, hide=True)
+            else:
+                poke_id = randint(1, 1010) if generation is None else generation
+                temp = await self.generate_image(f"{poke_id:03}", is_shiny, hide=True)
+            
+            if temp is not None:
+                break
+        else:  # This else block runs when the for loop completes without a 'break'
+            return await ctx.send("Failed to generate whosthatpokemon card image multiple times.")
+            
         # Took this from Core's event file.
         # https://github.com/Cog-Creators/Red-DiscordBot/blob/41d89c7b54a1f231a01f79655c20d4acf1799633/redbot/core/_events.py#L424-L426
         img_timeout = discord.utils.format_dt(
             datetime.now(timezone.utc) + timedelta(minutes=5), "R"
         )
-        species_data = await self.get_data(f"{API_URL}/pokemon-species/{poke_id}")
+        eligible_names = []
+        if is_ditto_game:
+            species_data = await self.get_data(f"{API_URL}/pokemon-species/132")  # 132 is Ditto's ID
+            eligible_names.append("ditto")
+        else:
+            species_data = await self.get_data(f"{API_URL}/pokemon-species/{poke_id}")
         if species_data.get("http_code"):
             return await ctx.send("Failed to get species data from PokeAPI.")
         names_data = species_data.get("names", [{}])
@@ -272,12 +248,21 @@ class WhosThatPokemon(commands.Cog):
         filtered_names_es = [x["name"] for x in names_data if x["language"]["name"] == "es"]
         filtered_names_en = [x["name"] for x in names_data if x["language"]["name"] == "en"]
 
-        english_name = filtered_names_es[0] if filtered_names_es else (filtered_names_en[0] if filtered_names_en else "Unknown")
+        # Update revealing image generation when it's a Ditto game
+        if is_ditto_game:
+            if is_ditto_disguised:
+                revealed = await self.generate_image("132", shiny=is_shiny, hide=False)  # Show Ditto without disguise
+                english_name = "Ditto"
+            else:
+                revealed = await self.generate_image(f"{disguise_poke_id:>03}", shiny=is_shiny, hide=False)
+                english_name = filtered_names_es[0] if filtered_names_es else (filtered_names_en[0] if filtered_names_en else "Unknown")
+        else:
+            revealed = await self.generate_image(f"{poke_id:>03}", shiny=is_shiny, hide=False)
+            english_name = filtered_names_es[0] if filtered_names_es else (filtered_names_en[0] if filtered_names_en else "Unknown")
 
-        revealed = await self.generate_image(f"{poke_id:>03}", hide=False)
         revealed_img = File(revealed, "whosthatpokemon.png")
 
-        view = WhosThatPokemonView(self.bot, eligible_names)
+        view = WhosThatPokemonView(self.bot, eligible_names, is_shiny, english_name)
         view.message = await ctx.send(
             f"**¡¿Cuál es este Pokémon?!**\nNecesito una respuesta válida en menos de {img_timeout}.",
             file=File(temp, "guessthatpokemon.png"),
@@ -289,9 +274,16 @@ class WhosThatPokemon(commands.Cog):
             description=f"El Pokémon era... **{english_name}**.",
             color=0x76EE00,
         )
-        embed.set_image(url="attachment://whosthatpokemon.png")
+
+        if is_ditto_disguised:  # Change the image URL in the embed if Ditto was disguised
+            embed.set_image(url="attachment://whosthatpokemon.png")
+            revealed_img = File(await self.generate_image("132", shiny=is_shiny, hide=False), "whosthatpokemon.png")
+        else:
+            embed.set_image(url="attachment://guessthatpokemon.png")
+            revealed_img = File(revealed, "guessthatpokemon.png")
+
         embed.set_footer(text=f"Author: {ctx.author}", icon_url=ctx.author.avatar.url)
-        # because we want it to timeout and not tell the user that they got it right.
+
         # This is probably not the best way to do it, but it works perfectly fine.
         timeout = await view.wait()
         if timeout:
@@ -413,3 +405,118 @@ class WhosThatPokemon(commands.Cog):
             await self.config.user_from_id(user_id).usage_count.set(0)
         
         await ctx.send("Todos los usos del comando wtp han sido reiniciados.")
+
+    @commands.command(name="wtpcheckuses")
+    @commands.is_owner()
+    async def check_user_uses(self, ctx: commands.Context, user: discord.Member):
+        """Check how many uses of the `whosthatpokemon` command a specific user has left for today."""
+        
+        usage_count = await self.config.user(user).usage_count() or 0
+        remaining_uses = 10 - usage_count
+
+        if remaining_uses <= 0:
+            await ctx.send(f"{user.name} ha agotado todos sus intentos por hoy.")
+        else:
+            await ctx.send(f"{user.name} tiene {remaining_uses} usos restantes para hoy.")
+
+    @commands.command(name="wtpusesadd")
+    @commands.is_owner()
+    async def add_wtp_uses(self, ctx: commands.Context, target: Union[discord.Member, discord.Role], extra_uses: int):
+        """Agrega usos extras al comando 'quién es ese Pokémon' a un usuario o rol específico.
+
+        Parámetros:
+        - target: El usuario o rol al que deseas otorgar usos extras.
+        - extra_uses: La cantidad de usos que quieres agregar.
+        """
+
+        if extra_uses <= 0:
+            return await ctx.send("Por favor, proporciona un número positivo para los usos extra.")
+
+        targets = []
+
+        if isinstance(target, discord.Member):
+            targets.append(target)
+        elif isinstance(target, discord.Role):
+            targets.extend(target.members)
+
+        for member in targets:
+            current_uses = await self.config.user(member).usage_count()
+            new_uses = max(0, current_uses - extra_uses)  # Reducir del conteo usado efectivamente les da usos extra
+            await self.config.user(member).usage_count.set(new_uses)
+
+        if isinstance(target, discord.Member):
+            await ctx.send(f"Se han agregado exitosamente {extra_uses} usos extra a {target.name}. Ahora efectivamente tiene {10 - new_uses} usos totales para hoy.")
+        elif isinstance(target, discord.Role):
+            await ctx.send(f"Se han agregado exitosamente {extra_uses} usos extra a todos los miembros del rol {target.name}.")
+
+    @commands.command(name="wtpusesleft")
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def wtp_uses_left(self, ctx: commands.Context):
+        """Verifica cuántos usos del comando 'quién es ese Pokémon' te quedan para hoy."""
+
+        usage_count = await self.config.user(ctx.author).usage_count() or 0
+        remaining_uses = 10 - usage_count
+
+        if remaining_uses <= 0:
+            await ctx.send(f"{ctx.author.mention}, ¡Has agotado todos tus intentos para hoy!")
+        else:
+            await ctx.send(f"{ctx.author.mention}, te quedan {remaining_uses} usos para hoy.")
+        
+    async def generate_image(self, poke_id: str, shiny: bool, *, hide: bool) -> Optional[BytesIO]:
+        # Fetch pokemon data from the API
+        response = await self.session.get(f"https://pokeapi.co/api/v2/pokemon/{poke_id}")
+        if response.status != 200:
+            print(f"API response not 200 OK: {response.status}")
+            return None
+        pkmn_data = await response.json()
+        
+        # Determine the artwork URL based on whether shiny is True or False
+        if shiny:
+            base_url = pkmn_data.get('sprites', {}).get('other', {}).get('official-artwork', {}).get('front_shiny')
+            if not base_url:
+                base_url = pkmn_data['sprites']['other']['official-artwork']['front_default']
+        else:
+            base_url = pkmn_data['sprites']['other']['official-artwork']['front_default']
+
+        if base_url is None:
+            print("Base URL for the Pokémon image not found.")
+            return None
+            
+        base_image = Image.open(bundled_data_path(self) / "template.webp").convert("RGBA")
+        bg_width, bg_height = base_image.size
+        
+        try:
+            async with self.session.get(base_url) as response:
+                if response.status != 200:
+                    print(f"Failed to fetch the Pokémon image: {response.status}")
+                    return None
+                data = await response.read()
+        except asyncio.TimeoutError:
+            print("Timed out while trying to fetch the Pokémon image.")
+            return None
+
+        pbytes = BytesIO(data)
+        poke_image = Image.open(pbytes)
+        poke_width, poke_height = poke_image.size
+        poke_image_resized = poke_image.resize((int(poke_width * 1.6), int(poke_height * 1.6)))
+
+        if hide:
+            p_load = poke_image_resized.load()
+            for y in range(poke_image_resized.size[1]):
+                for x in range(poke_image_resized.size[0]):
+                    if p_load[x, y] == (0, 0, 0, 0):
+                        continue
+                    p_load[x, y] = (1, 1, 1)
+
+        paste_w = int((bg_width - poke_width) / 10)
+        paste_h = int((bg_height - poke_height) / 4)
+
+        base_image.paste(poke_image_resized, (paste_w, paste_h), poke_image_resized)
+
+        temp = BytesIO()
+        base_image.save(temp, "png")
+        temp.seek(0)
+        pbytes.close()
+        base_image.close()
+        poke_image.close()
+        return temp

@@ -4,6 +4,9 @@ from redbot.core import Config, commands
 from collections import defaultdict
 from tabulate import tabulate
 import json
+import asyncio
+
+ITEMS_PER_PAGE = 10
 
 class MewtwoWars(commands.Cog):
     def __init__(self, bot):
@@ -71,34 +74,79 @@ class MewtwoWars(commands.Cog):
     @commands.group(name="mwranking", invoke_without_command=True)
     async def mwranking(self, ctx):
         """Check the Mewtwo Wars ranking."""
-        await self.display_ranking(ctx)
+        await self.display_ranking(ctx, 0)
 
-    async def display_ranking(self, ctx):
-        table = [["Ranking", "Usuario", "Puntos"]]
-        
-        # Fetch the user points from the Config storage
+    async def display_ranking(self, ctx, page=0):
+        # Fetch the user points from the Config storage FIRST
         user_points = await self.config.guild(ctx.guild).user_points()
 
-        # Sort the users by their points in descending order
-        sorted_users = sorted(user_points.items(), key=lambda x: x[1], reverse=True)[:10]
-        for idx, (user_id, points) in enumerate(sorted_users):
-            user = ctx.guild.get_member(int(user_id))  # Convert user_id from str to int
-            if user:
-                team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
-                table.append([f"# {idx + 1}", f"{user.display_name} ({team})", f"{points} puntos"])
-            else:
-                table.append([f"# {idx + 1}", "Unknown", f"{points} puntos"])
+        # Filter and sort users
+        filtered_users = {user_id: points for user_id, points in user_points.items() if points > 0}
+        sorted_users = sorted(filtered_users.items(), key=lambda x: x[1], reverse=True)
 
-        # Fetch the team points from Config
+        # Fetch the team points
         team_points = await self.config.guild(ctx.guild).team_points()
 
-        table_str = tabulate(table, headers="firstrow", tablefmt="grid")
+        # Ensure both 'Mewtwo X' and 'Mewtwo Y' teams are present in the dictionary
+        for team in ["Mewtwo X", "Mewtwo Y"]:
+            if team not in team_points:
+                team_points[team] = 0
 
-        embed = discord.Embed(title="Clasificación Mewtwo Wars")
-        embed.add_field(name="Mewtwo X", value=f"{team_points['Mewtwo X']} puntos", inline=True)
-        embed.add_field(name="Mewtwo Y", value=f"{team_points['Mewtwo Y']} puntos", inline=True)
-        embed.description = f"```\n{table_str}\n```"
-        await ctx.send(embed=embed)
+        table = [["Ranking", "Usuario", "Puntos"]]
+        msg = None
+
+        while True:  # This loop allows for moving back and forth between pages.
+            table.clear()
+            table.append(["Ranking", "Usuario", "Puntos"])
+            
+            start_index = page * ITEMS_PER_PAGE
+            end_index = start_index + ITEMS_PER_PAGE
+
+            for idx, (user_id, points) in enumerate(sorted_users[start_index:end_index]):
+                user = ctx.guild.get_member(int(user_id))
+                if user:
+                    team = "X" if any(role.id == 1147254156491509780 for role in user.roles) else "Y"
+                    handle = f"{user.name}"
+                    table.append([f"# {start_index + idx + 1}", f"{handle} ({team})", f"{points} puntos"])
+
+            table_str = tabulate(table, headers="firstrow", tablefmt="grid")
+
+            embed = discord.Embed(title="Clasificación Mewtwo Wars")
+            embed.description = f"```\n{table_str}\n```"
+
+            # Include total team points in the embed
+            for team, points in team_points.items():
+                embed.add_field(name=team, value=f"{points} puntos", inline=True)
+
+            # This check ensures that the reacting user is the one who invoked the command
+            # and that they're reacting with the appropriate emoji.
+            def check(reaction, user):
+                return user == ctx.author and str(reaction.emoji) in ["⬅️", "➡️"]
+
+            if not msg:  # If the message isn't sent yet, send it.
+                msg = await ctx.send(embed=embed)
+            else:  # Otherwise edit the existing message.
+                await msg.edit(embed=embed)
+
+            # Clear previous reactions and set up the new ones.
+            await msg.clear_reactions()
+
+            if page > 0:
+                await msg.add_reaction("⬅️")
+            if (page + 1) * ITEMS_PER_PAGE < len(sorted_users):
+                await msg.add_reaction("➡️")
+
+            try:
+                reaction, user = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
+                if str(reaction.emoji) == "⬅️" and page > 0:
+                    page -= 1
+                elif str(reaction.emoji) == "➡️" and (page + 1) * ITEMS_PER_PAGE < len(sorted_users):
+                    page += 1
+            except asyncio.TimeoutError:
+                await msg.clear_reactions()
+                return
+
+        await msg.clear_reactions()
 
     @commands.command(name="mwreset")
     @commands.is_owner()  # Ensure only the bot owner can run this

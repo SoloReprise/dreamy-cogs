@@ -5,7 +5,7 @@ from redbot.core import commands
 
 class Generation(commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str) -> int:
-        allowed_gens = [f"gen{x}" for x in range(1, 11)] + ["arceus"]
+        allowed_gens = ["gen1", "gen2", "gen3", "gen4", "gen5", "gen6", "gen7", "gen8", "arceus", "gen9"]
         
         if argument.lower() not in allowed_gens:
             ctx.command.reset_cooldown(ctx)

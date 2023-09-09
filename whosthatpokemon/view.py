@@ -24,9 +24,11 @@ class WhosThatPokemonModal(discord.ui.Modal, title="Whos That Pokémon?"):
 
 #MewtwoWars, bot
 class WhosThatPokemonView(discord.ui.View):
-    def __init__(self, bot, eligible_names: List[Any]) -> None:
+    def __init__(self, bot, eligible_names: List[Any], is_shiny: bool, pokemon_name: str) -> None:
         self.bot = bot
         self.eligible_names = eligible_names
+        self.is_shiny = is_shiny
+        self.pokemon_name = pokemon_name
         self.winner = None
         super().__init__(timeout=300.0)
 
@@ -71,17 +73,32 @@ class WhosThatPokemonView(discord.ui.View):
             button.label = "Pokémon acertado"
             button.style = discord.ButtonStyle.success
             await self.message.edit(view=self)
-
+              
             # Add points to the winner using the MewtwoWars cog
             mewtwo_cog = self.bot.get_cog('MewtwoWars') # Assuming the cog's name is 'MewtwoWars'
             if mewtwo_cog:
                 guild = interaction.guild
-                await mewtwo_cog.add_points(guild, self.winner, 1)
 
-            # Mention the winner in the message with the team name without pinging
-            await interaction.followup.send(
-                content=f"¡{self.winner.mention} ha acertado el Pokémon! ¡**1 punto** para el Equipo {matching_role.name}!"
-            )
+                # Determine points based on Pokémon type and shininess
+                if self.pokemon_name == "Ditto" and self.is_shiny:
+                    points = 12
+                    point_text = "¡**12 puntos**"
+                elif self.pokemon_name == "Ditto":
+                    points = 5
+                    point_text = "¡**5 puntos**"
+                elif self.is_shiny:
+                    points = 8
+                    point_text = "¡**8 puntos**"
+                else:
+                    points = 1
+                    point_text = "¡**1 punto**"
+
+                await mewtwo_cog.add_points(guild, self.winner, points)
+                            
+                # Modify the followup message based on points
+                await interaction.followup.send(
+                    content=f"¡{self.winner.mention} ha acertado el Pokémon! {point_text} para el Equipo {matching_role.name}!"
+                )
 
     async def on_error(
         self,
