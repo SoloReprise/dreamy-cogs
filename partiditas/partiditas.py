@@ -33,6 +33,17 @@ class Partiditas(commands.Cog):
         for player in all_players:
             await player.send("Combate cancelado. Entra en United Legacy para saber más.")
 
+    @battle.command(name="end")
+    async def clearscrim(self, ctx):
+        """Elimina los canales de voz creados para el enfrentamiento y resetea la información."""
+        guild = ctx.guild
+        voice_channels = [channel for channel in guild.voice_channels if "◇║Equipo" in channel.name]
+
+        # Inform all players in the matches
+        all_players = [player for pair in self.combined_teams for team in pair for player in team]
+        for player in all_players:
+            await player.send("¡Combate finalizado! ¡Recordad dar !gg a vuestros compas de equipo y a vuestros rivales!")
+
         # Move users back to their original voice channels
         for channel in voice_channels:
             for member in channel.members:
