@@ -161,6 +161,25 @@ class UserCommands(MixinMeta, ABC):
         # Return the URL of the predefined server background
         return "https://i.imgur.com/wsOC1nW.png"
 
+    @commands.command(name="doublegg")
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)  # Only allow admins to run the command
+    async def toggle_double_gg(self, ctx: commands.Context):
+        """
+        Toggle the double star mode for the !gg command.
+        """
+        guild_id = ctx.guild.id
+
+        # Assuming you have a method to initialize guild data, similar to your init_user method
+        if guild_id not in self.data:
+            self.init_guild_data(guild_id)
+
+        # Toggle the doublegg_mode value
+        current_mode = self.data[guild_id].get("doublegg_mode", False)
+        self.data[guild_id]["doublegg_mode"] = not current_mode
+
+        await ctx.send("Modo doublegg " + ("activado" if not current_mode else "desactivado"))
+
     @commands.command(name="gg", aliases=["givestar", "addstar", "thanks", "stars"])
     @commands.guild_only()
     async def give_star(self, ctx: commands.Context, *users: discord.Member):
@@ -219,12 +238,13 @@ class UserCommands(MixinMeta, ABC):
                 users_data = self.data[guild_id]["users"]
                 
                 # Now, it's guaranteed that user data exists
-                users_data[user_id]["stars"] += 1
+                star_increment = 2 if self.data[guild_id].get("doublegg_mode", False) else 1
+                users_data[user_id]["stars"] += star_increment
 
                 if self.data[guild_id]["weekly"]["on"]:
                     if guild_id not in self.data[guild_id]["weekly"]["users"]:
                         self.init_user_weekly(guild_id, user_id)
-                    self.data[guild_id]["weekly"]["users"][user_id]["stars"] += 1
+                    self.data[guild_id]["weekly"]["users"][user_id]["stars"] += star_increment
 
                 recipients.append(user.display_name)  # Use display_name instead of mention
 
