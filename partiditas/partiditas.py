@@ -306,3 +306,44 @@ class Partiditas(commands.Cog):
 
             else:
                 await message.author.send("El código proporcionado no es válido. Por favor, envía un número de 8 dígitos.")
+
+    @commands.has_permissions(administrator=True)
+    @commands.command()
+    async def guerra(self, ctx):
+        embed = discord.Embed(
+            title="Guerra campal",
+            description="¡Es la hora de la Guerra Campal! ¡Es hora de defender a tu Mewtwo! Muestra tu lealtad a tu equipo y defiende tu color. ¿Rojo o azul? ¿X o Y?. ¡Hoy comienza a decidirse todo!\n\n¡Reacciona con :yellow_circle: a este mensaje para confirmar tu disponibilidad!"
+        )
+        message = await ctx.send(embed=embed)
+        await message.add_reaction("🟡")
+
+        def check(reaction, user):
+            return user == ctx.author and str(reaction.emoji) == '🟡'
+
+        reaction, _ = await self.bot.wait_for('reaction_add', check=check)
+
+        member = ctx.author
+
+        role1 = discord.utils.get(ctx.guild.roles, id=1147254156491509780)
+        role2 = discord.utils.get(ctx.guild.roles, id=1147253975893159957)
+        new_role1 = discord.utils.get(ctx.guild.roles, id=1150034423157362719)
+        new_role2 = discord.utils.get(ctx.guild.roles, id=1150034469638635570)
+
+        if role1 in member.roles:
+            await member.add_roles(new_role1)
+        elif role2 in member.roles:
+            await member.add_roles(new_role2)
+
+    @commands.has_permissions(administrator=True)
+    @commands.command()
+    async def warclear(self, ctx):
+        new_role1 = discord.utils.get(ctx.guild.roles, id=1150034423157362719)
+        new_role2 = discord.utils.get(ctx.guild.roles, id=1150034469638635570)
+
+        for member in ctx.guild.members:
+            if new_role1 in member.roles:
+                await member.remove_roles(new_role1)
+            if new_role2 in member.roles:
+                await member.remove_roles(new_role2)
+
+        await ctx.send("Roles cleared.")
