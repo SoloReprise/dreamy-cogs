@@ -126,11 +126,11 @@ class RandomBuild(commands.Cog):
         chosen_line = random.choice(self.line)
         
         message = (f"¡Hola, {ctx.author.mention}! Esta será tu build. ¡Prepara a tu Pokémon!\n\n"
-                f"*Pokémon*: {chosen_pokemon}\n"
-                f"*Movimientos*: {', '.join(chosen_moves)}\n"
-                f"*Objeto de combate*: {chosen_combat_item}\n"
-                f"*Objetos de equipo*: {', '.join(chosen_equipment)}\n"
-                f"*Línea*: {chosen_line}")
+                f"**Pokémon**: {chosen_pokemon}\n"
+                f"**Movimientos**: {', '.join(chosen_moves)}\n"
+                f"**Objeto de combate**: {chosen_combat_item}\n"
+                f"**Objetos de equipo**: {', '.join(chosen_equipment)}\n"
+                f"**Línea**: {chosen_line}")
         
         await ctx.send(message)
 
