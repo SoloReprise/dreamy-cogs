@@ -34,7 +34,7 @@ class RandomBuild(commands.Cog):
             'Charizard': [['Lanzallamas', 'Puño Fuego'], ['Llamarada', 'Envite Ígneo']],
             'Cinderace': [['Balón Ígneo', 'Patada Ígnea'], ['Nitrocarga', 'Amago']],
             'Clefable': [['Luz Lunar', 'Beso Drenaje'], ['Gravedad', 'Señuelo']],
-            'Comfey': [['Cura Florar', 'Beso Dulce'], ['Hoja Mágica', 'Hierba Lazo']],
+            'Comfey': [['Cura Floral', 'Beso Dulce'], ['Hoja Mágica', 'Hierba Lazo']],
             'Cramorant': [['Vendaval', 'Tajo Aéreo'], ['Surf', 'Buceo']],
             'Crustle': [['Tumba Rocas', 'Rompecoraza'], ['Trampa Rocas', 'Tijera X']],
             'Decidueye': [['Hoja Afilada', 'Puntada Sombría'], ['Lluevehojas', 'Sombra Vil']],
