@@ -94,45 +94,45 @@ class RandomBuild(commands.Cog):
         
         self.line = ['Top', 'Bot', 'Jungla']
 
-@commands.command(name='randombuild', aliases=['rb'])
-async def random_build(self, ctx):
-    # Ensure the chosen Pokemon is not banned
-    available_pokemon = [p for p in self.pokemon if p not in self.banned_pokemon]
-    
-    if not available_pokemon:
-        await ctx.send("All Pokémon are currently banned!")
-        return
-
-    chosen_pokemon = random.choice(available_pokemon)
-
-    if chosen_pokemon == "Mew":
-        first_set_moves = self.moves[chosen_pokemon][0]
-        second_set_moves = self.moves[chosen_pokemon][1]
+    @commands.command(name='randombuild', aliases=['rb'])
+    async def random_build(self, ctx):
+        # Ensure the chosen Pokemon is not banned
+        available_pokemon = [p for p in self.pokemon if p not in self.banned_pokemon]
         
-        num_moves_first_set = random.randint(1, len(first_set_moves))
-        num_moves_second_set = random.randint(1, len(second_set_moves))
+        if not available_pokemon:
+            await ctx.send("All Pokémon are currently banned!")
+            return
 
-        chosen_moves = random.sample(first_set_moves, num_moves_first_set) + random.sample(second_set_moves, num_moves_second_set)
-    else:
-        chosen_moves = [random.choice(pair) for pair in self.moves[chosen_pokemon]]
-    
-    chosen_combat_item = random.choice(self.combat_item)
-    
-    if chosen_pokemon == 'Zacian':
-        chosen_equipment = ['Espada Oxidada'] + random.sample([item for item in self.equipment_items if item != 'Espada Oxidada'], 2)
-    else:
-        chosen_equipment = random.sample(self.equipment_items, 3)  # This picks 3 unique items
-    
-    chosen_line = random.choice(self.line)
-    
-    message = (f"¡Hola, {ctx.author.mention}! Esta será tu build. ¡Prepara a tu Pokémon!\n\n"
-            f"*Pokémon*: {chosen_pokemon}\n"
-            f"*Movimientos*: {', '.join(chosen_moves)}\n"
-            f"*Objeto de combate*: {chosen_combat_item}\n"
-            f"*Objetos de equipo*: {', '.join(chosen_equipment)}\n"
-            f"*Línea*: {chosen_line}")
-    
-    await ctx.send(message)
+        chosen_pokemon = random.choice(available_pokemon)
+
+        if chosen_pokemon == "Mew":
+            first_set_moves = self.moves[chosen_pokemon][0]
+            second_set_moves = self.moves[chosen_pokemon][1]
+            
+            num_moves_first_set = random.randint(1, len(first_set_moves))
+            num_moves_second_set = random.randint(1, len(second_set_moves))
+
+            chosen_moves = random.sample(first_set_moves, num_moves_first_set) + random.sample(second_set_moves, num_moves_second_set)
+        else:
+            chosen_moves = [random.choice(pair) for pair in self.moves[chosen_pokemon]]
+        
+        chosen_combat_item = random.choice(self.combat_item)
+        
+        if chosen_pokemon == 'Zacian':
+            chosen_equipment = ['Espada Oxidada'] + random.sample([item for item in self.equipment_items if item != 'Espada Oxidada'], 2)
+        else:
+            chosen_equipment = random.sample(self.equipment_items, 3)  # This picks 3 unique items
+        
+        chosen_line = random.choice(self.line)
+        
+        message = (f"¡Hola, {ctx.author.mention}! Esta será tu build. ¡Prepara a tu Pokémon!\n\n"
+                f"*Pokémon*: {chosen_pokemon}\n"
+                f"*Movimientos*: {', '.join(chosen_moves)}\n"
+                f"*Objeto de combate*: {chosen_combat_item}\n"
+                f"*Objetos de equipo*: {', '.join(chosen_equipment)}\n"
+                f"*Línea*: {chosen_line}")
+        
+        await ctx.send(message)
 
     @commands.group(name='randombuildset', aliases=['rbset'])
     @commands.has_permissions(administrator=True)
