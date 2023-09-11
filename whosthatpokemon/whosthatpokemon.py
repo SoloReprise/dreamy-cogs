@@ -157,6 +157,7 @@ class WhosThatPokemon(commands.Cog):
     @commands.cooldown(1, 30, commands.BucketType.user)
     @commands.max_concurrency(1, commands.BucketType.channel)
     @commands.bot_has_permissions(attach_files=True, embed_links=True)
+    @commands.mod_or_permissions(administrator=True)
     async def whosthatpokemon(self, ctx: commands.Context, generation: Generation = None) -> None:
         """Guess Who's that Pokémon in 30 seconds!
 
