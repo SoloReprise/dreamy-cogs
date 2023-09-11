@@ -206,9 +206,9 @@ class WhosThatPokemon(commands.Cog):
 
         await ctx.typing()
 
-        is_ditto_game = random.randint(1, 15) == 1
+        is_ditto_game = random.randint(1, 25) == 1
         is_ditto_disguised = False  # Initialize to False
-        is_shiny = random.randint(1, 50) == 1
+        is_shiny = random.randint(1, 75) == 1
 
         MAX_RETRIES = 5  # Adjust this based on how many retries you'd like
 
