@@ -19,7 +19,7 @@ class RandomBuild(commands.Cog):
             'Mewtwo Y', 'Mr. Mime', 'Ninetales', 'Pikachu', 'Sableye', 'Slowbro',
             'Snorlax', 'Sylveon', 'Talonflame', 'Trevenant', 'Tsareena', 'Tyranitar',
             'Umbreon', 'Venusaur', 'Wiglytuff', 'Zacian', 'Zeraora', 'Zoroark', 'Scizor', 'Scyther',
-            'Urshifu Estilo Brusco', 'Urshifu Estilo Fluido'
+            'Urshifu Estilo Brusco', 'Urshifu Estilo Fluido', 'Mew'
         ]
         self.banned_pokemon = []  # List to store banned Pokémon
         
