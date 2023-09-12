@@ -82,13 +82,13 @@ class WhosThatPokemonView(discord.ui.View):
                 # Determine points based on Pokémon type and shininess
                 if self.pokemon_name == "Ditto" and self.is_shiny:
                     points = 8
-                    point_text = "¡**12 puntos**"
+                    point_text = "¡**8 puntos**"
                 elif self.pokemon_name == "Ditto":
                     points = 3
-                    point_text = "¡**5 puntos**"
+                    point_text = "¡**3 puntos**"
                 elif self.is_shiny:
                     points = 5
-                    point_text = "¡**8 puntos**"
+                    point_text = "¡**5 puntos**"
                 else:
                     points = 1
                     point_text = "¡**1 punto**"
