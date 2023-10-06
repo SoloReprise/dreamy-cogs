@@ -87,18 +87,16 @@ class ActionCog(commands.Cog):
                 return
             mentioned_user = mentioned_users[0]
 
-            # Fetch the count and update it in the action dictionary in memory
-            count = await self.config.guild(message.guild).actions.get_raw(action_name, "counts", str(mentioned_user.id), default=0)
-            count += 1
-            await self.config.guild(message.guild).actions.set_raw(action_name, "counts", str(mentioned_user.id), value=count)
+            users_key = f"{message.author.id},{mentioned_user.id}" 
+            count = await self.config.guild(message.guild).actions.get_raw(action_name, "counts", users_key, default=0)
+            await self.config.guild(message.guild).actions.set_raw(action_name, "counts", users_key, value=count + 1)
 
-            # Format the message
             text = action["text"].format(user=message.author.display_name, mention=mentioned_user.display_name)
-            count_text = action["count_text"].format(user=message.author.display_name, mention=mentioned_user.display_name, count=count)
+            count_text = action["count_text"].format(user=message.author.display_name, mention=mentioned_user.display_name, count=count + 1)
             
-            # Send the message
             embed = Embed(description=f"{text}\n{count_text}")
             embed.set_image(url=random.choice(action["images"]))
+
             await message.channel.send(embed=embed)
 
             await self.config.guild(message.guild).set_raw('actions', action_name, value=action)
