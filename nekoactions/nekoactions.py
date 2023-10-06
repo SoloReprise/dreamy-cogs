@@ -78,7 +78,6 @@ class ActionCog(commands.Cog):
         action_name = content.split()[0][1:]  # Removing the prefix '!'
 
         actions = await self.config.guild(message.guild).actions()
-
         if action_name in actions:
             action = actions[action_name]
 
@@ -87,19 +86,21 @@ class ActionCog(commands.Cog):
                 return
             mentioned_user = mentioned_users[0]
 
-            users_key = f"{message.author.id},{mentioned_user.id}" 
+            users_key = f"{message.author.id},{mentioned_user.id}"
             count = await self.config.guild(message.guild).actions.get_raw(action_name, "counts", users_key, default=0)
             await self.config.guild(message.guild).actions.set_raw(action_name, "counts", users_key, value=count + 1)
 
-            text = action["text"].format(user=message.author.display_name, mention=mentioned_user.display_name)
-            count_text = action["count_text"].format(user=message.author.display_name, mention=mentioned_user.display_name, count=count + 1)
-            
+            # Fetch updated action data
+            updated_action = await self.config.guild(message.guild).actions.get_raw(action_name)
+            updated_count = updated_action["counts"].get(users_key, 0)
+
+            text = updated_action["text"].format(user=message.author.display_name, mention=mentioned_user.display_name)
+            count_text = updated_action["count_text"].format(user=message.author.display_name, mention=mentioned_user.display_name, count=updated_count)
+
             embed = Embed(description=f"{text}\n{count_text}")
-            embed.set_image(url=random.choice(action["images"]))
+            embed.set_image(url=random.choice(updated_action["images"]))
 
             await message.channel.send(embed=embed)
-
-            await self.config.guild(message.guild).set_raw('actions', action_name, value=action)
 
 def setup(bot):
     bot.add_cog(ActionCog(bot))
