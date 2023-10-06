@@ -97,7 +97,7 @@ class ActionCog(commands.Cog):
             text = updated_action["text"].format(user=message.author.display_name, mention=mentioned_user.display_name)
             count_text = updated_action["count_text"].format(user=message.author.display_name, mention=mentioned_user.display_name, count=updated_count)
 
-            embed = Embed(description=f"{text}\n{count_text}")
+            embed = Embed(description=f"{text}\n{count_text}", color=0x6fb139)
             embed.set_image(url=random.choice(updated_action["images"]))
 
             await message.channel.send(embed=embed)
