@@ -36,8 +36,12 @@ class ActionCog(commands.Cog):
         image_urls = await self.get_input(ctx, "Please provide image URLs for the action separated by spaces.")
         count_text = await self.get_input(ctx, "Please provide the text for counting action occurrences (use {user}, {mention}, and {count} as placeholders).")
 
-        async with self.config.guild(ctx.guild).actions() as actions:
-            actions[action_name] = {"text": text, "images": image_urls.split(), "counts": {}, "count_text": count_text}
+        await self.config.guild(ctx.guild).actions.set_raw(action_name, value={
+            "text": text, 
+            "images": image_urls.split(), 
+            "counts": {}, 
+            "count_text": count_text
+        })
 
         await ctx.send(f"'{action_name}' action has been created.")
 
@@ -82,17 +86,17 @@ class ActionCog(commands.Cog):
                 return
             mentioned_user = mentioned_users[0]
 
-            count_key = f"{mentioned_user.id}"
-            action["counts"][count_key] = action["counts"].get(count_key, 0) + 1
+            count = await self.config.guild(message.guild).actions.get_raw(action_name, "counts", mentioned_user.id, default=0)
+            await self.config.guild(message.guild).actions.set_raw(action_name, "counts", mentioned_user.id, value=count + 1)
 
             text = action["text"].format(user=message.author.display_name, mention=mentioned_user.display_name)
-            count_text = action["count_text"].format(user=message.author.display_name, mention=mentioned_user.display_name, count=action["counts"][count_key])
+            count_text = action["count_text"].format(user=message.author.display_name, mention=mentioned_user.display_name, count=count + 1)
             
             embed = Embed(description=f"{text}\n{count_text}")
             embed.set_image(url=random.choice(action["images"]))
 
             await message.channel.send(embed=embed)
-
+            
             await self.config.guild(message.guild).set_raw('actions', action_name, value=action)
 
 def setup(bot):
