@@ -1,4 +1,4 @@
-from .nekoactions import ActionCog
+from .nekoactions import Actions
 
 async def setup(bot):
-    await bot.add_cog(ActionCog(bot))
+    await bot.add_cog(Actions(bot))
