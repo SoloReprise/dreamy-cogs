@@ -248,6 +248,24 @@ class UserCommands(MixinMeta, ABC):
 
                 recipients.append(user.display_name)  # Use display_name instead of mention
 
+        # Add gg to the user of the command
+        author_id = str(ctx.author.id)
+        
+        # Initialize user data if it doesn't exist
+        if author_id not in self.data[ctx.guild.id]["users"]:
+            self.init_user(ctx.guild.id, author_id)
+        
+        user_mention = self.data[guild_id]["mention"]
+        users_data = self.data[guild_id]["users"]
+        
+        # Increment stars for the author based on the number of mentioned users
+        users_data[author_id]["stars"] += len(unique_users)
+        
+        if self.data[guild_id]["weekly"]["on"]:
+            if guild_id not in self.data[guild_id]["weekly"]["users"]:
+                self.init_user_weekly(guild_id, author_id)
+            self.data[guild_id]["weekly"]["users"][author_id]["stars"] += len(unique_users)
+            
         self.stars.setdefault(guild_id, {})
         self.stars[guild_id][star_giver] = now
 
