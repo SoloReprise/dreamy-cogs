@@ -203,11 +203,11 @@ class UserCommands(MixinMeta, ABC):
         now = datetime.datetime.now()
         star_giver = str(ctx.author.id)
         guild_id = ctx.guild.id
+
         if guild_id not in self.data:
             return await ctx.send(_("Cache not loaded yet, wait a few more seconds."))
 
         recipients = []  # Initialize the recipients list
-        users_data = self.data[ctx.guild.id]["users"]
 
         if guild_id in self.stars:
             cooldown = self.data[guild_id]["starcooldown"]
@@ -221,25 +221,39 @@ class UserCommands(MixinMeta, ABC):
                     await ctx.send(_("¡Espera {} minutos antes de usar el comando otra vez!").format(remaining_time // 60))
                     return
 
-        # Give a gg to the command invoker
+        users_data = self.data[ctx.guild.id]["users"]
+
+        # Give gg's to the command invoker
         if star_giver not in users_data:
             self.init_user(ctx.guild.id, star_giver)
-        
+
         star_increment_for_invoker = len(unique_users)
         users_data[star_giver]["stars"] += star_increment_for_invoker
 
-        # Now process each unique user mention
-        for user in unique_users:  
+        # Check for doublegg_mode for invoker
+        if self.data[ctx.guild.id].get("doublegg_mode", False):
+            users_data[star_giver]["stars"] += star_increment_for_invoker
+
+        # Check for weekly mode for invoker
+        if self.data[ctx.guild.id]["weekly"]["on"]:
+            if guild_id not in self.data[ctx.guild.id]["weekly"]["users"]:
+                self.init_user_weekly(ctx.guild.id, star_giver)
+            self.data[ctx.guild.id]["weekly"]["users"][star_giver]["stars"] += star_increment_for_invoker
+
+        for user in unique_users:  # Iterate through the unique set of users
             if ctx.author == user:
                 await ctx.send(_("¡No puedes decirte gg a ti mismo!"))
             elif user.bot:
                 await ctx.send(_("¡No puedes decirle gg a un bot!"))
             else:
                 user_id = str(user.id)
-                
+
                 if user_id not in users_data:
                     self.init_user(ctx.guild.id, user_id)
-                    
+
+                user_mention = self.data[guild_id]["mention"]
+
+                # Now, it's guaranteed that user data exists
                 star_increment = 2 if self.data[guild_id].get("doublegg_mode", False) else 1
                 users_data[user_id]["stars"] += star_increment
 
