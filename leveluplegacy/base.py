@@ -200,6 +200,26 @@ class UserCommands(MixinMeta, ABC):
         if len(unique_users) < len(users):
             return await ctx.send(_("¡No puedes mencionar al mismo usuario más de una vez!"))
 
+        # Start of the new modification
+        users_data = self.data[ctx.guild.id]["users"]
+        invoker_id = str(ctx.author.id)
+        if invoker_id not in users_data:
+            self.init_user(ctx.guild.id, invoker_id)
+
+        star_increment_for_invoker = len(unique_users)
+        users_data[invoker_id]["stars"] += star_increment_for_invoker
+
+        # Check for doublegg_mode for invoker
+        if self.data[ctx.guild.id].get("doublegg_mode", False):
+            users_data[invoker_id]["stars"] += star_increment_for_invoker
+
+        # Check for weekly mode for invoker
+        if self.data[ctx.guild.id]["weekly"]["on"]:
+            if ctx.guild.id not in self.data[ctx.guild.id]["weekly"]["users"]:
+                self.init_user_weekly(ctx.guild.id, invoker_id)
+            self.data[ctx.guild.id]["weekly"]["users"][invoker_id]["stars"] += star_increment_for_invoker
+        # End of the new modification
+
         now = datetime.datetime.now()
         star_giver = str(ctx.author.id)
         guild_id = ctx.guild.id
