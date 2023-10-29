@@ -200,26 +200,6 @@ class UserCommands(MixinMeta, ABC):
         if len(unique_users) < len(users):
             return await ctx.send(_("¡No puedes mencionar al mismo usuario más de una vez!"))
 
-        # Start of the new modification
-        users_data = self.data[ctx.guild.id]["users"]
-        invoker_id = str(ctx.author.id)
-        if invoker_id not in users_data:
-            self.init_user(ctx.guild.id, invoker_id)
-
-        star_increment_for_invoker = len(unique_users)
-        users_data[invoker_id]["stars"] += star_increment_for_invoker
-
-        # Check for doublegg_mode for invoker
-        if self.data[ctx.guild.id].get("doublegg_mode", False):
-            users_data[invoker_id]["stars"] += star_increment_for_invoker
-
-        # Check for weekly mode for invoker
-        if self.data[ctx.guild.id]["weekly"]["on"]:
-            if ctx.guild.id not in self.data[ctx.guild.id]["weekly"]["users"]:
-                self.init_user_weekly(ctx.guild.id, invoker_id)
-            self.data[ctx.guild.id]["weekly"]["users"][invoker_id]["stars"] += star_increment_for_invoker
-        # End of the new modification
-
         now = datetime.datetime.now()
         star_giver = str(ctx.author.id)
         guild_id = ctx.guild.id
@@ -227,6 +207,7 @@ class UserCommands(MixinMeta, ABC):
             return await ctx.send(_("Cache not loaded yet, wait a few more seconds."))
 
         recipients = []  # Initialize the recipients list
+        users_data = self.data[ctx.guild.id]["users"]
 
         if guild_id in self.stars:
             cooldown = self.data[guild_id]["starcooldown"]
@@ -240,7 +221,15 @@ class UserCommands(MixinMeta, ABC):
                     await ctx.send(_("¡Espera {} minutos antes de usar el comando otra vez!").format(remaining_time // 60))
                     return
 
-        for user in unique_users:  # Iterate through the unique set of users
+        # Give a gg to the command invoker
+        if star_giver not in users_data:
+            self.init_user(ctx.guild.id, star_giver)
+        
+        star_increment_for_invoker = len(unique_users)
+        users_data[star_giver]["stars"] += star_increment_for_invoker
+
+        # Now process each unique user mention
+        for user in unique_users:  
             if ctx.author == user:
                 await ctx.send(_("¡No puedes decirte gg a ti mismo!"))
             elif user.bot:
@@ -248,16 +237,9 @@ class UserCommands(MixinMeta, ABC):
             else:
                 user_id = str(user.id)
                 
-                users = self.data[ctx.guild.id]["users"]
-                
-                # Initialize user data if it doesn't exist
-                if user_id not in users:
+                if user_id not in users_data:
                     self.init_user(ctx.guild.id, user_id)
-
-                user_mention = self.data[guild_id]["mention"]
-                users_data = self.data[guild_id]["users"]
-                
-                # Now, it's guaranteed that user data exists
+                    
                 star_increment = 2 if self.data[guild_id].get("doublegg_mode", False) else 1
                 users_data[user_id]["stars"] += star_increment
 
@@ -273,9 +255,9 @@ class UserCommands(MixinMeta, ABC):
 
         if recipients:
             emoji_id_here = 1146935305765670954  # Replace with the actual emoji ID
-            
+
             emoji = ctx.bot.get_emoji(emoji_id_here)
-            
+
             if emoji:
                 await ctx.message.add_reaction(emoji)
 
