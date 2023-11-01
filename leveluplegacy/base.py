@@ -182,23 +182,22 @@ class UserCommands(MixinMeta, ABC):
 
     @commands.command(name="gg", aliases=["givestar", "addstar", "thanks", "stars"])
     @commands.guild_only()
-    async def give_star(self, ctx: commands.Context, *users: discord.Member):
+    async def give_star(self, ctx: commands.Context, *mentions: discord.Member):
         """
         ¡Dile a otros jugadores lo bien que han jugado!
         """
+        # The mentions are already filtered as discord.Member, no extra text will be considered.
+
         # Check if the command is used as a reply
         if ctx.message.reference and ctx.message.reference.message_id:
             replied_to_msg = await ctx.channel.fetch_message(ctx.message.reference.message_id)
             target_user = replied_to_msg.author
-            users = [target_user]  # Target the user being replied to
+            mentions = [target_user]  # Target the user being replied to
 
-        if not users:
+        if not mentions:
             return await ctx.send(_("¡Tienes que mencionar al menos a un usuario!"))
 
-        unique_users = set(users)  # Convert the users list to a set to ensure uniqueness
-
-        if len(unique_users) < len(users):
-            return await ctx.send(_("¡No puedes mencionar al mismo usuario más de una vez!"))
+        unique_users = set(mentions)  # Convert the mentions list to a set to ensure uniqueness
 
         now = datetime.datetime.now()
         star_giver = str(ctx.author.id)
@@ -206,8 +205,6 @@ class UserCommands(MixinMeta, ABC):
 
         if guild_id not in self.data:
             return await ctx.send(_("Cache not loaded yet, wait a few more seconds."))
-
-        recipients = []  # Initialize the recipients list
 
         if guild_id in self.stars:
             cooldown = self.data[guild_id]["starcooldown"]
@@ -239,6 +236,8 @@ class UserCommands(MixinMeta, ABC):
             if guild_id not in self.data[ctx.guild.id]["weekly"]["users"]:
                 self.init_user_weekly(ctx.guild.id, star_giver)
             self.data[ctx.guild.id]["weekly"]["users"][star_giver]["stars"] += star_increment_for_invoker
+
+        recipients = []  # Initialize the recipients list
 
         for user in unique_users:  # Iterate through the unique set of users
             if ctx.author == user:
