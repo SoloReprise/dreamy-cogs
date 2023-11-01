@@ -182,11 +182,12 @@ class UserCommands(MixinMeta, ABC):
 
     @commands.command(name="gg", aliases=["givestar", "addstar", "thanks", "stars"])
     @commands.guild_only()
-    async def give_star(self, ctx: commands.Context, *mentions: discord.Member):
+    async def give_star(self, ctx: commands.Context, *args):
         """
         ¡Dile a otros jugadores lo bien que han jugado!
         """
-        # The mentions are already filtered as discord.Member, no extra text will be considered.
+        # Filter out only member mentions from the arguments
+        users = [arg for arg in args if isinstance(arg, discord.Member)]
 
         # Check if the command is used as a reply
         if ctx.message.reference and ctx.message.reference.message_id:
