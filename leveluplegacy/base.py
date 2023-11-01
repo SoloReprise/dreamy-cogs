@@ -182,11 +182,11 @@ class UserCommands(MixinMeta, ABC):
 
     @commands.command(name="gg", aliases=["givestar", "addstar", "thanks", "stars"])
     @commands.guild_only()
-    async def give_star(self, ctx: commands.Context, *members: commands.Greedy[discord.Member]):
+    async def give_star(self, ctx: commands.Context):
         """
         ¡Dile a otros jugadores lo bien que han jugado!
         """
-        # No need to parse the message content manually, as only member mentions will be passed to `members`
+        mentions = ctx.message.mentions  # Get the list of members mentioned in the message
 
         # Check if the command is used as a reply
         if ctx.message.reference and ctx.message.reference.message_id:
