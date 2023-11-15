@@ -36,5 +36,5 @@ class CommunityStars(commands.Cog):
                     await self.config.reactions.set(reactions)
 
                     # If 5 different users have reacted, pin the message
-                    if len(reactions[message_id]) >= 1:
+                    if len(reactions[message_id]) >= 6:
                         await reaction.message.pin()
