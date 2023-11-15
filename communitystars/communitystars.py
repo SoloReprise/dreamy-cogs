@@ -9,7 +9,7 @@ class CommunityStars(commands.Cog):
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
-        if reaction.emoji == ":star:" and not reaction.message.pinned:
+        if reaction.emoji == "⭐" and not reaction.message.pinned:
             channel = reaction.message.channel
             message_id = reaction.message.id
 
