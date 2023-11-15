@@ -21,5 +21,5 @@ class CommunityStars(commands.Cog):
                 reactions[message_id].append(user.id)
                 await self.config.reactions.set(reactions)
 
-                if len(reactions[message_id]) >= 1:
+                if len(reactions[message_id]) >= 5:
                     await reaction.message.pin()
