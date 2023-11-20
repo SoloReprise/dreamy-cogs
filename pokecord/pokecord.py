@@ -46,10 +46,6 @@ class Pokecord(
     commands.Cog,
     metaclass=CompositeMetaClass,
 ):
-    """Pokecord adapted to use on Red."""
-
-    __version__ = "0.0.1-alpha-23"
-    __author__ = "flare"
 
     def format_help_for_context(self, ctx):
         """Thanks Sinbad."""
