@@ -151,14 +151,20 @@ class RandomBuild(commands.Cog):
         
         chosen_line = random.choice(self.line)
         
+        # Construct the base message
         message = (f"¡Hola, {ctx.author.mention}! Esta será tu build. ¡Prepara a tu Pokémon!\n\n"
-                f"**Pokémon**: {specified_pokemon}\n"
-                f"**Estilo**: {style if specified_pokemon == 'Blaziken' else 'N/A'}\n"
-                f"**Movimientos**: {', '.join(chosen_moves)}\n"
-                f"**Objeto de combate**: {chosen_combat_item}\n"
-                f"**Objetos de equipo**: {', '.join(chosen_equipment)}\n"
-                f"**Línea**: {chosen_line}")
-        
+                f"**Pokémon**: {specified_pokemon}\n")
+
+        # Add the style line only for Blaziken
+        if specified_pokemon == "Blaziken":
+            message += f"**Estilo**: {style}\n"
+
+        # Continue with the rest of the message
+        message += (f"**Movimientos**: {', '.join(chosen_moves)}\n"
+                    f"**Objeto de combate**: {chosen_combat_item}\n"
+                    f"**Objetos de equipo**: {', '.join(chosen_equipment)}\n"
+                    f"**Línea**: {chosen_line}")
+
         await ctx.send(message)
 
     @commands.group(name='randombuildset', aliases=['rbset'])
