@@ -209,3 +209,25 @@ class SettingsMixin(MixinMeta):
             )
         await self.config.spawnloop.set(state)
         await ctx.tick()
+
+    @pokecordset.command()
+    @commands.admin_or_permissions(manage_guild=True)
+    async def checkwhitelist(self, ctx):
+        """
+        Check if messages in channels (whitelisted or not) are contributing to Pokémon spawning.
+        """
+        whitelist = await self.config.guild(ctx.guild).whitelist()
+        text_channels = ctx.guild.text_channels
+
+        if not whitelist:
+            # If whitelist is empty, assume all channels contribute to spawning.
+            await ctx.send(_("The whitelist is empty. All channels contribute to Pokémon spawning."))
+        else:
+            # If whitelist has channels, only these contribute to spawning.
+            channel_mentions = [f"<#{channel_id}>" for channel_id in whitelist]
+            channel_list = ", ".join(channel_mentions)
+            await ctx.send(
+                _("Only the following channels contribute to Pokémon spawning: {channels}").format(channels=channel_list)
+            )
+
+        await ctx.tick()
