@@ -96,14 +96,11 @@ class Pokecord(
         self.cursor = Database(f"sqlite:///{cog_data_path(self)}/pokemon.db")
         self._executor = concurrent.futures.ThreadPoolExecutor(1)
         self.bg_loop_task = None
-        self.voice_channel_task = self.bot.loop.create_task(self.voice_channel_listener())
 
     def cog_unload(self):
         self._executor.shutdown()
         if self.bg_loop_task:
             self.bg_loop_task.cancel()
-        if self.voice_channel_task:
-            self.voice_channel_task.cancel()
 
     async def initalize(self):
         await self.cursor.connect()
@@ -284,7 +281,7 @@ class Pokecord(
             if localnames[self.usercache[user.id]["locale"]] is not None
             else localnames["en"]
         )
-    
+
     def get_pokemon_name(self, pokemon: dict) -> set:
         """function returns all name for specified pokemon"""
         return {
@@ -292,49 +289,6 @@ class Pokecord(
             for name in pokemon["name"]
             if pokemon["name"][name] is not None
         }
-
-    async def voice_channel_listener(self):
-        await self.bot.wait_until_ready()
-        while True:
-            try:
-                for guild in self.bot.guilds:
-                    for vc in guild.voice_channels:
-                        members = [m for m in vc.members if not m.bot and not m.voice.self_deaf and not m.voice.afk]
-                        if len(members) > 1:  # More than one non-bot user
-                            for member in members:
-                                # Update spawn chances and experience gain as if 5 messages were sent
-                                await self.update_spawn_chance_based_on_voice(member)
-                                await self.exp_gain_voice(member)
-                await asyncio.sleep(60)  # Wait for 1 minute before checking again
-            except Exception as exc:
-                log.error("Error in voice channel listener: ", exc_info=exc)
-
-    async def update_spawn_chance_based_on_voice(self, member):
-        guild_id = member.guild.id
-        if guild_id not in self.maybe_spawn:
-            self.maybe_spawn[guild_id] = {
-                "amount": 5,  # Equivalent to 5 messages
-                "spawnchance": random.randint(self.spawnchance[0], self.spawnchance[1]),
-                "time": datetime.datetime.utcnow().timestamp(),
-                "author": member.id,
-            }
-        else:
-            self.maybe_spawn[guild_id]["amount"] += 5  # Add the equivalent of 5 messages
-
-        if self.spawn_chance(guild_id):
-            channel = random.choice(self.guildcache[guild_id]["whitelist"])
-            channel = member.guild.get_channel(int(channel))
-            if channel:
-                await self.spawn_pokemon(channel)
-
-    async def exp_gain_voice(self, member):
-        userconf = self.usercache.get(member.id)
-        if userconf is None:
-            return
-
-        # Simulate the effect of 5 messages for exp gain
-        for _ in range(5):
-            await self.exp_gain(None, member)  # None represents the channel, which is not needed for voice
 
     @commands.command()
     async def starter(self, ctx, pokemon: str = None):
@@ -527,49 +481,49 @@ class Pokecord(
 
     @commands.Cog.listener()
     async def on_message_without_command(self, message):
-        if not message.guild or message.author.bot:
+        if not message.guild:
             return
-
+        if message.author.bot:
+            return
         guildcache = self.guildcache.get(message.guild.id)
         if guildcache is None:
             return
-
         if not guildcache["toggle"]:
             return
-
-        # Update guild cache to include all text channels by default
-        if not guildcache["whitelist"]:
-            all_text_channels = [ch.id for ch in message.guild.text_channels]
-            guildcache["whitelist"] = all_text_channels
-
-        # Exclude blacklisted channels
-        if guildcache["blacklist"] and message.channel.id in guildcache["blacklist"]:
-            return
-
         await self.exp_gain(message.channel, message.author)
-
-        # Initialize spawn data if not present
+        if guildcache["whitelist"]:
+            if message.channel.id not in guildcache["whitelist"]:
+                return
+        elif guildcache["blacklist"]:
+            if message.channel.id in guildcache["blacklist"]:
+                return
         if message.guild.id not in self.maybe_spawn:
             self.maybe_spawn[message.guild.id] = {
                 "amount": 1,
                 "spawnchance": random.randint(self.spawnchance[0], self.spawnchance[1]),
                 "time": datetime.datetime.utcnow().timestamp(),
                 "author": message.author.id,
-            }
-        
-        # Increment spawn count, but control spamming
-        spawn_data = self.maybe_spawn[message.guild.id]
-        if spawn_data["author"] != message.author.id or \
-        (datetime.datetime.utcnow().timestamp() - spawn_data["time"]) >= 5:
-            spawn_data["amount"] += 1
-
-        # Check for spawn
-        if spawn_data["amount"] > spawn_data["spawnchance"]:
-            del self.maybe_spawn[message.guild.id]
-            await set_contextual_locales_from_guild(self.bot, message.guild)
-            channel = message.guild.get_channel(int(random.choice(guildcache["whitelist"])))
-            if channel:
-                await self.spawn_pokemon(channel)
+            }  # TODO: big value
+        if (
+            self.maybe_spawn[message.guild.id]["author"] == message.author.id
+        ):  # stop spamming to spawn
+            if (
+                datetime.datetime.utcnow().timestamp() - self.maybe_spawn[message.guild.id]["time"]
+            ) < 5:
+                return
+        self.maybe_spawn[message.guild.id]["amount"] += 1
+        should_spawn = self.spawn_chance(message.guild.id)
+        if not should_spawn:
+            return
+        del self.maybe_spawn[message.guild.id]
+        if not guildcache["activechannels"]:
+            channel = message.channel
+        else:
+            channel = message.guild.get_channel(int(random.choice(guildcache["activechannels"])))
+            if channel is None:
+                return  # TODO: Remove channel from config
+        await set_contextual_locales_from_guild(self.bot, message.guild)
+        await self.spawn_pokemon(channel)
 
     async def spawn_pokemon(self, channel, *, pokemon=None):
         if pokemon is None:
@@ -804,25 +758,3 @@ class Pokecord(
         # Spawn the Pokemon in the selected channel
         await self.spawn_pokemon(channel, pokemon=pokemon)
         await ctx.send(f"A test Pokémon spawn has been created in {channel.mention}.")
-
-    @commands.command()
-    @commands.guild_only()
-    @commands.has_permissions(manage_guild=True)  # Ensure only users with specific permissions can use this
-    async def checkvoiceactivity(self, ctx):
-        """
-        Check and list all voice channels currently contributing to Pokémon spawning.
-        """
-        active_voice_channels = []
-        for vc in ctx.guild.voice_channels:
-            # Count non-bot members in the voice channel
-            non_bot_members = [member for member in vc.members if not member.bot]
-            if len(non_bot_members) > 1:  # More than one non-bot user
-                active_voice_channels.append(vc)
-
-        if active_voice_channels:
-            channel_list = ", ".join([channel.mention for channel in active_voice_channels])
-            await ctx.send(
-                _("The following voice channels are currently active and contributing to Pokémon spawning:\n{channels}").format(channels=channel_list)
-            )
-        else:
-            await ctx.send(_("There are currently no active voice channels contributing to Pokémon spawning."))
