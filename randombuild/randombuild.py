@@ -111,20 +111,17 @@ class RandomBuild(commands.Cog):
         if specified_pokemon:
             normalized_input = specified_pokemon.strip().lower()
 
-            # Handle special cases explicitly
-            special_cases = {
-                'mewtwo x': 'Mewtwo X',
-                'mewtwo y': 'Mewtwo Y',
-                'mew': 'Mew'
-            }
-            matched_pokemon = special_cases.get(normalized_input, None)
-
-            if not matched_pokemon:
+            # Handling special cases for Pokemon names with suffixes like "Mewtwo X" or "Mewtwo Y"
+            if normalized_input.startswith("mewtwo"):
+                if "x" in normalized_input:
+                    matched_pokemon = "Mewtwo X"
+                elif "y" in normalized_input:
+                    matched_pokemon = "Mewtwo Y"
+                else:
+                    matched_pokemon = None
+            else:
                 # General matching logic for other Pokémon
-                for pokemon in self.pokemon:
-                    if normalized_input in pokemon.lower():
-                        matched_pokemon = pokemon
-                        break
+                matched_pokemon = next((pokemon for pokemon in self.pokemon if normalized_input in pokemon.lower()), None)
 
             if not matched_pokemon:
                 await ctx.send(f"¡El Pokémon {specified_pokemon} no es válido!")
