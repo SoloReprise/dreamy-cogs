@@ -110,20 +110,19 @@ class RandomBuild(commands.Cog):
     async def random_build(self, ctx, specified_pokemon: str = None):
         if specified_pokemon:
             normalized_input = specified_pokemon.strip().lower()
+            input_parts = normalized_input.split()
 
-            # Explicitly handle special cases
-            if "mewtwo" in normalized_input:
-                if "x" in normalized_input:
-                    matched_pokemon = "Mewtwo X"
-                elif "y" in normalized_input:
-                    matched_pokemon = "Mewtwo Y"
+            # Enhanced matching logic for names with suffixes
+            matched_pokemon = None
+            for pokemon in self.pokemon:
+                pokemon_parts = pokemon.lower().split()
+                if len(input_parts) > 1 and input_parts[-1] in ['x', 'y']:
+                    # Check for matching suffix (last part of the name)
+                    if input_parts[-1] == pokemon_parts[-1] and input_parts[0] == pokemon_parts[0]:
+                        matched_pokemon = pokemon
+                        break
                 else:
-                    # Handle general "Mewtwo" case
-                    matched_pokemon = "Mewtwo X"  # or "Mewtwo Y", depending on your default preference
-            else:
-                # General matching logic for other Pokémon
-                matched_pokemon = None
-                for pokemon in self.pokemon:
+                    # General matching logic for other Pokémon
                     if normalized_input in pokemon.lower():
                         matched_pokemon = pokemon
                         break
