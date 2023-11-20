@@ -111,16 +111,19 @@ class RandomBuild(commands.Cog):
         if specified_pokemon:
             normalized_input = RandomBuild.normalize_name(specified_pokemon)
 
-            # Check for exact match first
-            if specified_pokemon in self.pokemon:
-                matched_pokemon = specified_pokemon
-            else:
-                # Find matching Pokémon
-                matched_pokemon = None
-                for pokemon in self.pokemon:
-                    if normalized_input in RandomBuild.normalize_name(pokemon):
-                        matched_pokemon = pokemon
-                        break
+            # Find matching Pokémon
+            exact_match = None
+            partial_match = None
+            for pokemon in self.pokemon:
+                normalized_pokemon = RandomBuild.normalize_name(pokemon)
+                if normalized_input == normalized_pokemon:
+                    exact_match = pokemon
+                    break
+                elif normalized_input in normalized_pokemon:
+                    partial_match = pokemon
+                    # Do not break here to ensure we check all possible matches
+
+            matched_pokemon = exact_match or partial_match
 
             if not matched_pokemon:
                 await ctx.send(f"¡El Pokémon {specified_pokemon} no es válido!")
