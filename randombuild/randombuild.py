@@ -105,7 +105,9 @@ class RandomBuild(commands.Cog):
     async def random_build(self, ctx, specified_pokemon: str = None):
         # If a Pokémon was specified, check if it's valid and not banned.
         if specified_pokemon:
-            specified_pokemon = specified_pokemon.capitalize()  # Ensure the first letter is uppercase
+            # Correctly capitalize each word in the Pokémon name
+            specified_pokemon = ' '.join(word.capitalize() for word in specified_pokemon.split())
+
             if specified_pokemon in self.banned_pokemon:
                 await ctx.send(f"¡El Pokémon {specified_pokemon} está baneado!")
                 return
