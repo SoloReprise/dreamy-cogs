@@ -109,19 +109,22 @@ class RandomBuild(commands.Cog):
     @commands.command(name='randombuild', aliases=['rb'])
     async def random_build(self, ctx, specified_pokemon: str = None):
         if specified_pokemon:
-            normalized_input = normalize_name(specified_pokemon)
+            # Normalize the input for case-insensitive comparison
+            normalized_input = specified_pokemon.strip().lower()
 
-            # Find matching Pokémon - consider exact and partial matches
-            exact_match = None
-            partial_match = None
+            # Find matching Pokémon - consider exact matches first, then partial matches
+            matched_pokemon = None
             for pokemon in self.pokemon:
-                if normalized_input == normalize_name(pokemon):
-                    exact_match = pokemon
+                if normalized_input == pokemon.lower():
+                    # Exact match found
+                    matched_pokemon = pokemon
                     break
-                elif normalized_input in normalize_name(pokemon):
-                    partial_match = pokemon
-
-            matched_pokemon = exact_match or partial_match
+            if not matched_pokemon:
+                for pokemon in self.pokemon:
+                    if normalized_input in pokemon.lower():
+                        # Partial match found
+                        matched_pokemon = pokemon
+                        break
 
             if not matched_pokemon:
                 await ctx.send(f"¡El Pokémon {specified_pokemon} no es válido!")
