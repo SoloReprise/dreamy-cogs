@@ -109,20 +109,19 @@ class RandomBuild(commands.Cog):
     @commands.command(name='randombuild', aliases=['rb'])
     async def random_build(self, ctx, specified_pokemon: str = None):
         if specified_pokemon:
-            # Normalize the input for case-insensitive comparison
             normalized_input = specified_pokemon.strip().lower()
 
-            # Find matching Pokémon - consider exact matches first, then partial matches
+            # First, try to find an exact match
             matched_pokemon = None
             for pokemon in self.pokemon:
                 if normalized_input == pokemon.lower():
-                    # Exact match found
                     matched_pokemon = pokemon
                     break
+            
+            # If no exact match is found, look for a partial match
             if not matched_pokemon:
                 for pokemon in self.pokemon:
-                    if normalized_input in pokemon.lower():
-                        # Partial match found
+                    if pokemon.lower().startswith(normalized_input):
                         matched_pokemon = pokemon
                         break
 
