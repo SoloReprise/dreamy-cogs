@@ -128,13 +128,16 @@ class RandomBuild(commands.Cog):
 
             chosen_moves = random.sample(first_set_moves, num_moves_first_set) + random.sample(second_set_moves, num_moves_second_set)
         elif specified_pokemon == "Blaziken":
-            first_set_moves = self.moves[specified_pokemon][0]
-            second_set_moves = self.moves[specified_pokemon][1]
-            
-            num_moves_first_set = random.randint(1, min(2, len(first_set_moves)))
-            num_moves_second_set = random.randint(1, min(2, len(second_set_moves)))
+            style = random.choice(["Estilo Puñetazo", "Estilo Patada", "Ambos estilos"])
+            first_set_moves = self.moves[specified_pokemon][0]  # Onda Certera and Puño Fuego
+            second_set_moves = self.moves[specified_pokemon][1]  # Patada Ígnea and Sofoco
 
-            chosen_moves = random.sample(first_set_moves, num_moves_first_set) + random.sample(second_set_moves, num_moves_second_set)
+            if style == "Estilo Puñetazo":
+                chosen_moves = random.sample(first_set_moves, min(2, len(first_set_moves)))
+            elif style == "Estilo Patada":
+                chosen_moves = random.sample(second_set_moves, min(2, len(second_set_moves)))
+            else:  # Ambos estilos
+                chosen_moves = first_set_moves + second_set_moves
         else:
             chosen_moves = [random.choice(pair) for pair in self.moves[specified_pokemon]]
         
@@ -149,6 +152,7 @@ class RandomBuild(commands.Cog):
         
         message = (f"¡Hola, {ctx.author.mention}! Esta será tu build. ¡Prepara a tu Pokémon!\n\n"
                 f"**Pokémon**: {specified_pokemon}\n"
+                f"**Estilo**: {style if specified_pokemon == 'Blaziken' else 'N/A'}\n"
                 f"**Movimientos**: {', '.join(chosen_moves)}\n"
                 f"**Objeto de combate**: {chosen_combat_item}\n"
                 f"**Objetos de equipo**: {', '.join(chosen_equipment)}\n"
