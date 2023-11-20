@@ -111,14 +111,16 @@ class RandomBuild(commands.Cog):
         if specified_pokemon:
             normalized_input = specified_pokemon.strip().lower()
 
-            # Handling special cases for Pokemon names with suffixes like "Mewtwo X" or "Mewtwo Y"
-            if normalized_input.startswith("mewtwo"):
+            # Refine special cases handling
+            if "mewtwo" in normalized_input:
                 if "x" in normalized_input:
                     matched_pokemon = "Mewtwo X"
                 elif "y" in normalized_input:
                     matched_pokemon = "Mewtwo Y"
                 else:
                     matched_pokemon = None
+            elif "mew" in normalized_input and len(normalized_input) == len("mew"):
+                matched_pokemon = "Mew"
             else:
                 # General matching logic for other Pokémon
                 matched_pokemon = next((pokemon for pokemon in self.pokemon if normalized_input in pokemon.lower()), None)
