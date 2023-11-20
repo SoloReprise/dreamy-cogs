@@ -6,11 +6,7 @@ import re
 
 def normalize_name(name):
     # Convert to lowercase only
-    normalized = name.lower()
-    # Handle special case for "Mewtwo Y"
-    if normalized == "mewtwo y":
-        return "Mewtwo Y"
-    return normalized
+    return name.lower()
 
 class RandomBuild(commands.Cog):
 
