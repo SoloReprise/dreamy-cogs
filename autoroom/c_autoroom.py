@@ -251,23 +251,26 @@ class AutoRoomCommands(MixinMeta, ABC):
 
     @room.command()
     async def move(self, ctx: commands.Context, member: discord.Member) -> None:
-        """Mueve a una persona a tu sala si está en la sala de Off-Topic."""
+        """Mueve a una persona a tu sala si está en la sala específica."""
         if not ctx.guild:
             return
-        
+
         # Check if the command author is the owner of the AutoRoom
         autoroom_channel, autoroom_info = await self._get_autoroom_channel_and_info(
             ctx, check_owner=True
         )
         if not autoroom_channel or not autoroom_info:
             return
-        
-        # Check if the member is in the specified voice room
-        voice_channel = ctx.guild.get_channel(1127625556247203863)
-        if not voice_channel or member.voice.channel != voice_channel:
-            await ctx.send("La persona que quieres mover no está en Off-Topic.")
+
+        # The specific voice channel ID to check
+        specific_voice_channel_id = 1127625556247203863
+        specific_voice_channel = ctx.guild.get_channel(specific_voice_channel_id)
+
+        # Check if the member is in the specific voice channel
+        if not specific_voice_channel or member.voice.channel != specific_voice_channel:
+            await ctx.send("La persona que quieres mover no está en la sala específica.")
             return
-        
+
         # Check if the member is a moderator, administrator, or if they're trying to move one
         if (
             await self.is_mod_or_mod_role(member)
@@ -276,15 +279,15 @@ class AutoRoomCommands(MixinMeta, ABC):
         ):
             await ctx.send("Mods, administradores o dueños del servidor no pueden ser movidos.")
             return
-        
+
         # Move the member to the AutoRoom
         try:
             await member.move_to(autoroom_channel)
-            await ctx.send(f"{member.display_name} ha sido movido a la sala.")
+            await ctx.send(f"{member.display_name} ha sido movido a tu sala.")
         except discord.Forbidden:
-            await ctx.send("I don't have the permissions to move members.")
+            await ctx.send("No tengo permisos para mover miembros.")
         except discord.HTTPException:
-            await ctx.send("Failed to move the member.")
+            await ctx.send("Hubo un fallo al mover al miembro.")
 
     @room.command()
     async def name(self, ctx: commands.Context, *, new_name: str) -> None:
