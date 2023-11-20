@@ -725,23 +725,23 @@ class Pokecord(
                 a[variant] += 1
         await ctx.send(a)
 
-@commands.command()
-@commands.is_owner()  # or @commands.has_permissions(administrator=True)
-async def createspawn(self, ctx, channel_id: int, *, pokemon_name: str = None):
-    """Manually create a pokemon spawn in a specified channel for testing purposes."""
-    
-    channel = ctx.guild.get_channel(channel_id)
-    if not channel:
-        return await ctx.send("Channel not found.")
+    @commands.command()
+    @commands.is_owner()  # or @commands.has_permissions(administrator=True)
+    async def createspawn(self, ctx, channel_id: int, *, pokemon_name: str = None):
+        """Manually create a pokemon spawn in a specified channel for testing purposes."""
+        
+        channel = ctx.guild.get_channel(channel_id)
+        if not channel:
+            return await ctx.send("Channel not found.")
 
-    # Optional: Check if the pokemon_name is valid, else choose a random one
-    if pokemon_name:
-        pokemon = self.get_pokemon_by_name(pokemon_name)  # You need to implement this method
-        if not pokemon:
-            return await ctx.send("Invalid Pokémon name.")
-    else:
-        pokemon = self.pokemon_choose()  # Assuming this method randomly selects a Pokémon
+        # Optional: Check if the pokemon_name is valid, else choose a random one
+        if pokemon_name:
+            pokemon = self.get_pokemon_by_name(pokemon_name)  # You need to implement this method
+            if not pokemon:
+                return await ctx.send("Invalid Pokémon name.")
+        else:
+            pokemon = self.pokemon_choose()  # Assuming this method randomly selects a Pokémon
 
-    # Spawn the Pokémon in the specified channel
-    await self.spawn_pokemon(channel, pokemon=pokemon)
-    await ctx.send(f"A wild {pokemon['name']['english']} has been spawned in {channel.mention}!")
+        # Spawn the Pokémon in the specified channel
+        await self.spawn_pokemon(channel, pokemon=pokemon)
+        await ctx.send(f"A wild {pokemon['name']['english']} has been spawned in {channel.mention}!")
