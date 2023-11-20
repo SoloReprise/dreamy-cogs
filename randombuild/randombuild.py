@@ -61,7 +61,7 @@ class RandomBuild(commands.Cog):
             'Mamoswine': [['Chuzos', 'Colmillo Hielo'], ['Fuerza Equina', 'Terremoto']],
             'Mewtwo X': [['Premonición', 'Onda Mental'], ['Recuperación', 'Teletransporte']],
             'Mewtwo Y': [['Premonición', 'Onda Mental'], ['Recuperación', 'Teletransporte']],
-            'Mimikyu': [['Carantoña, Garra Umbría'], ['Sombra Vil', 'Espacio Raro']],
+            'Mimikyu': [['Carantoña', 'Garra Umbría'], ['Sombra Vil', 'Espacio Raro']],
             'Mr. Mime': [['Confusión', 'Psíquico'], ['Barrera', 'Cambiafuerza']],
             'Ninetales': [['Alud', 'Brillo Mágico'], ['Ventisca', 'Velo Aurora']],
             'Pikachu': [['Bola Voltio', 'Trueno'], ['Placaje Eléctrico', 'Rayo']],
