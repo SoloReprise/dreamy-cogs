@@ -128,11 +128,13 @@ class RandomBuild(commands.Cog):
 
             chosen_moves = random.sample(first_set_moves, num_moves_first_set) + random.sample(second_set_moves, num_moves_second_set)
         elif specified_pokemon == "Blaziken":
-            # For Blaziken, select one move from each set
             first_set_moves = self.moves[specified_pokemon][0]
             second_set_moves = self.moves[specified_pokemon][1]
+            
+            num_moves_first_set = random.randint(1, min(2, len(first_set_moves)))
+            num_moves_second_set = random.randint(1, min(2, len(second_set_moves)))
 
-            chosen_moves = [random.choice(first_set_moves), random.choice(second_set_moves)]
+            chosen_moves = random.sample(first_set_moves, num_moves_first_set) + random.sample(second_set_moves, num_moves_second_set)
         else:
             chosen_moves = [random.choice(pair) for pair in self.moves[specified_pokemon]]
         
