@@ -5,8 +5,8 @@ import random
 import re
 
 def normalize_name(name):
-    # Remove non-alphabetic characters and convert to lowercase
-    return re.sub(r'[^a-z]', '', name.lower())
+    # Keep only alphabetic characters, spaces, and dots; convert to lowercase
+    return re.sub(r'[^a-z. ]', '', name.lower())
 
 class RandomBuild(commands.Cog):
 
@@ -109,21 +109,14 @@ class RandomBuild(commands.Cog):
     @commands.command(name='randombuild', aliases=['rb'])
     async def random_build(self, ctx, specified_pokemon: str = None):
         if specified_pokemon:
-            normalized_input = RandomBuild.normalize_name(specified_pokemon)
+            normalized_input = normalize_name(specified_pokemon)
 
             # Find matching Pokémon
-            exact_match = None
-            partial_match = None
+            matched_pokemon = None
             for pokemon in self.pokemon:
-                normalized_pokemon = RandomBuild.normalize_name(pokemon)
-                if normalized_input == normalized_pokemon:
-                    exact_match = pokemon
+                if normalized_input == normalize_name(pokemon):
+                    matched_pokemon = pokemon
                     break
-                elif normalized_input in normalized_pokemon:
-                    partial_match = pokemon
-                    # Do not break here to ensure we check all possible matches
-
-            matched_pokemon = exact_match or partial_match
 
             if not matched_pokemon:
                 await ctx.send(f"¡El Pokémon {specified_pokemon} no es válido!")
@@ -131,8 +124,7 @@ class RandomBuild(commands.Cog):
             elif matched_pokemon in self.banned_pokemon:
                 await ctx.send(f"¡El Pokémon {matched_pokemon} está baneado!")
                 return
-                
-            # Use the matched Pokémon name for further processing
+
             specified_pokemon = matched_pokemon
         else:
             # Ensure the chosen Pokemon is not banned
