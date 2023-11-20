@@ -106,14 +106,33 @@ class SettingsMixin(MixinMeta):
 
     @pokecordset.command()
     @commands.admin_or_permissions(manage_channels=True)
-    async def whitelist(self, ctx, channel: discord.TextChannel):
-        """Whitelist channels that will contribute to pokémon spawning."""
+    async def whitelist(self, ctx, channel: discord.TextChannel, action: str = "add"):
+        """
+        Manage the whitelist of channels for pokémon spawning.
+        
+        Parameters:
+        - channel: The discord text channel to be added or removed.
+        - action: "add" to add the channel to the whitelist, "remove" to remove it.
+        """
+        valid_actions = ["add", "remove"]
+        if action not in valid_actions:
+            await ctx.send(_("Invalid action. Please use 'add' or 'remove'."))
+            return
+
         async with self.config.guild(ctx.guild).whitelist() as channels:
-            if channel.id in channels:
-                channels.remove(channel.id)
-                await ctx.send(_("Channel has been removed from the whitelist."))
-            else:
-                channels.append(channel.id)
+            if action == "add":
+                if channel.id not in channels:
+                    channels.append(channel.id)
+                    await ctx.send(_(f"Channel {channel.mention} has been added to the whitelist."))
+                else:
+                    await ctx.send(_(f"Channel {channel.mention} is already in the whitelist."))
+            elif action == "remove":
+                if channel.id in channels:
+                    channels.remove(channel.id)
+                    await ctx.send(_(f"Channel {channel.mention} has been removed from the whitelist."))
+                else:
+                    await ctx.send(_(f"Channel {channel.mention} is not in the whitelist."))
+
         await self.update_guild_cache()
         await ctx.tick()
 
