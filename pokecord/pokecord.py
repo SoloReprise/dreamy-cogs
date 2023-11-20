@@ -726,22 +726,25 @@ class Pokecord(
         await ctx.send(a)
 
     @commands.command()
-    @commands.is_owner()  # or @commands.has_permissions(administrator=True)
-    async def createspawn(self, ctx, channel_id: int, *, pokemon_name: str = None):
-        """Manually create a pokemon spawn in a specified channel for testing purposes."""
-        
-        channel = ctx.guild.get_channel(channel_id)
-        if not channel:
-            return await ctx.send("Channel not found.")
+    @commands.is_owner()  # Ensures that only the bot owner can use this command
+    async def createspawn(self, ctx):
+        """Creates a test Pokemon spawn in the active channel."""
+        # Check if the guild is in the guild cache
+        guildcache = self.guildcache.get(ctx.guild.id)
+        if not guildcache or not guildcache["activechannels"]:
+            await ctx.send("No active channels found for spawning.")
+            return
 
-        # Optional: Check if the pokemon_name is valid, else choose a random one
-        if pokemon_name:
-            pokemon = self.get_pokemon_by_name(pokemon_name)  # You need to implement this method
-            if not pokemon:
-                return await ctx.send("Invalid Pokémon name.")
-        else:
-            pokemon = self.pokemon_choose()  # Assuming this method randomly selects a Pokémon
+        # Choose a random active channel
+        channel_id = random.choice(guildcache["activechannels"])
+        channel = ctx.guild.get_channel(int(channel_id))
+        if channel is None:
+            await ctx.send("Selected channel is not valid.")
+            return
 
-        # Spawn the Pokémon in the specified channel
+        # Choose a random Pokemon to spawn
+        pokemon = self.pokemon_choose()  # Assuming you have a method to select a random Pokemon
+
+        # Spawn the Pokemon in the selected channel
         await self.spawn_pokemon(channel, pokemon=pokemon)
-        await ctx.send(f"A wild {pokemon['name']['english']} has been spawned in {channel.mention}!")
+        await ctx.send(f"A test Pokémon spawn has been created in {channel.mention}.")
