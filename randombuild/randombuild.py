@@ -95,8 +95,8 @@ class RandomBuild(commands.Cog):
                 ['Motivación', 'Pantalla de Luz', 'Agilidad']
             ],
             'Blaziken': [
-                ['Patada Ígnea', 'Onda Certera'], 
-                ['Puño Fuego', 'Sofoco']
+                ['Patada Ígnea', 'Sofoco'], 
+                ['Puño Fuego', 'Onda Certera']
             ]
                 }
         
