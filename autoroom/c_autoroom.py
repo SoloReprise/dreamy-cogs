@@ -307,7 +307,7 @@ class AutoRoomCommands(MixinMeta, ABC):
         except discord.Forbidden:
             await ctx.send("No tengo permisos para cambiar el nombre de la sala.")
         except discord.HTTPException:
-            await ctx.send("Hubo un error al cambiar el nombre de la sala.")
+            await ctx.send("¡Oops! Hubo un error al cambiar el nombre de la sala.")
 
     @room.command()
     async def public(self, ctx: commands.Context) -> None:
