@@ -561,7 +561,7 @@ class Pokecord(
         await channel.send(embed=embed, file=_file)
         await self.config.channel(channel).pokemon.set(pokemon)
 
-        await asyncio.sleep(60)
+        await asyncio.sleep(180)
 
         # Check if the pokemon is still there
         pokemonspawn = await self.config.channel(channel).pokemon()
