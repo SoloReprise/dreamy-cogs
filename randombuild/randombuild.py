@@ -112,15 +112,15 @@ class RandomBuild(commands.Cog):
             normalized_input = specified_pokemon.strip().lower()
 
             # Handle special cases explicitly
-            if normalized_input in ['mewtwo x', 'mewtwo y', 'mew']:
-                matched_pokemon = {
-                    'mewtwo x': 'Mewtwo X',
-                    'mewtwo y': 'Mewtwo Y',
-                    'mew': 'Mew'
-                }.get(normalized_input, None)
-            else:
+            special_cases = {
+                'mewtwo x': 'Mewtwo X',
+                'mewtwo y': 'Mewtwo Y',
+                'mew': 'Mew'
+            }
+            matched_pokemon = special_cases.get(normalized_input, None)
+
+            if not matched_pokemon:
                 # General matching logic for other Pokémon
-                matched_pokemon = None
                 for pokemon in self.pokemon:
                     if normalized_input in pokemon.lower():
                         matched_pokemon = pokemon
