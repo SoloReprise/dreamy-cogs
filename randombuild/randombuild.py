@@ -101,85 +101,95 @@ class RandomBuild(commands.Cog):
         
         self.line = ['Top', 'Bot', 'Jungla']
 
-    @commands.command(name='randombuild', aliases=['rb'])
-    async def random_build(self, ctx, specified_pokemon: str = None):
-        # Trim leading/trailing whitespace and handle capitalization
-        if specified_pokemon:
-            specified_pokemon = specified_pokemon.strip()
-            specified_pokemon = ' '.join(word.capitalize() for word in specified_pokemon.split())
+        def normalize_name(name):
+            return ''.join(filter(str.isalnum, name.lower()))
 
-            # Debug prints
-            print(f"Processed Pokémon name: {specified_pokemon}")
-            print(f"Available Pokémon list: {self.pokemon}")
+        @commands.command(name='randombuild', aliases=['rb'])
+        async def random_build(self, ctx, specified_pokemon: str = None):
+            # Normalize Pokémon names in the list
+            normalized_pokemon_names = {normalize_name(p): p for p in self.pokemon}
 
-            if specified_pokemon in self.banned_pokemon:
-                await ctx.send(f"¡El Pokémon {specified_pokemon} está baneado!")
-                return
-            elif specified_pokemon not in self.pokemon:
-                await ctx.send(f"¡El Pokémon {specified_pokemon} no es válido!")
-                return
-        else:
-            # Ensure the chosen Pokemon is not banned
-            available_pokemon = [p for p in self.pokemon if p not in self.banned_pokemon]
+            if specified_pokemon:
+                # Normalize the input Pokémon name
+                normalized_input = normalize_name(specified_pokemon)
 
-            if not available_pokemon:
-                await ctx.send("¡Todos los Pokémon están actualmente baneados!")
-                return
+                # Find a matching Pokémon or allow partial matches
+                matched_pokemon = None
+                for norm_name, orig_name in normalized_pokemon_names.items():
+                    if normalized_input in norm_name:
+                        matched_pokemon = orig_name
+                        break
 
-            specified_pokemon = random.choice(available_pokemon)
+                if not matched_pokemon:
+                    await ctx.send(f"¡El Pokémon {specified_pokemon} no es válido!")
+                    return
+                elif matched_pokemon in self.banned_pokemon:
+                    await ctx.send(f"¡El Pokémon {matched_pokemon} está baneado!")
+                    return
 
-        if specified_pokemon == "Mew":
-            first_set_moves = self.moves[specified_pokemon][0]
-            second_set_moves = self.moves[specified_pokemon][1]
-            
-            num_moves_first_set = random.randint(1, len(first_set_moves))
-            num_moves_second_set = random.randint(1, len(second_set_moves))
+                specified_pokemon = matched_pokemon
+            else:
+                # Ensure the chosen Pokemon is not banned
+                available_pokemon = [p for p in self.pokemon if p not in self.banned_pokemon]
 
-            chosen_moves = random.sample(first_set_moves, num_moves_first_set) + random.sample(second_set_moves, num_moves_second_set)
-        elif specified_pokemon == "Blaziken":
-            style = random.choice(["Estilo Puñetazo", "Estilo Patada", "Ambos estilos"])
-            first_set_moves = self.moves[specified_pokemon][0]  # Onda Certera and Puño Fuego
-            second_set_moves = self.moves[specified_pokemon][1]  # Patada Ígnea and Sofoco
+                if not available_pokemon:
+                    await ctx.send("¡Todos los Pokémon están actualmente baneados!")
+                    return
 
-            if style == "Estilo Puñetazo":
-                chosen_moves = random.sample(first_set_moves, min(2, len(first_set_moves)))
-            elif style == "Estilo Patada":
-                chosen_moves = random.sample(second_set_moves, min(2, len(second_set_moves)))
-            else:  # Ambos estilos
-                chosen_moves = first_set_moves + second_set_moves
-        elif specified_pokemon == "Urshifu":
-            style = random.choice(["Brusco", "Fluido"])
-            movesets = self.moves[specified_pokemon][style]
-            
-            # Assuming each moveset only has one move, so we take the first element
-            chosen_moves = [moveset[0] for moveset in movesets]                
-        else:
-            chosen_moves = [random.choice(pair) for pair in self.moves[specified_pokemon]]
-        
-        chosen_combat_item = random.choice(self.combat_item)
-        
-        if specified_pokemon == 'Zacian':
-            chosen_equipment = ['Espada Oxidada'] + random.sample([item for item in self.equipment_items if item != 'Espada Oxidada'], 2)
-        else:
-            chosen_equipment = random.sample(self.equipment_items, 3)  # This picks 3 unique items
-        
-        chosen_line = random.choice(self.line)
-        
-        # Construct the base message
-        message = (f"¡Hola, {ctx.author.mention}! Esta será tu build. ¡Prepara a tu Pokémon!\n\n"
-                f"**Pokémon**: {specified_pokemon}\n")
+                specified_pokemon = random.choice(available_pokemon)
 
-        # Add the style line only for Blaziken and Urshifu
-        if specified_pokemon in ["Blaziken", "Urshifu"]:
-            message += f"**Estilo**: {style}\n"
+                if specified_pokemon == "Mew":
+                    first_set_moves = self.moves[specified_pokemon][0]
+                    second_set_moves = self.moves[specified_pokemon][1]
+                    
+                    num_moves_first_set = random.randint(1, len(first_set_moves))
+                    num_moves_second_set = random.randint(1, len(second_set_moves))
 
-        # Continue with the rest of the message
-        message += (f"**Movimientos**: {', '.join(chosen_moves)}\n"
-                    f"**Objeto de combate**: {chosen_combat_item}\n"
-                    f"**Objetos de equipo**: {', '.join(chosen_equipment)}\n"
-                    f"**Línea**: {chosen_line}")
+                    chosen_moves = random.sample(first_set_moves, num_moves_first_set) + random.sample(second_set_moves, num_moves_second_set)
+                elif specified_pokemon == "Blaziken":
+                    style = random.choice(["Estilo Puñetazo", "Estilo Patada", "Ambos estilos"])
+                    first_set_moves = self.moves[specified_pokemon][0]  # Onda Certera and Puño Fuego
+                    second_set_moves = self.moves[specified_pokemon][1]  # Patada Ígnea and Sofoco
 
-        await ctx.send(message)
+                    if style == "Estilo Puñetazo":
+                        chosen_moves = random.sample(first_set_moves, min(2, len(first_set_moves)))
+                    elif style == "Estilo Patada":
+                        chosen_moves = random.sample(second_set_moves, min(2, len(second_set_moves)))
+                    else:  # Ambos estilos
+                        chosen_moves = first_set_moves + second_set_moves
+                elif specified_pokemon == "Urshifu":
+                    style = random.choice(["Brusco", "Fluido"])
+                    movesets = self.moves[specified_pokemon][style]
+                    
+                    # Assuming each moveset only has one move, so we take the first element
+                    chosen_moves = [moveset[0] for moveset in movesets]                
+                else:
+                    chosen_moves = [random.choice(pair) for pair in self.moves[specified_pokemon]]
+                
+                chosen_combat_item = random.choice(self.combat_item)
+                
+                if specified_pokemon == 'Zacian':
+                    chosen_equipment = ['Espada Oxidada'] + random.sample([item for item in self.equipment_items if item != 'Espada Oxidada'], 2)
+                else:
+                    chosen_equipment = random.sample(self.equipment_items, 3)  # This picks 3 unique items
+                
+                chosen_line = random.choice(self.line)
+                
+                # Construct the base message
+                message = (f"¡Hola, {ctx.author.mention}! Esta será tu build. ¡Prepara a tu Pokémon!\n\n"
+                        f"**Pokémon**: {specified_pokemon}\n")
+
+                # Add the style line only for Blaziken and Urshifu
+                if specified_pokemon in ["Blaziken", "Urshifu"]:
+                    message += f"**Estilo**: {style}\n"
+
+                # Continue with the rest of the message
+                message += (f"**Movimientos**: {', '.join(chosen_moves)}\n"
+                            f"**Objeto de combate**: {chosen_combat_item}\n"
+                            f"**Objetos de equipo**: {', '.join(chosen_equipment)}\n"
+                            f"**Línea**: {chosen_line}")
+
+                await ctx.send(message)
 
     @commands.group(name='randombuildset', aliases=['rbset'])
     @commands.has_permissions(administrator=True)
