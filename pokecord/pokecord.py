@@ -561,6 +561,16 @@ class Pokecord(
         await channel.send(embed=embed, file=_file)
         await self.config.channel(channel).pokemon.set(pokemon)
 
+        await asyncio.sleep(60)
+
+        # Check if the pokemon is still there
+        pokemonspawn = await self.config.channel(channel).pokemon()
+        if pokemonspawn is not None:
+            # If the pokemon is the same that was spawned
+            if pokemonspawn["id"] == pokemon["id"]:
+                await self.config.channel(channel).pokemon.clear()
+                await channel.send(f"¡El Pokémon salvaje ha huído! ¡El Pokémon salvaje era {pokemon['name']['english']}!")
+
     def calc_xp(self, lvl):
         return 25 * lvl
 
