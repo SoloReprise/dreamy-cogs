@@ -107,11 +107,13 @@ class RandomBuild(commands.Cog):
         self.line = ['Top', 'Bot', 'Jungla']
 
     @commands.command(name='randombuild', aliases=['rb'])
-    async def random_build(self, ctx, specified_pokemon: str = None):
-        if specified_pokemon:
-            normalized_input = specified_pokemon.strip().lower()
+    async def random_build(self, ctx, *args):
+        specified_pokemon = " ".join(args).strip() if args else None
 
-            # Refine special cases handling
+        if specified_pokemon:
+            normalized_input = specified_pokemon.lower()
+
+            # Handle special cases more robustly
             if "mewtwo" in normalized_input:
                 if "x" in normalized_input:
                     matched_pokemon = "Mewtwo X"
@@ -119,7 +121,7 @@ class RandomBuild(commands.Cog):
                     matched_pokemon = "Mewtwo Y"
                 else:
                     matched_pokemon = None
-            elif "mew" in normalized_input and len(normalized_input) == len("mew"):
+            elif "mew" == normalized_input:
                 matched_pokemon = "Mew"
             else:
                 # General matching logic for other Pokémon
