@@ -19,7 +19,7 @@ class RandomBuild(commands.Cog):
             'Mewtwo Y', 'Mimikyu', 'Mr. Mime', 'Ninetales', 'Pikachu', 'Sableye', 'Slowbro',
             'Snorlax', 'Sylveon', 'Talonflame', 'Trevenant', 'Tsareena', 'Tyranitar',
             'Umbreon', 'Venusaur', 'Wiglytuff', 'Zacian', 'Zeraora', 'Zoroark', 'Scizor', 'Scyther',
-            'Urshifu Estilo Brusco', 'Urshifu Estilo Fluido', 'Mew', 
+            'Urshifu', 'Mew', 
         ]
         self.banned_pokemon = []  # List to store banned Pokémon
         
@@ -81,8 +81,10 @@ class RandomBuild(commands.Cog):
             'Zoroark': [['Tajo Umbrío', 'Finta'], ['Garra Umbría', 'Corte']],
             'Scizor': [['Puño Bala'], ['Doble Golpe', 'Danza Espada']],
             'Scyther': [['Ala Bis'], ['Doble Golpe', 'Danza Espada']],
-            'Urshifu Estilo Brusco': [['Golpe Oscuro'], ['Golpe Mordaza']],
-            'Urshifu Estilo Fluido': [['Azote Torrencial'], ['Hidroariete']],
+            'Urshifu': {
+                'Brusco': [['Golpe Oscuro'], ['Golpe Mordaza']],
+                'Fluido': [['Azote Torrencial'], ['Hidroariete']]
+            },
             'Mew': [
                 ['Bola Voltio', 'Rayo Solar', 'Surf'], 
                 ['Motivación', 'Pantalla de Luz', 'Agilidad']
@@ -139,6 +141,12 @@ class RandomBuild(commands.Cog):
                 chosen_moves = random.sample(second_set_moves, min(2, len(second_set_moves)))
             else:  # Ambos estilos
                 chosen_moves = first_set_moves + second_set_moves
+        elif specified_pokemon == "Urshifu":
+            style = random.choice(["Brusco", "Fluido"])
+            movesets = self.moves[specified_pokemon][style]
+            
+            # Assuming each moveset only has one move, so we take the first element
+            chosen_moves = [moveset[0] for moveset in movesets]                
         else:
             chosen_moves = [random.choice(pair) for pair in self.moves[specified_pokemon]]
         
@@ -155,8 +163,8 @@ class RandomBuild(commands.Cog):
         message = (f"¡Hola, {ctx.author.mention}! Esta será tu build. ¡Prepara a tu Pokémon!\n\n"
                 f"**Pokémon**: {specified_pokemon}\n")
 
-        # Add the style line only for Blaziken
-        if specified_pokemon == "Blaziken":
+        # Add the style line only for Blaziken and Urshifu
+        if specified_pokemon in ["Blaziken", "Urshifu"]:
             message += f"**Estilo**: {style}\n"
 
         # Continue with the rest of the message
