@@ -300,7 +300,7 @@ class AutoRoomCommands(MixinMeta, ABC):
             return
 
         # Validate and set the new name
-        full_new_name = f"◇║ {new_name}"
+        full_new_name = f"◇║{new_name}"
         try:
             await autoroom_channel.edit(name=full_new_name)
             await ctx.send(f"El nombre de la sala ha sido cambiado a: {full_new_name}")
