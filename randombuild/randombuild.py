@@ -5,8 +5,8 @@ import random
 import re
 
 def normalize_name(name):
-    # Keep only alphabetic characters, spaces, and dots; convert to lowercase
-    return re.sub(r'[^a-z. ]', '', name.lower())
+    # Convert to lowercase only
+    return name.lower()
 
 class RandomBuild(commands.Cog):
 
@@ -111,12 +111,14 @@ class RandomBuild(commands.Cog):
         if specified_pokemon:
             normalized_input = normalize_name(specified_pokemon)
 
-            # Find matching Pokémon
+            # Find matching Pokémon - consider both partial and exact matches
             matched_pokemon = None
             for pokemon in self.pokemon:
-                if normalized_input == normalize_name(pokemon):
+                if normalized_input in normalize_name(pokemon):
                     matched_pokemon = pokemon
-                    break
+                    # Prioritize exact matches
+                    if normalized_input == normalize_name(pokemon):
+                        break
 
             if not matched_pokemon:
                 await ctx.send(f"¡El Pokémon {specified_pokemon} no es válido!")
