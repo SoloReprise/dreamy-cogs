@@ -10,7 +10,7 @@ class RandomBuild(commands.Cog):
 
         # Data
         self.pokemon = [
-            'Absol', 'Aegislash', 'Azumarill', 'Blastoise', 'Blissey', 'Buzzwole',
+            'Absol', 'Aegislash', 'Azumarill', 'Blastoise', 'Blaziken', 'Blissey', 'Buzzwole',
             'Chandelure', 'Charizard', 'Cinderace', 'Clefable', 'Comfey', 'Cramorant',
             'Crustle', 'Decidueye', 'Delphox', 'Dodrio', 'Dragapult', 'Dragonite',
             'Duraludon', 'Eldegoss', 'Espeon', 'Garchomp', 'Gardevoir', 'Gengar',
@@ -19,7 +19,7 @@ class RandomBuild(commands.Cog):
             'Mewtwo Y', 'Mr. Mime', 'Ninetales', 'Pikachu', 'Sableye', 'Slowbro',
             'Snorlax', 'Sylveon', 'Talonflame', 'Trevenant', 'Tsareena', 'Tyranitar',
             'Umbreon', 'Venusaur', 'Wiglytuff', 'Zacian', 'Zeraora', 'Zoroark', 'Scizor', 'Scyther',
-            'Urshifu Estilo Brusco', 'Urshifu Estilo Fluido', 'Mew'
+            'Urshifu Estilo Brusco', 'Urshifu Estilo Fluido', 'Mew', 
         ]
         self.banned_pokemon = []  # List to store banned Pokémon
         
@@ -85,6 +85,10 @@ class RandomBuild(commands.Cog):
             'Mew': [
                 ['Bola Voltio', 'Rayo Solar', 'Surf'], 
                 ['Motivación', 'Pantalla de Luz', 'Agilidad']
+            ],
+            'Blaziken': [
+                ['Patada Ígnea', 'Onda Certera'], 
+                ['Puño Fuego', 'Sofoco']
             ]
                 }
         
@@ -123,6 +127,12 @@ class RandomBuild(commands.Cog):
             num_moves_second_set = random.randint(1, len(second_set_moves))
 
             chosen_moves = random.sample(first_set_moves, num_moves_first_set) + random.sample(second_set_moves, num_moves_second_set)
+        elif specified_pokemon == "Blaziken":
+            # For Blaziken, select one move from each set
+            first_set_moves = self.moves[specified_pokemon][0]
+            second_set_moves = self.moves[specified_pokemon][1]
+
+            chosen_moves = [random.choice(first_set_moves), random.choice(second_set_moves)]
         else:
             chosen_moves = [random.choice(pair) for pair in self.moves[specified_pokemon]]
         
