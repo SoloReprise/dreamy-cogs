@@ -287,6 +287,29 @@ class AutoRoomCommands(MixinMeta, ABC):
             await ctx.send("Failed to move the member.")
 
     @room.command()
+    async def name(self, ctx: commands.Context, *, new_name: str) -> None:
+        """Cambia el nombre de tu sala de voz."""
+        if not ctx.guild:
+            return
+
+        # Check if the command author is the owner of the AutoRoom
+        autoroom_channel, autoroom_info = await self._get_autoroom_channel_and_info(
+            ctx, check_owner=True
+        )
+        if not autoroom_channel or not autoroom_info:
+            return
+
+        # Validate and set the new name
+        full_new_name = f"◇║ {new_name}"
+        try:
+            await autoroom_channel.edit(name=full_new_name)
+            await ctx.send(f"El nombre de la sala ha sido cambiado a: {full_new_name}")
+        except discord.Forbidden:
+            await ctx.send("No tengo permisos para cambiar el nombre de la sala.")
+        except discord.HTTPException:
+            await ctx.send("Hubo un error al cambiar el nombre de la sala.")
+
+    @room.command()
     async def public(self, ctx: commands.Context) -> None:
         """Haz tu sala pública."""
         await self._process_allow_deny(ctx, self.perms_public)
