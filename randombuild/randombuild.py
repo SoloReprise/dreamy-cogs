@@ -4,6 +4,10 @@ from redbot.core import Config, commands
 import random
 import re
 
+def normalize_name(name):
+    # Remove non-alphabetic characters and convert to lowercase
+    return re.sub(r'[^a-z]', '', name.lower())
+
 class RandomBuild(commands.Cog):
 
     def __init__(self, bot):
@@ -101,10 +105,6 @@ class RandomBuild(commands.Cog):
         self.equipment_items = ['Cinta Fuerte', 'Periscopio', 'Garra Afilada', 'Cascabel Concha', 'Gafas Especiales', 'Energáfono', 'Gafas Elección', 'Pañuelo Combo', 'Corona Drenaje', 'Cuchara Peculiar', 'Brazalete Condena', 'Incienso Condena', 'Cinta Focus', 'Casco Dentado', 'Restos', 'Chaleco Asalto', 'Seguro Debilidad', 'Rodillera Escudo', 'Galleta Æos', 'Pesas Ofensivas', 'Gafas de Asalto', 'Piedra Pómez', 'Barrera Auxiliar', 'Repartir Experiencia', 'Cinta Rescate']
         
         self.line = ['Top', 'Bot', 'Jungla']
-
-    def normalize_name(name):
-        # Remove non-alphabetic characters and convert to lowercase
-        return re.sub(r'[^a-z]', '', name.lower())
 
     @commands.command(name='randombuild', aliases=['rb'])
     async def random_build(self, ctx, specified_pokemon: str = None):
