@@ -109,14 +109,18 @@ class RandomBuild(commands.Cog):
     @commands.command(name='randombuild', aliases=['rb'])
     async def random_build(self, ctx, specified_pokemon: str = None):
         if specified_pokemon:
-            normalized_input = normalize_name(specified_pokemon)
+            normalized_input = RandomBuild.normalize_name(specified_pokemon)
 
-            # Find matching Pokémon
-            matched_pokemon = None
-            for pokemon in self.pokemon:
-                if normalized_input in normalize_name(pokemon):
-                    matched_pokemon = pokemon
-                    break
+            # Check for exact match first
+            if specified_pokemon in self.pokemon:
+                matched_pokemon = specified_pokemon
+            else:
+                # Find matching Pokémon
+                matched_pokemon = None
+                for pokemon in self.pokemon:
+                    if normalized_input in RandomBuild.normalize_name(pokemon):
+                        matched_pokemon = pokemon
+                        break
 
             if not matched_pokemon:
                 await ctx.send(f"¡El Pokémon {specified_pokemon} no es válido!")
@@ -124,7 +128,7 @@ class RandomBuild(commands.Cog):
             elif matched_pokemon in self.banned_pokemon:
                 await ctx.send(f"¡El Pokémon {matched_pokemon} está baneado!")
                 return
-            
+                
             # Use the matched Pokémon name for further processing
             specified_pokemon = matched_pokemon
         else:
