@@ -109,7 +109,7 @@ class RandomBuild(commands.Cog):
     @commands.command(name='randombuild', aliases=['rb'])
     async def random_build(self, ctx, specified_pokemon: str = None):
         if specified_pokemon:
-            normalized_input = normalize_name(specified_pokemon)
+            normalized_input = specified_pokemon.strip().lower()
 
             # Handle special cases explicitly
             special_cases = {
