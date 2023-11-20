@@ -109,21 +109,14 @@ class RandomBuild(commands.Cog):
     @commands.command(name='randombuild', aliases=['rb'])
     async def random_build(self, ctx, specified_pokemon: str = None):
         if specified_pokemon:
-            normalized_input = specified_pokemon.strip().lower()
+            input_parts = specified_pokemon.strip().lower().split()
 
-            # First, try to find an exact match
             matched_pokemon = None
             for pokemon in self.pokemon:
-                if normalized_input == pokemon.lower():
+                pokemon_parts = pokemon.lower().split()
+                if all(part in pokemon_parts for part in input_parts):
                     matched_pokemon = pokemon
                     break
-            
-            # If no exact match is found, look for a partial match
-            if not matched_pokemon:
-                for pokemon in self.pokemon:
-                    if pokemon.lower().startswith(normalized_input):
-                        matched_pokemon = pokemon
-                        break
 
             if not matched_pokemon:
                 await ctx.send(f"¡El Pokémon {specified_pokemon} no es válido!")
