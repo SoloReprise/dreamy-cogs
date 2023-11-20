@@ -310,6 +310,38 @@ class AutoRoomCommands(MixinMeta, ABC):
             await ctx.send("¡Oops! Hubo un error al cambiar el nombre de la sala.")
 
     @room.command()
+    async def size(self, ctx: commands.Context, size: int) -> None:
+        """Cambia el límite de usuarios de tu sala de voz."""
+        if not ctx.guild:
+            return
+
+        # Check if the command author is the owner of the AutoRoom
+        autoroom_channel, autoroom_info = await self._get_autoroom_channel_and_info(
+            ctx, check_owner=True
+        )
+        if not autoroom_channel or not autoroom_info:
+            return
+
+        # Check if the provided size is valid
+        if size < 0 or size > 99:  # Discord's maximum user limit for voice channels is 99
+            await ctx.send("Por favor, introduce un número válido entre 0 y 99.")
+            return
+
+        # If size is 0, remove the user limit
+        new_user_limit = None if size == 0 else size
+
+        try:
+            await autoroom_channel.edit(user_limit=new_user_limit)
+            if new_user_limit:
+                await ctx.send(f"El límite de usuarios de la sala se ha establecido en {new_user_limit}.")
+            else:
+                await ctx.send("El límite de usuarios de la sala ha sido eliminado.")
+        except discord.Forbidden:
+            await ctx.send("No tengo permisos para cambiar el límite de usuarios de la sala.")
+        except discord.HTTPException:
+            await ctx.send("Hubo un error al cambiar el límite de usuarios de la sala.")
+
+    @room.command()
     async def public(self, ctx: commands.Context) -> None:
         """Haz tu sala pública."""
         await self._process_allow_deny(ctx, self.perms_public)
