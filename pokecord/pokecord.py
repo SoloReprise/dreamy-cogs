@@ -481,49 +481,49 @@ class Pokecord(
 
     @commands.Cog.listener()
     async def on_message_without_command(self, message):
-        if not message.guild:
+        if not message.guild or message.author.bot:
             return
-        if message.author.bot:
-            return
+
         guildcache = self.guildcache.get(message.guild.id)
         if guildcache is None:
             return
+
         if not guildcache["toggle"]:
             return
+
+        # Update guild cache to include all text channels by default
+        if not guildcache["whitelist"]:
+            all_text_channels = [ch.id for ch in message.guild.text_channels]
+            guildcache["whitelist"] = all_text_channels
+
+        # Exclude blacklisted channels
+        if guildcache["blacklist"] and message.channel.id in guildcache["blacklist"]:
+            return
+
         await self.exp_gain(message.channel, message.author)
-        if guildcache["whitelist"]:
-            if message.channel.id not in guildcache["whitelist"]:
-                return
-        elif guildcache["blacklist"]:
-            if message.channel.id in guildcache["blacklist"]:
-                return
+
+        # Initialize spawn data if not present
         if message.guild.id not in self.maybe_spawn:
             self.maybe_spawn[message.guild.id] = {
                 "amount": 1,
                 "spawnchance": random.randint(self.spawnchance[0], self.spawnchance[1]),
                 "time": datetime.datetime.utcnow().timestamp(),
                 "author": message.author.id,
-            }  # TODO: big value
-        if (
-            self.maybe_spawn[message.guild.id]["author"] == message.author.id
-        ):  # stop spamming to spawn
-            if (
-                datetime.datetime.utcnow().timestamp() - self.maybe_spawn[message.guild.id]["time"]
-            ) < 5:
-                return
-        self.maybe_spawn[message.guild.id]["amount"] += 1
-        should_spawn = self.spawn_chance(message.guild.id)
-        if not should_spawn:
-            return
-        del self.maybe_spawn[message.guild.id]
-        if not guildcache["activechannels"]:
-            channel = message.channel
-        else:
-            channel = message.guild.get_channel(int(random.choice(guildcache["activechannels"])))
-            if channel is None:
-                return  # TODO: Remove channel from config
-        await set_contextual_locales_from_guild(self.bot, message.guild)
-        await self.spawn_pokemon(channel)
+            }
+        
+        # Increment spawn count, but control spamming
+        spawn_data = self.maybe_spawn[message.guild.id]
+        if spawn_data["author"] != message.author.id or \
+        (datetime.datetime.utcnow().timestamp() - spawn_data["time"]) >= 5:
+            spawn_data["amount"] += 1
+
+        # Check for spawn
+        if spawn_data["amount"] > spawn_data["spawnchance"]:
+            del self.maybe_spawn[message.guild.id]
+            await set_contextual_locales_from_guild(self.bot, message.guild)
+            channel = message.guild.get_channel(int(random.choice(guildcache["whitelist"])))
+            if channel:
+                await self.spawn_pokemon(channel)
 
     async def spawn_pokemon(self, channel, *, pokemon=None):
         if pokemon is None:
