@@ -103,10 +103,14 @@ class RandomBuild(commands.Cog):
 
     @commands.command(name='randombuild', aliases=['rb'])
     async def random_build(self, ctx, specified_pokemon: str = None):
-        # If a Pokémon was specified, check if it's valid and not banned.
+        # Trim leading/trailing whitespace and handle capitalization
         if specified_pokemon:
-            # Correctly capitalize each word in the Pokémon name
+            specified_pokemon = specified_pokemon.strip()
             specified_pokemon = ' '.join(word.capitalize() for word in specified_pokemon.split())
+
+            # Debug prints
+            print(f"Processed Pokémon name: {specified_pokemon}")
+            print(f"Available Pokémon list: {self.pokemon}")
 
             if specified_pokemon in self.banned_pokemon:
                 await ctx.send(f"¡El Pokémon {specified_pokemon} está baneado!")
@@ -117,7 +121,7 @@ class RandomBuild(commands.Cog):
         else:
             # Ensure the chosen Pokemon is not banned
             available_pokemon = [p for p in self.pokemon if p not in self.banned_pokemon]
-            
+
             if not available_pokemon:
                 await ctx.send("¡Todos los Pokémon están actualmente baneados!")
                 return
