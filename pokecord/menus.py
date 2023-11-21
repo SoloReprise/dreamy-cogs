@@ -1,6 +1,7 @@
 import asyncio
 import contextlib
 from typing import Any, Dict, Iterable, List, Optional
+import tabulate
 
 import discord
 import tabulate
@@ -8,8 +9,7 @@ from redbot.core import commands
 from redbot.core.i18n import Translator
 from redbot.core.utils.predicates import MessagePredicate
 from redbot.vendored.discord.ext import menus
-from redbot.core.utils.chat_formatting import box, pagify
-from discord.ext import menus
+
 
 from .functions import poke_embed
 
@@ -145,25 +145,34 @@ class PokeListMenu(menus.MenuPages, inherit_buttons=False):
 
 
 class PokeList(menus.ListPageSource):
-    def __init__(self, entries: List[Dict], per_page: int = 8):
+    def __init__(self, entries: Iterable[Dict], per_page: int = 8):
         super().__init__(entries, per_page=per_page)
 
     async def format_page(self, menu: PokeListMenu, entries: List[Dict]) -> discord.Embed:
-        lines = ["ID | Pokémon (Nickname) | Nº Pokédex | Nivel | Shiny | Género | XP"]
+        # Header for the ASCII table
+        table_header = ["ID", "Pokémon", "Nº Pokédex", "Nivel", "Shiny", "Género", "XP"]
+
+        # Data rows for each Pokémon
+        table_rows = []
         for idx, pokemon in enumerate(entries, start=1 + (menu.current_page * self.per_page)):
             name = pokemon["name"]["english"]
             if pokemon.get("nickname"):
                 name += f" ({pokemon['nickname']})"
             shiny = "Sí" if pokemon.get("shiny", False) else "No"
             gender = pokemon.get("gender", "Desconocido")
-            line = f"{idx} | {name} | {pokemon['id']} | {pokemon['level']} | {shiny} | {gender} | {pokemon['xp']}"
-            lines.append(line)
-        
-        table = box("\n".join(lines), lang="prolog")
-        embed = discord.Embed(description=table)
+
+            # Append a row for each Pokémon
+            table_rows.append([
+                str(idx), name, str(pokemon['id']), str(pokemon['level']), shiny, gender, str(pokemon['xp'])
+            ])
+
+        # Create ASCII table
+        table = tabulate.tabulate(table_rows, headers=table_header, tablefmt="plain")
+
+        # Embed with ASCII table as description
+        embed = discord.Embed(description=f"```\n{table}\n```", color=0x00FF00)
         embed.set_footer(text=f"Página {menu.current_page + 1}/{self.get_max_pages()}")
         return embed
-
 
 class GenericMenu(menus.MenuPages, inherit_buttons=False):
     def __init__(
