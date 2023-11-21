@@ -4,6 +4,7 @@ import random
 
 import discord
 from redbot.core.utils.chat_formatting import box
+from redbot.core.utils.menus import start_adding_reactions  # Import start_adding_reactions
 from redbot.core.utils.predicates import ReactionPredicate, MessagePredicate
 from redbot.core.i18n import Translator
 
