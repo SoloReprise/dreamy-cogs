@@ -143,11 +143,23 @@ class PokeListMenu(menus.MenuPages, inherit_buttons=False):
 
 
 class PokeList(menus.ListPageSource):
-    def __init__(self, entries: Iterable[str]):
-        super().__init__(entries, per_page=1)
+    def __init__(self, entries: Iterable[Dict], per_page: int = 8):
+        super().__init__(entries, per_page=per_page)
 
-    async def format_page(self, menu: PokeListMenu, pokemon: Dict) -> str:
-        embed = await poke_embed(menu.cog, menu.ctx, pokemon, menu=self)
+    async def format_page(self, menu: PokeListMenu, entries: List[Dict]) -> discord.Embed:
+        embed = discord.Embed(title="Lista de tus Pokémon")
+        for idx, pokemon in enumerate(entries, start=1 + (menu.current_page * self.per_page)):
+            name = pokemon["name"]["english"]
+            if pokemon.get("nickname"):
+                name += f" ({pokemon['nickname']})"
+            shiny = "Sí" if pokemon.get("shiny", False) else "No"
+            gender = pokemon.get("gender", "Desconocido")
+            embed.add_field(
+                name=f"ID: {idx}",
+                value=f"Nombre: {name}\nNº Pokédex: {pokemon['id']}\nNivel: {pokemon['level']}\nShiny: {shiny}\nGénero: {gender}\nXP: {pokemon['xp']}",
+                inline=False,
+            )
+        embed.set_footer(text=f"Página {menu.current_page + 1}/{self.get_max_pages()}")
         return embed
 
 
