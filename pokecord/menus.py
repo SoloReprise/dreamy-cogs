@@ -150,24 +150,27 @@ class PokeList(menus.ListPageSource):
 
     async def format_page(self, menu: PokeListMenu, entries: List[Dict]) -> discord.Embed:
         # Header for the ASCII table
-        table_header = ["ID", "Pokémon", "Nº Pokédex", "Nivel", "Shiny", "Género", "XP"]
+        table_header = ["ID", "Pokémon", "Nº Pokédex", "Nivel", "XP"]
 
         # Data rows for each Pokémon
         table_rows = []
         for idx, pokemon in enumerate(entries, start=1 + (menu.current_page * self.per_page)):
-            name = pokemon["name"]["english"]
+            # Determine gender symbol
+            gender_symbol = "♂️" if pokemon.get("gender") == "Male" else "♀️" if pokemon.get("gender") == "Female" else ""
+
+            # Prefix name with shiny symbol if shiny
+            name_prefix = "✨" if pokemon.get("shiny", False) else ""
+            name = f"{name_prefix}{pokemon['name']['english']}{gender_symbol}"
             if pokemon.get("nickname"):
                 name += f" ({pokemon['nickname']})"
-            shiny = "Sí" if pokemon.get("shiny", False) else "No"
-            gender = pokemon.get("gender", "Desconocido")
 
             # Append a row for each Pokémon
             table_rows.append([
-                str(idx), name, str(pokemon['id']), str(pokemon['level']), shiny, gender, str(pokemon['xp'])
+                str(idx), name, str(pokemon['id']), str(pokemon['level']), str(pokemon['xp'])
             ])
 
-        # Create ASCII table
-        table = tabulate.tabulate(table_rows, headers=table_header, tablefmt="plain")
+        # Create ASCII table with '|' as the column separator
+        table = tabulate.tabulate(table_rows, headers=table_header, tablefmt="plain", colalign=("center",))
 
         # Embed with ASCII table as description
         embed = discord.Embed(description=f"```\n{table}\n```", color=0x00FF00)
