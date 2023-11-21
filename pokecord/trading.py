@@ -2,12 +2,8 @@ import asyncio
 import json
 
 import discord
-import tabulate
-from redbot.core import bank
-from redbot.core.errors import BalanceTooHigh
-from redbot.core.i18n import Translator
-from redbot.core.utils.chat_formatting import *
-from redbot.core.utils.predicates import MessagePredicate
+from redbot.core.utils.chat_formatting import box
+from redbot.core.utils.predicates import ReactionPredicate, MessagePredicate
 
 from .abc import MixinMeta
 from .statements import *
@@ -16,130 +12,69 @@ poke = MixinMeta.poke
 
 _ = Translator("Pokecord", __file__)
 
-
 class TradeMixin(MixinMeta):
-    """Pokecord Trading Commands"""
+    """Comandos de intercambio de Pokecord"""
 
-    @poke.command(usage="<user> <pokemon ID>")
-    async def trade(self, ctx, user: discord.Member, *, id: int):
-        """Pokecord Trading
+    @poke.command(usage="<usuario> <ID de tu pokémon> <ID de su pokémon>")
+    async def trade(self, ctx, user: discord.Member, your_pokemon_id: int, their_pokemon_id: int):
+        """Intercambio de Pokémon
 
-        Currently a work in progress."""
+        Intercambia un Pokémon con otro usuario especificando los ID de los Pokémon."""
         async with ctx.typing():
+            # Obtener tus Pokémon
             result = await self.cursor.fetch_all(
-                query="""SELECT pokemon, message_id from users where user_id = :user_id""",
+                query="SELECT pokemon, message_id FROM users WHERE user_id = :user_id",
                 values={"user_id": ctx.author.id},
             )
-            pokemons = [None]
+            your_pokemons = [None]
             for data in result:
-                pokemons.append([json.loads(data[0]), data[1]])
+                your_pokemons.append([json.loads(data[0]), data[1]])
 
-        if not pokemons:
-            return await ctx.send(_("You don't have any pokémon, trainer!"))
-        if id >= len(pokemons):
-            return await ctx.send(_("You don't have a pokemon at that slot."))
-        pokemon = pokemons[id]
-        name = self.get_name(pokemon[0]["name"], ctx.author)
+            # Obtener Pokémon del otro usuario
+            result = await self.cursor.fetch_all(
+                query="SELECT pokemon, message_id FROM users WHERE user_id = :user_id",
+                values={"user_id": user.id},
+            )
+            their_pokemons = [None]
+            for data in result:
+                their_pokemons.append([json.loads(data[0]), data[1]])
 
-        await ctx.send(
-            _(
-                "You are about to trade {name}, if you wish to continue type `yes`, otherwise type `no`."
-            ).format(name=name)
+        # Verificar si los ID de Pokémon son válidos
+        if not your_pokemons or your_pokemon_id >= len(your_pokemons):
+            return await ctx.send("No tienes un Pokémon con ese ID.")
+        if not their_pokemons or their_pokemon_id >= len(their_pokemons):
+            return await ctx.send(f"{user.mention} no tiene un Pokémon con ese ID.")
+
+        your_pokemon = your_pokemons[your_pokemon_id]
+        their_pokemon = their_pokemons[their_pokemon_id]
+
+        your_pokemon_name = self.get_name(your_pokemon[0]["name"], ctx.author)
+        their_pokemon_name = self.get_name(their_pokemon[0]["name"], user)
+
+        # Confirmar el intercambio
+        confirm_message = await ctx.send(
+            f"Vas a intercambiar tu {your_pokemon_name} por el {their_pokemon_name} de {user.mention}. Reacciona con ✅ para continuar o ❌ para cancelar."
         )
+        start_adding_reactions(confirm_message, ReactionPredicate.YES_OR_NO_EMOJIS)
         try:
-            pred = MessagePredicate.yes_or_no(ctx, user=ctx.author)
-            await ctx.bot.wait_for("message", check=pred, timeout=20)
+            pred = ReactionPredicate.yes_or_no(confirm_message, ctx.author)
+            await ctx.bot.wait_for("reaction_add", check=pred, timeout=20)
         except asyncio.TimeoutError:
-            await ctx.send(_("Exiting operation."))
-            return
+            return await ctx.send("Operación cancelada por tiempo de espera.")
 
         if pred.result:
-            await ctx.send(
-                _("How many credits would you like to recieve for {name}?").format(name=name)
+            # Intercambio
+            await self.cursor.execute(
+                "UPDATE users SET user_id = :new_user_id WHERE message_id = :message_id",
+                values={"new_user_id": user.id, "message_id": your_pokemon[1]}
             )
-            try:
-                amount = MessagePredicate.valid_int(ctx, user=ctx.author)
-                await ctx.bot.wait_for("message", check=amount, timeout=20)
-            except asyncio.TimeoutError:
-                await ctx.send(_("Exiting operation."))
-                return
-            bal = amount.result
-            if not await bank.can_spend(user, amount.result):
-                await ctx.send(
-                    _("{user} does not have {amount} {currency} available.").format(
-                        user=user,
-                        amount=amount.result,
-                        currency=await bank.get_currency_name(ctx.guild or None),
-                    )
-                )
-
-                return
-            await ctx.send(
-                _(
-                    "{user}, {author} would like to trade their {pokemon} for {amount} {currency}. Type `yes` to accept, otherwise type `no`."
-                ).format(
-                    user=user.mention,
-                    author=ctx.author,
-                    pokemon=name,
-                    amount=bal,
-                    currency=await bank.get_currency_name(ctx.guild or None),
-                )
+            await self.cursor.execute(
+                "UPDATE users SET user_id = :new_user_id WHERE message_id = :message_id",
+                values={"new_user_id": ctx.author.id, "message_id": their_pokemon[1]}
             )
 
-            try:
-                authorconfirm = MessagePredicate.yes_or_no(ctx, user=user)
-                await ctx.bot.wait_for("message", check=authorconfirm, timeout=30)
-            except asyncio.TimeoutError:
-                await ctx.send(_("Exiting operation."))
-                return
-
-            if authorconfirm.result:
-                await self.cursor.execute(
-                    query="DELETE FROM users where message_id = :message_id",
-                    values={"message_id": pokemon[1]},
-                )
-                await self.cursor.execute(
-                    query=INSERT_POKEMON,
-                    values={
-                        "user_id": user.id,
-                        "message_id": ctx.message.id,
-                        "pokemon": json.dumps(pokemon[0]),
-                    },
-                )
-                userconf = await self.user_is_global(ctx.author)
-                pokeid = await userconf.pokeid()
-                msg = ""
-                if id < pokeid:
-                    msg += _(
-                        "{user}, your default pokemon may have changed. I have tried to account for this change."
-                    ).format(user=ctx.author)
-                    await userconf.pokeid.set(pokeid - 1)
-                elif id == pokeid:
-                    msg += _(
-                        "{user}, You have traded your selected pokemon. I have reset your selected pokemon to your first pokemon."
-                    ).format(user=user)
-                    await userconf.pokeid.set(1)
-
-                await bank.withdraw_credits(user, bal)
-                try:
-                    await bank.deposit_credits(ctx.author, bal)
-                except BalanceTooHigh as e:
-                    bal = e.max_balance - await bank.get_balance(ctx.author)
-                    bal = _("{balance} (balance too high)").format(balanace=bal)
-                    await bank.set_balance(ctx.author, e.max_balance)
-                lst = [
-                    ["-- {pokemon}".format(pokemon=name), bal],
-                    [_("++ {balance} credits").format(balance=bal), name],
-                ]
-                await ctx.send(
-                    box(tabulate.tabulate(lst, headers=[ctx.author, user]), lang="diff")
-                )
-                if msg:
-                    await ctx.send(msg)
-
-            else:
-                await ctx.send(_("{user} has denied the trade request.").format(user=user))
-                return
-
+            await ctx.send(
+                f"¡Intercambio completado! {ctx.author.mention} ha intercambiado su {your_pokemon_name} por el {their_pokemon_name} de {user.mention}."
+            )
         else:
-            await ctx.send(_("Trade cancelled."))
+            await ctx.send("Intercambio cancelado.")
