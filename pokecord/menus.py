@@ -155,27 +155,29 @@ class PokeList(menus.ListPageSource):
 
         for idx, pokemon in enumerate(entries, start=1 + (menu.current_page * self.per_page)):
             # Determine gender symbol
-            gender = pokemon.get("gender", "").lower()
-            gender_symbol = "♂️" if gender == "male" else "♀️" if gender == "female" else ""
+            gender_symbol = ""
+            if pokemon.get("gender") == "Male":
+                gender_symbol = "♂️"
+            elif pokemon.get("gender") == "Female":
+                gender_symbol = "♀️"
 
-            # Check for shiny status
-            is_shiny = pokemon.get("shiny", False)
-            shiny_symbol = "✨" if is_shiny else ""
+            # Check if the Pokémon is shiny
+            shiny_symbol = "✨" if "shiny" in pokemon.get("name", "").lower() else ""
 
-            # Construct the Pokémon name
+            # Construct Pokémon name with optional nickname
             name = f"{shiny_symbol}{pokemon['name']['english']}{gender_symbol}"
             if "nickname" in pokemon and pokemon["nickname"]:
                 name += f" ({pokemon['nickname']})"
 
-            # Construct the row
-            row = f"{str(idx).center(2)} | {name.ljust(20)} | {str(pokemon['id']).center(11)} | {str(pokemon['level']).center(5)} | {str(pokemon['xp']).center(3)}"
+            # Format row for the table
+            row = f"{str(idx).center(3)} | {name.ljust(20)} | {str(pokemon['id']).center(11)} | {str(pokemon['level']).center(5)} | {str(pokemon['xp']).center(3)}"
             lines.append(row)
 
-        # Join all the lines into a single string
+        # Combine lines into a single string for the table
         table = "\n".join(lines)
 
         # Embed with ASCII table as plain text
-        embed = discord.Embed(description=table, color=0x00FF00)
+        embed = discord.Embed(description=f"```\n{table}\n```", color=0x00FF00)
         embed.set_footer(text=f"Página {menu.current_page + 1}/{self.get_max_pages()}")
         return embed
 
