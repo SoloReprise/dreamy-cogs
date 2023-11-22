@@ -125,15 +125,16 @@ class TradeMixin(MixinMeta):
                 values={"user_id": ctx.author.id},
             )
             your_pokemons = []
-            for i, data in enumerate(result, start=1):
+            for i, data in enumerate(result):
                 poke = json.loads(data[0])
-                poke["sid"] = i  # Asignar 'sid' aquí
+                poke["sid"] = i + 1  # Asignar 'sid' comenzando en 1
                 your_pokemons.append([poke, data[1]])
 
-            if not your_pokemons or pokemon_id >= len(your_pokemons):
+            if pokemon_id < 1 or pokemon_id > len(your_pokemons):
                 return await ctx.send("No tienes un Pokémon con ese ID.")
 
-            your_pokemon = your_pokemons[pokemon_id - 1]  # Ajustar para el índice de la lista
+            # Ajustar para el índice de la lista (que comienza en 0)
+            your_pokemon = your_pokemons[pokemon_id - 1]
 
             # Generar un Pokémon aleatorio
             random_pokemon = self.pokemon_choose()
