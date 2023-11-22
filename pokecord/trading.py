@@ -20,9 +20,7 @@ class TradeMixin(MixinMeta):
 
     @poke.command(usage="<usuario> <ID de tu pokémon> <ID de su pokémon>")
     async def trade(self, ctx, user: discord.Member, your_pokemon_id: int, their_pokemon_id: int):
-        """Intercambio de Pokémon
-
-        Intercambia un Pokémon con otro usuario especificando los ID de los Pokémon."""
+        """Intercambia un Pokémon con otro usuario especificando los ID de los Pokémon."""
         async with ctx.typing():
             # Obtener tus Pokémon
             result = await self.cursor.fetch_all(
@@ -54,7 +52,7 @@ class TradeMixin(MixinMeta):
         your_pokemon_name = self.get_name(your_pokemon[0]["name"], ctx.author)
         their_pokemon_name = self.get_name(their_pokemon[0]["name"], user)
 
-        # Confirmar el intercambio
+        # Solicitar confirmación del usuario que inicia el intercambio
         confirm_message = await ctx.send(
             f"Vas a intercambiar tu {your_pokemon_name} por el {their_pokemon_name} de {user.mention}. Reacciona con ✅ para continuar o ❌ para cancelar."
         )
@@ -65,23 +63,38 @@ class TradeMixin(MixinMeta):
         except asyncio.TimeoutError:
             return await ctx.send("Operación cancelada por tiempo de espera.")
 
-        if pred.result:
-            # Intercambio
-            await self.cursor.execute(
-                "UPDATE users SET user_id = :new_user_id WHERE message_id = :message_id",
-                values={"new_user_id": user.id, "message_id": your_pokemon[1]}
-            )
-            await self.cursor.execute(
-                "UPDATE users SET user_id = :new_user_id WHERE message_id = :message_id",
-                values={"new_user_id": ctx.author.id, "message_id": their_pokemon[1]}
-            )
+        if not pred.result:
+            return await ctx.send("Intercambio cancelado por el iniciador.")
 
-            await ctx.send(
-                f"¡Intercambio completado! {ctx.author.mention} ha intercambiado su {your_pokemon_name} por el {their_pokemon_name} de {user.mention}."
-            )
-        else:
-            await ctx.send("Intercambio cancelado.")
+        # Solicitar confirmación del otro usuario
+        confirm_message = await ctx.send(
+            f"{user.mention}, {ctx.author.mention} quiere intercambiar su {your_pokemon_name} por tu {their_pokemon_name}. Reacciona con ✅ para aceptar o ❌ para rechazar."
+        )
+        start_adding_reactions(confirm_message, ReactionPredicate.YES_OR_NO_EMOJIS)
 
+        try:
+            pred = ReactionPredicate.yes_or_no(confirm_message, user)
+            await ctx.bot.wait_for("reaction_add", check=pred, timeout=20)
+        except asyncio.TimeoutError:
+            return await ctx.send(f"{user.mention} no respondió a tiempo. Intercambio cancelado.")
+
+        if not pred.result:
+            return await ctx.send(f"{user.mention} ha rechazado el intercambio.")
+
+        # Realizar el intercambio
+        await self.cursor.execute(
+            "UPDATE users SET user_id = :new_user_id WHERE message_id = :message_id",
+            values={"new_user_id": user.id, "message_id": your_pokemon[1]}
+        )
+        await self.cursor.execute(
+            "UPDATE users SET user_id = :new_user_id WHERE message_id = :message_id",
+            values={"new_user_id": ctx.author.id, "message_id": their_pokemon[1]}
+        )
+
+        await ctx.send(
+            f"¡Intercambio completado! {ctx.author.mention} ha intercambiado su {your_pokemon_name} por el {their_pokemon_name} de {user.mention}."
+        )
+        
     @poke.command(usage="<ID de tu pokémon>")
     async def wondertrade(self, ctx, pokemon_id: int):
         """Intercambia tu Pokémon por uno aleatorio."""
