@@ -105,14 +105,16 @@ class TradeMixin(MixinMeta):
                 query="SELECT pokemon, message_id FROM users WHERE user_id = :user_id",
                 values={"user_id": ctx.author.id},
             )
-            your_pokemons = [None]
-            for data in result:
-                your_pokemons.append([json.loads(data[0]), data[1]])
+            your_pokemons = []
+            for i, data in enumerate(result, start=1):
+                poke = json.loads(data[0])
+                poke["sid"] = i  # Asignar 'sid' aquí
+                your_pokemons.append([poke, data[1]])
 
             if not your_pokemons or pokemon_id >= len(your_pokemons):
                 return await ctx.send("No tienes un Pokémon con ese ID.")
 
-            your_pokemon = your_pokemons[pokemon_id]
+            your_pokemon = your_pokemons[pokemon_id - 1]  # Ajustar para el índice de la lista
 
             # Generar un Pokémon aleatorio
             random_pokemon = self.pokemon_choose()
@@ -125,7 +127,7 @@ class TradeMixin(MixinMeta):
             random_pokemon["level"] = random.randint(min_level, max_level)
 
             # Asignar el mismo ID 'sid' al nuevo Pokémon
-            random_pokemon["sid"] = your_pokemon[0]["sid"]
+            random_pokemon["sid"] = your_pokemon[0]["sid"]  # Usar el mismo 'sid' que el Pokémon intercambiado
             random_pokemon["xp"] = 0
             random_pokemon["gender"] = self.gender_choose(random_pokemon["name"]["english"])
             random_pokemon["ivs"] = {
