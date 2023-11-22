@@ -12,9 +12,13 @@ from .functions import chunks, poke_embed
 from .abc import MixinMeta
 from .statements import *
 
+from datetime import datetime, timedelta
+
 poke = MixinMeta.poke
 
 _ = Translator("Pokecord", __file__)
+
+MAX_WONDER_TRADES_PER_DAY = 5
 
 class TradeMixin(MixinMeta):
     """Comandos de intercambio de Pokecord"""
@@ -117,7 +121,21 @@ class TradeMixin(MixinMeta):
         
     @poke.command(usage="<ID de tu pokémon>")
     async def wondertrade(self, ctx, pokemon_id: int):
-        """Intercambia tu Pokémon por uno aleatorio."""
+        """Intercambia tu Pokémon por uno aleatorio. Límite de 5 intercambios por día."""
+        user_conf = await self.user_is_global(ctx.author)
+
+        # Obtener la información de intercambio del día
+        last_trade_date = await user_conf.last_trade_date()
+        trade_count = await user_conf.trade_count()
+
+        # Comprobar si es un nuevo día
+        if last_trade_date != str(datetime.utcnow().date()):
+            trade_count = 0
+            await user_conf.last_trade_date.set(str(datetime.utcnow().date()))
+
+        # Comprobar si se ha alcanzado el límite diario
+        if trade_count >= MAX_WONDER_TRADES_PER_DAY:
+            return await ctx.send(f"Has alcanzado el límite de {MAX_WONDER_TRADES_PER_DAY} intercambios por día.")
         async with ctx.typing():
             # Obtener tu Pokémon
             result = await self.cursor.fetch_all(
@@ -203,5 +221,15 @@ class TradeMixin(MixinMeta):
             embed, _file = await poke_embed(self, ctx, random_pokemon, file=True)
             await ctx.send(
                 f"Has intercambiado tu {self.get_name(your_pokemon[0]['name'], ctx.author)} por un {self.get_name(random_pokemon['name'], ctx.author)} nivel {random_pokemon['level']}.",
+                embed=embed, file=_file
+            )
+
+            # Actualizar la información de intercambio
+            await user_conf.trade_count.set(trade_count + 1)
+
+            # Informar al usuario sobre los intercambios restantes
+            trades_left = MAX_WONDER_TRADES_PER_DAY - trade_count - 1
+            await ctx.send(
+                f"Intercambio realizado. Te quedan {trades_left} intercambios por hoy.",
                 embed=embed, file=_file
             )
