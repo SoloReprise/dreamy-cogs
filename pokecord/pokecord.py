@@ -75,6 +75,8 @@ class Pokecord(
             "pokeid": 1,
             "has_starter": False,
             "locale": "en",
+            "last_trade_date": str(datetime.utcnow().date()),
+            "trade_count": 0
         }
         self.config.register_user(**defaults_user)
         self.config.register_member(**defaults_user)
