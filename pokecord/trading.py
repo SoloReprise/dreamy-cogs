@@ -115,7 +115,18 @@ class TradeMixin(MixinMeta):
 
             # Generar un Pokémon aleatorio
             random_pokemon = self.pokemon_choose()
-            random_pokemon["level"] = random.randint(1, 100)  # Ejemplo de nivel aleatorio
+            random_pokemon["level"] = random.randint(1, 100)
+            random_pokemon["xp"] = 0
+            random_pokemon["gender"] = self.gender_choose(random_pokemon["name"]["english"])
+            random_pokemon["ivs"] = {
+                "HP": random.randint(0, 31),
+                "Attack": random.randint(0, 31),
+                "Defence": random.randint(0, 31),
+                "Sp. Atk": random.randint(0, 31),
+                "Sp. Def": random.randint(0, 31),
+                "Speed": random.randint(0, 31),
+            }
+            # Aquí puedes agregar cualquier otra información necesaria
 
             # Intercambio
             await self.cursor.execute(
@@ -131,6 +142,9 @@ class TradeMixin(MixinMeta):
                 },
             )
 
+            # Mostrar las estadísticas del nuevo Pokémon
+            embed, _file = await poke_embed(self, ctx, random_pokemon, file=True)
             await ctx.send(
-                f"Has intercambiado tu {self.get_name(your_pokemon[0]['name'], ctx.author)} por un {self.get_name(random_pokemon['name'], ctx.author)} nivel {random_pokemon['level']}."
+                f"Has intercambiado tu {self.get_name(your_pokemon[0]['name'], ctx.author)} por un {self.get_name(random_pokemon['name'], ctx.author)} nivel {random_pokemon['level']}.",
+                embed=embed, file=_file
             )
