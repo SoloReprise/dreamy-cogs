@@ -150,7 +150,7 @@ class PokeList(menus.ListPageSource):
 
     async def format_page(self, menu: PokeListMenu, entries: List[Dict]) -> discord.Embed:
         # Header for the ASCII table
-        table_header = "ID | Pokémon              | Nº Pokédex | Nivel | XP"
+        table_header = "ID | Pokémon              | #Pokédex | Nivel | XP"
         lines = [table_header]
 
         for idx, pokemon in enumerate(entries, start=1 + (menu.current_page * self.per_page)):
@@ -180,7 +180,9 @@ class PokeList(menus.ListPageSource):
 
         # Embed with ASCII table as plain text
         embed = discord.Embed(description=f"```\n{table}\n```", color=0x00FF00)
-        embed.set_footer(text=f"Página {menu.current_page + 1}/{self.get_max_pages()}")
+        footer_text = f"Página {menu.current_page + 1}/{self.get_max_pages()}\n"
+        footer_text += "Puedes comprobar las estadísticas completas de un Pokémon con !stats <ID>"
+        embed.set_footer(text=footer_text)
         return embed
 
 class GenericMenu(menus.MenuPages, inherit_buttons=False):
