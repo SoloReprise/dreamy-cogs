@@ -92,6 +92,25 @@ class TradeMixin(MixinMeta):
             values={"new_user_id": ctx.author.id, "message_id": their_pokemon[1]}
         )
 
+        # Actualizar la Pokedex de ambos usuarios
+        conf_author = await self.user_is_global(ctx.author)
+        conf_user = await self.user_is_global(user)
+
+        async with conf_author.pokeids() as author_pokeids, conf_user.pokeids() as user_pokeids:
+            # Añadir el Pokémon del otro usuario a tu Pokedex si no está presente
+            their_pokemon_id_str = str(their_pokemon[0]["id"])
+            if their_pokemon_id_str not in author_pokeids:
+                author_pokeids[their_pokemon_id_str] = 1
+            else:
+                author_pokeids[their_pokemon_id_str] += 1
+
+            # Añadir tu Pokémon a la Pokedex del otro usuario si no está presente
+            your_pokemon_id_str = str(your_pokemon[0]["id"])
+            if your_pokemon_id_str not in user_pokeids:
+                user_pokeids[your_pokemon_id_str] = 1
+            else:
+                user_pokeids[your_pokemon_id_str] += 1
+
         await ctx.send(
             f"¡Intercambio completado! {ctx.author.mention} ha intercambiado su {your_pokemon_name} por el {their_pokemon_name} de {user.mention}."
         )
