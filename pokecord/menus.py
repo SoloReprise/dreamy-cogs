@@ -170,8 +170,8 @@ class PokeList(menus.ListPageSource):
         # Join all the lines into a single string
         table = "\n".join(lines)
 
-        # Embed with ASCII table as description
-        embed = discord.Embed(description=f"```\n{table}\n```", color=0x00FF00)
+        # Embed with ASCII table as plain text
+        embed = discord.Embed(description=table, color=0x00FF00)
         embed.set_footer(text=f"Página {menu.current_page + 1}/{self.get_max_pages()}")
         return embed
 
