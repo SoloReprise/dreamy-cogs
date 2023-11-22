@@ -233,6 +233,5 @@ class TradeMixin(MixinMeta):
             # Informar al usuario sobre los intercambios restantes
             trades_left = MAX_WONDER_TRADES_PER_DAY - trade_count - 1
             await ctx.send(
-                f"Intercambio realizado. Te quedan {trades_left} intercambios por hoy.",
-                embed=embed, file=_file
+                f"Intercambio realizado. Te quedan {trades_left} intercambios por hoy."
             )
