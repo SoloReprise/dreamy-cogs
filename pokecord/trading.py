@@ -123,6 +123,9 @@ class TradeMixin(MixinMeta):
     async def wondertrade(self, ctx, pokemon_id: int):
         """Intercambia tu Pokémon por uno aleatorio. Límite de 5 intercambios por día."""
         user_conf = await self.user_is_global(ctx.author)
+        user_conf = self.config.user(ctx.author)
+        last_trade_date = await user_conf.last_trade_date()
+        trade_count = await user_conf.trade_count()
 
         # Obtener la información de intercambio del día
         last_trade_date = await user_conf.last_trade_date()
