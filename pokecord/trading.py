@@ -116,7 +116,16 @@ class TradeMixin(MixinMeta):
 
             # Generar un Pokémon aleatorio
             random_pokemon = self.pokemon_choose()
-            random_pokemon["level"] = random.randint(1, 100)
+
+            # Ajustar nivel dentro del 10% del nivel del Pokémon intercambiado
+            exchanged_level = your_pokemon[0]['level']
+            level_variation = round(exchanged_level * 0.1)
+            min_level = max(1, exchanged_level - level_variation)  # Asegurarse de que el nivel no sea menor que 1
+            max_level = min(100, exchanged_level + level_variation)  # Asegurarse de que el nivel no sea mayor que 100
+            random_pokemon["level"] = random.randint(min_level, max_level)
+
+            # Asignar el mismo ID 'sid' al nuevo Pokémon
+            random_pokemon["sid"] = your_pokemon[0]["sid"]
             random_pokemon["xp"] = 0
             random_pokemon["gender"] = self.gender_choose(random_pokemon["name"]["english"])
             random_pokemon["ivs"] = {
