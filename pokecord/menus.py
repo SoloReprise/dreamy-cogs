@@ -162,10 +162,12 @@ class PokeList(menus.ListPageSource):
                 gender_symbol = "♀️"
 
             # Check if the Pokémon is shiny
-            shiny_symbol = "✨" if "shiny" in pokemon.get("name", "").lower() else ""
+            # Assuming 'shiny' status is determined by checking if the English name contains 'shiny'
+            name_english = pokemon['name'].get('english', '')  # Get the English name
+            shiny_symbol = "✨" if "shiny" in name_english.lower() else ""  # Check if 'shiny' is in the name
 
             # Construct Pokémon name with optional nickname
-            name = f"{shiny_symbol}{pokemon['name']['english']}{gender_symbol}"
+            name = f"{shiny_symbol}{name_english}{gender_symbol}"
             if "nickname" in pokemon and pokemon["nickname"]:
                 name += f" ({pokemon['nickname']})"
 
