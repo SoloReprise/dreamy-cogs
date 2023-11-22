@@ -155,12 +155,16 @@ class PokeList(menus.ListPageSource):
 
         for idx, pokemon in enumerate(entries, start=1 + (menu.current_page * self.per_page)):
             # Determine gender symbol
-            gender_symbol = "\u2642" if pokemon.get("gender") == "Male" else "\u2640" if pokemon.get("gender") == "Female" else ""
+            gender = pokemon.get("gender", "").lower()
+            gender_symbol = "♂️" if gender == "male" else "♀️" if gender == "female" else ""
 
-            # Prefix name with shiny symbol if shiny
-            name_prefix = "\u2728" if pokemon.get("shiny", False) else ""
-            name = f"{name_prefix}{pokemon['name']['english']}{gender_symbol}"
-            if pokemon.get("nickname"):
+            # Check for shiny status
+            is_shiny = pokemon.get("shiny", False)
+            shiny_symbol = "✨" if is_shiny else ""
+
+            # Construct the Pokémon name
+            name = f"{shiny_symbol}{pokemon['name']['english']}{gender_symbol}"
+            if "nickname" in pokemon and pokemon["nickname"]:
                 name += f" ({pokemon['nickname']})"
 
             # Construct the row
