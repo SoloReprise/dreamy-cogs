@@ -346,3 +346,30 @@ class GeneralMixin(MixinMeta):
         else:
             embed, _file = await poke_embed(self, ctx, pokemon, file=True)
             await ctx.send(embed=embed, file=_file)
+
+    @commands.command()
+    @commands.max_concurrency(1, commands.BucketType.user)
+    async def stats(self, ctx, poke_id: int):
+        """Show the stats of a Pokémon by its ID"""
+        conf = await self.user_is_global(ctx.author)
+        if not await conf.has_starter():
+            return await ctx.send(
+                _("You haven't picked a starter Pokémon yet! Check out {prefix}starter.").format(prefix=ctx.clean_prefix)
+            )
+        
+        user = ctx.author
+        async with ctx.typing():
+            result = await self.cursor.fetch_all(query=SELECT_POKEMON, values={"user_id": user.id})
+        
+        pokemons = [json.loads(data[0]) for data in result]
+        if not pokemons:
+            return await ctx.send(_("You don't have any Pokémon. Go get catching, trainer!"))
+
+        # Adjust the index to match the list indexing (starting from 0)
+        adjusted_id = poke_id - 1
+        if adjusted_id < 0 or adjusted_id >= len(pokemons):
+            return await ctx.send(_("You don't have a Pokémon with that ID."))
+
+        pokemon = pokemons[adjusted_id]
+        embed, _file = await poke_embed(self, ctx, pokemon, file=True)
+        await ctx.send(embed=embed, file=_file)
