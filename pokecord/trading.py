@@ -170,6 +170,15 @@ class TradeMixin(MixinMeta):
             else:
                 return await ctx.send("Error al obtener el ID del nuevo Pokémon.")
 
+            # Actualizar la Pokedex del usuario
+            conf = await self.user_is_global(ctx.author)
+            async with conf.pokeids() as pokeids:
+                poke_id_str = str(random_pokemon["id"])
+                if poke_id_str not in pokeids:
+                    pokeids[poke_id_str] = 1
+                else:
+                    pokeids[poke_id_str] += 1
+
             # Mostrar las estadísticas del nuevo Pokémon
             embed, _file = await poke_embed(self, ctx, random_pokemon, file=True)
             await ctx.send(
