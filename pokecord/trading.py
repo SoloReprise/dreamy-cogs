@@ -154,6 +154,22 @@ class TradeMixin(MixinMeta):
                 },
             )
 
+            # Obtener el ID actual del nuevo Pokémon tras agregarlo a la base de datos
+            new_pokemon_result = await self.cursor.fetch_all(
+                query="SELECT pokemon, message_id FROM users WHERE user_id = :user_id",
+                values={"user_id": ctx.author.id},
+            )
+            new_pokemon_id = None
+            for i, data in enumerate(new_pokemon_result, start=1):
+                if data[1] == ctx.message.id:
+                    new_pokemon_id = i
+                    break
+
+            if new_pokemon_id is not None:
+                random_pokemon["sid"] = new_pokemon_id
+            else:
+                return await ctx.send("Error al obtener el ID del nuevo Pokémon.")
+
             # Mostrar las estadísticas del nuevo Pokémon
             embed, _file = await poke_embed(self, ctx, random_pokemon, file=True)
             await ctx.send(
