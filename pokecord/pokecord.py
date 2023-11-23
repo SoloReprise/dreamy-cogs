@@ -806,21 +806,21 @@ class Pokecord(
 
     @commands.command()
     async def incienso(self, ctx):
-        user_conf = await self.user_is_global(ctx.author)
-        incienso_count = await user_conf.incienso_count()
-        if incienso_count <= 0:
-            await ctx.send(_("¡No te quedan inciensos!"))
-            return
-
-        # Decrease the Incienso count by one
         try:
             user_conf = await self.user_is_global(ctx.author)
             incienso_count = await user_conf.incienso_count()
-            await user_conf.set_incienso_count(incienso_count - 1)
+
+            if incienso_count <= 0:
+                await ctx.send(_("¡No te quedan inciensos!"))
+                return
+
+            new_incienso_count = incienso_count - 1
+            await user_conf.incienso_count.set(new_incienso_count)
+
+            await ctx.send(_("Has usado un incienso. Ha aparecido un Pokémon salvaje..."))
+            await self.spawn_pokemon(ctx.channel)  # Assuming this method spawns a Pokémon
+
         except Exception as e:
             log.error(f"Error updating incienso count for user {ctx.author}: {e}")
             await ctx.send(_("Error updating incienso count. Please try again later."))
-
-        # Spawn a new Pokémon
-        await ctx.send(_("Has usado un incienso. Ha aparecido un Pokémon salvaje..."))
-        await self.spawn_pokemon(ctx.channel)  # Assuming this method spawns a Pokémon
+            return  # Ensure command execution stops here if an error occurs
