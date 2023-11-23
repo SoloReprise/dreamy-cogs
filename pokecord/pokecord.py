@@ -77,7 +77,8 @@ class Pokecord(
             "has_starter": False,
             "locale": "en",
             "last_trade_date": str(datetime.utcnow().date()),
-            "trade_count": 0
+            "trade_count": 0,
+            "incienso_count": 0,  # New key to track the number of Incienso
         }
         self.config.register_user(**defaults_user)
         self.config.register_member(**defaults_user)
@@ -474,6 +475,13 @@ class Pokecord(
                 pokename=pokename,
             )
 
+            # After successfully catching a Pokémon
+            if random.randint(1, 10) == 1:  # 10% chance to get an Incienso
+                user_conf = await self.user_is_global(ctx.author)
+                async with user_conf.incienso_count() as incienso_count:
+                    incienso_count += 1
+                await ctx.send(_("¡Has encontrado un Incienso!"))
+
             async with conf.pokeids() as poke:
                 if str(pokemonspawn["id"]) not in poke:
                     msg += _("\n{pokename} has been added to the pokédex.").format(
@@ -791,3 +799,19 @@ class Pokecord(
         # Spawn the Pokemon in the selected channel
         await self.spawn_pokemon(channel, pokemon=pokemon)
         await ctx.send(f"A test Pokémon spawn has been created in {channel.mention}.")
+
+    @commands.command()
+    async def incienso(self, ctx):
+        user_conf = await self.user_is_global(ctx.author)
+        incienso_count = await user_conf.incienso_count()
+        if incienso_count <= 0:
+            await ctx.send(_("¡No te quedan inciensos!"))
+            return
+
+        # Decrease the Incienso count by one
+        async with user_conf.incienso_count() as incienso_count:
+            incienso_count -= 1
+
+        # Spawn a new Pokémon
+        await ctx.send(_("Has usado un incienso. Ha aparecido un Pokémon salvaje..."))
+        await self.spawn_pokemon(ctx.channel)  # Assuming this method spawns a Pokémon
