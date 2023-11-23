@@ -475,12 +475,15 @@ class Pokecord(
                 pokename=pokename,
             )
 
-            # After successfully catching a Pokémon
-            if random.randint(1, 10) == 1:  # 10% chance to get an Incienso
-                user_conf = await self.user_is_global(ctx.author)
-                async with user_conf.incienso_count() as incienso_count:
-                    incienso_count += 1
-                await ctx.send(_("¡Has encontrado un Incienso!"))
+            try:
+                if random.randint(1, 10) == 1:  # 10% chance to get an Incienso
+                    user_conf = await self.user_is_global(ctx.author)
+                    async with user_conf.incienso_count() as incienso_count:
+                        incienso_count += 1
+                    await ctx.send(_("¡Has encontrado un Incienso!"))
+            except Exception as e:
+                log.error(f"Error while adding Incienso: {e}")
+                await ctx.send(_("There was an error while processing your Incienso."))
 
             async with conf.pokeids() as poke:
                 if str(pokemonspawn["id"]) not in poke:
