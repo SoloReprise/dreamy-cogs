@@ -476,7 +476,7 @@ class Pokecord(
             )
 
             try:
-                if random.randint(1, 10) == 1:  # 10% chance to get an Incienso
+                if random.randint(1, 3) == 1:  # 10% chance to get an Incienso
                     user_conf = await self.user_is_global(ctx.author)
                     async with user_conf.incienso_count() as incienso_count:
                         incienso_count += 1
