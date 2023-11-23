@@ -813,8 +813,7 @@ class Pokecord(
             return
 
         # Decrease the Incienso count by one
-        async with user_conf.incienso_count() as incienso_count:
-            incienso_count -= 1
+        await user_conf.set_incienso_count(incienso_count - 1)
 
         # Spawn a new Pokémon
         await ctx.send(_("Has usado un incienso. Ha aparecido un Pokémon salvaje..."))
