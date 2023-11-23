@@ -814,11 +814,12 @@ class Pokecord(
 
         # Decrease the Incienso count by one
         try:
+            user_conf = await self.user_is_global(ctx.author)
+            incienso_count = await user_conf.incienso_count()
             await user_conf.set_incienso_count(incienso_count - 1)
         except Exception as e:
             log.error(f"Error updating incienso count for user {ctx.author}: {e}")
             await ctx.send(_("Error updating incienso count. Please try again later."))
-            return
 
         # Spawn a new Pokémon
         await ctx.send(_("Has usado un incienso. Ha aparecido un Pokémon salvaje..."))
