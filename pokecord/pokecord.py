@@ -801,8 +801,8 @@ class Pokecord(
         pokemon = self.pokemon_choose()  # Assuming you have a method to select a random Pokemon
 
         # Spawn the Pokemon in the selected channel
-        await self.spawn_pokemon(channel, pokemon=pokemon)
         await ctx.send(f"A test Pokémon spawn has been created in {channel.mention}.")
+        await self.spawn_pokemon(channel, pokemon=pokemon)
 
     @commands.command()
     async def incienso(self, ctx):
@@ -813,7 +813,12 @@ class Pokecord(
             return
 
         # Decrease the Incienso count by one
-        await user_conf.set_incienso_count(incienso_count - 1)
+        try:
+            await user_conf.set_incienso_count(incienso_count - 1)
+        except Exception as e:
+            log.error(f"Error updating incienso count for user {ctx.author}: {e}")
+            await ctx.send(_("Error updating incienso count. Please try again later."))
+            return
 
         # Spawn a new Pokémon
         await ctx.send(_("Has usado un incienso. Ha aparecido un Pokémon salvaje..."))
