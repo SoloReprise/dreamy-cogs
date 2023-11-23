@@ -233,31 +233,30 @@ class Pokecord(
         log.debug("Starting loop for random spawns.")
         while True:
             try:
-                activity_detected = False
                 for guild in self.guildcache:
                     if (
                         self.guildcache[guild]["toggle"]
                         and self.guildcache[guild]["activechannels"]
                     ):
+                        if random.randint(1, 2) == 2:
+                            continue
                         _guild = self.bot.get_guild(int(guild))
                         if _guild is None:
                             continue
-
-                        for channel_id in self.guildcache[guild]["activechannels"]:
-                            channel = _guild.get_channel(int(channel_id))
-                            if channel is None:
-                                continue
-
-                            # Check for recent activity in the channel
-                            if await self.check_activity(channel):
-                                activity_detected = True
-                                break  # Breaks out of the inner for-loop
-
-                        if not activity_detected:
-                            await self.spawn_pokemon(channel)
-
-                sleep_time = 60 if activity_detected else 600  # 1 minute if activity, else 10 minutes
-                await asyncio.sleep(sleep_time)
+                        channel = _guild.get_channel(
+                            int(random.choice(self.guildcache[guild]["activechannels"]))
+                        )
+                        if channel is None:
+                            continue
+                        await self.spawn_pokemon(channel)
+                        # Check if there is activity on the channel and set sleep time accordingly
+                        if await self.check_activity(guild):  # Note the 'await' since it's an async function
+                            sleep_time = 45  # 1 minute
+                        else:
+                            sleep_time = 600  # 10 minutes
+                    else:
+                        sleep_time = 2400  # Original 40 minutes sleep time as a fallback
+                    await asyncio.sleep(sleep_time)
             except Exception as exc:
                 log.error("Exception in pokemon auto spawning: ", exc_info=exc)
 
