@@ -475,7 +475,7 @@ class Pokecord(
                 pokename=pokename,
             )
 
-            if random.randint(1, 1) == 1:  # Always true for testing
+            if random.randint(1, 10) == 1:  # Always true for testing
                 try:
                     user_conf = await self.user_is_global(ctx.author)
                     incienso_count = await user_conf.incienso_count()
