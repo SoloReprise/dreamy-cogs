@@ -682,7 +682,7 @@ class Pokecord(
 
         prefixes = await self.bot.get_valid_prefixes(guild=channel.guild)
         embed = discord.Embed(
-            title=_("‌‌A wild pokémon has appeared!"),
+            title=_("A wild pokémon has appeared!"),
             description=_(
                 "Guess the pokémon and type {prefix}catch <pokémon> to catch it!"
             ).format(prefix=prefixes[0]),
@@ -695,22 +695,22 @@ class Pokecord(
         types = pokemon['type']
         bg_images = self.determine_background(types)
 
-        # Load and resize the selected background image
+        # Choose a random background image from the available options
         bg_image_path = self.choose_random_background(bg_images)
         background = Image.open(bg_image_path).resize((800, 500), Image.Resampling.LANCZOS)
 
+        # Load pokemon image
+        pokemon_image_path = os.path.join(self.datapath, f'pokemon/{pokemon["name"]["english"]}.png'.replace(":", ""))
+        pokemon_image = Image.open(pokemon_image_path)
+
         # Calculate new size for pokemon image (60% of background)
-        scale_width = background.width * 0.75
-        scale_height = background.height * 0.75
-        # Maintaining aspect ratio
-        aspect_ratio = min(scale_width / pokemon_image.width, scale_height / pokemon_image.height)
-        new_width = int(pokemon_image.width * aspect_ratio)
-        new_height = int(pokemon_image.height * aspect_ratio)
-        pokemon_image = pokemon_image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+        new_width = int(background.width * 0.8)
+        new_height = int(background.height * 0.8)
+        pokemon_image = pokemon_image.resize((new_width, new_height), Image.LANCZOS)
 
         # Center pokemon image on background
         offset = ((background.width - new_width) // 2, (background.height - new_height) // 2)
-        background.paste(pokemon_image, offset, pokemon_image)
+        background.paste(pokemon_image, offset)
 
         # Save to a BytesIO object
         img_byte_arr = io.BytesIO()
