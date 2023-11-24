@@ -940,7 +940,7 @@ class Pokecord(
 
         for data in result:
             pokemon = json.loads(data[0])
-            if "shiny" in pokemon["name"]["english"].lower():  # Adjust this condition as needed
+            if isinstance(pokemon, dict) and "shiny" in pokemon.get("name", {}).get("english", "").lower():
                 shiny_pokemons.append(pokemon)
 
         if shiny_pokemons:
@@ -959,7 +959,12 @@ class Pokecord(
         """Display your trainer card with various information."""
         user_conf = await self.user_is_global(ctx.author)
         result = await self.cursor.fetch_all(query=SELECT_POKEMON, values={"user_id": ctx.author.id})
-        shiny_count = sum("shiny" in pokemon["name"]["english"].lower() for data in result for pokemon in json.loads(data[0]))
+
+        shiny_count = 0
+        for data in result:
+            pokemon = json.loads(data[0])
+            if isinstance(pokemon, dict) and "shiny" in pokemon.get("name", {}).get("english", "").lower():
+                shiny_count += 1
 
         # Fetching user's Pokédex count, Inciensos count, and current Pokémon index
         pokedex = await user_conf.pokeids()  # Dictionary of pokemon IDs and their counts
