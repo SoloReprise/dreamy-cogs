@@ -20,6 +20,9 @@ from .general import GeneralMixin
 from .settings import SettingsMixin
 from .statements import *
 from .trading import TradeMixin
+from PIL import Image
+import io
+import os
 
 log = logging.getLogger("red.flare.pokecord")
 
@@ -655,22 +658,42 @@ class Pokecord(
     async def spawn_pokemon(self, channel, *, pokemon=None):
         if pokemon is None:
             pokemon = self.pokemon_choose()
+
         prefixes = await self.bot.get_valid_prefixes(guild=channel.guild)
         embed = discord.Embed(
-            title=_("‌‌A wild pokémon has аppeаred!"),
+            title=_("‌‌A wild pokémon has appeared!"),
             description=_(
-                "Guess the pokémon аnd type {prefix}catch <pokémon> to cаtch it!"
+                "Guess the pokémon and type {prefix}catch <pokémon> to catch it!"
             ).format(prefix=prefixes[0]),
             color=await self.bot.get_embed_color(channel),
         )
+
         log.debug(f"{pokemon['name']['english']} has spawned in {channel} on {channel.guild}")
-        _file = discord.File(
-            self.datapath
-            + f'/pokemon/{pokemon["name"]["english"] if not pokemon.get("variant") else pokemon.get("alias") if pokemon.get("alias") else pokemon["name"]["english"]}.png'.replace(
-                ":", ""
-            ),
-            filename="pokemonspawn.png",
-        )
+
+        # Load background image
+        bg_image_path = os.path.join(self.datapath, "pokecord/data/backgrounds/route.jpg")
+        background = Image.open(bg_image_path)
+
+        # Load pokemon image
+        pokemon_image_path = os.path.join(self.datapath, f'pokemon/{pokemon["name"]["english"]}.png'.replace(":", ""))
+        pokemon_image = Image.open(pokemon_image_path)
+
+        # Resize and center pokemon image on background
+        # Adjust resizing as needed
+        pokemon_image = pokemon_image.resize((100, 100))  # Example resize, adjust as needed
+        bg_w, bg_h = background.size
+        img_w, img_h = pokemon_image.size
+        offset = ((bg_w - img_w) // 2, (bg_h - img_h) // 2)
+        background.paste(pokemon_image, offset, pokemon_image)
+
+        # Save to a BytesIO object
+        img_byte_arr = io.BytesIO()
+        background.save(img_byte_arr, format='PNG')
+        img_byte_arr.seek(0)
+
+        # Create discord file
+        _file = discord.File(fp=img_byte_arr, filename="pokemonspawn.png")
+
         embed.set_image(url="attachment://pokemonspawn.png")
         embed.set_footer(
             text=_("Supports: {languages}").format(
@@ -685,6 +708,7 @@ class Pokecord(
                 )
             )
         )
+
         await channel.send(embed=embed, file=_file)
         await self.config.channel(channel).pokemon.set(pokemon)
 
