@@ -99,6 +99,26 @@ SPANISH_TO_ENGLISH_TYPES  = {
     "Hada": "Fairy"
 }
 
+ENGLISH_TO_SPANISH_TYPES  = {
+    "Normal": "Normal",
+    "Fire": "Fuego",
+    "Water": "Agua",
+    "Electric": "Eléctrico",
+    "Grass": "Planta",
+    "Ice": "Hielo",
+    "Fight": "Lucha",
+    "Poison": "Veneno",
+    "Ground": "Tierra",
+    "Flying": "Volador",
+    "Psychic": "Psíquico",
+    "Bug": "Bicho",
+    "Rock": "Roca",
+    "Ghost": "Fantasma",
+    "Dragon": "Dragón",
+    "Dark": "Siniestro",
+    "Steel": "Acero",
+    "Fairy": "Hada"
+}
 @cog_i18n(_)
 class Pokecord(
     Dev,
@@ -938,31 +958,36 @@ class Pokecord(
     @commands.command()
     async def badgecountdown(self, ctx, pokemon_type: str):
         """Indica cuántos Pokémon más de un tipo específico necesitas para ganar la medalla."""
-        # Normalize and translate the type name
         pokemon_type = pokemon_type.capitalize()
-        english_type = SPANISH_TO_ENGLISH_TYPES.get(pokemon_type, None)
-        if not english_type:
-            await ctx.send(_("'{type}' no es un tipo de Pokémon válido.").format(type=pokemon_type))
-            return
 
-        user_conf = await self.user_is_global(ctx.author)
-        user_pokemons = await user_conf.pokeids()  # Assuming this returns a dict of Pokémon IDs
+        # Translate input type name to English for processing
+        english_type = SPANISH_TO_ENGLISH_TYPES.get(pokemon_type, pokemon_type)
 
-        # Count Pokémon of the specified type
-        type_count = self.count_pokemon_of_type(user_pokemons, english_type)
+        # Translate the English type name back to Spanish for output
+        spanish_type = ENGLISH_TO_SPANISH_TYPES.get(english_type, pokemon_type)
 
-        # Determine the total required for the badge
-        total_required = self.count_total_pokemon_in_type(english_type) // 2
-        remaining = max(total_required - type_count, 0)
+        # Proceed if the type is valid
+        if english_type in TYPE_BADGES:
+            user_conf = await self.user_is_global(ctx.author)
+            user_pokemons = await user_conf.pokeids()
 
-        await ctx.send(
-            _("Tienes {type_count} Pokémon de tipo {type}. Necesitas {remaining} más para conseguir la {badge}.").format(
-                type_count=type_count,
-                type=pokemon_type,  # Use the Spanish type name
-                remaining=remaining,
-                badge=TYPE_BADGES_SPANISH[pokemon_type]  # Use the Spanish badge name
+            # Count Pokémon of the specified type
+            type_count = self.count_pokemon_of_type(user_pokemons, english_type)
+
+            # Determine the total required for the badge
+            total_required = self.count_total_pokemon_in_type(english_type) // 2
+            remaining = max(total_required - type_count, 0)
+
+            await ctx.send(
+                _("Tienes {type_count} Pokémon de tipo {spanish_type}. Necesitas {remaining} más para conseguir la {badge}.").format(
+                    type_count=type_count,
+                    spanish_type=spanish_type,  # Use the Spanish type name
+                    remaining=remaining,
+                    badge=TYPE_BADGES_SPANISH[spanish_type]  # Use the Spanish badge name
+                )
             )
-        )
+        else:
+            await ctx.send(_("'{type}' no es un tipo de Pokémon válido.").format(type=pokemon_type))
 
     def count_pokemon_of_type(self, user_pokemons, pokemon_type):
         """Counts the number of Pokémon of a specific type the user has."""
