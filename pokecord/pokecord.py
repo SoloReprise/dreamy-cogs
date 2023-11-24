@@ -935,15 +935,16 @@ class Pokecord(
     async def shinylist(self, ctx):
         """Lists all the shiny Pokémon a user has."""
         user_conf = await self.user_is_global(ctx.author)
-        user_pokemons = await user_conf.pokeids()  # Assuming this returns a dict of Pokémon IDs
-
-        # Fetch and filter shiny Pokémon
-        shiny_pokemons = self.get_shiny_pokemons(user_pokemons)
+        result = await self.cursor.fetch_all(
+            query=SELECT_POKEMON,
+            values={"user_id": ctx.author.id},
+        )
+        shiny_pokemons = [json.loads(data[0]) for data in result if "shiny" in json.loads(data[0])["name"]["english"].lower()]
 
         if shiny_pokemons:
-            shiny_list = [f"{pokemon['name']} (ID: {pokemon['id']})" for pokemon in shiny_pokemons]
+            shiny_list = [f"{pokemon['name']['english']} (ID: {pokemon['id']})" for pokemon in shiny_pokemons]
             message = _("¡Has encontrado un total de {count} shinies!\n{shinies}").format(
-                count=len(shiny_pokemons), 
+                count=len(shiny_pokemons),
                 shinies=", ".join(shiny_list)
             )
         else:
@@ -964,7 +965,12 @@ class Pokecord(
     async def trainercard(self, ctx):
         """Display your trainer card with various information."""
         user_conf = await self.user_is_global(ctx.author)
-        user_pokemons = await user_conf.pokeids()  # Fetch user's Pokémon
+        result = await self.cursor.fetch_all(
+            query=SELECT_POKEMON,
+            values={"user_id": ctx.author.id},
+        )
+        shiny_pokemons = [json.loads(data[0]) for data in result if "shiny" in json.loads(data[0])["name"]["english"].lower()]
+        shiny_count = len(shiny_pokemons)
 
         # Fetching user's Pokédex count, Inciensos count, and current Pokémon index
         pokedex = await user_conf.pokeids()  # Dictionary of pokemon IDs and their counts
@@ -980,10 +986,6 @@ class Pokecord(
 
         # Fetch badges
         badges = await user_conf.badges()
-
-        # Get shiny count
-        shiny_pokemons = self.get_shiny_pokemons(user_pokemons)
-        shiny_count = len(shiny_pokemons)
 
         # Creating the embed
         embed = discord.Embed(title=f"{ctx.author.display_name}'s Trainer Card", color=await self.bot.get_embed_color(ctx.channel))
