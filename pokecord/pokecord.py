@@ -624,8 +624,10 @@ class Pokecord(
         userconf = self.usercache.get(user.id)
         if userconf is None:
             return
-        if datetime.datetime.utcnow().timestamp() - userconf["timestamp"] < 10:
+        if datetime.utcnow().timestamp() - userconf["timestamp"] < 10:
             return
+
+        self.usercache[user.id]["timestamp"] = datetime.utcnow().timestamp()
         self.usercache[user.id][
             "timestamp"
         ] = datetime.datetime.utcnow().timestamp()  # Try remove a race condition
