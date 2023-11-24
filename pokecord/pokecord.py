@@ -938,13 +938,14 @@ class Pokecord(
         result = await self.cursor.fetch_all(query=SELECT_POKEMON, values={"user_id": ctx.author.id})
         shiny_pokemons = []
 
-        for data in result:
+        for i, data in enumerate(result, start=1):
             pokemon = json.loads(data[0])
             if isinstance(pokemon, dict) and pokemon.get("variant") == "Shiny":
+                pokemon["sid"] = i  # Assign a unique sequential ID to each Pokémon
                 shiny_pokemons.append(pokemon)
 
         if shiny_pokemons:
-            shiny_list = [f"{pokemon['name']['english']} (ID: {pokemon['id']})" for pokemon in shiny_pokemons]
+            shiny_list = [f"{pokemon['name']['english']} (ID: {pokemon['sid']})" for pokemon in shiny_pokemons]
             message = _("¡Has encontrado un total de {count} shinies!\n{shinies}").format(
                 count=len(shiny_pokemons), 
                 shinies=", ".join(shiny_list)
