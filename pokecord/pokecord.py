@@ -849,7 +849,7 @@ class Pokecord(
 
         # Creating the embed
         embed = discord.Embed(title=f"{ctx.author.display_name}'s Trainer Card", color=await self.bot.get_embed_color(ctx.channel))
-        embed.set_thumbnail(url=ctx.author.avatar_url)
+        embed.set_thumbnail(url=ctx.author.avatar.url)  # Updated to use avatar.url
         embed.add_field(name="Starter Pokémon", value=starter_pokemon, inline=False)
         embed.add_field(name="Pokédex", value=f"{pokedex_count}/{total_pokedex}", inline=False)
         embed.add_field(name="Inciensos", value=str(incienso_count), inline=False)
