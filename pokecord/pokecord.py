@@ -960,7 +960,7 @@ class Pokecord(
                 type_count=type_count,
                 type=pokemon_type,  # Use the Spanish type name
                 remaining=remaining,
-                badge=TYPE_BADGES_SPANISH[english_type]  # Use the Spanish badge name
+                badge=TYPE_BADGES_SPANISH[pokemon_type]  # Use the Spanish badge name
             )
         )
 
