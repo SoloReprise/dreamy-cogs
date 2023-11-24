@@ -20,7 +20,7 @@ from .general import GeneralMixin
 from .settings import SettingsMixin
 from .statements import *
 from .trading import TradeMixin
-from PIL import Image
+from PIL import Image, ImageOps
 import io
 import os
 
@@ -706,16 +706,16 @@ class Pokecord(
                 ":", ""
             )
         )
-        pokemon_image = Image.open(pokemon_image_path)
+        pokemon_image = Image.open(pokemon_image_path).convert("RGBA")
 
-        # Calculate new size for pokemon image (60% of background)
+        # Resize pokemon image while preserving transparency
         new_width = int(background.width * 0.85)
         new_height = int(background.height * 0.85)
-        pokemon_image = pokemon_image.resize((new_width, new_height), Image.LANCZOS)
+        pokemon_image = ImageOps.fit(pokemon_image, (new_width, new_height), method=0, bleed=0.0, centering=(0.5, 0.5))
 
         # Center pokemon image on background
         offset = ((background.width - new_width) // 2, (background.height - new_height) // 2)
-        background.paste(pokemon_image, offset)
+        background.paste(pokemon_image, offset, pokemon_image)
 
         # Save to a BytesIO object
         img_byte_arr = io.BytesIO()
@@ -752,7 +752,7 @@ class Pokecord(
             if pokemonspawn["id"] == pokemon["id"]:
                 await self.config.channel(channel).pokemon.clear()
                 await channel.send(f"¡El Pokémon salvaje ha huído! ¡El Pokémon salvaje era {pokemon['name']['english']}!")
-
+        
     def determine_background(self, types):
         # Determine the appropriate background(s) based on Pokémon type
         bg_images = []
