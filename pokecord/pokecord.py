@@ -655,6 +655,27 @@ class Pokecord(
         await set_contextual_locales_from_guild(self.bot, message.guild)
         await self.spawn_pokemon(channel)
 
+    TYPE_BACKGROUND_MAPPING = {
+        "Normal": ["route.jpg", "route_2.jpg"],
+        "Fire": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg"],  # List of possible backgrounds
+        "Water": ["beach.jpg", "water.jpg", "water_2.jpg", "route.jpg", "route_2.jpg"],
+        "Electric": ["cave.jpg", "cave_2.jpg", "forest.jpg", "route.jpg", "route_2.jpg"],
+        "Fighting": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg"],
+        "Grass": ["forest.jpg", "forest_2.jpg", "route.jpg", "route_2.jpg"],
+        "Poison": ["forest.jpg", "forest_2.jpg", "cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg"],
+        "Ground": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg"],
+        "Rock": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg"],
+        "Flying": ["sky.jpg", "sky_2.jpg", "route.jpg", "route_2.jpg"],
+        "Psychic": ["forest_2.jpg", "route.jpg", "route_2.jpg"],
+        "Bug": ["forest.jpg", "forest_2.jpg", "route.jpg", "route_2.jpg"],
+        "Ghost": ["forest.jpg", "forest_2.jpg", "route.jpg", "route_2.jpg"],
+        "Dragon": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg"],
+        "Steel": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg"],
+        "Dark": ["forest.jpg", "forest_2.jpg", "cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg"],
+        "Fairy": ["route.jpg", "route_2.jpg"],
+        "Ice": ["ice.jpg", "ice_2.jpg"],
+    }
+
     async def spawn_pokemon(self, channel, *, pokemon=None):
         if pokemon is None:
             pokemon = self.pokemon_choose()
@@ -670,13 +691,13 @@ class Pokecord(
 
         log.debug(f"{pokemon['name']['english']} has spawned in {channel} on {channel.guild}")
 
-        # Load background image
-        bg_image_path = "/home/unitedlegacy/.local/share/Red-DiscordBot/data/Spribotito/cogs/RepoManager/repos/dreamy-cogs/pokecord/data/backgrounds/route.jpg"
-        background = Image.open(bg_image_path).resize((800, 500), Image.Resampling.LANCZOS)
+        # Determine the background image based on Pokémon type
+        types = pokemon['type']
+        bg_images = self.determine_background(types)
 
-        # Load and resize pokemon image
-        pokemon_image_path = os.path.join(self.datapath, f'pokemon/{pokemon["name"]["english"]}.png'.replace(":", ""))
-        pokemon_image = Image.open(pokemon_image_path)
+        # Load and resize the selected background image
+        bg_image_path = self.choose_random_background(bg_images)
+        background = Image.open(bg_image_path).resize((800, 500), Image.Resampling.LANCZOS)
 
         # Calculate new size for pokemon image (60% of background)
         scale_width = background.width * 0.75
@@ -727,6 +748,24 @@ class Pokecord(
                 await self.config.channel(channel).pokemon.clear()
                 await channel.send(f"¡El Pokémon salvaje ha huído! ¡El Pokémon salvaje era {pokemon['name']['english']}!")
 
+    def determine_background(self, types):
+        # Determine the appropriate background(s) based on Pokémon type
+        bg_images = []
+        for _type in types:
+            if _type in self.TYPE_BACKGROUND_MAPPING:
+                bg_images.extend(self.TYPE_BACKGROUND_MAPPING[_type])
+        if not bg_images:
+            # If no specific backgrounds found, use the default background
+            bg_images.append("route.jpg")
+        return bg_images
+
+    def choose_random_background(self, bg_images):
+        # Choose a random background image from the available options
+        return os.path.join(
+            "/home/unitedlegacy/.local/share/Red-DiscordBot/data/Spribotito/cogs/RepoManager/repos/dreamy-cogs/pokecord/data/backgrounds",
+            random.choice(bg_images),
+        )
+    
     def calc_xp(self, lvl):
         return 25 * lvl
 
