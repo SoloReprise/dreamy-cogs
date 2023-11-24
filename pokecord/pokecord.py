@@ -932,9 +932,39 @@ class Pokecord(
         return count
     
     @commands.command()
+    async def shinylist(self, ctx):
+        """Lists all the shiny Pokémon a user has."""
+        user_conf = await self.user_is_global(ctx.author)
+        user_pokemons = await user_conf.pokeids()  # Assuming this returns a dict of Pokémon IDs
+
+        # Fetch and filter shiny Pokémon
+        shiny_pokemons = self.get_shiny_pokemons(user_pokemons)
+
+        if shiny_pokemons:
+            shiny_list = [f"{pokemon['name']} (ID: {pokemon['id']})" for pokemon in shiny_pokemons]
+            message = _("¡Has encontrado un total de {count} shinies!\n{shinies}").format(
+                count=len(shiny_pokemons), 
+                shinies=", ".join(shiny_list)
+            )
+        else:
+            message = _("No tienes ningún Pokémon shiny.")
+
+        await ctx.send(message)
+
+    def get_shiny_pokemons(self, user_pokemons):
+        """Returns a list of shiny Pokémon from the user's collection."""
+        shinies = []
+        for poke_id in user_pokemons:
+            pokemon = self.pokemondata[int(poke_id)]  # Retrieve Pokémon data by ID
+            if pokemon.get('shiny'):  # Check if the Pokémon is marked as shiny
+                shinies.append(pokemon)
+        return shinies
+    
+    @commands.command()
     async def trainercard(self, ctx):
         """Display your trainer card with various information."""
         user_conf = await self.user_is_global(ctx.author)
+        user_pokemons = await user_conf.pokeids()  # Fetch user's Pokémon
 
         # Fetching user's Pokédex count, Inciensos count, and current Pokémon index
         pokedex = await user_conf.pokeids()  # Dictionary of pokemon IDs and their counts
@@ -951,10 +981,15 @@ class Pokecord(
         # Fetch badges
         badges = await user_conf.badges()
 
+        # Get shiny count
+        shiny_pokemons = self.get_shiny_pokemons(user_pokemons)
+        shiny_count = len(shiny_pokemons)
+
         # Creating the embed
         embed = discord.Embed(title=f"{ctx.author.display_name}'s Trainer Card", color=await self.bot.get_embed_color(ctx.channel))
         embed.set_thumbnail(url=ctx.author.avatar.url)  # Updated to use avatar.url
         embed.add_field(name="Pokédex", value=f"{pokedex_count}/{total_pokedex}", inline=False)
+        embed.add_field(name="Shinies", value=str(shiny_count), inline=False)
         embed.add_field(name="Inciensos", value=str(incienso_count), inline=False)
         embed.add_field(name="Acompañante", value=current_pokemon, inline=False)
         # Formatting the badge field
