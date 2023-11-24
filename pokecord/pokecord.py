@@ -894,6 +894,43 @@ class Pokecord(
         return sum(1 for pokemon in self.pokemondata if type_name in pokemon['types'])
     
     @commands.command()
+    async def badgecountdown(self, ctx, pokemon_type: str):
+        """Tells you how many more Pokémon of a specific type you need to earn the badge."""
+        # Ensure the provided type is valid and normalize it
+        pokemon_type = pokemon_type.capitalize()
+        if pokemon_type not in TYPE_BADGES:
+            await ctx.send(_("'{type}' no es un tipo de Pokémon válido.").format(type=pokemon_type))
+            return
+
+        user_conf = await self.user_is_global(ctx.author)
+        user_pokemons = await user_conf.pokeids()  # Assuming this returns a dict of Pokémon IDs
+
+        # Count Pokémon of the specified type
+        type_count = self.count_pokemon_of_type(user_pokemons, pokemon_type)
+
+        # Determine the total required for the badge
+        total_required = self.count_total_pokemon_in_type(pokemon_type) // 2
+        remaining = max(total_required - type_count, 0)
+
+        await ctx.send(
+            _("Necesitas {remaining} Pokémon de tipo {type} para conseguir la {badge}.").format(
+                remaining=remaining,
+                type=pokemon_type,
+                badge=TYPE_BADGES[pokemon_type]
+            )
+        )
+
+    def count_pokemon_of_type(self, user_pokemons, pokemon_type):
+        """Counts the number of Pokémon of a specific type the user has."""
+        count = 0
+        for poke_id in user_pokemons:
+            pokemon = self.pokemondata[int(poke_id)]  # Retrieve Pokémon data by ID
+            if pokemon_type in pokemon['types']:  # Assuming each Pokémon has a 'types' field
+                count += 1
+
+        return count
+    
+    @commands.command()
     async def trainercard(self, ctx):
         """Display your trainer card with various information."""
         user_conf = await self.user_is_global(ctx.author)
