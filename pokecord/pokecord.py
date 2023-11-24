@@ -708,10 +708,18 @@ class Pokecord(
         )
         pokemon_image = Image.open(pokemon_image_path).convert("RGBA")
 
-        # Resize pokemon image while preserving transparency
-        new_width = int(background.width * 0.85)
-        new_height = int(background.height * 0.85)
-        pokemon_image = ImageOps.fit(pokemon_image, (new_width, new_height), method=0, bleed=0.0, centering=(0.5, 0.5))
+        # Calculate new size for pokemon image (60% of background)
+        scale_width = background.width * 0.6
+        scale_height = background.height * 0.6
+        # Maintaining aspect ratio
+        aspect_ratio = min(scale_width / pokemon_image.width, scale_height / pokemon_image.height)
+        new_width = int(pokemon_image.width * aspect_ratio)
+        new_height = int(pokemon_image.height * aspect_ratio)
+        pokemon_image = pokemon_image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
+        # Center pokemon image on background
+        offset = ((background.width - new_width) // 2, (background.height - new_height) // 2)
+        background.paste(pokemon_image, offset, pokemon_image)
 
         # Center pokemon image on background
         offset = ((background.width - new_width) // 2, (background.height - new_height) // 2)
