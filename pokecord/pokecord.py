@@ -671,7 +671,7 @@ class Pokecord(
         log.debug(f"{pokemon['name']['english']} has spawned in {channel} on {channel.guild}")
 
         # Load background image
-        bg_image_path = os.path.join(self.datapath, "cogs/RepoManager/repos/dreamy-cogs/pokecord/data/backgrounds/route.jpg")
+        bg_image_path = "/home/unitedlegacy/.local/share/Red-DiscordBot/data/Spribotito/cogs/RepoManager/repos/dreamy-cogs/pokecord/data/backgrounds/route.jpg"
         background = Image.open(bg_image_path)
 
         # Load pokemon image
