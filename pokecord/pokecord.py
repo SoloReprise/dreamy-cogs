@@ -674,13 +674,20 @@ class Pokecord(
         bg_image_path = "/home/unitedlegacy/.local/share/Red-DiscordBot/data/Spribotito/cogs/RepoManager/repos/dreamy-cogs/pokecord/data/backgrounds/route.jpg"
         background = Image.open(bg_image_path)
 
+        # Resize background
+        bg_max_width = 800
+        bg_max_height = 500
+        background = background.resize((bg_max_width, bg_max_height), Image.Resampling.LANCZOS)
+
         # Load pokemon image
         pokemon_image_path = os.path.join(self.datapath, f'pokemon/{pokemon["name"]["english"]}.png'.replace(":", ""))
         pokemon_image = Image.open(pokemon_image_path)
 
-        # Resize and center pokemon image on background
-        # Adjust resizing as needed
-        pokemon_image = pokemon_image.resize((100, 100))  # Example resize, adjust as needed
+        # Resize pokemon image
+        scale_factor = 0.5  # Adjust this factor to change the size of the pokemon image
+        pokemon_image = pokemon_image.resize((int(pokemon_image.width * scale_factor), int(pokemon_image.height * scale_factor)), Image.Resampling.LANCZOS)
+
+        # Center pokemon image on background
         bg_w, bg_h = background.size
         img_w, img_h = pokemon_image.size
         offset = ((bg_w - img_w) // 2, (bg_h - img_h) // 2)
