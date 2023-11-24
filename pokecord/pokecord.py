@@ -870,7 +870,7 @@ class Pokecord(
 
         for poke_id in user_pokemons:
             pokemon = self.pokemondata[int(poke_id)]  # Retrieve Pokémon data by ID
-            pokemon_types = pokemon['types']  # Assuming each Pokémon data has a 'types' field
+            pokemon_types = pokemon['type']  # Assuming each Pokémon data has a 'types' field
 
             for type_name in pokemon_types:
                 if type_name in type_counts:
@@ -891,7 +891,7 @@ class Pokecord(
 
     def count_total_pokemon_in_type(self, type_name):
         # Count the total number of Pokémon in the given type
-        return sum(1 for pokemon in self.pokemondata if type_name in pokemon['types'])
+        return sum(1 for pokemon in self.pokemondata if type_name in pokemon['type'])
     
     @commands.command()
     async def badgecountdown(self, ctx, pokemon_type: str):
@@ -925,7 +925,7 @@ class Pokecord(
         count = 0
         for poke_id in user_pokemons:
             pokemon = self.pokemondata[int(poke_id)]  # Retrieve Pokémon data by ID
-            if pokemon_type in pokemon['types']:  # Assuming each Pokémon has a 'types' field
+            if pokemon_type in pokemon['type']:  # Assuming each Pokémon has a 'types' field
                 count += 1
 
         return count
