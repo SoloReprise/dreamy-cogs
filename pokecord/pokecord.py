@@ -251,7 +251,7 @@ class Pokecord(
                         await self.spawn_pokemon(channel)
                         # Check if there is activity on the channel and set sleep time accordingly
                         if await self.check_activity(guild):  # Note the 'await' since it's an async function
-                            sleep_time = 45  # 1 minute
+                            sleep_time = 300  # 5 minutes
                         else:
                             sleep_time = 600  # 10 minutes
                     else:
@@ -838,10 +838,6 @@ class Pokecord(
         incienso_count = await user_conf.incienso_count()
         current_pokemon_index = await user_conf.pokeid() - 1  # Adjusting index to 0-based
 
-        # Fetching Pokémon data
-        starter_pokemon_id = next(iter(pokedex)) if pokedex else None
-        starter_pokemon = self.pokemondata[int(starter_pokemon_id) - 1]["name"]["english"] if starter_pokemon_id else "None"
-
         # Fetching current Pokémon based on its index
         result = await self.cursor.fetch_all(query=SELECT_POKEMON, values={"user_id": ctx.author.id})
         pokemons = [json.loads(data[0]) for data in result]
@@ -850,7 +846,6 @@ class Pokecord(
         # Creating the embed
         embed = discord.Embed(title=f"{ctx.author.display_name}'s Trainer Card", color=await self.bot.get_embed_color(ctx.channel))
         embed.set_thumbnail(url=ctx.author.avatar.url)  # Updated to use avatar.url
-        embed.add_field(name="Starter Pokémon", value=starter_pokemon, inline=False)
         embed.add_field(name="Pokédex", value=f"{pokedex_count}/{total_pokedex}", inline=False)
         embed.add_field(name="Inciensos", value=str(incienso_count), inline=False)
         embed.add_field(name="Acompañante", value=current_pokemon, inline=False)
