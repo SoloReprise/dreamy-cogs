@@ -55,8 +55,50 @@ TYPE_BADGES = {
     "Dark": "Medalla Siniestra",
     "Steel": "Medalla Acerosa",
     "Fairy": "Medalla Feérica"
-    # ... Add all types here ...
 }
+
+TYPE_BADGES_SPANISH = {
+    "Normal": "Medalla Básica",
+    "Fuego": "Medalla Ardiente",
+    "Agua": "Medalla Acuática",
+    "Eléctrico": "Medalla Eléctrica",
+    "Planta": "Medalla Herbácea",
+    "Hielo": "Medalla Helada",
+    "Lucha": "Medalla Peleona",
+    "Veneno": "Medalla Venenosa",
+    "Tierra": "Medalla Terrestre",
+    "Volador": "Medalla Celeste",
+    "Psíquico": "Medalla Psíquica",
+    "Bicho": "Medalla Invertebrada",
+    "Roca": "Medalla Rocosa",
+    "Fantasma": "Medalla Fantasmagórica",
+    "Dragón": "Medalla Dracónica",
+    "Siniestro": "Medalla Siniestra",
+    "Acero": "Medalla Acerosa",
+    "Hada": "Medalla Feérica"
+}
+
+SPANISH_TO_ENGLISH_TYPES  = {
+    "Normal": "Normal",
+    "Fuego": "Fire",
+    "Agua": "Water",
+    "Eléctrico": "Electric",
+    "Planta": "Grass",
+    "Hielo": "Ice",
+    "Lucha": "Fight",
+    "Veneno": "Poison",
+    "Tierra": "Ground",
+    "Volador": "Flying",
+    "Psíquico": "Psychic",
+    "Bicho": "Bug",
+    "Roca": "Rock",
+    "Fantasma": "Ghost",
+    "Dragón": "Dragon",
+    "Siniestro": "Dark",
+    "Acero": "Steel",
+    "Hada": "Fairy"
+}
+
 @cog_i18n(_)
 class Pokecord(
     Dev,
@@ -892,13 +934,14 @@ class Pokecord(
     def count_total_pokemon_in_type(self, type_name):
         # Count the total number of Pokémon in the given type
         return sum(1 for pokemon in self.pokemondata if type_name in pokemon['type'])
-    
+
     @commands.command()
     async def badgecountdown(self, ctx, pokemon_type: str):
-        """Tells you how many more Pokémon of a specific type you need to earn the badge."""
-        # Ensure the provided type is valid and normalize it
+        """Indica cuántos Pokémon más de un tipo específico necesitas para ganar la medalla."""
+        # Normalize and translate the type name
         pokemon_type = pokemon_type.capitalize()
-        if pokemon_type not in TYPE_BADGES:
+        english_type = SPANISH_TO_ENGLISH_TYPES.get(pokemon_type, None)
+        if not english_type:
             await ctx.send(_("'{type}' no es un tipo de Pokémon válido.").format(type=pokemon_type))
             return
 
@@ -906,18 +949,18 @@ class Pokecord(
         user_pokemons = await user_conf.pokeids()  # Assuming this returns a dict of Pokémon IDs
 
         # Count Pokémon of the specified type
-        type_count = self.count_pokemon_of_type(user_pokemons, pokemon_type)
+        type_count = self.count_pokemon_of_type(user_pokemons, english_type)
 
         # Determine the total required for the badge
-        total_required = self.count_total_pokemon_in_type(pokemon_type) // 2
+        total_required = self.count_total_pokemon_in_type(english_type) // 2
         remaining = max(total_required - type_count, 0)
 
         await ctx.send(
             _("Tienes {type_count} Pokémon de tipo {type}. Necesitas {remaining} más para conseguir la {badge}.").format(
                 type_count=type_count,
-                type=pokemon_type,
+                type=pokemon_type,  # Use the Spanish type name
                 remaining=remaining,
-                badge=TYPE_BADGES[pokemon_type]
+                badge=TYPE_BADGES_SPANISH[english_type]  # Use the Spanish badge name
             )
         )
 
