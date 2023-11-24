@@ -672,27 +672,25 @@ class Pokecord(
 
         # Load background image
         bg_image_path = "/home/unitedlegacy/.local/share/Red-DiscordBot/data/Spribotito/cogs/RepoManager/repos/dreamy-cogs/pokecord/data/backgrounds/route.jpg"
-        background = Image.open(bg_image_path)
+        background = Image.open(bg_image_path).resize((800, 500), Image.Resampling.LANCZOS)
 
-        # Resize background
-        bg_max_width = 800
-        bg_max_height = 500
-        background = background.resize((bg_max_width, bg_max_height), Image.Resampling.LANCZOS)
-
-        # Load pokemon image
+        # Load and resize pokemon image
         pokemon_image_path = os.path.join(self.datapath, f'pokemon/{pokemon["name"]["english"]}.png'.replace(":", ""))
         pokemon_image = Image.open(pokemon_image_path)
 
-        # Resize pokemon image
-        scale_factor = 0.5  # Adjust this factor to change the size of the pokemon image
-        pokemon_image = pokemon_image.resize((int(pokemon_image.width * scale_factor), int(pokemon_image.height * scale_factor)), Image.Resampling.LANCZOS)
+        # Calculate new size for pokemon image (60% of background)
+        scale_width = background.width * 0.6
+        scale_height = background.height * 0.6
+        # Maintaining aspect ratio
+        aspect_ratio = min(scale_width / pokemon_image.width, scale_height / pokemon_image.height)
+        new_width = int(pokemon_image.width * aspect_ratio)
+        new_height = int(pokemon_image.height * aspect_ratio)
+        pokemon_image = pokemon_image.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
         # Center pokemon image on background
-        bg_w, bg_h = background.size
-        img_w, img_h = pokemon_image.size
-        offset = ((bg_w - img_w) // 2, (bg_h - img_h) // 2)
+        offset = ((background.width - new_width) // 2, (background.height - new_height) // 2)
         background.paste(pokemon_image, offset, pokemon_image)
-
+        
         # Save to a BytesIO object
         img_byte_arr = io.BytesIO()
         background.save(img_byte_arr, format='PNG')
