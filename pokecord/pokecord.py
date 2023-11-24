@@ -834,7 +834,7 @@ class Pokecord(
         # Fetching user's Pokédex count, Inciensos count, and current Pokémon index
         pokedex = await user_conf.pokeids()  # Dictionary of pokemon IDs and their counts
         pokedex_count = len(pokedex)  # Total number of different pokemons caught
-        total_pokedex = len(self.pokemondata)  # Total number of pokemons in the Pokédex
+        total_pokedex = len(self.pokemonlist)  
         incienso_count = await user_conf.incienso_count()
         current_pokemon_index = await user_conf.pokeid() - 1  # Adjusting index to 0-based
 
