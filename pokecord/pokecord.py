@@ -709,8 +709,8 @@ class Pokecord(
         pokemon_image = Image.open(pokemon_image_path).convert("RGBA")
 
         # Calculate new size for pokemon image (60% of background)
-        scale_width = background.width * 0.8
-        scale_height = background.height * 0.8
+        scale_width = background.width * 0.9
+        scale_height = background.height * 0.9
         # Maintaining aspect ratio
         aspect_ratio = min(scale_width / pokemon_image.width, scale_height / pokemon_image.height)
         new_width = int(pokemon_image.width * aspect_ratio)
