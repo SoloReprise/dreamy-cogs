@@ -734,19 +734,6 @@ class Pokecord(
         _file = discord.File(fp=img_byte_arr, filename="pokemonspawn.png")
 
         embed.set_image(url="attachment://pokemonspawn.png")
-        embed.set_footer(
-            text=_("Supports: {languages}").format(
-                languages=humanize_list(
-                    list(
-                        [
-                            x.title()
-                            for x in pokemon["name"].keys()
-                            if pokemon["name"][x] is not None
-                        ]
-                    )
-                )
-            )
-        )
 
         await channel.send(embed=embed, file=_file)
         await self.config.channel(channel).pokemon.set(pokemon)
