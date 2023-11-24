@@ -940,7 +940,7 @@ class Pokecord(
 
         for data in result:
             pokemon = json.loads(data[0])
-            if isinstance(pokemon, dict) and "shiny" in pokemon.get("name", {}).get("english", "").lower():
+            if isinstance(pokemon, dict) and pokemon.get("variant") == "Shiny":
                 shiny_pokemons.append(pokemon)
 
         if shiny_pokemons:
@@ -963,7 +963,7 @@ class Pokecord(
         shiny_count = 0
         for data in result:
             pokemon = json.loads(data[0])
-            if isinstance(pokemon, dict) and "shiny" in pokemon.get("name", {}).get("english", "").lower():
+            if isinstance(pokemon, dict) and pokemon.get("variant") == "Shiny":
                 shiny_count += 1
 
         # Fetching user's Pokédex count, Inciensos count, and current Pokémon index
