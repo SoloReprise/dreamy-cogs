@@ -919,7 +919,14 @@ class Pokecord(
         embed.add_field(name="Pokédex", value=f"{pokedex_count}/{total_pokedex}", inline=False)
         embed.add_field(name="Inciensos", value=str(incienso_count), inline=False)
         embed.add_field(name="Acompañante", value=current_pokemon, inline=False)
-        embed.add_field(name="Badges", value=f"{len(badges)}/18 ({', '.join(badges)})", inline=False)
+        # Formatting the badge field
+        if badges:
+            badge_field_value = f"{len(badges)}/18 ({', '.join(badges)})"
+        else:
+            badge_field_value = "0/18"
+
+        # Adding badges to the embed
+        embed.add_field(name="Medallas", value=badge_field_value, inline=False)
 
         # Sending the embed
         await ctx.send(embed=embed)
