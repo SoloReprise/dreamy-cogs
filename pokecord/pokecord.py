@@ -1,6 +1,5 @@
 import asyncio
 import concurrent.futures
-import datetime
 from datetime import datetime, timedelta
 import json
 import logging
@@ -211,7 +210,7 @@ class Pokecord(
             bool: True if there's recent activity, False otherwise.
         """
         active_channels = self.guildcache[str(guild_id)]["activechannels"]
-        time_limit = datetime.datetime.utcnow() - datetime.timedelta(minutes=10)
+        time_limit = datetime.utcnow() - datetime.timedelta(minutes=10)
 
         for channel_id in active_channels:
             channel = self.bot.get_channel(int(channel_id))
@@ -546,14 +545,14 @@ class Pokecord(
             self.maybe_spawn[message.guild.id] = {
                 "amount": 1,
                 "spawnchance": random.randint(self.spawnchance[0], self.spawnchance[1]),
-                "time": datetime.datetime.utcnow().timestamp(),
+                "time": datetime.utcnow().timestamp(),
                 "author": message.author.id,
             }  # TODO: big value
         if (
             self.maybe_spawn[message.guild.id]["author"] == message.author.id
         ):  # stop spamming to spawn
             if (
-                datetime.datetime.utcnow().timestamp() - self.maybe_spawn[message.guild.id]["time"]
+                datetime.utcnow().timestamp() - self.maybe_spawn[message.guild.id]["time"]
             ) < 5:
                 return
         self.maybe_spawn[message.guild.id]["amount"] += 1
@@ -630,9 +629,9 @@ class Pokecord(
         self.usercache[user.id]["timestamp"] = datetime.utcnow().timestamp()
         self.usercache[user.id][
             "timestamp"
-        ] = datetime.datetime.utcnow().timestamp()  # Try remove a race condition
+        ] = datetime.utcnow().timestamp()  # Try remove a race condition
         await self.config.user(user).timestamp.set(
-            datetime.datetime.utcnow().timestamp()
+            datetime.utcnow().timestamp()
         )  # TODO: guild based
         await self.update_user_cache()
         result = await self.cursor.fetch_all(query=SELECT_POKEMON, values={"user_id": user.id})
