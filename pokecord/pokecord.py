@@ -700,12 +700,17 @@ class Pokecord(
         background = Image.open(bg_image_path).resize((800, 500), Image.Resampling.LANCZOS)
 
         # Load pokemon image
-        pokemon_image_path = os.path.join(self.datapath, f'pokemon/{pokemon["name"]["english"]}.png'.replace(":", ""))
+        pokemon_image_path = (
+            self.datapath
+            + f'/pokemon/{pokemon["name"]["english"] if not pokemon.get("variant") else pokemon.get("alias") if pokemon.get("alias") else pokemon["name"]["english"]}.png'.replace(
+                ":", ""
+            )
+        )
         pokemon_image = Image.open(pokemon_image_path)
 
         # Calculate new size for pokemon image (60% of background)
-        new_width = int(background.width * 0.8)
-        new_height = int(background.height * 0.8)
+        new_width = int(background.width * 0.85)
+        new_height = int(background.height * 0.85)
         pokemon_image = pokemon_image.resize((new_width, new_height), Image.LANCZOS)
 
         # Center pokemon image on background
