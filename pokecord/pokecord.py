@@ -935,42 +935,31 @@ class Pokecord(
     async def shinylist(self, ctx):
         """Lists all the shiny Pokémon a user has."""
         user_conf = await self.user_is_global(ctx.author)
-        result = await self.cursor.fetch_all(
-            query=SELECT_POKEMON,
-            values={"user_id": ctx.author.id},
-        )
-        shiny_pokemons = [json.loads(data[0]) for data in result if "shiny" in json.loads(data[0])["name"]["english"].lower()]
+        result = await self.cursor.fetch_all(query=SELECT_POKEMON, values={"user_id": ctx.author.id})
+        shiny_pokemons = []
+
+        for data in result:
+            pokemon = json.loads(data[0])
+            if "shiny" in pokemon["name"]["english"].lower():  # Adjust this condition as needed
+                shiny_pokemons.append(pokemon)
 
         if shiny_pokemons:
             shiny_list = [f"{pokemon['name']['english']} (ID: {pokemon['id']})" for pokemon in shiny_pokemons]
             message = _("¡Has encontrado un total de {count} shinies!\n{shinies}").format(
-                count=len(shiny_pokemons),
+                count=len(shiny_pokemons), 
                 shinies=", ".join(shiny_list)
             )
         else:
             message = _("No tienes ningún Pokémon shiny.")
 
         await ctx.send(message)
-
-    def get_shiny_pokemons(self, user_pokemons):
-        """Returns a list of shiny Pokémon from the user's collection."""
-        shinies = []
-        for poke_id in user_pokemons:
-            pokemon = self.pokemondata[int(poke_id)]  # Retrieve Pokémon data by ID
-            if pokemon.get('shiny'):  # Check if the Pokémon is marked as shiny
-                shinies.append(pokemon)
-        return shinies
     
     @commands.command()
     async def trainercard(self, ctx):
         """Display your trainer card with various information."""
         user_conf = await self.user_is_global(ctx.author)
-        result = await self.cursor.fetch_all(
-            query=SELECT_POKEMON,
-            values={"user_id": ctx.author.id},
-        )
-        shiny_pokemons = [json.loads(data[0]) for data in result if "shiny" in json.loads(data[0])["name"]["english"].lower()]
-        shiny_count = len(shiny_pokemons)
+        result = await self.cursor.fetch_all(query=SELECT_POKEMON, values={"user_id": ctx.author.id})
+        shiny_count = sum("shiny" in pokemon["name"]["english"].lower() for data in result for pokemon in json.loads(data[0]))
 
         # Fetching user's Pokédex count, Inciensos count, and current Pokémon index
         pokedex = await user_conf.pokeids()  # Dictionary of pokemon IDs and their counts
