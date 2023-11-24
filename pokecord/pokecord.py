@@ -831,12 +831,19 @@ class Pokecord(
         """Display your trainer card with various information."""
         user_conf = await self.user_is_global(ctx.author)
 
-        # Fetching user's starter, Pokédex count, Inciensos count, and current Pokémon
-        starter_pokemon = await user_conf.starter()  # Assuming there is a method to get the starter
-        pokedex_count = len(await user_conf.pokeids())  # Total number of different pokemons caught
+        # Fetching user's Pokédex count, Inciensos count, and current Pokémon
+        pokedex = await user_conf.pokeids()  # Dictionary of pokemon IDs and their counts
+        pokedex_count = len(pokedex)  # Total number of different pokemons caught
         total_pokedex = len(self.pokemondata)  # Total number of pokemons in the Pokédex
         incienso_count = await user_conf.incienso_count()
-        current_pokemon = self.get_name((await user_conf.current_pokemon())["name"], ctx.author)  # Assuming there's a method to get the current Pokémon
+
+        # Assuming the first Pokémon in the user's list is the starter (if not, adjust accordingly)
+        starter_pokemon_id = next(iter(pokedex)) if pokedex else None
+        starter_pokemon = self.pokemondata[int(starter_pokemon_id) - 1]["name"]["english"] if starter_pokemon_id else "None"
+
+        # Assuming a method to get the current Pokémon's ID
+        current_pokemon_id = await user_conf.current_pokemon()
+        current_pokemon = self.pokemondata[int(current_pokemon_id) - 1]["name"]["english"] if current_pokemon_id else "None"
 
         # Creating the embed
         embed = discord.Embed(title=f"{ctx.author.display_name}'s Trainer Card", color=await self.bot.get_embed_color(ctx.channel))
