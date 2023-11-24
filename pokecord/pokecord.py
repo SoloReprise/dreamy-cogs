@@ -913,9 +913,10 @@ class Pokecord(
         remaining = max(total_required - type_count, 0)
 
         await ctx.send(
-            _("Necesitas {remaining} Pokémon de tipo {type} para conseguir la {badge}.").format(
-                remaining=remaining,
+            _("Tienes {type_count} Pokémon de tipo {type}. Necesitas {remaining} más para conseguir la {badge}.").format(
+                type_count=type_count,
                 type=pokemon_type,
+                remaining=remaining,
                 badge=TYPE_BADGES[pokemon_type]
             )
         )
