@@ -825,3 +825,26 @@ class Pokecord(
             log.error(f"Error updating incienso count for user {ctx.author}: {e}")
             await ctx.send(_("Error updating incienso count. Please try again later."))
             return  # Ensure command execution stops here if an error occurs
+        
+    @commands.command()
+    async def trainercard(self, ctx):
+        """Display your trainer card with various information."""
+        user_conf = await self.user_is_global(ctx.author)
+
+        # Fetching user's starter, Pokédex count, Inciensos count, and current Pokémon
+        starter_pokemon = await user_conf.starter()  # Assuming there is a method to get the starter
+        pokedex_count = len(await user_conf.pokeids())  # Total number of different pokemons caught
+        total_pokedex = len(self.pokemondata)  # Total number of pokemons in the Pokédex
+        incienso_count = await user_conf.incienso_count()
+        current_pokemon = self.get_name((await user_conf.current_pokemon())["name"], ctx.author)  # Assuming there's a method to get the current Pokémon
+
+        # Creating the embed
+        embed = discord.Embed(title=f"{ctx.author.display_name}'s Trainer Card", color=await self.bot.get_embed_color(ctx.channel))
+        embed.set_thumbnail(url=ctx.author.avatar_url)
+        embed.add_field(name="Starter Pokémon", value=starter_pokemon, inline=False)
+        embed.add_field(name="Pokédex", value=f"{pokedex_count}/{total_pokedex}", inline=False)
+        embed.add_field(name="Inciensos", value=str(incienso_count), inline=False)
+        embed.add_field(name="Acompañante", value=current_pokemon, inline=False)
+
+        # Sending the embed
+        await ctx.send(embed=embed)
