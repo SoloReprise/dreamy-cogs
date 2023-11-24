@@ -36,7 +36,27 @@ class CompositeMetaClass(type(commands.Cog), type(ABC)):
     """This allows the metaclass used for proper type detection to coexist with discord.py's
     metaclass."""
 
-
+TYPE_BADGES = {
+    "Normal": "Medalla Básica",
+    "Fire": "Medalla Ardiente",
+    "Water": "Medalla Acuática",
+    "Electric": "Medalla Eléctrica",
+    "Grass": "Medalla Herbácea",
+    "Ice": "Medalla Helada",
+    "Fighting": "Medalla Peleona",
+    "Poison": "Medalla Venenosa",
+    "Ground": "Medalla Terrestre",
+    "Flying": "Medalla Celeste",
+    "Psychic": "Medalla Psíquica",
+    "Bug": "Medalla Invertebrada",
+    "Rock": "Medalla Rocosa",
+    "Ghost": "Medalla Fantasmagórica",
+    "Dragon": "Medalla Dracónica",
+    "Dark": "Medalla Siniestra",
+    "Steel": "Medalla Acerosa",
+    "Fairy": "Medalla Feérica"
+    # ... Add all types here ...
+}
 @cog_i18n(_)
 class Pokecord(
     Dev,
@@ -70,6 +90,7 @@ class Pokecord(
         self.config.register_guild(**defaults_guild)
         defaults_user = {
             "pokeids": {},
+            "badges": [],  # List to store the names of the badges earned
             "silence": False,
             "timestamp": 0,
             "pokeid": 1,
@@ -825,7 +846,53 @@ class Pokecord(
             log.error(f"Error updating incienso count for user {ctx.author}: {e}")
             await ctx.send(_("Error updating incienso count. Please try again later."))
             return  # Ensure command execution stops here if an error occurs
-        
+
+    async def update_user_badges(self, user_id):
+        user_conf = await self.user_is_global(user_id)
+        user_pokemons = await user_conf.pokeids()  # Assuming this returns a dict of Pokémon IDs
+
+        # Count Pokémon by type
+        type_counts = self.count_pokemon_by_type(user_pokemons)
+
+        # Determine which badges to award
+        new_badges = self.determine_badges(type_counts)
+
+        # Update the user's badges
+        current_badges = await user_conf.badges()
+        for badge in new_badges:
+            if badge not in current_badges:
+                current_badges.append(badge)
+
+        await user_conf.badges.set(current_badges)
+
+    def count_pokemon_by_type(self, user_pokemons):
+        type_counts = {type_name: 0 for type_name in TYPE_BADGES.keys()}
+
+        for poke_id in user_pokemons:
+            pokemon = self.pokemondata[int(poke_id)]  # Retrieve Pokémon data by ID
+            pokemon_types = pokemon['types']  # Assuming each Pokémon data has a 'types' field
+
+            for type_name in pokemon_types:
+                if type_name in type_counts:
+                    type_counts[type_name] += 1
+
+        return type_counts
+
+    def determine_badges(self, type_counts):
+        new_badges = []
+
+        for type_name, count in type_counts.items():
+            total_in_type = self.count_total_pokemon_in_type(type_name)
+            if count >= total_in_type / 2:
+                badge_name = TYPE_BADGES[type_name]
+                new_badges.append(badge_name)
+
+        return new_badges
+
+    def count_total_pokemon_in_type(self, type_name):
+        # Count the total number of Pokémon in the given type
+        return sum(1 for pokemon in self.pokemondata if type_name in pokemon['types'])
+    
     @commands.command()
     async def trainercard(self, ctx):
         """Display your trainer card with various information."""
@@ -843,12 +910,16 @@ class Pokecord(
         pokemons = [json.loads(data[0]) for data in result]
         current_pokemon = pokemons[current_pokemon_index]["name"]["english"] if current_pokemon_index < len(pokemons) else "None"
 
+        # Fetch badges
+        badges = await user_conf.badges()
+
         # Creating the embed
         embed = discord.Embed(title=f"{ctx.author.display_name}'s Trainer Card", color=await self.bot.get_embed_color(ctx.channel))
         embed.set_thumbnail(url=ctx.author.avatar.url)  # Updated to use avatar.url
         embed.add_field(name="Pokédex", value=f"{pokedex_count}/{total_pokedex}", inline=False)
         embed.add_field(name="Inciensos", value=str(incienso_count), inline=False)
         embed.add_field(name="Acompañante", value=current_pokemon, inline=False)
+        embed.add_field(name="Badges", value=f"{len(badges)}/18 ({', '.join(badges)})", inline=False)
 
         # Sending the embed
         await ctx.send(embed=embed)
