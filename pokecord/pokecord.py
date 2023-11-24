@@ -679,8 +679,8 @@ class Pokecord(
         pokemon_image = Image.open(pokemon_image_path)
 
         # Calculate new size for pokemon image (60% of background)
-        scale_width = background.width * 0.6
-        scale_height = background.height * 0.6
+        scale_width = background.width * 0.75
+        scale_height = background.height * 0.75
         # Maintaining aspect ratio
         aspect_ratio = min(scale_width / pokemon_image.width, scale_height / pokemon_image.height)
         new_width = int(pokemon_image.width * aspect_ratio)
@@ -690,7 +690,7 @@ class Pokecord(
         # Center pokemon image on background
         offset = ((background.width - new_width) // 2, (background.height - new_height) // 2)
         background.paste(pokemon_image, offset, pokemon_image)
-        
+
         # Save to a BytesIO object
         img_byte_arr = io.BytesIO()
         background.save(img_byte_arr, format='PNG')
