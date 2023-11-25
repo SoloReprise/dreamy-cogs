@@ -200,19 +200,34 @@ class SearchFormat:
         embed.set_footer(text=f"Page {page + 1}/{len(self.entries)}")
         return embed
 
-class PokedexFormat:
-    def __init__(self, entries: Iterable[Dict], per_page: int = 1):
-        self.entries = list(entries)
-        self.per_page = per_page
+class PokedexFormat(menus.ListPageSource):
+    def __init__(self, entries: List[Dict], per_page: int = 1):
+        super().__init__(entries, per_page=per_page)
 
-    async def get_max_pages(self):
-        return len(self.entries) // self.per_page + (1 if len(self.entries) % self.per_page else 0)
-
-    async def format_page(self, menu: GenericMenu, page: int) -> discord.Embed:
-        items = self.entries[page * self.per_page:(page + 1) * self.per_page]
-        embed = discord.Embed(title="Pokédex", color=await menu.ctx.embed_color())
-        for item in items:
-            # Format each item as needed for the embed
-            embed.add_field(name=item["name"], value=str(item["value"]))
-        embed.set_footer(text=f"Showing {page + 1}-{min(len(self.entries), (page + 1) * self.per_page)} of {len(self.entries)}.")
+    async def format_page(self, menu: GenericMenu, items: List[Dict]) -> discord.Embed:
+        embed = discord.Embed(title=_("Pokédex"), color=await menu.ctx.embed_colour())
+        embed.set_footer(
+            text=_("Showing {page}-{lenpages} of {amount}.").format(
+                page=menu.current_page + 1, lenpages=self.get_max_pages(), amount=menu.len_poke
+            )
+        )
+        for pokemon in items:
+            if pokemon["amount"] > 0:
+                msg = _("{amount} caught! \N{WHITE HEAVY CHECK MARK}").format(
+                    amount=pokemon["amount"]
+                )
+            else:
+                msg = _("Not caught yet! \N{CROSS MARK}")
+            embed.add_field(
+                name="{pokemonname} {pokemonid}".format(
+                    pokemonname=menu.cog.get_name(pokemon["name"], menu.ctx.author),
+                    pokemonid=pokemon["id"],
+                ),
+                value=msg,
+            )
+        if menu.current_page == 0:
+            embed.description = _("You've caught {total} out of {amount} pokémon.").format(
+                total=len(await menu.cog.config.user(menu.ctx.author).pokeids()),
+                amount=menu.len_poke,
+            )
         return embed
