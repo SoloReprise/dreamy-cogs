@@ -241,7 +241,7 @@ class GeneralMixin(MixinMeta):
                 ctx=ctx,  # Pass ctx as an argument
                 delete_message_after=False,
                 len_poke=len(pokemonlist),
-            ).start(wait=False)  # Remove ctx argument from start() method
+            ).start()
 
     @commands.command()
     async def psearch(self, ctx, *, args: Args):
