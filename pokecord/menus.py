@@ -126,6 +126,7 @@ class GenericMenu(discord.ui.View):
     def __init__(self, source, ctx, len_poke=0, timeout: int = 180, delete_message_after: bool = False):
         super().__init__(timeout=timeout)
         self.source = source
+        cog: Optional[commands.Cog] = None,
         self.ctx = ctx
         self.len_poke = len_poke
         self.delete_message_after = delete_message_after
