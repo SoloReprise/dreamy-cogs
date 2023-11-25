@@ -123,13 +123,14 @@ class PokeListMenu(discord.ui.View):
         self.message = await channel.send(embed=embed, view=self)
 
 class GenericMenu(discord.ui.View):
-    def __init__(self, source, ctx, len_poke=0, timeout: int = 180):
+    def __init__(self, source, ctx, len_poke=0, timeout: int = 180, delete_message_after: bool = False):
         super().__init__(timeout=timeout)
         self.source = source
         self.ctx = ctx
         self.len_poke = len_poke
+        self.delete_message_after = delete_message_after
         self.current_page = 0
-        self.message = None  # Reference to the message to which this view is attached
+        self.message = None
 
     async def on_timeout(self):
         for item in self.children:
@@ -168,7 +169,13 @@ class GenericMenu(discord.ui.View):
 
     @discord.ui.button(label="Stop", style=discord.ButtonStyle.danger)
     async def stop_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.message.delete()
+        if self.delete_message_after:
+            await interaction.message.delete()
+        else:
+            self.stop()
+            for item in self.children:
+                item.disabled = True
+            await interaction.response.edit_message(view=self)
 
     async def start(self, channel: discord.abc.Messageable):
         content = await self.source.format_page(self, self.current_page)
