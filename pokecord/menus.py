@@ -62,6 +62,19 @@ class PokeList:
         embed.set_footer(text=footer_text)
         return embed
 
+class PageJumpModal(discord.ui.Modal):
+    def __init__(self, menu):
+        super().__init__(title="Jump to Page")
+        self.menu = menu
+        self.add_item(discord.ui.TextInput(label="Page Number", placeholder="Enter page number"))
+
+    async def on_submit(self, interaction: discord.Interaction):
+        try:
+            page_number = int(self.children[0].value) - 1
+            await self.menu.update_page(interaction, page_number)
+        except ValueError:
+            await interaction.response.send_message("Please enter a valid number.", ephemeral=True)
+
 class PokeListMenu(discord.ui.View):
     def __init__(self, poke_list: PokeList, timeout: int = 180):
         super().__init__(timeout=timeout)
@@ -98,8 +111,8 @@ class PokeListMenu(discord.ui.View):
 
     @discord.ui.button(label="Jump to Page", style=discord.ButtonStyle.secondary)
     async def jump_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Implementation for jumping to a specific page can be added here
-        pass
+        modal = PageJumpModal(self)
+        await interaction.response.send_modal(modal)
 
     @discord.ui.button(label="Stop", style=discord.ButtonStyle.danger)
     async def stop_button(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -111,7 +124,7 @@ class PokeListMenu(discord.ui.View):
     async def start(self, channel: discord.abc.Messageable):
         embed = self.poke_list.format_page(self.current_page)
         self.message = await channel.send(embed=embed, view=self)
-
+        
 class GenericMenu(menus.MenuPages, inherit_buttons=False):
     def __init__(
         self,
