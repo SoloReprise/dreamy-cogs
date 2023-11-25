@@ -241,7 +241,7 @@ class GeneralMixin(MixinMeta):
                 ctx=ctx,  # Pass ctx as an argument
                 delete_message_after=False,
                 len_poke=len(pokemonlist),
-            ).start()
+            ).start(ctx.channel)  # Pass the channel where you want to display the menu
 
     @commands.command()
     async def psearch(self, ctx, *, args: Args):
