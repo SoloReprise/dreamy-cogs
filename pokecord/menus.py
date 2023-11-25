@@ -67,41 +67,44 @@ class PokeListMenu(discord.ui.View):
         super().__init__(timeout=timeout)
         self.poke_list = poke_list
         self.current_page = 0
+        self.message = None  # This will hold the message to which this view is attached
 
-    @discord.ui.button(label="Previous", style=discord.ButtonStyle.primary, custom_id="prev")
-    async def previous_button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await self.show_page(interaction, self.current_page - 1)
+    async def on_timeout(self):
+        for button in self.children:
+            button.disabled = True
+        if self.message:
+            await self.message.edit(view=self)
 
-    @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next")
-    async def next_button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await self.show_page(interaction, self.current_page + 1)
-
-    @discord.ui.button(label="Jump to Page", style=discord.ButtonStyle.secondary, custom_id="jump")
-    async def jump_button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await self.number_page(interaction)
-
-    @discord.ui.button(label="Stop", style=discord.ButtonStyle.danger, custom_id="stop")
-    async def stop_button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        for item in self.children:
-            item.disabled = True
-        await interaction.response.edit_message(view=self)
-        self.stop()
-
-    async def show_page(self, interaction: discord.Interaction, page_number: int):
-        max_pages = self.poke_list.get_max_pages()
+    async def update_page(self, interaction: discord.Interaction, page_number: int):
         if page_number < 0:
-            self.current_page = max_pages - 1
-        elif page_number >= max_pages:
+            self.current_page = self.poke_list.get_max_pages() - 1
+        elif page_number >= self.poke_list.get_max_pages():
             self.current_page = 0
         else:
             self.current_page = page_number
 
-        content = self.poke_list.format_page(self.current_page)
-        await interaction.response.edit_message(content=None, embed=content, view=self)
+        embed = self.poke_list.format_page(self.current_page)
+        await interaction.response.edit_message(content=None, embed=embed, view=self)
 
-    async def number_page(self, interaction: discord.Interaction):
+    @discord.ui.button(label="Previous", style=discord.ButtonStyle.primary)
+    async def previous_button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await self.update_page(interaction, self.current_page - 1)
+
+    @discord.ui.button(label="Next", style=discord.ButtonStyle.primary)
+    async def next_button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await self.update_page(interaction, self.current_page + 1)
+
+    @discord.ui.button(label="Jump to Page", style=discord.ButtonStyle.secondary)
+    async def jump_button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         # Implementation for jumping to a specific page can be added here
         pass
+
+    @discord.ui.button(label="Stop", style=discord.ButtonStyle.danger)
+    async def stop_button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+        self.stop()
+        for button in self.children:
+            button.disabled = True
+        await interaction.response.edit_message(view=self)
 
     async def start(self, channel: discord.abc.Messageable):
         embed = self.poke_list.format_page(self.current_page)
