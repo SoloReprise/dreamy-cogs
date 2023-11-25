@@ -4,7 +4,6 @@ from typing import Optional, Any, Dict, Iterable, List, Optional
 import tabulate
 
 import discord
-from discord.ext import menus
 import tabulate
 from redbot.core import commands
 from redbot.core.i18n import Translator
@@ -18,31 +17,19 @@ _ = Translator("Pokecord", __file__)
 
 
 class PokeListMenu(discord.ui.View):
-    def __init__(
-        self,
-        source: menus.PageSource,
-        ctx,
-        user=None,
-        timeout: int = 180,
-        message: discord.Message = None,
-        **kwargs: Any,
-    ):
+    def __init__(self, entries: Iterable[Dict], per_page: int = 8, timeout: int = 180):
         super().__init__(timeout=timeout)
-        self.source = source
-        self.ctx = ctx
-        self.user = user
-        self.message = message
+        self.entries = list(entries)
+        self.per_page = per_page
         self.current_page = 0
-        self._search_lock = asyncio.Lock()
-        self._search_task: asyncio.Task = None
+        self.max_pages = len(self.entries) // per_page + (1 if len(self.entries) % per_page else 0)
         self.add_item(discord.ui.Button(label="Previous", style=discord.ButtonStyle.primary, custom_id="prev"))
         self.add_item(discord.ui.Button(label="Next", style=discord.ButtonStyle.primary, custom_id="next"))
         self.add_item(discord.ui.Button(label="Jump to Page", style=discord.ButtonStyle.secondary, custom_id="jump"))
-        self.add_item(discord.ui.Button(label="Select", style=discord.ButtonStyle.success, custom_id="select"))
         self.add_item(discord.ui.Button(label="Stop", style=discord.ButtonStyle.danger, custom_id="stop"))
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return interaction.user.id == self.ctx.author.id
+        return True  # Modify this to restrict who can interact with this view
 
     async def on_timeout(self) -> None:
         for item in self.children:
@@ -53,63 +40,40 @@ class PokeListMenu(discord.ui.View):
         custom_id = interaction.data.get("custom_id")
 
         if custom_id == "prev":
-            await self.show_page(self.current_page - 1)
+            await self.show_page(interaction, self.current_page - 1)
         elif custom_id == "next":
-            await self.show_page(self.current_page + 1)
+            await self.show_page(interaction, self.current_page + 1)
         elif custom_id == "jump":
             await self.number_page(interaction)
-        elif custom_id == "select":
-            command = self.ctx.bot.get_command("select")
-            await self.ctx.invoke(command, _id=self.current_page + 1)
         elif custom_id == "stop":
             for item in self.children:
                 item.disabled = True
-            await self.message.edit(view=self)
+            await interaction.message.edit(view=self)
             self.stop()
 
-    async def show_page(self, page_number: int):
-        max_pages = await self.source.get_max_pages()
+    async def show_page(self, interaction: discord.Interaction, page_number: int):
         if page_number < 0:
-            self.current_page = max_pages - 1
-        elif page_number >= max_pages:
+            self.current_page = self.max_pages - 1
+        elif page_number >= self.max_pages:
             self.current_page = 0
         else:
             self.current_page = page_number
 
-        content = await self.source.format_page(self, await self.source.get_page(self.current_page))
-        await self.message.edit(content=None, embed=content, view=self)
+        start = self.current_page * self.per_page
+        end = start + self.per_page
+        content = self.format_page(self.entries[start:end])
+        await interaction.response.edit_message(content=None, embed=content, view=self)
 
     async def number_page(self, interaction: discord.Interaction):
-        if self._search_lock.locked():
-            return
+        # Implementation for jumping to a specific page can be added here
+        pass
 
-        async with self._search_lock:
-            def check(m):
-                return m.author.id == self.ctx.author.id and m.channel.id == self.ctx.channel.id
-
-            prompt = await self.ctx.send("Please select the Pokémon ID number to jump to.")
-            try:
-                msg = await self.ctx.bot.wait_for('message', check=check, timeout=10.0)
-                jump_page = int(msg.content) - 1
-                await self.show_page(jump_page)
-                await prompt.delete()
-                await msg.delete()
-            except (ValueError, asyncio.TimeoutError):
-                await prompt.delete()
-
-    async def start(self, channel: discord.abc.Messageable):
-        self.message = await channel.send(embed=await self.source.get_page(0), view=self)
-
-class PokeList(menus.ListPageSource):
-    def __init__(self, entries: Iterable[Dict], per_page: int = 8):
-        super().__init__(entries, per_page=per_page)
-
-    async def format_page(self, menu: PokeListMenu, entries: List[Dict]) -> discord.Embed:
+    def format_page(self, entries: List[Dict]) -> discord.Embed:
         # Header for the ASCII table
         table_header = "ID | Pokémon              | Nº Pokédex | Nivel | XP"
         lines = [table_header]
 
-        for idx, pokemon in enumerate(entries, start=1 + (menu.current_page * self.per_page)):
+        for idx, pokemon in enumerate(entries, start=1 + (self.current_page * self.per_page)):
             # Determine gender symbol
             gender_symbol = ""
             if pokemon.get("gender") == "Male":
@@ -118,7 +82,6 @@ class PokeList(menus.ListPageSource):
                 gender_symbol = "♀️"
 
             # Check if the Pokémon is shiny
-            # Assuming 'shiny' status is determined by checking if the English name contains 'shiny'
             name_english = pokemon['name'].get('english', '')  # Get the English name
             shiny_symbol = "✨" if "shiny" in name_english.lower() else ""  # Check if 'shiny' is in the name
 
@@ -136,8 +99,7 @@ class PokeList(menus.ListPageSource):
 
         # Embed with ASCII table as plain text
         embed = discord.Embed(description=f"```\n{table}\n```", color=0x00FF00)
-        footer_text = f"Página {menu.current_page + 1}/{self.get_max_pages()}\n"
-        footer_text += "Puedes comprobar las estadísticas completas de un Pokémon con !stats <ID>"
+        footer_text = f"Página {self.current_page + 1}/{self.max_pages}"
         embed.set_footer(text=footer_text)
         return embed
 
