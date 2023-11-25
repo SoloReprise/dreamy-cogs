@@ -67,33 +67,25 @@ class PokeListMenu(discord.ui.View):
         super().__init__(timeout=timeout)
         self.poke_list = poke_list
         self.current_page = 0
-        self.add_item(discord.ui.Button(label="Previous", style=discord.ButtonStyle.primary, custom_id="prev"))
-        self.add_item(discord.ui.Button(label="Next", style=discord.ButtonStyle.primary, custom_id="next"))
-        self.add_item(discord.ui.Button(label="Jump to Page", style=discord.ButtonStyle.secondary, custom_id="jump"))
-        self.add_item(discord.ui.Button(label="Stop", style=discord.ButtonStyle.danger, custom_id="stop"))
 
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return True  # Modify this to restrict who can interact with this view
+    @discord.ui.button(label="Previous", style=discord.ButtonStyle.primary, custom_id="prev")
+    async def previous_button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await self.show_page(interaction, self.current_page - 1)
 
-    async def on_timeout(self) -> None:
+    @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next")
+    async def next_button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await self.show_page(interaction, self.current_page + 1)
+
+    @discord.ui.button(label="Jump to Page", style=discord.ButtonStyle.secondary, custom_id="jump")
+    async def jump_button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await self.number_page(interaction)
+
+    @discord.ui.button(label="Stop", style=discord.ButtonStyle.danger, custom_id="stop")
+    async def stop_button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         for item in self.children:
             item.disabled = True
-        await self.message.edit(view=self)
-
-    async def on_interaction(self, interaction: discord.Interaction):
-        custom_id = interaction.data.get("custom_id")
-
-        if custom_id == "prev":
-            await self.show_page(interaction, self.current_page - 1)
-        elif custom_id == "next":
-            await self.show_page(interaction, self.current_page + 1)
-        elif custom_id == "jump":
-            await self.number_page(interaction)
-        elif custom_id == "stop":
-            for item in this.children:
-                item.disabled = True
-            await interaction.message.edit(view=self)
-            self.stop()
+        await interaction.response.edit_message(view=self)
+        self.stop()
 
     async def show_page(self, interaction: discord.Interaction, page_number: int):
         max_pages = self.poke_list.get_max_pages()
