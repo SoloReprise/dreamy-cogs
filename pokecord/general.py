@@ -50,13 +50,11 @@ class GeneralMixin(MixinMeta):
             _("{user}'s selected Pokémon ID is {id}").format(user=user, id=_id),
             delete_after=5,
         )
-        await PokeListMenu(
-            source=PokeList(pokemons),
-            cog=self,
-            ctx=ctx,
-            user=user,
-            delete_message_after=False,
-        ).start(ctx=ctx, wait=False)
+
+        # Create an instance of PokeList and pass it to PokeListMenu
+        poke_list = PokeList(pokemons)
+        menu = PokeListMenu(poke_list)
+        await menu.start(ctx.channel)  # Start the menu in the current context's channel
 
     @commands.max_concurrency(1, commands.BucketType.user)
     @poke.command()
