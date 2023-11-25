@@ -201,27 +201,27 @@ class SearchFormat:
         return embed
 
 class PokedexFormat(menus.ListPageSource):
-    def __init__(self, entries: List[Dict], per_page: int = 1):
+    def __init__(self, entries: Iterable[List], per_page: int = 1):
         super().__init__(entries, per_page=per_page)
 
-    async def format_page(self, menu: GenericMenu, items: List[Dict]) -> discord.Embed:
+    async def format_page(self, menu: GenericMenu, page: List) -> discord.Embed:
         embed = discord.Embed(title=_("Pokédex"), color=await menu.ctx.embed_colour())
         embed.set_footer(
             text=_("Showing {page}-{lenpages} of {amount}.").format(
                 page=menu.current_page + 1, lenpages=self.get_max_pages(), amount=menu.len_poke
             )
         )
-        for pokemon in items:
-            if pokemon["amount"] > 0:
+        for pokemon in page:
+            if pokemon[1]["amount"] > 0:
                 msg = _("{amount} caught! \N{WHITE HEAVY CHECK MARK}").format(
-                    amount=pokemon["amount"]
+                    amount=pokemon[1]["amount"]
                 )
             else:
                 msg = _("Not caught yet! \N{CROSS MARK}")
             embed.add_field(
                 name="{pokemonname} {pokemonid}".format(
-                    pokemonname=menu.cog.get_name(pokemon["name"], menu.ctx.author),
-                    pokemonid=pokemon["id"],
+                    pokemonname=menu.cog.get_name(pokemon[1]["name"], menu.ctx.author),
+                    pokemonid=pokemon[1]["id"],
                 ),
                 value=msg,
             )
