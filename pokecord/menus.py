@@ -1,9 +1,10 @@
 import asyncio
 import contextlib
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Optional, Any, Dict, Iterable, List, Optional
 import tabulate
 
 import discord
+from discord.ext import menus
 import tabulate
 from redbot.core import commands
 from redbot.core.i18n import Translator
@@ -16,133 +17,88 @@ from .functions import poke_embed
 _ = Translator("Pokecord", __file__)
 
 
-class PokeListMenu(menus.MenuPages, inherit_buttons=False):
+class PokeListMenu(discord.ui.View):
     def __init__(
         self,
         source: menus.PageSource,
-        cog: Optional[commands.Cog] = None,
-        ctx=None,
+        ctx,
         user=None,
-        clear_reactions_after: bool = True,
-        delete_message_after: bool = False,
-        add_reactions: bool = True,
-        using_custom_emoji: bool = False,
-        using_embeds: bool = False,
-        keyword_to_reaction_mapping: Dict[str, str] = None,
         timeout: int = 180,
         message: discord.Message = None,
         **kwargs: Any,
-    ) -> None:
-        self.cog = cog
+    ):
+        super().__init__(timeout=timeout)
+        self.source = source
         self.ctx = ctx
         self.user = user
+        self.message = message
+        self.current_page = 0
         self._search_lock = asyncio.Lock()
         self._search_task: asyncio.Task = None
-        super().__init__(
-            source,
-            clear_reactions_after=clear_reactions_after,
-            delete_message_after=delete_message_after,
-            check_embeds=using_embeds,
-            timeout=timeout,
-            message=message,
-            **kwargs,
-        )
+        self.add_item(discord.ui.Button(label="Previous", style=discord.ButtonStyle.primary, custom_id="prev"))
+        self.add_item(discord.ui.Button(label="Next", style=discord.ButtonStyle.primary, custom_id="next"))
+        self.add_item(discord.ui.Button(label="Jump to Page", style=discord.ButtonStyle.secondary, custom_id="jump"))
+        self.add_item(discord.ui.Button(label="Select", style=discord.ButtonStyle.success, custom_id="select"))
+        self.add_item(discord.ui.Button(label="Stop", style=discord.ButtonStyle.danger, custom_id="stop"))
 
-    async def finalize(self, timed_out):
-        if not self._running:
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return interaction.user.id == self.ctx.author.id
+
+    async def on_timeout(self) -> None:
+        for item in self.children:
+            item.disabled = True
+        await self.message.edit(view=self)
+
+    async def on_interaction(self, interaction: discord.Interaction):
+        custom_id = interaction.data.get("custom_id")
+
+        if custom_id == "prev":
+            await self.show_page(self.current_page - 1)
+        elif custom_id == "next":
+            await self.show_page(self.current_page + 1)
+        elif custom_id == "jump":
+            await self.number_page(interaction)
+        elif custom_id == "select":
+            command = self.ctx.bot.get_command("select")
+            await self.ctx.invoke(command, _id=self.current_page + 1)
+        elif custom_id == "stop":
+            for item in self.children:
+                item.disabled = True
+            await self.message.edit(view=self)
+            self.stop()
+
+    async def show_page(self, page_number: int):
+        max_pages = await self.source.get_max_pages()
+        if page_number < 0:
+            self.current_page = max_pages - 1
+        elif page_number >= max_pages:
+            self.current_page = 0
+        else:
+            self.current_page = page_number
+
+        content = await self.source.format_page(self, await self.source.get_page(self.current_page))
+        await self.message.edit(content=None, embed=content, view=self)
+
+    async def number_page(self, interaction: discord.Interaction):
+        if self._search_lock.locked():
             return
-
-        await self.stop(do_super=False)
-
-    async def stop(self, do_super: bool = True):
-        if self._search_task is not None:
-            self._search_task.cancel()
-        if do_super:
-            super().stop()
-
-    async def _number_page_task(self):
-        async def cleanup(messages: List[discord.Message]):
-            with contextlib.suppress(discord.HTTPException):
-                for msg in messages:
-                    await msg.delete()
 
         async with self._search_lock:
-            prompt = await self.ctx.send(_("Please select the Pokémon ID number to jump to."))
+            def check(m):
+                return m.author.id == self.ctx.author.id and m.channel.id == self.ctx.channel.id
+
+            prompt = await self.ctx.send("Please select the Pokémon ID number to jump to.")
             try:
-                pred = MessagePredicate.valid_int(self.ctx)
-                msg = await self.bot.wait_for("message_without_command", check=pred, timeout=10.0)
-                jump_page = int(msg.content)
-                if jump_page > self._source.get_max_pages():
-                    await self.ctx.send(
-                        _("Invalid Pokémon ID, jumping to the end."), delete_after=5
-                    )
-                    jump_page = self._source.get_max_pages()
-                await self.show_checked_page(jump_page - 1)
-                await cleanup([prompt, msg])
-            except (ValueError, asyncio.TimeoutError, asyncio.CancelledError):
-                await cleanup([prompt])
+                msg = await self.ctx.bot.wait_for('message', check=check, timeout=10.0)
+                jump_page = int(msg.content) - 1
+                await self.show_page(jump_page)
+                await prompt.delete()
+                await msg.delete()
+            except (ValueError, asyncio.TimeoutError):
+                await prompt.delete()
 
-            self._search_task = None
-
-    def reaction_check(self, payload):
-        """The function that is used to check whether the payload should be processed.
-        This is passed to :meth:`discord.ext.commands.Bot.wait_for <Bot.wait_for>`.
-
-        There should be no reason to override this function for most users.
-
-        Parameters
-        ------------
-        payload: :class:`discord.RawReactionActionEvent`
-            The payload to check.
-
-        Returns
-        ---------
-        :class:`bool`
-            Whether the payload should be processed.
-        """
-        if payload.message_id != self.message.id:
-            return False
-        if payload.user_id not in (*self.bot.owner_ids, self._author_id):
-            return False
-
-        return payload.emoji in self.buttons
-
-    def _cant_select(self):
-        return self.ctx.author != self.user
-
-    @menus.button("\N{BLACK LEFT-POINTING TRIANGLE}", position=menus.First(0))
-    async def prev(self, payload: discord.RawReactionActionEvent):
-        if self.current_page == 0:
-            await self.show_page(self._source.get_max_pages() - 1)
-        else:
-            await self.show_checked_page(self.current_page - 1)
-
-    @menus.button("\N{CROSS MARK}", position=menus.First(1))
-    async def stop_pages_default(self, payload: discord.RawReactionActionEvent) -> None:
-        with contextlib.suppress(discord.NotFound):
-            await self.message.delete()
-
-        await self.stop()
-
-    @menus.button("\N{BLACK RIGHT-POINTING TRIANGLE}", position=menus.First(2))
-    async def next(self, payload: discord.RawReactionActionEvent):
-        if self.current_page == self._source.get_max_pages() - 1:
-            await self.show_page(0)
-        else:
-            await self.show_checked_page(self.current_page + 1)
-
-    @menus.button("\N{LEFT-POINTING MAGNIFYING GLASS}", position=menus.First(4))
-    async def number_page(self, payload: discord.RawReactionActionEvent):
-        if self._search_lock.locked() and self._search_task is not None:
-            return
-
-        self._search_task = asyncio.get_running_loop().create_task(self._number_page_task())
-
-    @menus.button("\N{WHITE HEAVY CHECK MARK}", position=menus.First(3), skip_if=_cant_select)
-    async def select(self, payload: discord.RawReactionActionEvent):
-        command = self.ctx.bot.get_command("select")
-        await self.ctx.invoke(command, _id=self.current_page + 1)
-
+    async def start(self, channel: discord.abc.Messageable):
+        self.message = await channel.send(embed=await self.source.get_page(0), view=self)
 
 class PokeList(menus.ListPageSource):
     def __init__(self, entries: Iterable[Dict], per_page: int = 8):
