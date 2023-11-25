@@ -239,7 +239,6 @@ class GeneralMixin(MixinMeta):
             await GenericMenu(
                 source=PokedexFormat(chunked),
                 delete_message_after=False,
-                cog=self,
                 len_poke=len(pokemonlist),
             ).start(ctx=ctx, wait=False)
 
