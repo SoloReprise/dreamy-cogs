@@ -15,65 +15,24 @@ from .functions import poke_embed
 
 _ = Translator("Pokecord", __file__)
 
-
-class PokeListMenu(discord.ui.View):
-    def __init__(self, entries: Iterable[Dict], per_page: int = 8, timeout: int = 180):
-        super().__init__(timeout=timeout)
+class PokeList:
+    def __init__(self, entries: Iterable[Dict], per_page: int = 8):
         self.entries = list(entries)
         self.per_page = per_page
-        self.current_page = 0
-        self.max_pages = len(self.entries) // per_page + (1 if len(self.entries) % per_page else 0)
-        self.add_item(discord.ui.Button(label="Previous", style=discord.ButtonStyle.primary, custom_id="prev"))
-        self.add_item(discord.ui.Button(label="Next", style=discord.ButtonStyle.primary, custom_id="next"))
-        self.add_item(discord.ui.Button(label="Jump to Page", style=discord.ButtonStyle.secondary, custom_id="jump"))
-        self.add_item(discord.ui.Button(label="Stop", style=discord.ButtonStyle.danger, custom_id="stop"))
 
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return True  # Modify this to restrict who can interact with this view
+    def get_max_pages(self):
+        return len(self.entries) // self.per_page + (1 if len(self.entries) % self.per_page else 0)
 
-    async def on_timeout(self) -> None:
-        for item in self.children:
-            item.disabled = True
-        await self.message.edit(view=self)
-
-    async def on_interaction(self, interaction: discord.Interaction):
-        custom_id = interaction.data.get("custom_id")
-
-        if custom_id == "prev":
-            await self.show_page(interaction, self.current_page - 1)
-        elif custom_id == "next":
-            await self.show_page(interaction, self.current_page + 1)
-        elif custom_id == "jump":
-            await self.number_page(interaction)
-        elif custom_id == "stop":
-            for item in self.children:
-                item.disabled = True
-            await interaction.message.edit(view=self)
-            self.stop()
-
-    async def show_page(self, interaction: discord.Interaction, page_number: int):
-        if page_number < 0:
-            self.current_page = self.max_pages - 1
-        elif page_number >= self.max_pages:
-            self.current_page = 0
-        else:
-            self.current_page = page_number
-
-        start = self.current_page * self.per_page
+    def format_page(self, current_page: int) -> discord.Embed:
+        start = current_page * self.per_page
         end = start + self.per_page
-        content = self.format_page(self.entries[start:end])
-        await interaction.response.edit_message(content=None, embed=content, view=self)
+        entries = self.entries[start:end]
 
-    async def number_page(self, interaction: discord.Interaction):
-        # Implementation for jumping to a specific page can be added here
-        pass
-
-    def format_page(self, entries: List[Dict]) -> discord.Embed:
         # Header for the ASCII table
         table_header = "ID | Pokémon              | Nº Pokédex | Nivel | XP"
         lines = [table_header]
 
-        for idx, pokemon in enumerate(entries, start=1 + (self.current_page * self.per_page)):
+        for idx, pokemon in enumerate(entries, start=1 + (current_page * self.per_page)):
             # Determine gender symbol
             gender_symbol = ""
             if pokemon.get("gender") == "Male":
@@ -99,9 +58,62 @@ class PokeListMenu(discord.ui.View):
 
         # Embed with ASCII table as plain text
         embed = discord.Embed(description=f"```\n{table}\n```", color=0x00FF00)
-        footer_text = f"Página {self.current_page + 1}/{self.max_pages}"
+        footer_text = f"Página {current_page + 1}/{self.get_max_pages()}"
         embed.set_footer(text=footer_text)
         return embed
+
+class PokeListMenu(discord.ui.View):
+    def __init__(self, poke_list: PokeList, timeout: int = 180):
+        super().__init__(timeout=timeout)
+        self.poke_list = poke_list
+        self.current_page = 0
+        self.add_item(discord.ui.Button(label="Previous", style=discord.ButtonStyle.primary, custom_id="prev"))
+        self.add_item(discord.ui.Button(label="Next", style=discord.ButtonStyle.primary, custom_id="next"))
+        self.add_item(discord.ui.Button(label="Jump to Page", style=discord.ButtonStyle.secondary, custom_id="jump"))
+        self.add_item(discord.ui.Button(label="Stop", style=discord.ButtonStyle.danger, custom_id="stop"))
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return True  # Modify this to restrict who can interact with this view
+
+    async def on_timeout(self) -> None:
+        for item in self.children:
+            item.disabled = True
+        await self.message.edit(view=self)
+
+    async def on_interaction(self, interaction: discord.Interaction):
+        custom_id = interaction.data.get("custom_id")
+
+        if custom_id == "prev":
+            await self.show_page(interaction, self.current_page - 1)
+        elif custom_id == "next":
+            await self.show_page(interaction, self.current_page + 1)
+        elif custom_id == "jump":
+            await self.number_page(interaction)
+        elif custom_id == "stop":
+            for item in this.children:
+                item.disabled = True
+            await interaction.message.edit(view=self)
+            self.stop()
+
+    async def show_page(self, interaction: discord.Interaction, page_number: int):
+        max_pages = self.poke_list.get_max_pages()
+        if page_number < 0:
+            self.current_page = max_pages - 1
+        elif page_number >= max_pages:
+            self.current_page = 0
+        else:
+            self.current_page = page_number
+
+        content = self.poke_list.format_page(self.current_page)
+        await interaction.response.edit_message(content=None, embed=content, view=self)
+
+    async def number_page(self, interaction: discord.Interaction):
+        # Implementation for jumping to a specific page can be added here
+        pass
+
+    async def start(self, channel: discord.abc.Messageable):
+        embed = self.poke_list.format_page(self.current_page)
+        self.message = await channel.send(embed=embed, view=self)
 
 class GenericMenu(menus.MenuPages, inherit_buttons=False):
     def __init__(
