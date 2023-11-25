@@ -122,161 +122,89 @@ class PokeListMenu(discord.ui.View):
         embed = self.poke_list.format_page(self.current_page)
         self.message = await channel.send(embed=embed, view=self)
 
-class GenericMenu(menus.MenuPages, inherit_buttons=False):
-    def __init__(
-        self,
-        source: menus.PageSource,
-        cog: Optional[commands.Cog] = None,
-        len_poke: Optional[int] = 0,
-        clear_reactions_after: bool = True,
-        delete_message_after: bool = False,
-        add_reactions: bool = True,
-        using_custom_emoji: bool = False,
-        using_embeds: bool = False,
-        keyword_to_reaction_mapping: Dict[str, str] = None,
-        timeout: int = 180,
-        message: discord.Message = None,
-        **kwargs: Any,
-    ) -> None:
-        self.cog = cog
+class GenericMenu(discord.ui.View):
+    def __init__(self, source, ctx, len_poke=0, timeout: int = 180):
+        super().__init__(timeout=timeout)
+        self.source = source
+        self.ctx = ctx
         self.len_poke = len_poke
-        super().__init__(
-            source,
-            clear_reactions_after=clear_reactions_after,
-            delete_message_after=delete_message_after,
-            check_embeds=using_embeds,
-            timeout=timeout,
-            message=message,
-            **kwargs,
-        )
+        self.current_page = 0
+        self.message = None  # Reference to the message to which this view is attached
 
-    def reaction_check(self, payload):
-        """The function that is used to check whether the payload should be processed.
-        This is passed to :meth:`discord.ext.commands.Bot.wait_for <Bot.wait_for>`.
-        There should be no reason to override this function for most users.
-        Parameters
-        ------------
-        payload: :class:`discord.RawReactionActionEvent`
-            The payload to check.
-        Returns
-        ---------
-        :class:`bool`
-            Whether the payload should be processed.
-        """
-        if payload.message_id != self.message.id:
-            return False
-        if payload.user_id not in (*self.bot.owner_ids, self._author_id):
-            return False
+    async def on_timeout(self):
+        for item in self.children:
+            item.disabled = True
+        if self.message:
+            await self.message.edit(view=self)
 
-        return payload.emoji in self.buttons
-
-    def _skip_single_arrows(self):
-        max_pages = self._source.get_max_pages()
-        if max_pages is None:
-            return True
-        return max_pages == 1
-
-    def _skip_double_triangle_buttons(self):
-        max_pages = self._source.get_max_pages()
-        if max_pages is None:
-            return True
-        return max_pages <= 2
-
-    # left
-    @menus.button(
-        "\N{BLACK LEFT-POINTING TRIANGLE}",
-        position=menus.First(1),
-        skip_if=_skip_single_arrows,
-    )
-    async def prev(self, payload: discord.RawReactionActionEvent):
-        if self.current_page == 0:
-            await self.show_page(self._source.get_max_pages() - 1)
+    async def update_page(self, interaction: discord.Interaction, page_number: int):
+        max_pages = await self.source.get_max_pages()
+        if page_number < 0:
+            self.current_page = max_pages - 1
+        elif page_number >= max_pages:
+            self.current_page = 0
         else:
-            await self.show_checked_page(self.current_page - 1)
+            self.current_page = page_number
 
-    @menus.button("\N{CROSS MARK}", position=menus.First(2))
-    async def stop_pages_default(self, payload: discord.RawReactionActionEvent) -> None:
-        self.stop()
-        with contextlib.suppress(discord.NotFound):
-            await self.message.delete()
+        content = await self.source.format_page(self, self.current_page)
+        await interaction.response.edit_message(content=None, embed=content, view=self)
 
-    @menus.button(
-        "\N{BLACK RIGHT-POINTING TRIANGLE}",
-        position=menus.First(2),
-        skip_if=_skip_single_arrows,
-    )
-    async def next(self, payload: discord.RawReactionActionEvent):
-        if self.current_page == self._source.get_max_pages() - 1:
-            await self.show_page(0)
-        else:
-            await self.show_checked_page(self.current_page + 1)
+    @discord.ui.button(label="First", style=discord.ButtonStyle.secondary)
+    async def first_page(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.update_page(interaction, 0)
 
-    @menus.button(
-        "\N{BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}\ufe0f",
-        position=menus.First(0),
-        skip_if=_skip_double_triangle_buttons,
-    )
-    async def go_to_first_page(self, payload):
-        """go to the first page"""
-        await self.show_page(0)
+    @discord.ui.button(label="Previous", style=discord.ButtonStyle.primary)
+    async def previous_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.update_page(interaction, self.current_page - 1)
 
-    @menus.button(
-        "\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}\ufe0f",
-        position=menus.Last(1),
-        skip_if=_skip_double_triangle_buttons,
-    )
-    async def go_to_last_page(self, payload):
-        """go to the last page"""
-        # The call here is safe because it's guarded by skip_if
-        await self.show_page(self._source.get_max_pages() - 1)
+    @discord.ui.button(label="Next", style=discord.ButtonStyle.primary)
+    async def next_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.update_page(interaction, self.current_page + 1)
 
+    @discord.ui.button(label="Last", style=discord.ButtonStyle.secondary)
+    async def last_page(self, interaction: discord.Interaction, button: discord.ui.Button):
+        max_pages = await self.source.get_max_pages()
+        await self.update_page(interaction, max_pages - 1)
 
-class SearchFormat(menus.ListPageSource):
-    def __init__(self, entries: Iterable[str]):
-        super().__init__(entries, per_page=1)
+    @discord.ui.button(label="Stop", style=discord.ButtonStyle.danger)
+    async def stop_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.message.delete()
 
-    async def format_page(self, menu: GenericMenu, string: str) -> str:
+    async def start(self, channel: discord.abc.Messageable):
+        content = await self.source.format_page(self, self.current_page)
+        self.message = await channel.send(embed=content, view=self)
+
+class SearchFormat:
+    def __init__(self, entries: Iterable[str], per_page: int = 1):
+        self.entries = list(entries)
+        self.per_page = per_page
+
+    async def get_max_pages(self):
+        return len(self.entries) // self.per_page + (1 if len(self.entries) % self.per_page else 0)
+
+    async def format_page(self, menu: GenericMenu, page: int) -> discord.Embed:
+        entry = self.entries[page]
         embed = discord.Embed(
             title="Pokemon Search",
             color=await menu.ctx.embed_color(),
-            description=string,
+            description=entry
         )
-        embed.set_footer(
-            text=_("Page {page}/{amount}").format(
-                page=menu.current_page + 1, amount=menu._source.get_max_pages()
-            )
-        )
+        embed.set_footer(text=f"Page {page + 1}/{len(self.entries)}")
         return embed
 
+class PokedexFormat:
+    def __init__(self, entries: Iterable[Dict], per_page: int = 1):
+        self.entries = list(entries)
+        self.per_page = per_page
 
-class PokedexFormat(menus.ListPageSource):
-    def __init__(self, entries: Iterable[str]):
-        super().__init__(entries, per_page=1)
+    async def get_max_pages(self):
+        return len(self.entries) // self.per_page + (1 if len(self.entries) % self.per_page else 0)
 
-    async def format_page(self, menu: GenericMenu, item: List) -> str:
-        embed = discord.Embed(title=_("Pokédex"), color=await menu.ctx.embed_colour())
-        embed.set_footer(
-            text=_("Showing {page}-{lenpages} of {amount}.").format(
-                page=item[0][0], lenpages=item[-1][0], amount=menu.len_poke
-            )
-        )
-        for pokemon in item:
-            if pokemon[1]["amount"] > 0:
-                msg = _("{amount} caught! \N{WHITE HEAVY CHECK MARK}").format(
-                    amount=pokemon[1]["amount"]
-                )
-            else:
-                msg = _("Not caught yet! \N{CROSS MARK}")
-            embed.add_field(
-                name="{pokemonname} {pokemonid}".format(
-                    pokemonname=menu.cog.get_name(pokemon[1]["name"], menu.ctx.author),
-                    pokemonid=pokemon[1]["id"],
-                ),
-                value=msg,
-            )
-        if menu.current_page == 0:
-            embed.description = _("You've caught {total} out of {amount} pokémon.").format(
-                total=len(await menu.cog.config.user(menu.ctx.author).pokeids()),
-                amount=menu.len_poke,
-            )
+    async def format_page(self, menu: GenericMenu, page: int) -> discord.Embed:
+        items = self.entries[page * self.per_page:(page + 1) * self.per_page]
+        embed = discord.Embed(title="Pokédex", color=await menu.ctx.embed_color())
+        for item in items:
+            # Format each item as needed for the embed
+            embed.add_field(name=item["name"], value=str(item["value"]))
+        embed.set_footer(text=f"Showing {page + 1}-{min(len(self.entries), (page + 1) * self.per_page)} of {len(self.entries)}.")
         return embed
