@@ -64,16 +64,16 @@ class PokeList:
 
 class PageJumpModal(discord.ui.Modal):
     def __init__(self, menu):
-        super().__init__(title="Jump to Page")
+        super().__init__(title="Saltar a la página")
         self.menu = menu
-        self.add_item(discord.ui.TextInput(label="Page Number", placeholder="Enter page number"))
+        self.add_item(discord.ui.TextInput(label="Número de página", placeholder="Introduce el número de la página."))
 
     async def on_submit(self, interaction: discord.Interaction):
         try:
             page_number = int(self.children[0].value) - 1
             await self.menu.update_page(interaction, page_number)
         except ValueError:
-            await interaction.response.send_message("Please enter a valid number.", ephemeral=True)
+            await interaction.response.send_message("Por favor introduce un número válido.", ephemeral=True)
 
 class PokeListMenu(discord.ui.View):
     def __init__(self, poke_list: PokeList, timeout: int = 180):
@@ -101,30 +101,27 @@ class PokeListMenu(discord.ui.View):
         embed = self.poke_list.format_page(self.current_page)
         await interaction.response.edit_message(embed=embed, view=self)
 
-    @discord.ui.button(label="Previous", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Anterior", style=discord.ButtonStyle.primary)
     async def previous_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.update_page(interaction, self.current_page - 1)
 
-    @discord.ui.button(label="Next", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Siguiente", style=discord.ButtonStyle.primary)
     async def next_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.update_page(interaction, self.current_page + 1)
 
-    @discord.ui.button(label="Jump to Page", style=discord.ButtonStyle.secondary)
+    @discord.ui.button(label="Saltar a la página...", style=discord.ButtonStyle.secondary)
     async def jump_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         modal = PageJumpModal(self)
         await interaction.response.send_modal(modal)
 
-    @discord.ui.button(label="Stop", style=discord.ButtonStyle.danger)
+    @discord.ui.button(label="Cerrar", style=discord.ButtonStyle.danger)
     async def stop_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.stop()
-        for item in self.children:
-            item.disabled = True
-        await interaction.response.edit_message(view=self)
+        await interaction.message.delete()
 
     async def start(self, channel: discord.abc.Messageable):
         embed = self.poke_list.format_page(self.current_page)
         self.message = await channel.send(embed=embed, view=self)
-        
+
 class GenericMenu(menus.MenuPages, inherit_buttons=False):
     def __init__(
         self,
