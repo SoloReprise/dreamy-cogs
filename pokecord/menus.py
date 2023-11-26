@@ -146,7 +146,7 @@ class PokedexFormat:
         self.per_page = per_page
 
     def get_max_pages(self):
-        return len(self.entries) // self.per_page + (1 if len(self.entries) % self.per_page else 0)
+        return len(self.entries) // 21 + (1 if len(self.entries) % 21 else 0)
     
     async def format_page(self, current_page: int) -> discord.Embed:
         item = self.entries[current_page]
