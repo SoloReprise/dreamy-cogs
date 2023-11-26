@@ -150,22 +150,29 @@ class PokedexFormat:
         return len(self.entries) // self.per_page + (1 if len(self.entries) % self.per_page else 0)
 
     async def format_page(self, current_page: int) -> discord.Embed:
-        item = self.entries[current_page]
+        page_items = self.entries[current_page]  # Get the current page items
         embed = discord.Embed(title="Pokédex")
-        embed.set_footer(text=f"Mostrando {item[0][0]}-{item[-1][0]} de {self.len_poke}.")
-        for pokemon in item:
-            pokemon_id = str(pokemon[1]["id"])  # Assuming 'id' is the key for Pokémon ID
-            caught_amount = self.pokedex.get(pokemon_id, 0)
-            if caught_amount > 0:
-                msg = f"{caught_amount} capturado! \N{WHITE HEAVY CHECK MARK}"
+        
+        # If the page is empty, set a default message
+        if not page_items:
+            embed.description = "No hay Pokémon en esta página."
+            return embed
+
+        start_index = current_page * self.per_page + 1
+        end_index = start_index + len(page_items) - 1
+        embed.set_footer(text=f"Mostrando {start_index}-{end_index} de {self.len_poke}.")
+
+        for pokemon in page_items:
+            pokemon_id = str(pokemon['id'])
+            if pokemon["amount"] > 0:
+                msg = f"{pokemon['amount']} capturado! \N{WHITE HEAVY CHECK MARK}"
             else:
                 msg = "¡Aún no capturado! \N{CROSS MARK}"
             embed.add_field(
-                name=f"{pokemon[1]['name']['english']} #{pokemon_id}",
+                name=f"{pokemon['name']['english']} #{pokemon_id}",
                 value=msg,
             )
-        if current_page == 0:
-            embed.description = f"Has capturado {self.total_caught} de {self.len_poke} pokémon."
+
         return embed
 
 class GenericMenu(discord.ui.View):
