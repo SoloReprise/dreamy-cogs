@@ -153,11 +153,7 @@ class PokedexFormat:
         page_items = self.entries[current_page]  # Get the current page items
         embed = discord.Embed(title="Pokédex")
         
-        # If the page is empty, set a default message
-        if not page_items:
-            embed.description = "No hay Pokémon en esta página."
-            return embed
-
+        # Set the footer text for pagination
         start_index = current_page * self.per_page + 1
         end_index = start_index + len(page_items) - 1
         embed.set_footer(text=f"Mostrando {start_index}-{end_index} de {self.len_poke}.")
@@ -173,8 +169,12 @@ class PokedexFormat:
                 value=msg,
             )
 
-        return embed
+        # Display the total caught Pokémon count on the first page
+        if current_page == 0:
+            embed.description = f"Has capturado {self.total_caught} de {self.len_poke} pokémon."
 
+        return embed
+    
 class GenericMenu(discord.ui.View):
     def __init__(self, source, timeout: int = 180):
         super().__init__(timeout=timeout)
