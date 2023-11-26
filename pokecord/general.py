@@ -229,22 +229,21 @@ class GeneralMixin(MixinMeta):
     async def pokedex(self, ctx):
         """Check your caught pokémon!"""
         async with ctx.typing():
-            # Define user_conf
             user_conf = await self.user_is_global(ctx.author)
+            pokemons = await user_conf.pokeids()  # Dictionary of Pokémon IDs and counts
 
-            pokemons = await user_conf.pokeids()  # Dictionary of pokemon IDs (as strings) and their counts
-            pokemonlist = copy.deepcopy(self.pokemonlist)  # List of all Pokémon IDs (assumed to be integers)
+            # Copy the original list to avoid modifying it during iteration
+            pokemonlist = copy.deepcopy(self.pokemonlist)
+            
+            # Update each Pokémon's 'amount' in the copied list
+            for pokemon in pokemonlist:
+                pokemon_id = str(pokemon['id'])
+                pokemon['amount'] = pokemons.get(pokemon_id, 0)
 
-            # Update the amount for each Pokémon in the list
-            for i, pokemon_id in enumerate(pokemonlist):
-                str_id = str(pokemon_id)  # Convert to string to match keys in 'pokemons'
-                amount = pokemons.get(str_id, 0)
-                pokemonlist[i] = {'id': pokemon_id, 'amount': amount}  # Create a dict for each Pokémon
+            total_caught = sum(1 for pokemon in pokemonlist if pokemon['amount'] > 0)
+            chunked = [pokemonlist[i:i + 20] for i in range(0, len(pokemonlist), 20)]  # Paginate the list
 
-            total_caught = sum(pokemon['amount'] > 0 for pokemon in pokemonlist)
-            chunked = [pokemonlist[i:i + 20] for i in range(0, len(pokemonlist), 20)]  # Change 20 to your desired number per page
-
-            # Create and start the menu
+            # Create and start the GenericMenu with PokedexFormat
             await GenericMenu(
                 source=PokedexFormat(chunked, len_poke=len(pokemonlist), total_caught=total_caught)
             ).start(ctx.channel)
