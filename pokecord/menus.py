@@ -151,18 +151,18 @@ class PokedexFormat:
     async def format_page(self, current_page: int) -> discord.Embed:
         item = self.entries[current_page]
         embed = discord.Embed(title="Pokédex")
-        embed.set_footer(text=f"Showing {item[0][0]}-{item[-1][0]} of {self.len_poke}.")
+        embed.set_footer(text=f"Mostrando {item[0][0]}-{item[-1][0]} de {self.len_poke}.")
         for pokemon in item:
             if pokemon[1]["amount"] > 0:
-                msg = f"{pokemon[1]['amount']} caught! \N{WHITE HEAVY CHECK MARK}"
+                msg = f"¡{pokemon[1]['amount']} capturados! \N{WHITE HEAVY CHECK MARK}"
             else:
-                msg = "Not caught yet! \N{CROSS MARK}"
+                msg = "¡Sin capturar! \N{CROSS MARK}"
             embed.add_field(
-                name=f"{pokemon[1]['name']} {pokemon[1]['id']}",
+                name=f"{pokemon[1]['name']['english']} #{pokemon[1]['id']}",
                 value=msg,
             )
         if current_page == 0:
-            embed.description = "You've caught {total} out of {amount} pokémon."  # Replace with actual values
+            embed.description = "Has capturado {total} de {amount} pokémon."  # Replace with actual values
         return embed
 
 class GenericMenu(discord.ui.View):
