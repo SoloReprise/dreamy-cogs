@@ -299,9 +299,8 @@ class GeneralMixin(MixinMeta):
                 return
             content = list(pagify(correct, page_length=1024))
             await GenericMenu(
-                source=SearchFormat(content),
-                delete_message_after=False,
-            ).start(ctx=ctx, wait=False)
+                source=SearchFormat(content)
+            ).start(ctx.channel)
 
     @commands.command()
     @commands.max_concurrency(1, commands.BucketType.user)
