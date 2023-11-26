@@ -238,7 +238,6 @@ class GeneralMixin(MixinMeta):
             chunked = [item for item in chunks(a, 20)]
             await GenericMenu(
                 source=PokedexFormat(chunked, len_poke=len(pokemonlist)),
-                delete_message_after=False,
                 cog=self,
             ).start(ctx.channel)
 
