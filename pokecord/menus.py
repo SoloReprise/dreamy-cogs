@@ -161,8 +161,8 @@ class PokedexFormat:
                 name=f"{pokemon[1]['name']['english']} #{pokemon[1]['id']}",
                 value=msg,
             )
-        if current_page == 0:
-            embed.description = "You've caught {total} out of {amount} pokémon."  # Replace with actual values
+        #if current_page == 0:
+        #    embed.description = "You've caught {total} out of {amount} pokémon."  # Replace with actual values
         return embed
         
 class GenericMenu(discord.ui.View):
