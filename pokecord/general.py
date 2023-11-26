@@ -232,15 +232,23 @@ class GeneralMixin(MixinMeta):
             pokemons = await self.config.user(ctx.author).pokeids()
             pokemonlist = copy.deepcopy(self.pokemonlist)
             for i, pokemon in enumerate(pokemonlist, start=1):
-                if str(pokemon) in pokemons:
-                    pokemonlist[i]["amount"] = pokemons[str(pokemon)]
+                # Ensure that `pokemon` is a dictionary and has an 'amount' key
+                if isinstance(pokemon, dict) and "amount" in pokemon:
+                    if str(pokemon["id"]) in pokemons:  # Assuming 'id' is the key for Pokémon ID
+                        pokemon["amount"] = pokemons[str(pokemon["id"])]
+                    else:
+                        pokemon["amount"] = 0
+                else:
+                    # Handle the case where `pokemon` is not a dictionary or doesn't have an 'amount' key
+                    continue
+
+            total_caught = sum(1 for pokemon in pokemonlist if isinstance(pokemon, dict) and pokemon.get("amount", 0) > 0)
             a = [value for value in pokemonlist.items()]
             chunked = [item for item in chunks(a, 20)]
-            total_caught = sum(1 for pokemon in pokemonlist if pokemon["amount"] > 0)
             await GenericMenu(
                 source=PokedexFormat(chunked, len_poke=len(pokemonlist), total_caught=total_caught)
             ).start(ctx.channel)
-            
+
     @commands.command()
     async def psearch(self, ctx, *, args: Args):
         """Search your pokemon.
