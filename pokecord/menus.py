@@ -150,22 +150,22 @@ class PokedexFormat:
         return len(self.entries) // self.per_page + (1 if len(self.entries) % self.per_page else 0)
 
     async def format_page(self, current_page: int) -> discord.Embed:
-        page_items = self.entries[current_page]  # Get the current page items
+        page_items = self.entries[current_page]
         embed = discord.Embed(title="Pokédex")
-        
+
         # Set the footer text for pagination
         start_index = current_page * self.per_page + 1
         end_index = start_index + len(page_items) - 1
         embed.set_footer(text=f"Mostrando {start_index}-{end_index} de {self.len_poke}.")
 
-        for pokemon in page_items:
-            pokemon_id = str(pokemon['id'])
-            if pokemon["amount"] > 0:
-                msg = f"{pokemon['amount']} capturado! \N{WHITE HEAVY CHECK MARK}"
+        for index, pokemon_data in page_items:
+            pokemon_id = str(pokemon_data['id'])
+            if pokemon_data["amount"] > 0:
+                msg = f"{pokemon_data['amount']} capturado! \N{WHITE HEAVY CHECK MARK}"
             else:
                 msg = "¡Aún no capturado! \N{CROSS MARK}"
             embed.add_field(
-                name=f"{pokemon['name']['english']} #{pokemon_id}",
+                name=f"{pokemon_data['name']['english']} #{pokemon_id}",
                 value=msg,
             )
 
