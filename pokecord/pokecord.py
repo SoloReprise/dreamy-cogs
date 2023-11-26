@@ -656,24 +656,24 @@ class Pokecord(
         await self.spawn_pokemon(channel)
 
     TYPE_BACKGROUND_MAPPING = {
-        "Normal": ["route.jpg", "route_2.jpg"],
-        "Fire": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg"],  # List of possible backgrounds
-        "Water": ["beach.jpg", "water.jpg", "water_2.jpg", "route.jpg", "route_2.jpg"],
-        "Electric": ["cave.jpg", "cave_2.jpg", "forest.jpg", "route.jpg", "route_2.jpg"],
-        "Fighting": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg"],
-        "Grass": ["forest.jpg", "forest_2.jpg", "route.jpg", "route_2.jpg"],
-        "Poison": ["forest.jpg", "forest_2.jpg", "cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg"],
-        "Ground": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg"],
-        "Rock": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg"],
-        "Flying": ["sky.jpg", "sky_2.jpg", "route.jpg", "route_2.jpg"],
-        "Psychic": ["forest_2.jpg", "route.jpg", "route_2.jpg"],
-        "Bug": ["forest.jpg", "forest_2.jpg", "route.jpg", "route_2.jpg"],
-        "Ghost": ["forest.jpg", "forest_2.jpg", "route.jpg", "route_2.jpg"],
-        "Dragon": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg"],
-        "Steel": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg"],
-        "Dark": ["forest.jpg", "forest_2.jpg", "cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg"],
-        "Fairy": ["route.jpg", "route_2.jpg"],
-        "Ice": ["ice.jpg", "ice_2.jpg"],
+        "Normal": ["route.jpg", "route_2.jpg", "route_3.jpg", "route_4.jpg"],
+        "Fire": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg", "route_3.jpg", "route_4.jpg"],  # List of possible backgrounds
+        "Water": ["beach.jpg", "water.jpg", "water_2.jpg", "route.jpg", "route_2.jpg", "route_3.jpg", "route_4.jpg"],
+        "Electric": ["cave.jpg", "cave_2.jpg", "forest.jpg", "route.jpg", "route_2.jpg", "route_3.jpg", "route_4.jpg"],
+        "Fighting": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg", "route_3.jpg", "route_4.jpg"],
+        "Grass": ["forest.jpg", "forest_2.jpg", "route.jpg", "route_2.jpg", "route_3.jpg", "route_4.jpg"],
+        "Poison": ["forest.jpg", "forest_2.jpg", "cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg", "route_3.jpg", "route_4.jpg"],
+        "Ground": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg", "route_3.jpg", "route_4.jpg"],
+        "Rock": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg", "route_3.jpg", "route_4.jpg"],
+        "Flying": ["sky.jpg", "sky_2.jpg", "route.jpg", "route_2.jpg", "route_3.jpg", "route_4.jpg"],
+        "Psychic": ["forest_2.jpg", "route.jpg", "route_2.jpg", "route_3.jpg", "route_4.jpg"],
+        "Bug": ["forest.jpg", "forest_2.jpg", "route.jpg", "route_2.jpg", "route_3.jpg", "route_4.jpg"],
+        "Ghost": ["forest.jpg", "forest_2.jpg", "route.jpg", "route_2.jpg", "route_3.jpg", "route_4.jpg"],
+        "Dragon": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg", "route_3.jpg", "route_4.jpg"],
+        "Steel": ["cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg", "route_3.jpg", "route_4.jpg"],
+        "Dark": ["forest.jpg", "forest_2.jpg", "cave.jpg", "cave_2.jpg", "route.jpg", "route_2.jpg", "route_3.jpg", "route_4.jpg"],
+        "Fairy": ["route.jpg", "route_2.jpg", "route_3.jpg", "route_4.jpg"],
+        "Ice": ["ice.jpg", "ice_2.jpg", "route_3.jpg", "route_4.jpg"],
     }
 
     async def spawn_pokemon(self, channel, *, pokemon=None):
