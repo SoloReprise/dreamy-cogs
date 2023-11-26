@@ -133,10 +133,10 @@ class SearchFormat:
     async def format_page(self, current_page: int) -> discord.Embed:
         string = self.entries[current_page]
         embed = discord.Embed(
-            title="Pokemon Search",
+            title="Búsqueda Pokémon",
             description=string,
         )
-        embed.set_footer(text=f"Page {current_page + 1}/{self.get_max_pages()}")
+        embed.set_footer(text=f"Página {current_page + 1}/{self.get_max_pages()}")
         return embed
 
 class PokedexFormat:
@@ -194,7 +194,7 @@ class GenericMenu(discord.ui.View):
     async def previous_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.update_page(interaction, self.current_page - 1)
 
-    @discord.ui.button(label="\N{CROSS MARK}", style=discord.ButtonStyle.danger)
+    @discord.ui.button(label="\N{CROSS MARK}", style=discord.ButtonStyle.secondary)
     async def stop_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.message.delete()
 
