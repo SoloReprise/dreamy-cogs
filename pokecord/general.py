@@ -237,14 +237,10 @@ class GeneralMixin(MixinMeta):
             a = [value for value in pokemonlist.items()]
             chunked = [item for item in chunks(a, 20)]
             await GenericMenu(
-                source=PokedexFormat(chunked),
+                source=PokedexFormat(chunked, len_poke=len(pokemonlist)),
                 delete_message_after=False,
                 cog=self,
-                len_poke=len(pokemonlist),
-            ).start(
-                ctx=ctx,
-                wait=False,
-            )
+            ).start(ctx.channel)
 
     @commands.command()
     async def psearch(self, ctx, *, args: Args):
