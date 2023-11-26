@@ -236,10 +236,11 @@ class GeneralMixin(MixinMeta):
                     pokemonlist[i]["amount"] = pokemons[str(pokemon)]
             a = [value for value in pokemonlist.items()]
             chunked = [item for item in chunks(a, 20)]
+            total_caught = sum(1 for pokemon in pokemonlist if pokemon["amount"] > 0)
             await GenericMenu(
-                source=PokedexFormat(chunked, len_poke=len(pokemonlist))
+                source=PokedexFormat(chunked, len_poke=len(pokemonlist), total_caught=total_caught)
             ).start(ctx.channel)
-
+            
     @commands.command()
     async def psearch(self, ctx, *, args: Args):
         """Search your pokemon.

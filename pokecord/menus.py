@@ -140,9 +140,10 @@ class SearchFormat:
         return embed
 
 class PokedexFormat:
-    def __init__(self, entries: Iterable[str], len_poke: int, per_page: int = 1):
+    def __init__(self, entries: Iterable[str], len_poke: int, total_caught: int, per_page: int = 1):
         self.entries = list(entries)
         self.len_poke = len_poke
+        self.total_caught = total_caught
         self.per_page = per_page
 
     def get_max_pages(self):
@@ -154,15 +155,15 @@ class PokedexFormat:
         embed.set_footer(text=f"Mostrando {item[0][0]}-{item[-1][0]} de {self.len_poke}.")
         for pokemon in item:
             if pokemon[1]["amount"] > 0:
-                msg = f"¡{pokemon[1]['amount']} capturados! \N{WHITE HEAVY CHECK MARK}"
+                msg = f"{pokemon[1]['amount']} capturados! \N{WHITE HEAVY CHECK MARK}"
             else:
-                msg = "¡Sin capturar! \N{CROSS MARK}"
+                msg = "¡Aún no capturado! \N{CROSS MARK}"
             embed.add_field(
                 name=f"{pokemon[1]['name']['english']} #{pokemon[1]['id']}",
                 value=msg,
             )
         if current_page == 0:
-            embed.description = "Has capturado {total} de {amount} pokémon."  # Replace with actual values
+            embed.description = f"Has capturado {self.total_caught} de {self.len_poke} pokémon."
         return embed
 
 class GenericMenu(discord.ui.View):
