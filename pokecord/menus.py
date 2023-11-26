@@ -154,12 +154,14 @@ class PokedexFormat:
         embed = discord.Embed(title="Pokédex")
         embed.set_footer(text=f"Mostrando {item[0][0]}-{item[-1][0]} de {self.len_poke}.")
         for pokemon in item:
-            if pokemon[1]["amount"] > 0:
-                msg = f"{pokemon[1]['amount']} capturados! \N{WHITE HEAVY CHECK MARK}"
+            pokemon_id = str(pokemon[1]["id"])  # Assuming 'id' is the key for Pokémon ID
+            caught_amount = self.pokedex.get(pokemon_id, 0)
+            if caught_amount > 0:
+                msg = f"{caught_amount} capturado! \N{WHITE HEAVY CHECK MARK}"
             else:
                 msg = "¡Aún no capturado! \N{CROSS MARK}"
             embed.add_field(
-                name=f"{pokemon[1]['name']['english']} #{pokemon[1]['id']}",
+                name=f"{pokemon[1]['name']['english']} #{pokemon_id}",
                 value=msg,
             )
         if current_page == 0:

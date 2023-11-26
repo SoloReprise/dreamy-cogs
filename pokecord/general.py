@@ -242,11 +242,12 @@ class GeneralMixin(MixinMeta):
                     # Handle the case where `pokemon` is not a dictionary or doesn't have an 'amount' key
                     continue
 
-            total_caught = sum(1 for pokemon in pokemonlist if isinstance(pokemon, dict) and pokemon.get("amount", 0) > 0)
+            pokedex = await user_conf.pokeids()
+            total_caught = sum(pokedex.values())
             a = [value for value in pokemonlist.items()]
             chunked = [item for item in chunks(a, 20)]
             await GenericMenu(
-                source=PokedexFormat(chunked, len_poke=len(pokemonlist), total_caught=total_caught)
+                source=PokedexFormat(chunked, len_poke=len(pokemonlist), total_caught=total_caught, pokedex=pokedex)
             ).start(ctx.channel)
 
     @commands.command()
