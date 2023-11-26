@@ -237,8 +237,7 @@ class GeneralMixin(MixinMeta):
             a = [value for value in pokemonlist.items()]
             chunked = [item for item in chunks(a, 20)]
             await GenericMenu(
-                source=PokedexFormat(chunked, len_poke=len(pokemonlist)),
-                cog=self,
+                source=PokedexFormat(chunked, len_poke=len(pokemonlist))
             ).start(ctx.channel)
 
     @commands.command()
