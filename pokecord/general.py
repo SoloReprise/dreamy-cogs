@@ -232,17 +232,17 @@ class GeneralMixin(MixinMeta):
             # Define user_conf
             user_conf = await self.user_is_global(ctx.author)
 
-            pokemons = await user_conf.pokeids()
-            pokemonlist = copy.deepcopy(self.pokemonlist)
+            pokemons = await user_conf.pokeids()  # Dictionary of pokemon IDs (as strings) and their counts
+            pokemonlist = copy.deepcopy(self.pokemonlist)  # List of all Pokémon IDs (assumed to be integers)
 
-            for i, pokemon in enumerate(pokemonlist, start=1):
-                pokemon_id = str(pokemon['id'])
-                pokemon['amount'] = pokemons.get(pokemon_id, 0)
+            # Update the amount for each Pokémon in the list
+            for i, pokemon_id in enumerate(pokemonlist):
+                str_id = str(pokemon_id)  # Convert to string to match keys in 'pokemons'
+                amount = pokemons.get(str_id, 0)
+                pokemonlist[i] = {'id': pokemon_id, 'amount': amount}  # Create a dict for each Pokémon
 
-            # Prepare data for PokedexFormat
             total_caught = sum(pokemon['amount'] > 0 for pokemon in pokemonlist)
-            a = [pokemon for pokemon in pokemonlist]
-            chunked = [a[i:i + 20] for i in range(0, len(a), 20)]  # Change 20 to the number of items per page
+            chunked = [pokemonlist[i:i + 20] for i in range(0, len(pokemonlist), 20)]  # Change 20 to your desired number per page
 
             # Create and start the menu
             await GenericMenu(
