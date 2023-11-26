@@ -229,25 +229,24 @@ class GeneralMixin(MixinMeta):
     async def pokedex(self, ctx):
         """Check your caught pokémon!"""
         async with ctx.typing():
-            pokemons = await self.config.user(ctx.author).pokeids()
-            pokemonlist = copy.deepcopy(self.pokemonlist)
-            for i, pokemon in enumerate(pokemonlist, start=1):
-                # Ensure that `pokemon` is a dictionary and has an 'amount' key
-                if isinstance(pokemon, dict) and "amount" in pokemon:
-                    if str(pokemon["id"]) in pokemons:  # Assuming 'id' is the key for Pokémon ID
-                        pokemon["amount"] = pokemons[str(pokemon["id"])]
-                    else:
-                        pokemon["amount"] = 0
-                else:
-                    # Handle the case where `pokemon` is not a dictionary or doesn't have an 'amount' key
-                    continue
+            # Define user_conf
+            user_conf = await self.user_is_global(ctx.author)
 
-            pokedex = await user_conf.pokeids()
-            total_caught = sum(pokedex.values())
-            a = [value for value in pokemonlist.items()]
-            chunked = [item for item in chunks(a, 20)]
+            pokemons = await user_conf.pokeids()
+            pokemonlist = copy.deepcopy(self.pokemonlist)
+
+            for i, pokemon in enumerate(pokemonlist, start=1):
+                pokemon_id = str(pokemon['id'])
+                pokemon['amount'] = pokemons.get(pokemon_id, 0)
+
+            # Prepare data for PokedexFormat
+            total_caught = sum(pokemon['amount'] > 0 for pokemon in pokemonlist)
+            a = [pokemon for pokemon in pokemonlist]
+            chunked = [a[i:i + 20] for i in range(0, len(a), 20)]  # Change 20 to the number of items per page
+
+            # Create and start the menu
             await GenericMenu(
-                source=PokedexFormat(chunked, len_poke=len(pokemonlist), total_caught=total_caught, pokedex=pokedex)
+                source=PokedexFormat(chunked, len_poke=len(pokemonlist), total_caught=total_caught)
             ).start(ctx.channel)
 
     @commands.command()
