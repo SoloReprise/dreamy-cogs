@@ -229,22 +229,15 @@ class GeneralMixin(MixinMeta):
     async def pokedex(self, ctx):
         """Check your caught pokémon!"""
         async with ctx.typing():
-            user_conf = await self.user_is_global(ctx.author)
-            pokemons = await user_conf.pokeids()  # Dictionary of Pokémon IDs (as strings) and counts
-
-            # Assuming pokemonlist is a list of Pokémon IDs (integers)
-            updated_pokemonlist = []
-            for pokemon_id in self.pokemonlist:
-                str_id = str(pokemon_id)
-                amount = pokemons.get(str_id, 0)
-                updated_pokemonlist.append({'id': pokemon_id, 'amount': amount})
-
-            total_caught = sum(1 for pokemon in updated_pokemonlist if pokemon['amount'] > 0)
-            chunked = [updated_pokemonlist[i:i + 20] for i in range(0, len(updated_pokemonlist), 20)]  # Paginate the list
-
-            # Create and start the GenericMenu with PokedexFormat
+            pokemons = await self.config.user(ctx.author).pokeids()
+            pokemonlist = copy.deepcopy(self.pokemonlist)
+            for i, pokemon in enumerate(pokemonlist, start=1):
+                if str(pokemon) in pokemons:
+                    pokemonlist[i]["amount"] = pokemons[str(pokemon)]
+            a = [value for value in pokemonlist.items()]
+            chunked = [item for item in chunks(a, 20)]
             await GenericMenu(
-                source=PokedexFormat(chunked, len_poke=len(self.pokemonlist), total_caught=total_caught)
+                source=PokedexFormat(chunked, len_poke=len(pokemonlist))
             ).start(ctx.channel)
 
     @commands.command()
