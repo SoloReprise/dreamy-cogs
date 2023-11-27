@@ -769,8 +769,70 @@ class Pokecord(
     def calc_xp(self, lvl):
         return 25 * lvl
 
+    async def handle_evolution(self, user, pokemon, channel):
+        # Determine if evolution is possible
+        evolve = self.evolvedata.get(pokemon["name"]["english"])
+        if evolve is None or (pokemon["level"] < int(evolve["level"])):
+            return  # No evolution at this level
+
+        # Evolution process starts
+        original_name = self.get_name(pokemon["name"], user)
+        evolved_pokemon_name = evolve["evolution"]
+        await channel.send(f"¡@{user.display_name}, algo pasa con tu {original_name}!")
+        await asyncio.sleep(2)  # Short pause for effect
+        await channel.send(f"¡{original_name} está evolucionando!")
+
+        # Fetch evolved Pokémon data
+        evolved_pokemon = next(
+            (item for item in self.pokemondata if item["name"]["english"] == evolved_pokemon_name),
+            None,
+        )
+        if evolved_pokemon is None:
+            return  # Evolved pokemon data not found
+
+        # Update pokemon data
+        pokemon.update({
+            "name": evolved_pokemon["name"],
+            "type": evolved_pokemon["type"],
+            "level": pokemon["level"],  # Keep current level
+            "xp": 0,  # Reset XP
+            "ivs": pokemon["ivs"],  # Keep IVs
+            "gender": pokemon["gender"],  # Keep gender
+            "stats": pokemon["stats"],  # Keep stats
+        })
+
+        # Create evolution embed
+        embed = discord.Embed(
+            title=f"¡Enhorabuena, @{user.display_name}!",
+            description=f"¡Tu {original_name} ha evolucionado a {evolved_pokemon_name}!",
+            color=await self.bot.get_embed_color(channel),
+        )
+        background_path = "/home/unitedlegacy/.local/share/Red-DiscordBot/data/Spribotito/cogs/RepoManager/repos/dreamy-cogs/pokecord/data/backgrounds/evolution.jpg"
+        background = Image.open(background_path).resize((800, 500), Image.Resampling.LANCZOS)
+        evolved_pokemon_image_path = (
+            self.datapath + f'/pokemon/{evolved_pokemon_name}.png'
+        )
+        evolved_pokemon_image = Image.open(evolved_pokemon_image_path).convert("RGBA")
+        background.paste(evolved_pokemon_image, (0, 0), evolved_pokemon_image)
+        img_byte_arr = io.BytesIO()
+        background.save(img_byte_arr, format='PNG')
+        img_byte_arr.seek(0)
+        _file = discord.File(fp=img_byte_arr, filename="evolvedpokemon.png")
+        embed.set_image(url="attachment://evolvedpokemon.png")
+
+        await channel.send(embed=embed, file=_file)
+
+    async def evolve_pokemon(self, user, pokemon, channel, method):
+        # Placeholder for future evolution methods
+        if method == "trade":
+            # Logic for trade evolution
+            pass
+        elif method == "stone":
+            # Logic for stone evolution
+            pass
+        # Add more methods as needed
+
     async def exp_gain(self, channel, user):
-        # conf = await self.user_is_global(user) # TODO: guild based
         userconf = self.usercache.get(user.id)
         if userconf is None:
             return
@@ -778,12 +840,9 @@ class Pokecord(
             return
 
         self.usercache[user.id]["timestamp"] = datetime.utcnow().timestamp()
-        self.usercache[user.id][
-            "timestamp"
-        ] = datetime.utcnow().timestamp()  # Try remove a race condition
         await self.config.user(user).timestamp.set(
             datetime.utcnow().timestamp()
-        )  # TODO: guild based
+        )
         await self.update_user_cache()
         result = await self.cursor.fetch_all(query=SELECT_POKEMON, values={"user_id": user.id})
         pokemons = []
@@ -808,110 +867,28 @@ class Pokecord(
             return  # No pokemon available to lvl up
         xp = random.randint(5, 25) + (pokemon["level"] // 2)
         pokemon["xp"] += xp
-        embed = None
+
         if pokemon["xp"] >= self.calc_xp(pokemon["level"]):
             pokemon["level"] += 1
             pokemon["xp"] = 0
-            if isinstance(pokemon["name"], str):
-                pokename = pokemon["name"]
-            else:
-                pokename = pokemon["name"]["english"]
-            evolve = self.evolvedata.get(pokename)
-            name = (
-                self.get_name(pokemon["name"], user)
-                if pokemon.get("nickname") is None
-                else f'"{pokemon.get("nickname")}"'
+            await self.handle_evolution(user, pokemon, channel)  # Evolution check and handling
+
+            # Update pokemon stats and message if evolution didn't happen
+            for stat in pokemon["stats"]:
+                pokemon["stats"][stat] = int(pokemon["stats"][stat]) + random.randint(1, 3)
+            embed = discord.Embed(
+                title=_("Congratulations {user}!").format(user=user.display_name),
+                description=_("Your {name} has levelled up to level {level}!").format(
+                    name=self.get_name(pokemon["name"], user), level=pokemon["level"]
+                ),
+                color=await self.bot.get_embed_color(channel),
             )
-            if evolve is not None and (pokemon["level"] >= int(evolve["level"])):
-                lvl = pokemon["level"]
-                nick = pokemon.get("nickname")
-                ivs = pokemon["ivs"]
-                gender = pokemon.get("gender")
-                if gender is None:
-                    gender = self.gender_choose(pokemon["name"]["english"])
-                if ivs is None:
-                    ivs = {
-                        "HP": random.randint(0, 31),
-                        "Attack": random.randint(0, 31),
-                        "Defence": random.randint(0, 31),
-                        "Sp. Atk": random.randint(0, 31),
-                        "Sp. Def": random.randint(0, 31),
-                        "Speed": random.randint(0, 31),
-                    }
-                stats = pokemon["stats"]
-                if pokemon.get("variant", None) is not None:
-                    pokemon = next(
-                        (
-                            item
-                            for item in self.pokemondata
-                            if (item["name"]["english"] == evolve["evolution"])
-                            and item.get("variant", "") == pokemon.get("variant", "")
-                        ),
-                        None,
-                    )
-                else:
-                    pokemon = next(
-                        (
-                            item
-                            for item in self.pokemondata
-                            if (item["name"]["english"] == evolve["evolution"])
-                        ),
-                        None,
-                    )  # Make better
-                if pokemon is None:
-                    # log.debug(
-                    #     f"Error occured trying to find {evolve['evolution']} for an evolution."
-                    # )
-                    return
-                if nick is not None:
-                    pokemon["nickname"] = nick
-                pokemon["xp"] = 0
-                pokemon["level"] = lvl
-                pokemon["ivs"] = ivs
-                pokemon["gender"] = gender
-                pokemon["stats"] = stats
-                if not userconf["silence"]:
-                    embed = discord.Embed(
-                        title=_("Congratulations {user}!").format(user=user.display_name),
-                        description=_("Your {name} has evolved into {evolvename}!").format(
-                            name=name, evolvename=self.get_name(pokemon["name"], user)
-                        ),
-                        color=await self.bot.get_embed_color(channel),
-                    )
-                log.debug(f"{name} has evolved into {pokemon['name']} for {user}.")
-                async with self.config.user(user).pokeids() as poke:
-                    if str(pokemon["id"]) not in poke:
-                        poke[str(pokemon["id"])] = 1
-                    else:
-                        poke[str(pokemon["id"])] += 1
-            else:
-                log.debug(f"{pokemon['name']} levelled up for {user}")
-                for stat in pokemon["stats"]:
-                    pokemon["stats"][stat] = int(pokemon["stats"][stat]) + random.randint(1, 3)
-                if not userconf["silence"]:
-                    embed = discord.Embed(
-                        title=_("Congratulations {user}!").format(user=user.display_name),
-                        description=_("Your {name} has levelled up to level {level}!").format(
-                            name=name, level=pokemon["level"]
-                        ),
-                        color=await self.bot.get_embed_color(channel),
-                    )
-            if embed is not None:
-                if (
-                    self.guildcache[channel.guild.id].get("levelup_messages")
-                    and channel.id in self.guildcache[channel.guild.id]["activechannels"]
-                ):
-                    channel = channel
-                elif (
-                    self.guildcache[channel.guild.id].get("levelup_messages")
-                    and not self.guildcache[channel.guild.id]["activechannels"]
-                ):
-                    channel = channel
-                else:
-                    channel = None
-                if channel is not None:
+            if self.guildcache[channel.guild.id].get("levelup_messages"):
+                if channel.id in self.guildcache[channel.guild.id]["activechannels"]:
                     await channel.send(embed=embed)
-        # data = (user.id, msg_id, json.dumps(pokemon))
+                elif not self.guildcache[channel.guild.id]["activechannels"]:
+                    await channel.send(embed=embed)
+
         await self.cursor.execute(
             query=UPDATE_POKEMON,
             values={"user_id": user.id, "message_id": msg_id, "pokemon": json.dumps(pokemon)},
