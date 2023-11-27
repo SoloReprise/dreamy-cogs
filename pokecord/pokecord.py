@@ -832,6 +832,48 @@ class Pokecord(
             pass
         # Add more methods as needed
 
+    @commands.command()
+    @commands.is_owner()  # Or use any other check for admin privileges
+    async def unevolve_pokemon(self, ctx, user_id: int, pokemon_identifier: str):
+        """
+        Admin command to reset a Pokemon's level to just before it evolves.
+
+        Parameters:
+        user_id (int): Discord ID of the user who owns the Pokémon.
+        pokemon_identifier (str): The name or ID of the Pokémon to unevolve.
+        """
+        # Fetch user's Pokémon
+        result = await self.cursor.fetch_all(query=SELECT_POKEMON, values={"user_id": user_id})
+        pokemons = [json.loads(data[0]) for data in result]
+
+        # Find the specified Pokémon
+        pokemon_to_unevolve = None
+        for pokemon in pokemons:
+            if pokemon_identifier.lower() in [pokemon["name"]["english"].lower(), str(pokemon["id"])]:
+                pokemon_to_unevolve = pokemon
+                break
+
+        if not pokemon_to_unevolve:
+            await ctx.send(f"No Pokémon found for user with ID {user_id} matching '{pokemon_identifier}'.")
+            return
+
+        # Determine evolution level
+        evolve_data = self.evolvedata.get(pokemon_to_unevolve["name"]["english"])
+        if not evolve_data:
+            await ctx.send(f"{pokemon_to_unevolve['name']['english']} does not evolve.")
+            return
+
+        evolution_level = int(evolve_data["level"])
+        if pokemon_to_unevolve["level"] < evolution_level:
+            await ctx.send(f"{pokemon_to_unevolve['name']['english']} has not evolved yet.")
+            return
+
+        # Reset level and experience
+        pokemon_to_unevolve["level"] = evolution_level - 1
+        pokemon_to_unevolve["xp"] = self.calc_xp(evolution_level - 1) - 1
+
+        await ctx.send(f"{pokemon_to_unevolve['name']['english']} has been unevolved to level {pokemon_to_unevolve['level']} with {pokemon_to_unevolve['xp']} XP.")
+
     async def exp_gain(self, channel, user):
         userconf = self.usercache.get(user.id)
         if userconf is None:
