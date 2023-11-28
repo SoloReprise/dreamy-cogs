@@ -813,7 +813,20 @@ class Pokecord(
             self.datapath + f'/pokemon/{evolved_pokemon_name}.png'
         )
         evolved_pokemon_image = Image.open(evolved_pokemon_image_path).convert("RGBA")
-        background.paste(evolved_pokemon_image, (0, 0), evolved_pokemon_image)
+
+        # Calculate new size for evolved pokemon image (85% of background)
+        scale_width = background.width * 0.85
+        scale_height = background.height * 0.85
+        aspect_ratio = min(scale_width / evolved_pokemon_image.width, scale_height / evolved_pokemon_image.height)
+        new_width = int(evolved_pokemon_image.width * aspect_ratio)
+        new_height = int(evolved_pokemon_image.height * aspect_ratio)
+        evolved_pokemon_image = evolved_pokemon_image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
+        # Center evolved pokemon image on background
+        offset = ((background.width - new_width) // 2, (background.height - new_height) // 2)
+        background.paste(evolved_pokemon_image, offset, evolved_pokemon_image)
+
+        # Save to a BytesIO object
         img_byte_arr = io.BytesIO()
         background.save(img_byte_arr, format='PNG')
         img_byte_arr.seek(0)
@@ -831,47 +844,6 @@ class Pokecord(
             # Logic for stone evolution
             pass
         # Add more methods as needed
-
-    @commands.command()
-    @commands.is_owner()  # This ensures only the bot owner can use this command
-    async def unevolve(self, ctx, pokemon_id: int):
-        # Check if the command is used by you (the admin)
-        if ctx.author.id != YOUR_DISCORD_USER_ID:
-            await ctx.send("You don't have permission to use this command.")
-            return
-
-        # Fetch the Pokémon by its unique ID
-        result = await self.cursor.fetch_all(query=SELECT_POKEMON_BY_ID, values={"pokemon_id": pokemon_id, "user_id": ctx.author.id})
-        if not result:
-            await ctx.send("Pokémon not found.")
-            return
-        pokemon = json.loads(result[0][0])
-
-        # Get the previous evolution stage
-        current_pokemon_name = self.get_name(pokemon["name"], ctx.author)
-        prev_evolution = self.get_previous_evolution(current_pokemon_name)
-        if not prev_evolution:
-            await ctx.send(f"{current_pokemon_name} cannot be unevolved.")
-            return
-
-        # Update the Pokémon's data
-        pokemon["name"] = {"english": prev_evolution}
-        pokemon["xp"] = self.calc_xp(pokemon["level"]) - 1  # Set XP just below the evolution threshold
-
-        # Update the Pokémon in the database
-        await self.cursor.execute(
-            query=UPDATE_POKEMON,
-            values={"user_id": ctx.author.id, "pokemon_id": pokemon_id, "pokemon": json.dumps(pokemon)},
-        )
-
-        await ctx.send(f"{current_pokemon_name} has been unevolved to {prev_evolution}.")
-
-    def get_previous_evolution(self, pokemon_name):
-        # Find the previous evolution stage
-        for key, value in self.evolvedata.items():
-            if value["evolution"] == pokemon_name:
-                return key
-        return None
 
     async def exp_gain(self, channel, user):
         userconf = self.usercache.get(user.id)
