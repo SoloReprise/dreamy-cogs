@@ -833,49 +833,38 @@ class Pokecord(
         # Add more methods as needed
 
     @commands.command()
-    @commands.is_owner()  # Ensure only the bot owner can use this command
+    @commands.is_owner()  # This ensures only the bot owner can use this command
     async def unevolve(self, ctx, pokemon_id: int):
-        # Fetch the specified Pokémon by ID
-        result = await self.cursor.fetch_one(query=SELECT_POKEMON_BY_ID, values={"pokemon_id": pokemon_id})
+        # Fetch the pokemon data based on the unique ID
+        result = await self.cursor.fetch_one(query=SELECT_POKEMON_BY_ID, values={"pokemon_id": pokemon_id, "user_id": ctx.author.id})
         if result is None:
-            await ctx.send("No Pokémon found with that ID.")
+            await ctx.send(_("No Pokémon found with that ID."))
             return
 
         pokemon = json.loads(result[0])
-        original_name = pokemon["name"]["english"] if isinstance(pokemon["name"], dict) else pokemon["name"]
+        pokename = self.get_name(pokemon["name"], ctx.author)
 
-        # Find the pre-evolution form, if any
-        pre_evolution = next(
-            (item for item in self.evolvedata if item["evolution"] == original_name),
-            None
+        # Find previous evolution, if any
+        prev_evolution = next(
+            (item for item in self.evolvedata.values() if item["evolution"] == pokename),
+            None,
         )
-        if pre_evolution is None:
-            await ctx.send(f"{original_name} does not have a pre-evolution form.")
+        if prev_evolution is None:
+            await ctx.send(_("This Pokémon cannot be unevolved."))
             return
 
-        # Change Pokémon to its pre-evolution form
-        pre_evolution_pokemon = next(
-            (item for item in self.pokemondata if item["name"]["english"] == pre_evolution["name"]),
-            None
-        )
-        if pre_evolution_pokemon is None:
-            await ctx.send("Pre-evolution data not found.")
-            return
+        # Adjust level and XP to just before the evolution point
+        pokemon["level"] = int(prev_evolution["level"]) - 1
+        pokemon["xp"] = self.calc_xp(pokemon["level"]) - 1
 
-        pokemon.update({
-            "name": pre_evolution_pokemon["name"],
-            "type": pre_evolution_pokemon["type"],
-            "xp": self.calc_xp(pokemon["level"] - 1) - 1,  # Set XP just below the evolution threshold
-        })
-
-        # Update the database
+        # Update the database with the new pokemon data
         await self.cursor.execute(
             query=UPDATE_POKEMON,
             values={"user_id": ctx.author.id, "message_id": result[1], "pokemon": json.dumps(pokemon)},
         )
 
-        await ctx.send(f"Your {original_name} has been unevolved to {pre_evolution['name']} with XP just below evolution.")
-    
+        await ctx.send(_("{pokename} has been unevolved successfully!").format(pokename=pokename))
+
     async def exp_gain(self, channel, user):
         userconf = self.usercache.get(user.id)
         if userconf is None:
