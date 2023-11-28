@@ -778,7 +778,7 @@ class Pokecord(
         # Evolution process starts
         original_name = self.get_name(pokemon["name"], user)
         evolved_pokemon_name = evolve["evolution"]
-        await channel.send(f"¡@{user.display_name}, algo pasa con tu {original_name}!")
+        await channel.send(f"¡<@{user.id}>, algo pasa con tu {original_name}!")
         await asyncio.sleep(2)  # Short pause for effect
         await channel.send(f"¡{original_name} está evolucionando!")
 
