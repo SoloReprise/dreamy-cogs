@@ -15780,7 +15780,7 @@
             "Speed": 71
         },
         "spawnchance": 0.003,
-        "url": "https://github.com/PokeAPI/sprites/blob/master/sprites/pokemon/other/official-artwork/shiny/656.png",
+        "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/656.png",
         "variant": "Shiny",
         "alias": "Shiny Froakie"
     },
