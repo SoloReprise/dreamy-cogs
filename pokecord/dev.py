@@ -202,3 +202,32 @@ class Dev(MixinMeta):
         await ctx.send(
             _(f"{user.display_name}'s {name} has been freed.{msg}").format(name=name, msg=msg)
         )
+
+    @dev.command(name="modify")
+    async def dev_modify(self, ctx, user: discord.Member, pokeid: int, *, data: str):
+        """Modify a pokemon with full data"""
+        # Parsing the provided JSON data
+        try:
+            new_data = json.loads(data)
+        except json.JSONDecodeError:
+            await ctx.send("Invalid JSON data provided.")
+            return
+
+        # Fetch the current Pokémon data
+        current_pokemon = await self.get_pokemon(ctx, user, pokeid)
+        if not isinstance(current_pokemon, list):
+            return  # get_pokemon already sends an error message if needed
+
+        # Update the Pokémon data
+        current_pokemon[0].update(new_data)
+
+        # Save the updated data back to the database
+        await self.cursor.execute(
+            query=UPDATE_POKEMON,
+            values={
+                "user_id": user.id,
+                "message_id": current_pokemon[1],
+                "pokemon": json.dumps(current_pokemon[0]),
+            },
+        )
+        await ctx.send(f"{user.display_name}'s Pokémon has been updated.")
