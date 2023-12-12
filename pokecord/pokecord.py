@@ -771,13 +771,18 @@ class Pokecord(
 
     async def handle_evolution(self, user, pokemon, channel):
         # Determine if evolution is possible
-        evolve = self.evolvedata.get(pokemon["name"]["english"])
+        is_shiny = 'Shiny' in pokemon["name"]["english"]
+        lookup_name = pokemon["name"]["english"].replace("Shiny ", "") if is_shiny else pokemon["name"]["english"]
+        evolve = self.evolvedata.get(lookup_name)
+
         if evolve is None or (pokemon["level"] < int(evolve["level"])):
             return  # No evolution at this level
 
         # Evolution process starts
         original_name = self.get_name(pokemon["name"], user)
         evolved_pokemon_name = evolve["evolution"]
+        if is_shiny:
+            evolved_pokemon_name = "Shiny " + evolved_pokemon_name
         await channel.send(f"¡<@{user.id}>, algo pasa con tu {original_name}!")
         await asyncio.sleep(2)  # Short pause for effect
         await channel.send(f"¡{original_name} está evolucionando!")
@@ -807,10 +812,16 @@ class Pokecord(
             description=f"¡Tu {original_name} ha evolucionado a {evolved_pokemon_name}!",
             color=await self.bot.get_embed_color(channel),
         )
+
+        # Adjust image path for shiny Pokémon
+        evolved_image_name = evolved_pokemon_name.replace(" ", "")
+        if is_shiny:
+            evolved_image_name = evolved_image_name + "_Shiny"
+
         background_path = "/home/unitedlegacy/.local/share/Red-DiscordBot/data/Spribotito/cogs/RepoManager/repos/dreamy-cogs/pokecord/data/backgrounds/evolution.jpg"
         background = Image.open(background_path).resize((800, 500), Image.Resampling.LANCZOS)
         evolved_pokemon_image_path = (
-            self.datapath + f'/pokemon/{evolved_pokemon_name}.png'
+            self.datapath + f'/pokemon/{evolved_image_name}.png'
         )
         evolved_pokemon_image = Image.open(evolved_pokemon_image_path).convert("RGBA")
 
