@@ -222,7 +222,18 @@ class Generator(MixinMeta, ABC):
         voice = ""  
         stars = str(stars)
         bal = _("Balance: ") + f"{humanize_number(balance)} {currency}"
-        api_stat = _("API: ") + api_value  # Example of using api_value
+        # Conditionally display API value if it's provided
+        if api_value is not None:
+            api_stat = _("API: ") + api_value
+            draw.text(
+                # Adjust positioning as needed
+                (bar_start + 10, stats_y + 3 * stat_offset),
+                api_stat,
+                statcolor,
+                font=stats_font,
+                stroke_width=stroke_width,
+                stroke_fill=statstxtfill,
+            )
         prestige_str = _("Prestige ") + str(prestige)
 
         # Get base font
