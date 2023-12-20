@@ -1089,7 +1089,6 @@ class UserCommands(MixinMeta, ABC):
                 "messages": humanize_number(messages),
                 "voice": time_formatter(voice),
                 "new_rank": new_rank,  # Pass new_rank to the profile generator
-                "api_value": "API Placeholder",  # Placeholder for the API value
                 "colors": usercolors,
                 "font_name": font,
                 "render_gifs": self.render_gifs,
