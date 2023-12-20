@@ -222,7 +222,6 @@ class Generator(MixinMeta, ABC):
         voice = ""  
         stars = str(stars)
         bal = _("Balance: ") + f"{humanize_number(balance)} {currency}"
-        api_stat = _("API: ") + api_value  # Example of using api_value
         prestige_str = _("Prestige ") + str(prestige)
 
         # Get base font
