@@ -37,6 +37,7 @@ class Generator(MixinMeta, ABC):
         messages: str = "0",
         voice: str = "None",
         new_rank: str = "Desconocido",  # Add the new_rank parameter with a default value
+        api_value: str = "API Placeholder",  # Add the api_value parameter with a default value
         prestige: int = 0,
         emoji: str = None,
         stars: str = "0",
@@ -221,6 +222,7 @@ class Generator(MixinMeta, ABC):
         voice = ""  
         stars = str(stars)
         bal = _("Balance: ") + f"{humanize_number(balance)} {currency}"
+        api_stat = _("API: ") + api_value  # Example of using api_value
         prestige_str = _("Prestige ") + str(prestige)
 
         # Get base font
@@ -360,6 +362,15 @@ class Generator(MixinMeta, ABC):
         draw.text(
             (bar_start + 10, stats_y + stat_offset),
             leveltxt,
+            statcolor,
+            font=stats_font,
+            stroke_width=stroke_width,
+            stroke_fill=statstxtfill,
+        )
+        # Draw the API value on the image
+        draw.text(
+            (bar_start + 10, stats_y + 3 * stat_offset),  # Adjust positioning as needed
+            api_stat,
             statcolor,
             font=stats_font,
             stroke_width=stroke_width,
