@@ -1026,6 +1026,96 @@ class UserCommands(MixinMeta, ABC):
                         f"Send Time: {humanize_number(mtime)}ms"
                     )
 
+    @commands.command(name="newpf")
+    @commands.guild_only()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def new_get_profile(self, ctx: commands.Context, *, user: discord.Member = None):
+        """View your new profile"""
+        if not user:
+            user = ctx.author
+        if user.bot:
+            return await ctx.send("Bots can't have profiles!")
+
+        gid = ctx.guild.id
+        if gid not in self.data:
+            await self.initialize()
+        
+        conf = self.data[gid]
+        users = conf["users"]
+        user_id = str(user.id)
+        if user_id not in users:
+            return await ctx.send(_("No information available yet!"))
+
+        bal = await bank.get_balance(user)
+        currency_name = await bank.get_currency_name(ctx.guild)
+
+        if DPY2:
+            pfp = user.display_avatar.url
+        else:
+            pfp = user.avatar_url
+
+        p = users[user_id]
+        level: int = p["level"]
+        messages: int = p["messages"]
+        voice: int = p["voice"]
+        bg = p["background"]
+        font = p["font"]
+        blur = p["blur"]
+
+        # New Rank calculation
+        new_rank = ""
+        if level == 0:
+            new_rank = "Desconocido"
+        elif 1 <= level <= 4:
+            new_rank = "Principiante"
+        elif 5 <= level <= 7:
+            new_rank = "Alto"
+        elif 8 <= level <= 14:
+            new_rank = "Avanzado"
+        elif 15 <= level <= 19:
+            new_rank = "Élite"
+        elif 20 <= level <= 24:
+            new_rank = "Experto"
+        elif level >= 25:
+            new_rank = "Maestro"
+
+        async with ctx.typing():
+            bg_image = bg 
+            colors = users[user_id]["colors"]
+            usercolors = {
+                "base": hex_to_rgb(str(user.colour)),
+                "name": hex_to_rgb(colors["name"]) if colors["name"] else None,
+                "stat": hex_to_rgb(colors["stat"]) if colors["stat"] else None,
+                "levelbar": hex_to_rgb(colors["levelbar"]) if colors["levelbar"] else None,
+            }
+
+            args = {
+                "bg_image": bg_image,
+                "profile_image": pfp,
+                "messages": humanize_number(messages),
+                "voice": time_formatter(voice),
+                "new_rank": new_rank,
+                "api_value": "API Placeholder",  # Placeholder for the API value
+                "colors": usercolors,
+                "font_name": font,
+                "render_gifs": self.render_gifs,
+                "blur": blur,
+            }
+
+            file = await self.get_or_fetch_profile(user, args, full=True)
+            if not file:
+                return await ctx.send("Failed to generate profile image :( try again in a bit")
+
+            try:
+                await ctx.reply(file=file)
+            except Exception as e:
+                log.error(f"Failed to send profile pic: {e}")
+                try:
+                    file = await self.get_or_fetch_profile(user, args, full=True)
+                    await ctx.send(file=file)
+                except Exception as e:
+                    log.error(f"Failed AGAIN to send profile pic: {e}")
+
     @commands.command(name="prestige")
     @commands.guild_only()
     @commands.bot_has_permissions(embed_links=True)
