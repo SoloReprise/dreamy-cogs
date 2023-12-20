@@ -138,7 +138,7 @@ class UserCommands(MixinMeta, ABC):
         if td > self.cache_seconds or not cache["img"]:
             # Choose the profile generation method based on use_new_generator
             if use_new_generator:
-                img = self.generate_profile_new(**args)  # Remove await here
+                img = await self.generate_profile_new(**args)  # Make sure generate_profile_new can handle **args
             else:
                 img = await self.gen_profile_img(args, full)
             self.profiles[gid][uid] = {"img": img, "ts": now}

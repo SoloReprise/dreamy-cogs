@@ -496,7 +496,7 @@ class Generator(MixinMeta, ABC):
 
         return final
 
-    def generate_profile_new(
+    async def generate_profile_new(
         self,
         bg_image: str = None,
         profile_image: str = "https://i.imgur.com/sUYWCve.png",
