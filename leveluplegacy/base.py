@@ -1039,20 +1039,12 @@ class UserCommands(MixinMeta, ABC):
         gid = ctx.guild.id
         if gid not in self.data:
             await self.initialize()
-        
+
         conf = self.data[gid]
         users = conf["users"]
         user_id = str(user.id)
         if user_id not in users:
             return await ctx.send(_("No information available yet!"))
-
-        bal = await bank.get_balance(user)
-        currency_name = await bank.get_currency_name(ctx.guild)
-
-        if DPY2:
-            pfp = user.display_avatar.url
-        else:
-            pfp = user.avatar_url
 
         p = users[user_id]
         level: int = p["level"]
@@ -1080,7 +1072,6 @@ class UserCommands(MixinMeta, ABC):
             new_rank = "Maestro"
 
         async with ctx.typing():
-            bg_image = bg 
             colors = users[user_id]["colors"]
             usercolors = {
                 "base": hex_to_rgb(str(user.colour)),
@@ -1090,8 +1081,8 @@ class UserCommands(MixinMeta, ABC):
             }
 
             args = {
-                "bg_image": bg_image,
-                "profile_image": pfp,
+                "bg_image": bg,
+                "profile_image": user.display_avatar.url if DPY2 else user.avatar_url,
                 "messages": humanize_number(messages),
                 "voice": time_formatter(voice),
                 "new_rank": new_rank,
