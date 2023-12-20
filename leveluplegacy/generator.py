@@ -36,6 +36,7 @@ class Generator(MixinMeta, ABC):
         colors: dict = None,
         messages: str = "0",
         voice: str = "None",
+        new_rank: str = "Desconocido",  # Add the new_rank parameter with a default value
         prestige: int = 0,
         emoji: str = None,
         stars: str = "0",
@@ -210,7 +211,7 @@ class Generator(MixinMeta, ABC):
         final = Image.alpha_composite(final, progress_bar)
 
         # Stat strings
-        rank = _("Rango: #") + str(user_position)
+        rank = _("Rango: ") + new_rank  # Use the new_rank variable here
         leveltxt = _("Nivel: ") + str(level)
         exp = (
             _("Experiencia: ")
@@ -346,9 +347,9 @@ class Generator(MixinMeta, ABC):
                 stroke_fill=statstxtfill,
             )
         # Stats text
-        # Rank
+        # Draw the new rank on the image
         draw.text(
-            (bar_start + 10, stats_y),
+            (bar_start + 10, stats_y + 2 * stat_offset),  # Adjust positioning as needed
             rank,
             statcolor,
             font=stats_font,
