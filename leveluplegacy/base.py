@@ -912,7 +912,21 @@ class UserCommands(MixinMeta, ABC):
         percentage = pos["pr"]  # Float
 
         # User stats
-        level: int = p["level"]  # Int
+        level: int = p["level"]
+        if level == 0:
+            new_rank = "Desconocido"
+        elif 1 <= level <= 4:
+            new_rank = "Principiante"
+        elif 5 <= level <= 7:
+            new_rank = "Alto"
+        elif 8 <= level <= 14:
+            new_rank = "Avanzado"
+        elif 15 <= level <= 19:
+            new_rank = "Élite"
+        elif 20 <= level <= 24:
+            new_rank = "Experto"
+        elif level >= 25:
+            new_rank = "Maestro"
         xp: int = int(p["xp"])  # Float in the config but force int
         messages: int = p["messages"]  # Int
         voice: int = p["voice"]  # Int
@@ -979,6 +993,7 @@ class UserCommands(MixinMeta, ABC):
                     "bg_image": bg_image,  # Background image link
                     "profile_image": pfp,  # User profile picture link
                     "level": level,  # User current level
+                    "new_rank": new_rank,
                     "prev_xp": xp_prev,  # Preveious levels cap
                     "user_xp": xp,  # User current xp
                     "next_xp": xp_needed,  # xp required for next level
@@ -1048,14 +1063,6 @@ class UserCommands(MixinMeta, ABC):
 
         p = users[user_id]
         level: int = p["level"]
-        messages: int = p["messages"]
-        voice: int = p["voice"]
-        bg = p["background"]
-        font = p["font"]
-        blur = p["blur"]
-
-        # New Rank calculation
-        new_rank = ""
         if level == 0:
             new_rank = "Desconocido"
         elif 1 <= level <= 4:
@@ -1070,6 +1077,11 @@ class UserCommands(MixinMeta, ABC):
             new_rank = "Experto"
         elif level >= 25:
             new_rank = "Maestro"
+        messages: int = p["messages"]
+        voice: int = p["voice"]
+        bg = p["background"]
+        font = p["font"]
+        blur = p["blur"]
 
         async with ctx.typing():
             colors = users[user_id]["colors"]
