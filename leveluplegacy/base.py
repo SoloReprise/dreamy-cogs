@@ -123,7 +123,7 @@ class UserCommands(MixinMeta, ABC):
         return img
 
     async def get_or_fetch_profile(
-        self, user: discord.Member, args: dict, full: bool
+        self, user: discord.Member, args: dict, full: bool, use_new_generator: bool = False
     ) -> Union[discord.File, None]:
         gid = user.guild.id
         uid = str(user.id)
@@ -136,7 +136,11 @@ class UserCommands(MixinMeta, ABC):
         cache = self.profiles[gid][uid]
         td = (now - cache["ts"]).total_seconds()
         if td > self.cache_seconds or not cache["img"]:
-            img = await self.gen_profile_img(args, full)
+            # Choose the profile generation method based on use_new_generator
+            if use_new_generator:
+                img = await self.generate_profile_new(**args)  # Make sure generate_profile_new can handle **args
+            else:
+                img = await self.gen_profile_img(args, full)
             self.profiles[gid][uid] = {"img": img, "ts": now}
         else:
             img = self.profiles[gid][uid]["img"]
@@ -144,9 +148,7 @@ class UserCommands(MixinMeta, ABC):
         if not img:
             return None
 
-        # Get the user's nickname on the server (if available), else use their display name.
         nickname = user.nick if user.nick else user.display_name
-
         animated = getattr(img, "is_animated", False)
         ext = "GIF" if animated else "WEBP"
         buffer = BytesIO()
@@ -912,21 +914,7 @@ class UserCommands(MixinMeta, ABC):
         percentage = pos["pr"]  # Float
 
         # User stats
-        level: int = p["level"]
-        if level == 0:
-            new_rank = "Desconocido"
-        elif 1 <= level <= 4:
-            new_rank = "Principiante"
-        elif 5 <= level <= 7:
-            new_rank = "Alto"
-        elif 8 <= level <= 14:
-            new_rank = "Avanzado"
-        elif 15 <= level <= 19:
-            new_rank = "Élite"
-        elif 20 <= level <= 24:
-            new_rank = "Experto"
-        elif level >= 25:
-            new_rank = "Maestro"
+        level: int = p["level"]  # Int
         xp: int = int(p["xp"])  # Float in the config but force int
         messages: int = p["messages"]  # Int
         voice: int = p["voice"]  # Int
@@ -993,7 +981,6 @@ class UserCommands(MixinMeta, ABC):
                     "bg_image": bg_image,  # Background image link
                     "profile_image": pfp,  # User profile picture link
                     "level": level,  # User current level
-                    "new_rank": new_rank,
                     "prev_xp": xp_prev,  # Preveious levels cap
                     "user_xp": xp,  # User current xp
                     "next_xp": xp_needed,  # xp required for next level
@@ -1063,6 +1050,14 @@ class UserCommands(MixinMeta, ABC):
 
         p = users[user_id]
         level: int = p["level"]
+        messages: int = p["messages"]
+        voice: int = p["voice"]
+        bg = p["background"]
+        font = p["font"]
+        blur = p["blur"]
+
+        # Calculate new_rank based on level
+        new_rank = "Desconocido"  # Default rank
         if level == 0:
             new_rank = "Desconocido"
         elif 1 <= level <= 4:
@@ -1077,11 +1072,6 @@ class UserCommands(MixinMeta, ABC):
             new_rank = "Experto"
         elif level >= 25:
             new_rank = "Maestro"
-        messages: int = p["messages"]
-        voice: int = p["voice"]
-        bg = p["background"]
-        font = p["font"]
-        blur = p["blur"]
 
         async with ctx.typing():
             colors = users[user_id]["colors"]
@@ -1095,9 +1085,10 @@ class UserCommands(MixinMeta, ABC):
             args = {
                 "bg_image": bg,
                 "profile_image": user.display_avatar.url if DPY2 else user.avatar_url,
+                "level": level,
                 "messages": humanize_number(messages),
                 "voice": time_formatter(voice),
-                "new_rank": new_rank,
+                "new_rank": new_rank,  # Pass new_rank to the profile generator
                 "api_value": "API Placeholder",  # Placeholder for the API value
                 "colors": usercolors,
                 "font_name": font,
@@ -1105,7 +1096,7 @@ class UserCommands(MixinMeta, ABC):
                 "blur": blur,
             }
 
-            file = await self.get_or_fetch_profile(user, args, full=True)
+            file = await self.get_or_fetch_profile(user, args, full=True, use_new_generator=True)
             if not file:
                 return await ctx.send("Failed to generate profile image :( try again in a bit")
 
@@ -1114,7 +1105,7 @@ class UserCommands(MixinMeta, ABC):
             except Exception as e:
                 log.error(f"Failed to send profile pic: {e}")
                 try:
-                    file = await self.get_or_fetch_profile(user, args, full=True)
+                    file = await self.get_or_fetch_profile(user, args, full=True, use_new_generator=True)
                     await ctx.send(file=file)
                 except Exception as e:
                     log.error(f"Failed AGAIN to send profile pic: {e}")
