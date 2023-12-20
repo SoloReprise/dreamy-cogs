@@ -222,18 +222,7 @@ class Generator(MixinMeta, ABC):
         voice = ""  
         stars = str(stars)
         bal = _("Balance: ") + f"{humanize_number(balance)} {currency}"
-        # Conditionally display API value if it's provided
-        if api_value is not None:
-            api_stat = _("API: ") + api_value
-            draw.text(
-                # Adjust positioning as needed
-                (bar_start + 10, stats_y + 3 * stat_offset),
-                api_stat,
-                statcolor,
-                font=stats_font,
-                stroke_width=stroke_width,
-                stroke_fill=statstxtfill,
-            )
+        api_stat = _("API: ") + api_value  # Example of using api_value
         prestige_str = _("Prestige ") + str(prestige)
 
         # Get base font
@@ -378,15 +367,18 @@ class Generator(MixinMeta, ABC):
             stroke_width=stroke_width,
             stroke_fill=statstxtfill,
         )
-        # Draw the API value on the image
-        draw.text(
-            (bar_start + 10, stats_y + 3 * stat_offset),  # Adjust positioning as needed
-            api_stat,
-            statcolor,
-            font=stats_font,
-            stroke_width=stroke_width,
-            stroke_fill=statstxtfill,
-        )
+        # Conditionally display API value if it's provided
+        if api_value is not None:
+            api_stat = _("API: ") + api_value
+            draw.text(
+                # Adjust positioning as needed
+                (bar_start + 10, stats_y + 3 * stat_offset),
+                api_stat,
+                statcolor,
+                font=stats_font,
+                stroke_width=stroke_width,
+                stroke_fill=statstxtfill,
+            )
         # Messages
         draw.text(
             (bar_start + 220, stats_y),
