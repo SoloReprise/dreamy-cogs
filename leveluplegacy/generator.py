@@ -37,7 +37,7 @@ class Generator(MixinMeta, ABC):
         messages: str = "0",
         voice: str = "None",
         new_rank: str = "Desconocido",  # Add the new_rank parameter with a default value
-        api_value: str = "API Placeholder",  # Add the api_value parameter with a default value
+        api_value: str = None
         prestige: int = 0,
         emoji: str = None,
         stars: str = "0",
