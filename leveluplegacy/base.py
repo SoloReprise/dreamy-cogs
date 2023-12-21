@@ -1050,6 +1050,7 @@ class UserCommands(MixinMeta, ABC):
 
         p = users[user_id]
         level: int = p["level"]
+        stars: int = p["stars"]  # Int
         messages: int = p["messages"]
         voice: int = p["voice"]
         bg = p["background"]
