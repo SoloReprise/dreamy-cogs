@@ -555,7 +555,6 @@ class Generator(MixinMeta, ABC):
         rgbs = self.get_img_colors(profile, 8)
         base = (255, 255, 255)
         namecolor = (255, 255, 255)
-        namefill = default_fill      
         statcolor = (255, 255, 255)
         lvlbarcolor = (255, 255, 255)
         # Color distancing is more strict if user hasn't defined color
@@ -602,18 +601,15 @@ class Generator(MixinMeta, ABC):
 
         # x1, y1, x2, y2
         # Sample name box colors and make sure they're not too similar with the background
+        # Sample name box colors to adjust namefill for contrast, if necessary
         namebox = (bar_start, name_y, bar_start + 50, name_y + 100)
         namesection = self.get_sample_section(card, namebox)
         namebg = self.get_img_color(namesection)
         namefill = default_fill
-        while self.distance(namecolor, namebg) < namedistance:
-            namecolor = self.rand_rgb()
-            iters += 1
-            if iters > 20:
-                iters = 0
-                break
+
+        # Adjust namefill for contrast against white namecolor
         if self.distance(namefill, namecolor) < namedistance - 50:
-            namefill = self.inv_rgb(namefill)
+            namefill = self.inv_rgb(namefill)  # Invert the fill color if too similar to white
 
         # Sample stat box colors and make sure they're not too similar with the background
         statbox = (bar_start, stats_y, bar_start + 400, bar_top)
