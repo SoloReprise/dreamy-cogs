@@ -1085,6 +1085,7 @@ class UserCommands(MixinMeta, ABC):
             args = {
                 "user_name": user.name,  # username with discriminator
                 "bg_image": bg,
+                "stars": stars,
                 "profile_image": user.display_avatar.url if DPY2 else user.avatar_url,
                 "level": level,
                 "messages": humanize_number(messages),
