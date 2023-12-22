@@ -1,10 +1,7 @@
 from redbot.core import commands, Config
 import discord
 
-from redbot.core import commands
-import discord
-
-class VoiceDecorators(commands.Cog):
+class VoiceDecorator(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 

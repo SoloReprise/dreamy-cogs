@@ -1,4 +1,4 @@
-from .voicedecorators import VoiceDecorators
+from .voicedecorator import VoiceDecorator
 
 async def setup(bot):
-    await bot.add_cog(VoiceDecorators(bot))
+    await bot.add_cog(VoiceDecorator(bot))
