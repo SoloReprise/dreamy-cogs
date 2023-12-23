@@ -137,3 +137,24 @@ class MysteryGift(commands.Cog):
                 message.append(f"User ID {user_id}: {data['gifts']} gifts")
 
         await ctx.send("\n".join(message))
+
+    @commands.is_owner()
+    @commands.command()
+    async def checklimitedprizes(self, ctx):
+        """Check the remaining quantity of each restricted gift."""
+        try:
+            won_limited_prizes = await self.config.won_limited_prizes()
+            remaining_prizes = {}
+
+            for prize_key, max_count in self.limited_prizes_counts.items():
+                won_count = won_limited_prizes.get(prize_key, 0)
+                remaining_prizes[prize_key] = max_count - won_count
+
+            message = ["Remaining Restricted Gifts:"]
+            for prize_key, remaining in remaining_prizes.items():
+                message.append(f"{prize_key}: {remaining} left")
+
+            await ctx.send("\n".join(message))
+        except Exception as e:
+            await ctx.send(f"An error occurred: {e}")
+            # You can add more detailed logging here if necessary
