@@ -58,16 +58,22 @@ class MysteryGift(commands.Cog):
     async def get_prize(self):
         won_limited_prizes = await self.config.won_limited_prizes()
         filtered_prizes = [
-            (item, weight) if len(prize) == 2 or won_limited_prizes.get(prize[2], 0) < self.limited_prizes_counts[prize[2]]
+            (item, weight) if len(prize) == 2 or won_limited_prizes.get(prize[2], 0) < self.limited_prizes_counts.get(prize[2], 0)
             else (item, 0) for item, weight, *prize in self.prizes
         ]
+        
+        # Check if total weight is not zero to avoid division by zero error
         total = sum(weight for item, weight in filtered_prizes)
+        if total == 0:
+            return "Lo siento, no hay más premios disponibles en este momento."
+        
         r = random.uniform(0, total)
         upto = 0
         for item, weight, *prize in filtered_prizes:
             if upto + weight >= r:
                 if prize:
-                    won_limited_prizes[prize[0]] = won_limited_prizes.get(prize[0], 0) + 1
+                    prize_key = prize[0]
+                    won_limited_prizes[prize_key] = won_limited_prizes.get(prize_key, 0) + 1
                     await self.config.won_limited_prizes.set(won_limited_prizes)
                 return item
             upto += weight
