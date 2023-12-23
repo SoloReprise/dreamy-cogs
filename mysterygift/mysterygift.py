@@ -81,11 +81,19 @@ class MysteryGift(commands.Cog):
 
             r = random.uniform(0, total)
             upto = 0
-            for item, weight in filtered_prizes:
+            for prize_entry in filtered_prizes:
+                item, weight = prize_entry
                 upto += weight
                 if upto >= r:
-                    if len(prize_entry) > 2:
-                        prize_key = prize_entry[2]
+                    # Check if the prize is a limited prize and update accordingly
+                    prize_key = None
+                    for original_entry in self.prizes:
+                        if item == original_entry[0]:
+                            if len(original_entry) > 2:
+                                prize_key = original_entry[2]
+                                break
+
+                    if prize_key:
                         won_limited_prizes[prize_key] = won_limited_prizes.get(prize_key, 0) + 1
                         await self.config.won_limited_prizes.set(won_limited_prizes)
                     return item
