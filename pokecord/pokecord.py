@@ -1050,13 +1050,21 @@ class Pokecord(
         all_user_ids = await self.get_all_user_ids()
 
         for user_id in all_user_ids:
-            user_conf = await self.user_is_global(user_id)  # Assuming this method returns user config
-            new_badges = await self.update_user_badges(user_id)
+            # Retrieve the user object from the user ID
+            user = ctx.bot.get_user(user_id)
+            if user is None:
+                continue  # Skip if the user object is not found
+
+            user_conf = await self.user_is_global(user)  # Pass the user object
+            new_badges = await self.update_user_badges(user)  # Pass the user object to update badges
+
             if new_badges:
-                user = ctx.guild.get_member(user_id)
-                if user:  # Check if user is part of the current guild
-                    badge_names = ", ".join(new_badges)
-                    await ctx.send(f"Felicidades {user.mention}, has ganado nuevas medallas: {badge_names}")
+                badge_names = ", ".join(new_badges)
+                try:
+                    await user.send(f"Felicidades, has ganado nuevas medallas: {badge_names}")
+                except Exception:
+                    # Handle cases where the user cannot be messaged (e.g., DMs blocked)
+                    pass
 
         await ctx.send("Actualización de medallas completada para todos los usuarios.")
 
