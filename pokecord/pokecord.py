@@ -1047,22 +1047,16 @@ class Pokecord(
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def updatebadges(self, ctx):
-        all_user_ids = await self.get_all_user_ids()
-
-        for user_id in all_user_ids:
+        # Iterate over all members in the guild
+        for member in ctx.guild.members:
             try:
-                # Create a mock context for each user
-                mock_ctx = copy.copy(ctx)
-                mock_ctx.author = ctx.guild.get_member(user_id)
-                mock_ctx.message.author = mock_ctx.author
-
-                if mock_ctx.author:  # Check if user is part of the current guild
-                    new_badges = await self.update_user_badges(mock_ctx, user_id)
-                    if new_badges:
-                        badge_names = ", ".join(new_badges)
-                        await ctx.send(f"Felicidades {mock_ctx.author.mention}, has ganado nuevas medallas: {badge_names}")
+                # Update badges for each member
+                new_badges = await self.update_user_badges(ctx, member.id)
+                if new_badges:
+                    badge_names = ", ".join(new_badges)
+                    await ctx.send(f"Felicidades {member.mention}, has ganado nuevas medallas: {badge_names}")
             except Exception as e:
-                await ctx.send(f"Error while updating badges for user {user_id}: {str(e)}")
+                await ctx.send(f"Error while updating badges for {member.display_name}: {str(e)}")
                 # Consider logging the error for further inspection
 
         await ctx.send("Actualización de medallas completada para todos los usuarios.")
