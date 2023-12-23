@@ -60,27 +60,39 @@ class MysteryGift(commands.Cog):
             # Here you can add more detailed logging if necessary
 
     async def get_prize(self):
-        won_limited_prizes = await self.config.won_limited_prizes()
-        filtered_prizes = [
-            (item, weight) if len(prize) == 2 or won_limited_prizes.get(prize[2], 0) < self.limited_prizes_counts.get(prize[2], 0)
-            else (item, 0) for item, weight, *prize in self.prizes
-        ]
-        
-        # Check if total weight is not zero to avoid division by zero error
-        total = sum(weight for item, weight in filtered_prizes)
-        if total == 0:
-            return "Lo siento, no hay más premios disponibles en este momento."
-        
-        r = random.uniform(0, total)
-        upto = 0
-        for item, weight, *prize in filtered_prizes:
-            if upto + weight >= r:
-                if prize:
-                    prize_key = prize[0]
-                    won_limited_prizes[prize_key] = won_limited_prizes.get(prize_key, 0) + 1
-                    await self.config.won_limited_prizes.set(won_limited_prizes)
-                return item
-            upto += weight
+        try:
+            won_limited_prizes = await self.config.won_limited_prizes()
+            filtered_prizes = []
+
+            for prize_entry in self.prizes:
+                # Check if prize_entry has the expected number of elements
+                if len(prize_entry) < 2:
+                    print(f"Invalid prize entry: {prize_entry}")
+                    continue
+
+                item, weight = prize_entry[:2]
+                prize_key = prize_entry[2] if len(prize_entry) > 2 else None
+                if not prize_key or won_limited_prizes.get(prize_key, 0) < self.limited_prizes_counts.get(prize_key, 0):
+                    filtered_prizes.append((item, weight))
+
+            total = sum(weight for item, weight in filtered_prizes)
+            if total == 0:
+                return "Lo siento, no hay más premios disponibles en este momento."
+
+            r = random.uniform(0, total)
+            upto = 0
+            for item, weight in filtered_prizes:
+                upto += weight
+                if upto >= r:
+                    if len(prize_entry) > 2:
+                        prize_key = prize_entry[2]
+                        won_limited_prizes[prize_key] = won_limited_prizes.get(prize_key, 0) + 1
+                        await self.config.won_limited_prizes.set(won_limited_prizes)
+                    return item
+
+        except Exception as e:
+            print(f"Error in get_prize: {e}")
+            raise
 
     @commands.is_owner()
     @commands.command()
