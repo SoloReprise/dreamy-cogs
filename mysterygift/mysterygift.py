@@ -47,13 +47,17 @@ class MysteryGift(commands.Cog):
     @commands.command(aliases=['mg'])
     async def mysterygift(self, ctx):
         """Use a mystery gift to receive a prize."""
-        user_gifts = await self.config.user(ctx.author).gifts()
-        if user_gifts > 0:
-            await self.config.user(ctx.author).gifts.set(user_gifts - 1)
-            prize = await self.get_prize()
-            await ctx.send(f"¡Enhorabuena! Te ha tocado {prize}.")
-        else:
-            await ctx.send("No tienes mystery gifts disponibles.")
+        try:
+            user_gifts = await self.config.user(ctx.author).gifts()
+            if user_gifts > 0:
+                await self.config.user(ctx.author).gifts.set(user_gifts - 1)
+                prize = await self.get_prize()
+                await ctx.send(f"¡Enhorabuena! Te ha tocado {prize}.")
+            else:
+                await ctx.send("No tienes mystery gifts disponibles.")
+        except Exception as e:
+            await ctx.send("An error occurred: {}".format(e))
+            # Here you can add more detailed logging if necessary
 
     async def get_prize(self):
         won_limited_prizes = await self.config.won_limited_prizes()
