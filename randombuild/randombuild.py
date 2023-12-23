@@ -20,7 +20,7 @@ class RandomBuild(commands.Cog):
             'Crustle', 'Decidueye', 'Delphox', 'Dodrio', 'Dragapult', 'Dragonite',
             'Duraludon', 'Eldegoss', 'Espeon', 'Garchomp', 'Gardevoir', 'Gengar',
             'Glaceon', 'Goodra', 'Greedent', 'Greninja', 'Hoopa', 'Inteleon',
-            'Lapras', 'Leafeon', 'Lucario', 'Machamp', 'Mamoswine', 'Mewoscarada','Mewtwo X',
+            'Lapras', 'Leafeon', 'Lucario', 'Machamp', 'Mamoswine', 'Meowscarada','Mewtwo X',
             'Mewtwo Y', 'Mimikyu', 'Mr. Mime', 'Ninetales', 'Pikachu', 'Sableye', 'Slowbro',
             'Snorlax', 'Sylveon', 'Talonflame', 'Trevenant', 'Tsareena', 'Tyranitar',
             'Umbreon', 'Venusaur', 'Wiglytuff', 'Zacian', 'Zeraora', 'Zoroark', 'Scizor', 'Scyther',
