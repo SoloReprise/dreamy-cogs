@@ -94,3 +94,30 @@ class MysteryGift(commands.Cog):
         new_amount = max(current_gifts - amount, 0)
         await self.config.user(user).gifts.set(new_amount)
         await ctx.send(f"Removed {amount} mystery gifts from {user.display_name}.")
+
+    @commands.is_owner()
+    @commands.command()
+    async def resetlimitedprizes(self, ctx):
+        """Reset the count of all limited prizes."""
+        await self.config.won_limited_prizes.clear()
+        await ctx.send("All limited prizes have been reset and are available again.")
+
+    @commands.is_owner()
+    @commands.command()
+    async def checkgifts(self, ctx):
+        """Check the number of gifts given to each user."""
+        all_users = await self.config.all_users()
+
+        if not all_users:
+            await ctx.send("No gifts have been given yet.")
+            return
+
+        message = ["Gifts given:"]
+        for user_id, data in all_users.items():
+            member = ctx.guild.get_member(user_id)
+            if member:
+                message.append(f"{member.display_name}: {data['gifts']} gifts")
+            else:
+                message.append(f"User ID {user_id}: {data['gifts']} gifts")
+
+        await ctx.send("\n".join(message))
