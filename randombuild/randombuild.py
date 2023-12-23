@@ -97,12 +97,13 @@ class RandomBuild(commands.Cog):
             'Blaziken': [
                 ['Patada Ígnea', 'Sofoco'], 
                 ['Puño Fuego', 'Onda Certera']
-            ]
+            ],
+            'Meowscarada': [['Truco Floral', 'Tajo Umbrío'], ['Doble Equipo', 'Abrecaminos']],
                 }
         
         self.combat_item = ['Poción', 'Ataque X', 'Velocidad X', 'Cola Skitty', 'Botón Escape', 'Humo Ralentizador', 'Cura Total', 'Apuratantos', 'Muñeco Shedinja']
         
-        self.equipment_items = ['Cinta Fuerte', 'Periscopio', 'Garra Afilada', 'Cascabel Concha', 'Gafas Especiales', 'Energáfono', 'Gafas Elección', 'Pañuelo Combo', 'Corona Drenaje', 'Cuchara Peculiar', 'Brazalete Condena', 'Incienso Condena', 'Cinta Focus', 'Casco Dentado', 'Restos', 'Chaleco Asalto', 'Seguro Debilidad', 'Rodillera Escudo', 'Galleta Æos', 'Pesas Ofensivas', 'Gafas de Asalto', 'Piedra Pómez', 'Barrera Auxiliar', 'Repartir Experiencia', 'Cinta Rescate']
+        self.equipment_items = ['Cinta Fuerte', 'Periscopio', 'Garra Afilada', 'Cascabel Concha', 'Gafas Especiales', 'Energáfono', 'Gafas Elección', 'Pañuelo Combo', 'Corona Drenaje', 'Cuchara Peculiar', 'Brazalete Condena', 'Incienso Condena', 'Cinta Focus', 'Casco Dentado', 'Restos', 'Chaleco Asalto', 'Seguro Debilidad', 'Rodillera Escudo', 'Galleta Æos', 'Pesas Ofensivas', 'Gafas de Asalto', 'Piedra Pómez', 'Barrera Auxiliar', 'Repartir Experiencia', 'Capucha Rescate', 'Guardia Resonante', 'Colgante Carga']
         
         self.line = ['Top', 'Bot', 'Jungla']
 
