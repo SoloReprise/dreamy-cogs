@@ -1030,14 +1030,29 @@ class Pokecord(
 
         return new_badges
     
+    async def get_all_user_ids(self):
+        query = "SELECT DISTINCT user_id FROM users"  # Assuming 'users' is the table name
+        user_ids = []
+        async with self.cursor.execute(query) as cursor:
+            async for row in cursor:
+                user_ids.append(row[0])
+        return user_ids
+    
     @commands.command()
+    @commands.has_permissions(administrator=True)
     async def updatebadges(self, ctx):
-        new_badges = await self.update_user_badges(ctx.author.id)
-        if new_badges:
-            badge_names = ", ".join(new_badges)
-            await ctx.send(f"Felicidades {ctx.author.mention}, has ganado nuevas medallas: {badge_names}")
-        else:
-            await ctx.send("No hay nuevas medallas esta vez.")
+        all_user_ids = await self.get_all_user_ids()
+
+        for user_id in all_user_ids:
+            user_conf = await self.user_is_global(user_id)  # Assuming this method returns user config
+            new_badges = await self.update_user_badges(user_id)
+            if new_badges:
+                user = ctx.guild.get_member(user_id)
+                if user:  # Check if user is part of the current guild
+                    badge_names = ", ".join(new_badges)
+                    await ctx.send(f"Felicidades {user.mention}, has ganado nuevas medallas: {badge_names}")
+
+        await ctx.send("Actualización de medallas completada para todos los usuarios.")
 
     def count_total_pokemon_in_type(self, type_name):
         # Count the total number of Pokémon in the given type
