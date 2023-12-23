@@ -20,7 +20,7 @@ class RandomBuild(commands.Cog):
             'Crustle', 'Decidueye', 'Delphox', 'Dodrio', 'Dragapult', 'Dragonite',
             'Duraludon', 'Eldegoss', 'Espeon', 'Garchomp', 'Gardevoir', 'Gengar',
             'Glaceon', 'Goodra', 'Greedent', 'Greninja', 'Hoopa', 'Inteleon',
-            'Lapras', 'Leafeon', 'Lucario', 'Machamp', 'Mamoswine', 'Mewtwo X',
+            'Lapras', 'Leafeon', 'Lucario', 'Machamp', 'Mamoswine', 'Mewoscarada','Mewtwo X',
             'Mewtwo Y', 'Mimikyu', 'Mr. Mime', 'Ninetales', 'Pikachu', 'Sableye', 'Slowbro',
             'Snorlax', 'Sylveon', 'Talonflame', 'Trevenant', 'Tsareena', 'Tyranitar',
             'Umbreon', 'Venusaur', 'Wiglytuff', 'Zacian', 'Zeraora', 'Zoroark', 'Scizor', 'Scyther',
@@ -64,6 +64,7 @@ class RandomBuild(commands.Cog):
             'Lucario': [['Velocidad Extrema', 'Puño Incremento'], ['Ataque Óseo', 'A Bocajarro']],
             'Machamp': [['Puño Dinámico', 'Sumisión'], ['A Bocajarro', 'Tajo Cruzado']],
             'Mamoswine': [['Chuzos', 'Colmillo Hielo'], ['Fuerza Equina', 'Terremoto']],
+            'Meowscarada': [['Truco Floral', 'Tajo Umbrío'], ['Doble Equipo', 'Abrecaminos']],            
             'Mewtwo X': [['Premonición', 'Onda Mental'], ['Recuperación', 'Teletransporte']],
             'Mewtwo Y': [['Premonición', 'Onda Mental'], ['Recuperación', 'Teletransporte']],
             'Mimikyu': [['Carantoña', 'Garra Umbría'], ['Sombra Vil', 'Espacio Raro']],
@@ -98,7 +99,6 @@ class RandomBuild(commands.Cog):
                 ['Patada Ígnea', 'Sofoco'], 
                 ['Puño Fuego', 'Onda Certera']
             ],
-            'Meowscarada': [['Truco Floral', 'Tajo Umbrío'], ['Doble Equipo', 'Abrecaminos']],
                 }
         
         self.combat_item = ['Poción', 'Ataque X', 'Velocidad X', 'Cola Skitty', 'Botón Escape', 'Humo Ralentizador', 'Cura Total', 'Apuratantos', 'Muñeco Shedinja']
