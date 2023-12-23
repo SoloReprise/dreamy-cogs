@@ -604,7 +604,7 @@ class Pokecord(
 
             try:
                 # Update badges and notify the user if they earn new ones
-                new_badges = await self.update_user_badges(ctx.author.id)
+                new_badges = await self.update_user_badges(ctx, ctx.author.id)
                 if new_badges:
                     badge_names = ", ".join(new_badges)
                     await ctx.send(f"Felicidades {ctx.author.mention}, has ganado nuevas medallas: {badge_names}")
@@ -990,8 +990,14 @@ class Pokecord(
             await ctx.send(_("Error updating incienso count. Please try again later."))
             return  # Ensure command execution stops here if an error occurs
 
-    async def update_user_badges(self, user_id):
-        user_conf = await self.user_is_global(user_id)
+    async def update_user_badges(self, ctx, user_id):
+        # Retrieve the user object from the user ID
+        user = ctx.guild.get_member(user_id)
+        if user is None:
+            # Handle the case where the user object could not be found
+            return []
+
+        user_conf = await self.user_is_global(user)
         user_pokemons = await user_conf.pokeids()  # Retrieve user's Pokémon list
 
         # Simplified logic for badge calculation (adjust as per your logic)
