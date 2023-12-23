@@ -607,6 +607,7 @@ class Pokecord(
             if new_badges:
                 badge_names = ", ".join(new_badges)
                 await ctx.send(f"Felicidades {ctx.author.mention}, has ganado nuevas medallas: {badge_names}")
+
             return
         await ctx.send(_("No pokemon is ready to be caught."))
 
@@ -989,22 +990,20 @@ class Pokecord(
         user_conf = await self.user_is_global(user_id)
         user_pokemons = await user_conf.pokeids()
 
-        # Count Pokémon by type
+        # Count Pokémon by type and determine new badges
         type_counts = self.count_pokemon_by_type(user_pokemons)
-
-        # Determine which badges to award
         new_badges = self.determine_badges(type_counts)
 
         # Update the user's badges
         current_badges = await user_conf.badges()
-        awarded_badges = []  # List to keep track of newly awarded badges
+        awarded_badges = []
         for badge in new_badges:
             if badge not in current_badges:
                 current_badges.append(badge)
-                awarded_badges.append(badge)  # Add to awarded badges list
+                awarded_badges.append(badge)
 
         await user_conf.badges.set(current_badges)
-        return awarded_badges  # Return the list of newly awarded badges
+        return awarded_badges
 
     def count_pokemon_by_type(self, user_pokemons):
         type_counts = {type_name: 0 for type_name in TYPE_BADGES.keys()}
