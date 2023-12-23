@@ -599,14 +599,18 @@ class Pokecord(
                     "pokemon": json.dumps(pokemonspawn),
                 },
             )
-            # After successfully catching a pokemon
-            await ctx.send(msg)  # Notify the user about the catch
+            # After catching a pokemon
+            await ctx.send(msg)  # Notify about the catch
 
-            # Update badges and notify the user if they earn new ones
-            new_badges = await self.update_user_badges(ctx.author.id)
-            if new_badges:
-                badge_names = ", ".join(new_badges)
-                await ctx.send(f"Felicidades {ctx.author.mention}, has ganado nuevas medallas: {badge_names}")
+            try:
+                # Update badges and notify the user if they earn new ones
+                new_badges = await self.update_user_badges(ctx.author.id)
+                if new_badges:
+                    badge_names = ", ".join(new_badges)
+                    await ctx.send(f"Felicidades {ctx.author.mention}, has ganado nuevas medallas: {badge_names}")
+            except Exception as e:
+                await ctx.send(f"Error while updating badges: {str(e)}")
+                # Consider logging the error for further inspection
 
             return
         await ctx.send(_("No pokemon is ready to be caught."))
@@ -988,21 +992,18 @@ class Pokecord(
 
     async def update_user_badges(self, user_id):
         user_conf = await self.user_is_global(user_id)
-        user_pokemons = await user_conf.pokeids()
+        user_pokemons = await user_conf.pokeids()  # Retrieve user's Pokémon list
 
-        # Count Pokémon by type and determine new badges
+        # Simplified logic for badge calculation (adjust as per your logic)
         type_counts = self.count_pokemon_by_type(user_pokemons)
         new_badges = self.determine_badges(type_counts)
 
         # Update the user's badges
         current_badges = await user_conf.badges()
-        awarded_badges = []
-        for badge in new_badges:
-            if badge not in current_badges:
-                current_badges.append(badge)
-                awarded_badges.append(badge)
+        awarded_badges = [badge for badge in new_badges if badge not in current_badges]
 
-        await user_conf.badges.set(current_badges)
+        # Set new badges
+        await user_conf.badges.set(current_badges + awarded_badges)
         return awarded_badges
 
     def count_pokemon_by_type(self, user_pokemons):
