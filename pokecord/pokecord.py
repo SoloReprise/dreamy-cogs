@@ -1025,21 +1025,14 @@ class Pokecord(
         return sum(1 for pokemon in self.pokemondata if type_name in pokemon['type'])
 
     @commands.command()
-    async def badgecountdown(self, ctx, pokemon_type: str):
-        """Indica cuántos Pokémon más de un tipo específico necesitas para ganar la medalla."""
-        pokemon_type = pokemon_type.capitalize()
+    async def badgecountdown(self, ctx):
+        """Displays the countdown for all types of Pokémon badges."""
+        user_conf = await self.user_is_global(ctx.author)
+        user_pokemons = await user_conf.pokeids()
 
-        # Translate input type name to English for processing
-        english_type = SPANISH_TO_ENGLISH_TYPES.get(pokemon_type, pokemon_type)
+        embed = discord.Embed(title="Pokémon Badge Countdown", color=discord.Color.blue())
 
-        # Translate the English type name back to Spanish for output
-        spanish_type = ENGLISH_TO_SPANISH_TYPES.get(english_type, pokemon_type)
-
-        # Proceed if the type is valid
-        if english_type in TYPE_BADGES:
-            user_conf = await self.user_is_global(ctx.author)
-            user_pokemons = await user_conf.pokeids()
-
+        for spanish_type, english_type in SPANISH_TO_ENGLISH_TYPES.items():
             # Count Pokémon of the specified type
             type_count = self.count_pokemon_of_type(user_pokemons, english_type)
 
@@ -1047,16 +1040,12 @@ class Pokecord(
             total_required = self.count_total_pokemon_in_type(english_type) // 2
             remaining = max(total_required - type_count, 0)
 
-            await ctx.send(
-                _("Tienes {type_count} Pokémon de tipo {spanish_type}. Necesitas {remaining} más para conseguir la {badge}.").format(
-                    type_count=type_count,
-                    spanish_type=spanish_type,  # Use the Spanish type name
-                    remaining=remaining,
-                    badge=TYPE_BADGES_SPANISH[spanish_type]  # Use the Spanish badge name
-                )
-            )
-        else:
-            await ctx.send(_("'{type}' no es un tipo de Pokémon válido.").format(type=pokemon_type))
+            badge_name = TYPE_BADGES_SPANISH[spanish_type]
+            embed.add_field(name=f"{badge_name} ({spanish_type})", 
+                            value=f"Tienes {type_count}. Necesitas {remaining} más para conseguir la medalla.",
+                            inline=False)
+
+        await ctx.send(embed=embed)
 
     def count_pokemon_of_type(self, user_pokemons, pokemon_type):
         """Counts the number of Pokémon of a specific type the user has."""
