@@ -108,7 +108,7 @@ class MysteryGift(commands.Cog):
         """Add mystery gifts to a user."""
         current_gifts = await self.config.user(user).gifts()
         await self.config.user(user).gifts.set(current_gifts + amount)
-        await ctx.send(f"Added {amount} mystery gifts to {user.display_name}.")
+        await ctx.send(f"Añadidos {amount} mystery gifts a {user.display_name}.")
 
     @commands.is_owner()
     @commands.command()
