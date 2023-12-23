@@ -1,4 +1,5 @@
 from redbot.core import commands, Config
+import discord
 import random
 
 class MysteryGift(commands.Cog):
