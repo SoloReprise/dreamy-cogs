@@ -356,7 +356,7 @@ class Pokecord(
     async def update_user_cache(self):
         self.usercache = await self.config.all_users()  # TODO: Support guild
 
-    cdatacasync def update_spawn_chance(self):
+    async def update_spawn_chance(self):
         self.spawnchance = await self.config.spawnchance()
 
     async def is_global(self, guild):
