@@ -210,7 +210,9 @@ class Pokecord(
             adata = json.load(f)
         with open(f"{self.datapath}/megas.json", encoding="utf-8") as f:
             megadata = json.load(f)
-        self.pokemondata = pdata + sdata + ldata + mdata + gdata + adata + megadata
+        with open(f"{self.datapath}/christmas.json", encoding="utf-8") as f:
+            chrisdata = json.load(f)
+        self.pokemondata = pdata + sdata + ldata + mdata + gdata + adata + megadata + chrisdata
         with open(f"{self.datapath}/url.json", encoding="utf-8") as f:
             url = json.load(f)
         for pokemon in self.pokemondata:
