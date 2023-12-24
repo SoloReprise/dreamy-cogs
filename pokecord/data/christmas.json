@@ -19,7 +19,7 @@
             "Sp. Def": 60,
             "Speed": 80
         },
-        "spawnchance": 0.66,
+        "spawnchance": 0.666,
         "variant": "Christmas",
         "alias": "Christmas Mamoswine"
     }
