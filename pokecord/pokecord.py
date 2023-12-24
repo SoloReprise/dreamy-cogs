@@ -1116,7 +1116,7 @@ class Pokecord(
 
         for i, data in enumerate(result, start=1):
             pokemon = json.loads(data[0])
-            if isinstance(pokemon, dict) and pokemon.get("variant") == "Shiny":
+            if isinstance(pokemon, dict) and pokemon.get("variant") in ["Shiny", "Christmas Shiny"]:
                 pokemon["sid"] = i  # Assign a unique sequential ID to each Pokémon
                 shiny_pokemons.append(pokemon)
 
