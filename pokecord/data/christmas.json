@@ -1,5 +1,53 @@
 [
     {
+        "id": 3,
+        "name": {
+            "english": "Venusaur",
+            "japanese": "\u30d5\u30b7\u30ae\u30d0\u30ca",
+            "chinese": "\u5999\u86d9\u82b1",
+            "french": "Florizarre"
+        },
+        "type": [
+            "Grass",
+            "Poison"
+        ],
+        "stats": {
+            "HP": 80,
+            "Attack": 82,
+            "Defence": 83,
+            "Sp. Atk": 100,
+            "Sp. Def": 100,
+            "Speed": 80
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas",
+        "alias": "Christmas Venusaur"
+    },
+    {
+        "id": 3,
+        "name": {
+            "english": "Venusaur",
+            "japanese": "\u30d5\u30b7\u30ae\u30d0\u30ca",
+            "chinese": "\u5999\u86d9\u82b1",
+            "french": "Florizarre"
+        },
+        "type": [
+            "Grass",
+            "Poison"
+        ],
+        "stats": {
+            "HP": 80,
+            "Attack": 82,
+            "Defence": 83,
+            "Sp. Atk": 100,
+            "Sp. Def": 100,
+            "Speed": 80
+        },
+        "spawnchance": 0.333,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Venusaur"
+    },
+    {
         "id": 9,
         "name": {
             "english": "Blastoise",
@@ -21,6 +69,409 @@
         "spawnchance": 0.666,
         "variant": "Christmas",
         "alias": "Christmas Blastoise"
+    },
+    {
+        "id": 9,
+        "name": {
+            "english": "Blastoise",
+            "japanese": "\u30ab\u30e1\u30c3\u30af\u30b9",
+            "chinese": "\u6c34\u7bad\u9f9c",
+            "french": "Tortank"
+        },
+        "type": [
+            "Water"
+        ],
+        "stats": {
+            "HP": 79,
+            "Attack": 83,
+            "Defence": 100,
+            "Sp. Atk": 85,
+            "Sp. Def": 105,
+            "Speed": 78
+        },
+        "spawnchance": 0.333,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Blastoise"
+    },
+    {
+        "id": 25,
+        "name": {
+            "english": "Pikachu",
+            "japanese": "\u30d4\u30ab\u30c1\u30e5\u30a6",
+            "chinese": "\u76ae\u5361\u4e18",
+            "french": "Pikachu"
+        },
+        "type": [
+            "Electric"
+        ],
+        "stats": {
+            "HP": 35,
+            "Attack": 55,
+            "Defence": 40,
+            "Sp. Atk": 50,
+            "Sp. Def": 50,
+            "Speed": 90
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas",
+        "alias": "Christmas Pikachu"
+    },
+    {
+        "id": 25,
+        "name": {
+            "english": "Pikachu",
+            "japanese": "\u30d4\u30ab\u30c1\u30e5\u30a6",
+            "chinese": "\u76ae\u5361\u4e18",
+            "french": "Pikachu"
+        },
+        "type": [
+            "Electric"
+        ],
+        "stats": {
+            "HP": 35,
+            "Attack": 55,
+            "Defence": 40,
+            "Sp. Atk": 50,
+            "Sp. Def": 50,
+            "Speed": 90
+        },
+        "spawnchance": 0.333,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Pikachu"
+    },
+    {
+        "id": 38,
+        "name": {
+            "english": "Ninetales",
+            "japanese": "\u30ad\u30e5\u30a6\u30b3\u30f3",
+            "chinese": "\u4e5d\u5c3e",
+            "french": "Feunard"
+        },
+        "type": [
+            "Fire"
+        ],
+        "stats": {
+            "HP": 73,
+            "Attack": 76,
+            "Defence": 75,
+            "Sp. Atk": 81,
+            "Sp. Def": 100,
+            "Speed": 100
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas Alolan",
+        "alias": "Christmas Alolan Ninetales"
+    },
+    {
+        "id": 38,
+        "name": {
+            "english": "Ninetales",
+            "japanese": "\u30ad\u30e5\u30a6\u30b3\u30f3",
+            "chinese": "\u4e5d\u5c3e",
+            "french": "Feunard"
+        },
+        "type": [
+            "Fire"
+        ],
+        "stats": {
+            "HP": 73,
+            "Attack": 76,
+            "Defence": 75,
+            "Sp. Atk": 81,
+            "Sp. Def": 100,
+            "Speed": 100
+        },
+        "spawnchance": 0.333,
+        "variant": "Christmas Shiny Alolan",
+        "alias": "Christmas Shiny Alolan Ninetales"
+    },
+    {
+        "id": 40,
+        "name": {
+            "english": "Wigglytuff",
+            "japanese": "\u30d7\u30af\u30ea\u30f3",
+            "chinese": "\u80d6\u53ef\u4e01",
+            "french": "Grodoudou"
+        },
+        "type": [
+            "Normal",
+            "Fairy"
+        ],
+        "stats": {
+            "HP": 140,
+            "Attack": 70,
+            "Defence": 45,
+            "Sp. Atk": 85,
+            "Sp. Def": 50,
+            "Speed": 45
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas",
+        "alias": "Christmas Wigglytuff"
+    },
+    {
+        "id": 40,
+        "name": {
+            "english": "Wigglytuff",
+            "japanese": "\u30d7\u30af\u30ea\u30f3",
+            "chinese": "\u80d6\u53ef\u4e01",
+            "french": "Grodoudou"
+        },
+        "type": [
+            "Normal",
+            "Fairy"
+        ],
+        "stats": {
+            "HP": 140,
+            "Attack": 70,
+            "Defence": 45,
+            "Sp. Atk": 85,
+            "Sp. Def": 50,
+            "Speed": 45
+        },
+        "spawnchance": 0.333,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Wigglytuff"
+    },
+    {
+        "id": 94,
+        "name": {
+            "english": "Gengar",
+            "japanese": "\u30b2\u30f3\u30ac\u30fc",
+            "chinese": "\u803f\u9b3c",
+            "french": "Ectoplasma"
+        },
+        "type": [
+            "Ghost",
+            "Poison"
+        ],
+        "stats": {
+            "HP": 60,
+            "Attack": 65,
+            "Defence": 60,
+            "Sp. Atk": 130,
+            "Sp. Def": 75,
+            "Speed": 110
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas",
+        "alias": "Christmas Gengar"
+    },
+    {
+        "id": 94,
+        "name": {
+            "english": "Gengar",
+            "japanese": "\u30b2\u30f3\u30ac\u30fc",
+            "chinese": "\u803f\u9b3c",
+            "french": "Ectoplasma"
+        },
+        "type": [
+            "Ghost",
+            "Poison"
+        ],
+        "stats": {
+            "HP": 60,
+            "Attack": 65,
+            "Defence": 60,
+            "Sp. Atk": 130,
+            "Sp. Def": 75,
+            "Speed": 110
+        },
+        "spawnchance": 0.333,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Gengar"
+    },
+    {
+        "id": 149,
+        "name": {
+            "english": "Dragonite",
+            "japanese": "\u30ab\u30a4\u30ea\u30e5\u30fc",
+            "chinese": "\u5feb\u9f8d",
+            "french": "Dracolosse"
+        },
+        "type": [
+            "Dragon",
+            "Flying"
+        ],
+        "stats": {
+            "HP": 91,
+            "Attack": 134,
+            "Defence": 95,
+            "Sp. Atk": 100,
+            "Sp. Def": 100,
+            "Speed": 80
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas",
+        "alias": "Christmas Dragonite"
+    },
+    {
+        "id": 149,
+        "name": {
+            "english": "Dragonite",
+            "japanese": "\u30ab\u30a4\u30ea\u30e5\u30fc",
+            "chinese": "\u5feb\u9f8d",
+            "french": "Dracolosse"
+        },
+        "type": [
+            "Dragon",
+            "Flying"
+        ],
+        "stats": {
+            "HP": 91,
+            "Attack": 134,
+            "Defence": 95,
+            "Sp. Atk": 100,
+            "Sp. Def": 100,
+            "Speed": 80
+        },
+        "spawnchance": 0.333,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Dragonite"
+    },
+    {
+        "id": 184,
+        "name": {
+            "english": "Azumarill",
+            "japanese": "\u30de\u30ea\u30eb\u30ea",
+            "chinese": "\u746a\u529b\u9732\u9e97",
+            "french": "Azumarill"
+        },
+        "type": [
+            "Water",
+            "Fairy"
+        ],
+        "stats": {
+            "HP": 100,
+            "Attack": 50,
+            "Defence": 80,
+            "Sp. Atk": 60,
+            "Sp. Def": 80,
+            "Speed": 50
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas",
+        "alias": "Christmas Azumarill"
+    },
+    {
+        "id": 184,
+        "name": {
+            "english": "Azumarill",
+            "japanese": "\u30de\u30ea\u30eb\u30ea",
+            "chinese": "\u746a\u529b\u9732\u9e97",
+            "french": "Azumarill"
+        },
+        "type": [
+            "Water",
+            "Fairy"
+        ],
+        "stats": {
+            "HP": 100,
+            "Attack": 50,
+            "Defence": 80,
+            "Sp. Atk": 60,
+            "Sp. Def": 80,
+            "Speed": 50
+        },
+        "spawnchance": 0.333,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Azumarill"
+    },
+    {
+        "id": 282,
+        "name": {
+            "english": "Gardevoir",
+            "japanese": "\u30b5\u30fc\u30ca\u30a4\u30c8",
+            "chinese": "\u6c99\u5948\u6735",
+            "french": "Gardevoir"
+        },
+        "type": [
+            "Psychic",
+            "Fairy"
+        ],
+        "stats": {
+            "HP": 68,
+            "Attack": 65,
+            "Defence": 65,
+            "Sp. Atk": 125,
+            "Sp. Def": 115,
+            "Speed": 80
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas",
+        "alias": "Christmas Gardevoir"
+    },
+    {
+        "id": 282,
+        "name": {
+            "english": "Gardevoir",
+            "japanese": "\u30b5\u30fc\u30ca\u30a4\u30c8",
+            "chinese": "\u6c99\u5948\u6735",
+            "french": "Gardevoir"
+        },
+        "type": [
+            "Psychic",
+            "Fairy"
+        ],
+        "stats": {
+            "HP": 68,
+            "Attack": 65,
+            "Defence": 65,
+            "Sp. Atk": 125,
+            "Sp. Def": 115,
+            "Speed": 80
+        },
+        "spawnchance": 0.333,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Gardevoir"
+    },
+    {
+        "id": 445,
+        "name": {
+            "english": "Garchomp",
+            "japanese": "\u30ac\u30d6\u30ea\u30a2\u30b9",
+            "chinese": "\u70c8\u54ac\u9678\u9bca",
+            "french": "Carchacrok"
+        },
+        "type": [
+            "Dragon",
+            "Ground"
+        ],
+        "stats": {
+            "HP": 108,
+            "Attack": 130,
+            "Defence": 95,
+            "Sp. Atk": 80,
+            "Sp. Def": 85,
+            "Speed": 102
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas",
+        "alias": "Christmas Garchomp"
+    },
+    {
+        "id": 445,
+        "name": {
+            "english": "Garchomp",
+            "japanese": "\u30ac\u30d6\u30ea\u30a2\u30b9",
+            "chinese": "\u70c8\u54ac\u9678\u9bca",
+            "french": "Carchacrok"
+        },
+        "type": [
+            "Dragon",
+            "Ground"
+        ],
+        "stats": {
+            "HP": 108,
+            "Attack": 130,
+            "Defence": 95,
+            "Sp. Atk": 80,
+            "Sp. Def": 85,
+            "Speed": 102
+        },
+        "spawnchance": 0.333,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Garchomp"
     },
     {
         "id": 473,
@@ -45,5 +496,219 @@
         "spawnchance": 0.666,
         "variant": "Christmas",
         "alias": "Christmas Mamoswine"
+    },
+    {
+        "id": 473,
+        "name": {
+            "english": "Mamoswine",
+            "japanese": "\u30de\u30f3\u30e0\u30fc",
+            "chinese": "\u8c61\u7259\u8c6c",
+            "french": "Mammochon"
+        },
+        "type": [
+            "Ice",
+            "Ground"
+        ],
+        "stats": {
+            "HP": 110,
+            "Attack": 130,
+            "Defence": 80,
+            "Sp. Atk": 70,
+            "Sp. Def": 60,
+            "Speed": 80
+        },
+        "spawnchance": 0.333,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Mamoswine"
+    },
+    {
+        "id": 558,
+        "name": {
+            "english": "Crustle",
+            "japanese": "\u30a4\u30ef\u30d1\u30ec\u30b9",
+            "chinese": "\u5ca9\u6bbf\u5c45\u87f9",
+            "french": "Crabaraque"
+        },
+        "type": [
+            "Bug",
+            "Rock"
+        ],
+        "stats": {
+            "HP": 70,
+            "Attack": 105,
+            "Defence": 125,
+            "Sp. Atk": 65,
+            "Sp. Def": 75,
+            "Speed": 45
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas",
+        "alias": "Christmas Crustle"
+    },
+    {
+        "id": 558,
+        "name": {
+            "english": "Crustle",
+            "japanese": "\u30a4\u30ef\u30d1\u30ec\u30b9",
+            "chinese": "\u5ca9\u6bbf\u5c45\u87f9",
+            "french": "Crabaraque"
+        },
+        "type": [
+            "Bug",
+            "Rock"
+        ],
+        "stats": {
+            "HP": 70,
+            "Attack": 105,
+            "Defence": 125,
+            "Sp. Atk": 65,
+            "Sp. Def": 75,
+            "Speed": 45
+        },
+        "spawnchance": 0.333,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Crustle"
+    },
+    {
+        "id": 706,
+        "name": {
+            "english": "Goodra",
+            "japanese": "\u30cc\u30e1\u30eb\u30b4\u30f3",
+            "chinese": "\u9ecf\u7f8e\u9f8d",
+            "french": "Muplodocus"
+        },
+        "type": [
+            "Dragon"
+        ],
+        "stats": {
+            "HP": 90,
+            "Attack": 100,
+            "Defence": 70,
+            "Sp. Atk": 110,
+            "Sp. Def": 150,
+            "Speed": 80
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas",
+        "alias": "Christmas Goodra"
+    },
+    {
+        "id": 706,
+        "name": {
+            "english": "Goodra",
+            "japanese": "\u30cc\u30e1\u30eb\u30b4\u30f3",
+            "chinese": "\u9ecf\u7f8e\u9f8d",
+            "french": "Muplodocus"
+        },
+        "type": [
+            "Dragon"
+        ],
+        "stats": {
+            "HP": 90,
+            "Attack": 100,
+            "Defence": 70,
+            "Sp. Atk": 110,
+            "Sp. Def": 150,
+            "Speed": 80
+        },
+        "spawnchance": 0.333,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Goodra"
+    },
+    {
+        "id": 658,
+        "name": {
+            "english": "Greninja",
+            "japanese": "\u30b2\u30c3\u30b3\u30a6\u30ac",
+            "chinese": "\u7532\u8cc0\u5fcd\u86d9",
+            "french": "Amphinobi"
+        },
+        "type": [
+            "Water",
+            "Dark"
+        ],
+        "stats": {
+            "HP": 72,
+            "Attack": 95,
+            "Defence": 67,
+            "Sp. Atk": 103,
+            "Sp. Def": 71,
+            "Speed": 122
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas",
+        "alias": "Christmas Greninja"
+    },
+    {
+        "id": 658,
+        "name": {
+            "english": "Greninja",
+            "japanese": "\u30b2\u30c3\u30b3\u30a6\u30ac",
+            "chinese": "\u7532\u8cc0\u5fcd\u86d9",
+            "french": "Amphinobi"
+        },
+        "type": [
+            "Water",
+            "Dark"
+        ],
+        "stats": {
+            "HP": 72,
+            "Attack": 95,
+            "Defence": 67,
+            "Sp. Atk": 103,
+            "Sp. Def": 71,
+            "Speed": 122
+        },
+        "spawnchance": 0.333,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Greninja"
+    },
+    {
+        "id": 892,
+        "name": {
+            "english": "Urshifu",
+            "japanese": "ウーラオス",
+            "chinese": "武道熊師",
+            "french": "Shifours"
+        },
+        "type": [
+            "Fighting",
+            "Dragon"
+        ],
+        "stats": {
+            "HP": 100,
+            "Attack": 130,
+            "Defence": 100,
+            "Sp. Atk": 63,
+            "Sp. Def": 60,
+            "Speed": 97
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas",
+        "alias": "Christmas Urshifu"
+    },
+    {
+        "id": 892,
+        "name": {
+            "english": "Urshifu",
+            "japanese": "ウーラオス",
+            "chinese": "武道熊師",
+            "french": "Shifours"
+        },
+        "type": [
+            "Fighting",
+            "Dragon"
+        ],
+        "stats": {
+            "HP": 100,
+            "Attack": 130,
+            "Defence": 100,
+            "Sp. Atk": 63,
+            "Sp. Def": 60,
+            "Speed": 97
+        },
+        "spawnchance": 0.333,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Urshifu"
     }
 ]
