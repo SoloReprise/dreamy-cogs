@@ -22024,28 +22024,4 @@
         "variant": "Shiny",
         "alias": "Shiny Arboliva"
     },
-    {
-        "id": 473,
-        "name": {
-            "english": "Mamoswine",
-            "japanese": "\u30de\u30f3\u30e0\u30fc",
-            "chinese": "\u8c61\u7259\u8c6c",
-            "french": "Mammochon"
-        },
-        "type": [
-            "Ice",
-            "Ground"
-        ],
-        "stats": {
-            "HP": 110,
-            "Attack": 130,
-            "Defence": 80,
-            "Sp. Atk": 70,
-            "Sp. Def": 60,
-            "Speed": 80
-        },
-        "spawnchance": 0.666,
-        "variant": "Christmas",
-        "alias": "Christmas Mamoswine"
-    }
 ]
