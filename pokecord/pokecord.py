@@ -372,7 +372,7 @@ class Pokecord(
 
     def pokemon_choose(self):
         if random.random() < 0.50:  # 25% chance to spawn a Christmas Pokémon
-            return random.choice(self.christmas_pokemon)
+            return random.choice(self.cdata)
         else:
             # Existing logic for choosing a standard Pokémon
             return random.choices(self.pokemondata, weights=self.spawnchances, k=1)[0]
