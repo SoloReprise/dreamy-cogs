@@ -210,10 +210,11 @@ class Pokecord(
             adata = json.load(f)
         with open(f"{self.datapath}/megas.json", encoding="utf-8") as f:
             megadata = json.load(f)
+        # Inside the __init__ method of the Pokecord class, add:
         with open(f"{self.datapath}/christmas.json", encoding="utf-8") as f:
-            self.cdata = json.load(f)
+            self.christmas_pokemon = json.load(f)
+        self.pokemondata.extend(self.christmas_pokemon)  # Add Christmas Pokémon to the overall list
         self.pokemondata = pdata + sdata + ldata + mdata + gdata + adata + megadata
-        self.pokemondata.extend(cdata)
         with open(f"{self.datapath}/url.json", encoding="utf-8") as f:
             url = json.load(f)
         for pokemon in self.pokemondata:
@@ -372,7 +373,7 @@ class Pokecord(
 
     def pokemon_choose(self):
         # Always choose a Christmas Pokémon for testing
-        return random.choice(self.cdata)
+        return random.choice(self.christmas_pokemon)
 
     def gender_choose(self, name):
         poke = self.genderdata.get(name, None)
