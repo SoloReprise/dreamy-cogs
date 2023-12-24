@@ -372,9 +372,12 @@ class Pokecord(
         return self.config.member(user)
 
     def pokemon_choose(self):
-        # Always choose a Christmas Pokémon for testing
-        return random.choice(self.christmas_pokemon)
-
+        if random.random() < 0.50:  # 25% chance to spawn a Christmas Pokémon
+            return random.choices(self.christmas_pokemon, weights=self.christmas_spawnchances, k=1)[0]
+        else:
+            # Existing logic for choosing a standard Pokémon
+            return random.choices(self.pokemondata, weights=self.spawnchances, k=1)[0]
+    
     def gender_choose(self, name):
         poke = self.genderdata.get(name, None)
         if poke is None:
