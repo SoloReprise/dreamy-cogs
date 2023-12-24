@@ -213,8 +213,8 @@ class Pokecord(
         # Inside the __init__ method of the Pokecord class, add:
         with open(f"{self.datapath}/christmas.json", encoding="utf-8") as f:
             self.christmas_pokemon = json.load(f)
-        self.pokemondata.extend(self.christmas_pokemon)  # Add Christmas Pokémon to the overall list
         self.pokemondata = pdata + sdata + ldata + mdata + gdata + adata + megadata
+        self.pokemondata.extend(self.christmas_pokemon)  # Add Christmas Pokémon to the overall list
         with open(f"{self.datapath}/url.json", encoding="utf-8") as f:
             url = json.load(f)
         for pokemon in self.pokemondata:
