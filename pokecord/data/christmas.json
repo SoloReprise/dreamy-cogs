@@ -1,5 +1,28 @@
 [
     {
+        "id": 9,
+        "name": {
+            "english": "Blastoise",
+            "japanese": "\u30ab\u30e1\u30c3\u30af\u30b9",
+            "chinese": "\u6c34\u7bad\u9f9c",
+            "french": "Tortank"
+        },
+        "type": [
+            "Water"
+        ],
+        "stats": {
+            "HP": 79,
+            "Attack": 83,
+            "Defence": 100,
+            "Sp. Atk": 85,
+            "Sp. Def": 105,
+            "Speed": 78
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas",
+        "alias": "Christmas Blastoise"
+    },
+    {
         "id": 473,
         "name": {
             "english": "Mamoswine",
