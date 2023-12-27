@@ -1185,8 +1185,15 @@ class Pokecord(
                 pokemon_list = ", ".join(pokemons)
                 messages.append(f"**Pokémon {group}**: {count}/{max_pokemon_counts[group]}\n**Lista**: {pokemon_list if pokemon_list else 'Ninguno'}")
 
-            message = "\n\n".join(messages) if messages else _("No tienes ningún Pokémon de Navidad.")
-            await ctx.send(message)
+            # Send message in parts if it's too long
+            full_message = "\n\n".join(messages) if messages else _("No tienes ningún Pokémon de Navidad.")
+            if len(full_message) <= 2000:
+                await ctx.send(full_message)
+            else:
+                parts = [full_message[i:i+2000] for i in range(0, len(full_message), 2000)]
+                for part in parts:
+                    await ctx.send(part)
+
         except Exception as e:
             logging.exception("An error occurred in christmaslist command: ")
             await ctx.send("An error occurred while processing the command.")
