@@ -1150,19 +1150,18 @@ class Pokecord(
                 if pokemon.get("variant") in variants:
                     max_pokemon_counts[group] += 1
 
-        # User's Pokémon counts and lists
-        user_counts = {group: set() for group in variant_groups}
+        # User's Pokémon lists
         user_lists = {group: [] for group in variant_groups}
-        for data in result:
+        for i, data in enumerate(result, start=1):
             pokemon = json.loads(data[0])
+            pokemon_id = f"{pokemon['name']['english']} (ID: {i})"
             for group, variants in variant_groups.items():
                 if pokemon.get("variant") in variants:
-                    user_lists[group].append(pokemon['name']['english'])
-                    user_counts[group].add(pokemon['name']['english'])
+                    user_lists[group].append(pokemon_id)
 
         messages = []
         for group, pokemons in user_lists.items():
-            count = len(user_counts[group])
+            count = len(set(pokemons))  # Count of unique Pokémon
             pokemon_list = ", ".join(pokemons)
             messages.append(f"**Pokémon {group}**: {count}/{max_pokemon_counts[group]}\n**Lista**: {pokemon_list if pokemon_list else 'Ninguno'}")
 
