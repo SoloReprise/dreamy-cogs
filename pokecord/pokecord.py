@@ -1170,22 +1170,24 @@ class Pokecord(
                     if pokemon.get("variant") in variants:
                         max_pokemon_counts[group] += 1
 
-            # User's Pokémon lists
+            # User's Pokémon lists and distinct species count
             user_lists = {group: [] for group in variant_groups}
+            distinct_species = {group: set() for group in variant_groups}
             for i, data in enumerate(result, start=1):
                 pokemon = json.loads(data[0])
                 pokemon_id = f"{pokemon['name']['english']} (ID: {i})"
                 for group, variants in variant_groups.items():
                     if pokemon.get("variant") in variants:
                         user_lists[group].append(pokemon_id)
+                        distinct_species[group].add(pokemon['name']['english'])
 
             messages = []
             for group, pokemons in user_lists.items():
-                count = len(set(pokemons))  # Count of unique Pokémon
+                count = len(distinct_species[group])  # Count of unique Pokémon species
                 pokemon_list = ", ".join(pokemons)
                 messages.append(f"**Pokémon {group}**: {count}/{max_pokemon_counts[group]}\n**Lista**: {pokemon_list if pokemon_list else 'Ninguno'}")
 
-            # Send message in parts if it's too long
+            # Split and send the message
             full_message = "\n\n".join(messages) if messages else _("No tienes ningún Pokémon de Navidad.")
             if len(full_message) <= 2000:
                 await ctx.send(full_message)
