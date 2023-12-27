@@ -1152,40 +1152,44 @@ class Pokecord(
 
     @commands.command()
     async def christmaslist(self, ctx):
-        """Lists all the Christmas-themed Pokémon a user has."""
-        user_conf = await self.user_is_global(ctx.author)
-        result = await self.cursor.fetch_all(query=SELECT_POKEMON, values={"user_id": ctx.author.id})
+        try:
+            """Lists all the Christmas-themed Pokémon a user has."""
+            user_conf = await self.user_is_global(ctx.author)
+            result = await self.cursor.fetch_all(query=SELECT_POKEMON, values={"user_id": ctx.author.id})
 
-        # Grouping variants
-        variant_groups = {
-            "de Navidad": ["Christmas", "Christmas Alolan"],
-            "Shiny de Navidad": ["Christmas Shiny", "Christmas Shiny Alolan"]
-        }
+            # Grouping variants
+            variant_groups = {
+                "de Navidad": ["Christmas", "Christmas Alolan"],
+                "Shiny de Navidad": ["Christmas Shiny", "Christmas Shiny Alolan"]
+            }
 
-        # Calculate max distinct Pokémon for each group
-        max_pokemon_counts = {group: 0 for group in variant_groups}
-        for pokemon in self.christmas_pokemon:
-            for group, variants in variant_groups.items():
-                if pokemon.get("variant") in variants:
-                    max_pokemon_counts[group] += 1
+            # Calculate max distinct Pokémon for each group
+            max_pokemon_counts = {group: 0 for group in variant_groups}
+            for pokemon in self.christmas_pokemon:
+                for group, variants in variant_groups.items():
+                    if pokemon.get("variant") in variants:
+                        max_pokemon_counts[group] += 1
 
-        # User's Pokémon lists
-        user_lists = {group: [] for group in variant_groups}
-        for i, data in enumerate(result, start=1):
-            pokemon = json.loads(data[0])
-            pokemon_id = f"{pokemon['name']['english']} (ID: {i})"
-            for group, variants in variant_groups.items():
-                if pokemon.get("variant") in variants:
-                    user_lists[group].append(pokemon_id)
+            # User's Pokémon lists
+            user_lists = {group: [] for group in variant_groups}
+            for i, data in enumerate(result, start=1):
+                pokemon = json.loads(data[0])
+                pokemon_id = f"{pokemon['name']['english']} (ID: {i})"
+                for group, variants in variant_groups.items():
+                    if pokemon.get("variant") in variants:
+                        user_lists[group].append(pokemon_id)
 
-        messages = []
-        for group, pokemons in user_lists.items():
-            count = len(set(pokemons))  # Count of unique Pokémon
-            pokemon_list = ", ".join(pokemons)
-            messages.append(f"**Pokémon {group}**: {count}/{max_pokemon_counts[group]}\n**Lista**: {pokemon_list if pokemon_list else 'Ninguno'}")
+            messages = []
+            for group, pokemons in user_lists.items():
+                count = len(set(pokemons))  # Count of unique Pokémon
+                pokemon_list = ", ".join(pokemons)
+                messages.append(f"**Pokémon {group}**: {count}/{max_pokemon_counts[group]}\n**Lista**: {pokemon_list if pokemon_list else 'Ninguno'}")
 
-        message = "\n\n".join(messages) if messages else _("No tienes ningún Pokémon de Navidad.")
-        await ctx.send(message)
+            message = "\n\n".join(messages) if messages else _("No tienes ningún Pokémon de Navidad.")
+            await ctx.send(message)
+        except Exception as e:
+            logging.exception("An error occurred in christmaslist command: ")
+            await ctx.send("An error occurred while processing the command.")
     
     @commands.command()
     async def trainercard(self, ctx):
