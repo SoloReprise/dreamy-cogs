@@ -1137,35 +1137,34 @@ class Pokecord(
         user_conf = await self.user_is_global(ctx.author)
         result = await self.cursor.fetch_all(query=SELECT_POKEMON, values={"user_id": ctx.author.id})
 
-        # Variants and their lists
-        christmas_variants = {
-            "Christmas": [],
-            "Christmas Shiny": [],
-            "Christmas Alolan": [],
-            "Christmas Shiny Alolan": []
+        # Grouping variants
+        variant_groups = {
+            "de Navidad": ["Christmas", "Christmas Alolan"],
+            "Shiny de Navidad": ["Christmas Shiny", "Christmas Shiny Alolan"]
         }
 
-        # Calculate max distinct Pokémon for each variant
-        max_pokemon_counts = {variant: 0 for variant in christmas_variants}
+        # Calculate max distinct Pokémon for each group
+        max_pokemon_counts = {group: 0 for group in variant_groups}
         for pokemon in self.christmas_pokemon:
-            variant = pokemon.get("variant")
-            if variant in max_pokemon_counts:
-                max_pokemon_counts[variant] += 1
+            for group, variants in variant_groups.items():
+                if pokemon.get("variant") in variants:
+                    max_pokemon_counts[group] += 1
 
         # User's Pokémon counts and lists
-        user_counts = {variant: set() for variant in christmas_variants}
+        user_counts = {group: set() for group in variant_groups}
+        user_lists = {group: [] for group in variant_groups}
         for data in result:
             pokemon = json.loads(data[0])
-            variant = pokemon.get("variant")
-            if variant in christmas_variants:
-                christmas_variants[variant].append(pokemon)
-                user_counts[variant].add(pokemon['name']['english'])
+            for group, variants in variant_groups.items():
+                if pokemon.get("variant") in variants:
+                    user_lists[group].append(pokemon['name']['english'])
+                    user_counts[group].add(pokemon['name']['english'])
 
         messages = []
-        for variant, pokemons in christmas_variants.items():
-            count = len(user_counts[variant])
-            pokemon_list = ", ".join([poke['name']['english'] for poke in pokemons])
-            messages.append(f"Pokémon {variant}: {count}/{max_pokemon_counts[variant]}\nLista: {pokemon_list if pokemon_list else 'Ninguno'}")
+        for group, pokemons in user_lists.items():
+            count = len(user_counts[group])
+            pokemon_list = ", ".join(pokemons)
+            messages.append(f"**Pokémon {group}**: {count}/{max_pokemon_counts[group]}\n**Lista**: {pokemon_list if pokemon_list else 'Ninguno'}")
 
         message = "\n\n".join(messages) if messages else _("No tienes ningún Pokémon de Navidad.")
         await ctx.send(message)
