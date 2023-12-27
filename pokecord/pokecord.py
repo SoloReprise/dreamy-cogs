@@ -999,6 +999,25 @@ class Pokecord(
             await ctx.send(_("Error updating incienso count. Please try again later."))
             return  # Ensure command execution stops here if an error occurs
 
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def addincienso(self, ctx, member: discord.Member, cantidad: int):
+        """Agrega inciensos a un usuario."""
+        if cantidad <= 0:
+            await ctx.send("Por favor, especifica una cantidad válida de inciensos para agregar.")
+            return
+
+        try:
+            user_conf = await self.user_is_global(member)
+            incienso_count = await user_conf.incienso_count()
+            new_incienso_count = incienso_count + cantidad
+            await user_conf.incienso_count.set(new_incienso_count)
+
+            await ctx.send(f"Se han agregado {cantidad} incienso(s) a {member.mention}. Ahora tiene {new_incienso_count} incienso(s).")
+        except Exception as e:
+            log.error(f"Error al agregar inciensos a {member}: {e}")
+            await ctx.send("Hubo un error al agregar los inciensos. Por favor, inténtalo de nuevo más tarde.")
+
     async def update_user_badges(self, ctx, user_id):
         # Retrieve the user object from the user ID
         user = ctx.guild.get_member(user_id)
