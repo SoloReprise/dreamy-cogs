@@ -1142,7 +1142,7 @@ class Pokecord(
             "Christmas": [],
             "Christmas Shiny": [],
             "Christmas Alolan": [],
-            "Christmas Alolan Shiny": []
+            "Christmas Shiny Alolan": []
         }
 
         # Calculate max distinct Pokémon for each variant
