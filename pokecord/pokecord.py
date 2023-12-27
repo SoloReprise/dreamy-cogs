@@ -164,6 +164,8 @@ class Pokecord(
             "last_trade_date": str(datetime.utcnow().date()),
             "trade_count": 0,
             "incienso_count": 0,  # New key to track the number of Incienso
+            "incienso_singular_count": 0,
+            "incienso_shiny_count": 0,
         }
         self.config.register_user(**defaults_user)
         self.config.register_member(**defaults_user)
@@ -1000,22 +1002,70 @@ class Pokecord(
             return  # Ensure command execution stops here if an error occurs
 
     @commands.command()
+    async def incienso_singular(self, ctx, *, pokemon_name: str):
+        user_conf = await self.user_is_global(ctx.author)
+        incienso_singular_count = await user_conf.incienso_singular_count()
+
+        if incienso_singular_count <= 0:
+            await ctx.send(_("¡No te quedan inciensos singulares!"))
+            return
+
+        # Find the requested Pokémon
+        requested_pokemon = next((poke for poke in self.pokemondata if poke['name']['english'].lower() == pokemon_name.lower()), None)
+        if not requested_pokemon:
+            await ctx.send(_("Pokémon no encontrado."))
+            return
+
+        await user_conf.incienso_singular_count.set(incienso_singular_count - 1)
+        await self.spawn_pokemon(ctx.channel, pokemon=requested_pokemon)
+
+    @commands.command()
+    async def incienso_shiny(self, ctx):
+        user_conf = await self.user_is_global(ctx.author)
+        incienso_shiny_count = await user_conf.incienso_shiny_count()
+
+        if incienso_shiny_count <= 0:
+            await ctx.send(_("¡No te quedan inciensos shiny!"))
+            return
+
+        shiny_pokemons = [poke for poke in self.pokemondata if 'Shiny' in poke.get('variant', '')]
+        shiny_pokemon = random.choice(shiny_pokemons) if shiny_pokemons else None
+
+        if not shiny_pokemon:
+            await ctx.send(_("No hay Pokémon shiny disponibles."))
+            return
+
+        await user_conf.incienso_shiny_count.set(incienso_shiny_count - 1)
+        await self.spawn_pokemon(ctx.channel, pokemon=shiny_pokemon)
+
+    @commands.command()
     @commands.has_permissions(administrator=True)
-    async def addincienso(self, ctx, member: discord.Member, cantidad: int):
-        """Agrega inciensos a un usuario."""
+    async def addincienso(self, ctx, incienso_type: str, member: discord.Member, cantidad: int):
+        """Agrega inciensos de un tipo específico a un usuario."""
         if cantidad <= 0:
             await ctx.send("Por favor, especifica una cantidad válida de inciensos para agregar.")
             return
 
+        incienso_types = {
+            "regular": "incienso_count",
+            "shiny": "incienso_shiny_count",
+            "singular": "incienso_singular_count"
+        }
+
+        if incienso_type not in incienso_types:
+            await ctx.send("Tipo de incienso no válido. Usa 'regular', 'shiny' o 'singular'.")
+            return
+
         try:
             user_conf = await self.user_is_global(member)
-            incienso_count = await user_conf.incienso_count()
+            incienso_attr = incienso_types[incienso_type]
+            incienso_count = await getattr(user_conf, incienso_attr)()
             new_incienso_count = incienso_count + cantidad
-            await user_conf.incienso_count.set(new_incienso_count)
+            await setattr(user_conf, incienso_attr, new_incienso_count)
 
-            await ctx.send(f"Se han agregado {cantidad} incienso(s) a {member.mention}. Ahora tiene {new_incienso_count} incienso(s).")
+            await ctx.send(f"Se han agregado {cantidad} incienso(s) {incienso_type} a {member.mention}. Ahora tiene {new_incienso_count} incienso(s) {incienso_type}.")
         except Exception as e:
-            log.error(f"Error al agregar inciensos a {member}: {e}")
+            log.error(f"Error al agregar inciensos {incienso_type} a {member}: {e}")
             await ctx.send("Hubo un error al agregar los inciensos. Por favor, inténtalo de nuevo más tarde.")
 
     async def update_user_badges(self, ctx, user_id):
