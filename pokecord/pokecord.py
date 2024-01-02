@@ -1209,8 +1209,8 @@ class Pokecord(
 
             # Grouping variants
             variant_groups = {
-                "de Navidad": ["Christmas", "Christmas Alolan"],
-                "Shiny de Navidad": ["Christmas Shiny", "Christmas Shiny Alolan"]
+                "de Navidad": ["Christmas", "Christmas Alolan", "Christmas Blue"],
+                "Shiny de Navidad": ["Christmas Shiny", "Christmas Shiny Alolan", "Christmas Blue Shiny"]
             }
 
             # Calculate max distinct Pokémon for each group

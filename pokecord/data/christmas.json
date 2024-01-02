@@ -135,9 +135,55 @@
             "Sp. Def": 50,
             "Speed": 90
         },
+        "spawnchance": 0.888,
+        "variant": "Christmas Blue",
+        "alias": "Christmas Blue Pikachu"
+    },
+    {
+        "id": 25,
+        "name": {
+            "english": "Pikachu",
+            "japanese": "\u30d4\u30ab\u30c1\u30e5\u30a6",
+            "chinese": "\u76ae\u5361\u4e18",
+            "french": "Pikachu"
+        },
+        "type": [
+            "Electric"
+        ],
+        "stats": {
+            "HP": 35,
+            "Attack": 55,
+            "Defence": 40,
+            "Sp. Atk": 50,
+            "Sp. Def": 50,
+            "Speed": 90
+        },
         "spawnchance": 0.666,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Pikachu"
+    },
+    {
+        "id": 25,
+        "name": {
+            "english": "Pikachu",
+            "japanese": "\u30d4\u30ab\u30c1\u30e5\u30a6",
+            "chinese": "\u76ae\u5361\u4e18",
+            "french": "Pikachu"
+        },
+        "type": [
+            "Electric"
+        ],
+        "stats": {
+            "HP": 35,
+            "Attack": 55,
+            "Defence": 40,
+            "Sp. Atk": 50,
+            "Sp. Def": 50,
+            "Speed": 90
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas Blue Shiny",
+        "alias": "Christmas Blue Shiny Pikachu"
     },
     {
         "id": 38,
@@ -232,6 +278,54 @@
         "spawnchance": 0.666,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Wigglytuff"
+    },
+    {
+        "id": 85,
+        "name": {
+            "english": "Dodrio",
+            "japanese": "\u30c9\u30fc\u30c9\u30ea\u30aa",
+            "chinese": "\u561f\u561f\u5229",
+            "french": "Dodrio"
+        },
+        "type": [
+            "Normal",
+            "Flying"
+        ],
+        "stats": {
+            "HP": 60,
+            "Attack": 110,
+            "Defence": 70,
+            "Sp. Atk": 60,
+            "Sp. Def": 60,
+            "Speed": 110
+        },
+        "spawnchance": 0.888,
+        "variant": "Christmas",
+        "alias": "Christmas Dodrio"
+    },
+    {
+        "id": 85,
+        "name": {
+            "english": "Dodrio",
+            "japanese": "\u30c9\u30fc\u30c9\u30ea\u30aa",
+            "chinese": "\u561f\u561f\u5229",
+            "french": "Dodrio"
+        },
+        "type": [
+            "Normal",
+            "Flying"
+        ],
+        "stats": {
+            "HP": 60,
+            "Attack": 110,
+            "Defence": 70,
+            "Sp. Atk": 60,
+            "Sp. Def": 60,
+            "Speed": 110
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Dodrio"
     },
     {
         "id": 94,
@@ -376,6 +470,98 @@
         "spawnchance": 0.666,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Azumarill"
+    },
+    {
+        "id": 196,
+        "name": {
+            "english": "Espeon",
+            "japanese": "\u30a8\u30fc\u30d5\u30a3",
+            "chinese": "\u592a\u967d\u4f0a\u5e03",
+            "french": "Mentali"
+        },
+        "type": [
+            "Psychic"
+        ],
+        "stats": {
+            "HP": 65,
+            "Attack": 65,
+            "Defence": 60,
+            "Sp. Atk": 130,
+            "Sp. Def": 95,
+            "Speed": 110
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas",
+        "alias": "Christmas Espeon"
+    },
+    {
+        "id": 196,
+        "name": {
+            "english": "Espeon",
+            "japanese": "\u30a8\u30fc\u30d5\u30a3",
+            "chinese": "\u592a\u967d\u4f0a\u5e03",
+            "french": "Mentali"
+        },
+        "type": [
+            "Psychic"
+        ],
+        "stats": {
+            "HP": 65,
+            "Attack": 65,
+            "Defence": 60,
+            "Sp. Atk": 130,
+            "Sp. Def": 95,
+            "Speed": 110
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Espeon"
+    },
+    {
+        "id": 242,
+        "name": {
+            "english": "Blissey",
+            "japanese": "\u30cf\u30d4\u30ca\u30b9",
+            "chinese": "\u5e78\u798f\u86cb",
+            "french": "Leuphorie"
+        },
+        "type": [
+            "Normal"
+        ],
+        "stats": {
+            "HP": 255,
+            "Attack": 10,
+            "Defence": 10,
+            "Sp. Atk": 75,
+            "Sp. Def": 135,
+            "Speed": 55
+        },
+        "spawnchance": 0.888,
+        "variant": "Christmas",
+        "alias": "Christmas Blissey"
+    },
+    {
+        "id": 242,
+        "name": {
+            "english": "Blissey",
+            "japanese": "\u30cf\u30d4\u30ca\u30b9",
+            "chinese": "\u5e78\u798f\u86cb",
+            "french": "Leuphorie"
+        },
+        "type": [
+            "Normal"
+        ],
+        "stats": {
+            "HP": 255,
+            "Attack": 10,
+            "Defence": 10,
+            "Sp. Atk": 75,
+            "Sp. Def": 135,
+            "Speed": 55
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Blissey"
     },
     {
         "id": 282,
@@ -662,6 +848,52 @@
         "spawnchance": 0.666,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Greninja"
+    },
+    {
+        "id": 820,
+        "name": {
+            "english": "Greedent",
+            "japanese": "\u30e8\u30af\u30d0\u30ea\u30b9",
+            "chinese": "\u85cf\u98fd\u6817\u9f20",
+            "french": "Rongrigou"
+        },
+        "type": [
+            "Normal"
+        ],
+        "stats": {
+            "HP": 120,
+            "Attack": 95,
+            "Defence": 95,
+            "Sp. Atk": 55,
+            "Sp. Def": 75,
+            "Speed": 20
+        },
+        "spawnchance": 0.888,
+        "variant": "Christmas",
+        "alias": "Christmas Greedent"
+    },
+    {
+        "id": 820,
+        "name": {
+            "english": "Greedent",
+            "japanese": "\u30e8\u30af\u30d0\u30ea\u30b9",
+            "chinese": "\u85cf\u98fd\u6817\u9f20",
+            "french": "Rongrigou"
+        },
+        "type": [
+            "Normal"
+        ],
+        "stats": {
+            "HP": 120,
+            "Attack": 95,
+            "Defence": 95,
+            "Sp. Atk": 55,
+            "Sp. Def": 75,
+            "Speed": 20
+        },
+        "spawnchance": 0.666,
+        "variant": "Christmas Shiny",
+        "alias": "Christmas Shiny Greedent"
     },
     {
         "id": 892,
