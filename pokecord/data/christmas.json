@@ -19,7 +19,7 @@
             "Sp. Def": 100,
             "Speed": 80
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Venusaur"
     },
@@ -43,7 +43,7 @@
             "Sp. Def": 100,
             "Speed": 80
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Venusaur"
     },
@@ -66,7 +66,7 @@
             "Sp. Def": 105,
             "Speed": 78
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Blastoise"
     },
@@ -89,7 +89,7 @@
             "Sp. Def": 105,
             "Speed": 78
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Blastoise"
     },
@@ -112,7 +112,7 @@
             "Sp. Def": 50,
             "Speed": 90
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Pikachu"
     },
@@ -135,7 +135,7 @@
             "Sp. Def": 50,
             "Speed": 90
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas Blue",
         "alias": "Christmas Blue Pikachu"
     },
@@ -158,7 +158,7 @@
             "Sp. Def": 50,
             "Speed": 90
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Pikachu"
     },
@@ -181,7 +181,7 @@
             "Sp. Def": 50,
             "Speed": 90
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Blue Shiny",
         "alias": "Christmas Blue Shiny Pikachu"
     },
@@ -204,7 +204,7 @@
             "Sp. Def": 100,
             "Speed": 100
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas Alolan",
         "alias": "Christmas Alolan Ninetales"
     },
@@ -227,7 +227,7 @@
             "Sp. Def": 100,
             "Speed": 100
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny Alolan",
         "alias": "Christmas Shiny Alolan Ninetales"
     },
@@ -251,7 +251,7 @@
             "Sp. Def": 50,
             "Speed": 45
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Wigglytuff"
     },
@@ -275,7 +275,7 @@
             "Sp. Def": 50,
             "Speed": 45
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Wigglytuff"
     },
@@ -299,7 +299,7 @@
             "Sp. Def": 60,
             "Speed": 110
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Dodrio"
     },
@@ -323,7 +323,7 @@
             "Sp. Def": 60,
             "Speed": 110
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Dodrio"
     },
@@ -347,7 +347,7 @@
             "Sp. Def": 75,
             "Speed": 110
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Gengar"
     },
@@ -371,7 +371,7 @@
             "Sp. Def": 75,
             "Speed": 110
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Gengar"
     },
@@ -395,7 +395,7 @@
             "Sp. Def": 100,
             "Speed": 80
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Dragonite"
     },
@@ -419,7 +419,7 @@
             "Sp. Def": 100,
             "Speed": 80
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Dragonite"
     },
@@ -443,7 +443,7 @@
             "Sp. Def": 80,
             "Speed": 50
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Azumarill"
     },
@@ -467,7 +467,7 @@
             "Sp. Def": 80,
             "Speed": 50
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Azumarill"
     },
@@ -490,7 +490,7 @@
             "Sp. Def": 95,
             "Speed": 110
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Espeon"
     },
@@ -513,7 +513,7 @@
             "Sp. Def": 95,
             "Speed": 110
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Espeon"
     },
@@ -536,7 +536,7 @@
             "Sp. Def": 135,
             "Speed": 55
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Blissey"
     },
@@ -559,7 +559,7 @@
             "Sp. Def": 135,
             "Speed": 55
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Blissey"
     },
@@ -583,7 +583,7 @@
             "Sp. Def": 115,
             "Speed": 80
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Gardevoir"
     },
@@ -607,7 +607,7 @@
             "Sp. Def": 115,
             "Speed": 80
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Gardevoir"
     },
@@ -631,7 +631,7 @@
             "Sp. Def": 85,
             "Speed": 102
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Garchomp"
     },
@@ -655,7 +655,7 @@
             "Sp. Def": 85,
             "Speed": 102
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Garchomp"
     },
@@ -679,7 +679,7 @@
             "Sp. Def": 60,
             "Speed": 80
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Mamoswine"
     },
@@ -703,7 +703,7 @@
             "Sp. Def": 60,
             "Speed": 80
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Mamoswine"
     },
@@ -727,7 +727,7 @@
             "Sp. Def": 75,
             "Speed": 45
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Crustle"
     },
@@ -751,7 +751,7 @@
             "Sp. Def": 75,
             "Speed": 45
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Crustle"
     },
@@ -774,7 +774,7 @@
             "Sp. Def": 150,
             "Speed": 80
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Goodra"
     },
@@ -797,7 +797,7 @@
             "Sp. Def": 150,
             "Speed": 80
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Goodra"
     },
@@ -821,7 +821,7 @@
             "Sp. Def": 71,
             "Speed": 122
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Greninja"
     },
@@ -845,7 +845,7 @@
             "Sp. Def": 71,
             "Speed": 122
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Greninja"
     },
@@ -868,7 +868,7 @@
             "Sp. Def": 75,
             "Speed": 20
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Greedent"
     },
@@ -891,7 +891,7 @@
             "Sp. Def": 75,
             "Speed": 20
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Greedent"
     },
@@ -915,7 +915,7 @@
             "Sp. Def": 60,
             "Speed": 97
         },
-        "spawnchance": 0.888,
+        "spawnchance": 0,
         "variant": "Christmas",
         "alias": "Christmas Urshifu"
     },
@@ -939,7 +939,7 @@
             "Sp. Def": 60,
             "Speed": 97
         },
-        "spawnchance": 0.666,
+        "spawnchance": 0,
         "variant": "Christmas Shiny",
         "alias": "Christmas Shiny Urshifu"
     }
