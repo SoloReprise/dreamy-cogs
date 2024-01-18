@@ -937,33 +937,34 @@ class Generator(MixinMeta, ABC):
             final = Image.open(tmp)
 
         else:
+            # Resize the profile picture (avatar)
             profile = profile.convert("RGBA").resize((100, 100), Image.Resampling.LANCZOS)
+
             # Mask to crop profile pic image to a circle
-            # draw at 4x size and resample down to 1x for a nice smooth circle
-            mask = Image.new("RGBA", ((card.size[0] * 4), (card.size[1] * 4)), 0)
+            # Adjust the mask size to match the new avatar size
+            mask_size = (100, 100)  # Same size as the resized avatar
+            mask = Image.new("RGBA", mask_size, 0)
             mask_draw = ImageDraw.Draw(mask)
             mask_draw.ellipse(
-                [
-                    circle_x * 4,
-                    circle_y * 4,
-                    (100 + circle_x) * 4,
-                    (100 + circle_y) * 4,
-                ],
+                [0, 0, mask_size[0], mask_size[1]],
                 fill=(255, 255, 255, 255),
             )
-            mask = mask.resize(card.size, Image.Resampling.LANCZOS)
-            # make a new Image to set up card-sized image for pfp layer and the circle mask for it
+
+            # Create a new Image to set up card-sized image for pfp layer and the circle mask for it
             profile_pic_holder = Image.new("RGBA", card.size, (255, 255, 255, 0))
-            # paste on square profile pic in appropriate spot
-            profile_pic_holder.paste(profile, (circle_x, circle_y))
-            # make a new Image at card size to crop pfp with transparency to the circle mask
-            pfp_composite_holder = Image.new("RGBA", card.size, (0, 0, 0, 0))
-            pfp_composite_holder = Image.composite(profile_pic_holder, pfp_composite_holder, mask)
+
+            # Calculate the position to paste the resized profile image
+            # Ensure it's centered within the circle
+            profile_position = (circle_x - mask_size[0] // 2, circle_y - mask_size[1] // 2)
+            profile_pic_holder.paste(profile, profile_position, mask)  # Paste with mask for circular crop
+
             # Profile image is on the background tile now
-            final = Image.alpha_composite(final, pfp_composite_holder)
+            final = Image.alpha_composite(final, profile_pic_holder)
+
             # Paste status over profile ring
+            # Adjust the status icon position if necessary
             blank = Image.new("RGBA", card.size, (255, 255, 255, 0))
-            blank.paste(status, (circle_x + 230, circle_y + 240))
+            blank.paste(status, (circle_x + 230, circle_y + 240))  # Adjust if needed
             final = Image.alpha_composite(final, blank)
 
         return final
