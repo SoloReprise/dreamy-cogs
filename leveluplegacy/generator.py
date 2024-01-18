@@ -946,8 +946,8 @@ class Generator(MixinMeta, ABC):
                 [
                     circle_x * 4,
                     circle_y * 4,
-                    (300 + circle_x) * 4,
-                    (300 + circle_y) * 4,
+                    (100 + circle_x) * 4,
+                    (100 + circle_y) * 4,
                 ],
                 fill=(255, 255, 255, 255),
             )
