@@ -547,7 +547,7 @@ class Generator(MixinMeta, ABC):
         card = (
             self.force_aspect_ratio(card)
             .convert("RGBA")
-            .resize((1050, 450), Image.Resampling.LANCZOS)
+            .resize((1200, 675), Image.Resampling.LANCZOS)
         )
 
         # Colors
