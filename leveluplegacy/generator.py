@@ -419,7 +419,7 @@ class Generator(MixinMeta, ABC):
             frames = []
             for i in range(profile.n_frames):
                 profile.seek(i)
-                prof_img = profile.convert("RGBA").resize((300, 300), Image.Resampling.LANCZOS)
+                prof_img = profile.convert("RGBA").resize((100, 100), Image.Resampling.LANCZOS)
                 # Mask to crop profile pic image to a circle
                 # draw at 4x size and resample down to 1x for a nice smooth circle
                 mask = Image.new("RGBA", ((card.size[0] * 4), (card.size[1] * 4)), 0)
@@ -891,7 +891,7 @@ class Generator(MixinMeta, ABC):
             frames = []
             for i in range(profile.n_frames):
                 profile.seek(i)
-                prof_img = profile.convert("RGBA").resize((100, 100), Image.Resampling.LANCZOS)
+                prof_img = profile.convert("RGBA").resize((300, 300), Image.Resampling.LANCZOS)
                 # Mask to crop profile pic image to a circle
                 # draw at 4x size and resample down to 1x for a nice smooth circle
                 mask = Image.new("RGBA", ((card.size[0] * 4), (card.size[1] * 4)), 0)
@@ -937,7 +937,7 @@ class Generator(MixinMeta, ABC):
             final = Image.open(tmp)
 
         else:
-            profile = profile.convert("RGBA").resize((300, 300), Image.Resampling.LANCZOS)
+            profile = profile.convert("RGBA").resize((100, 100), Image.Resampling.LANCZOS)
             # Mask to crop profile pic image to a circle
             # draw at 4x size and resample down to 1x for a nice smooth circle
             mask = Image.new("RGBA", ((card.size[0] * 4), (card.size[1] * 4)), 0)
