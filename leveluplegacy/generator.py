@@ -565,7 +565,10 @@ class Generator(MixinMeta, ABC):
         # Colors
         # Sample colors from profile pic to use for default colors
         rgbs = self.get_img_colors(profile, 8)
-
+        base = (255, 255, 255)
+        namecolor = (162, 74, 1)
+        statcolor = (255, 255, 255)
+        lvlbarcolor = (255, 255, 255)
         # Color distancing is more strict if user hasn't defined color
         namedistance = 200
         statdistance = 200
