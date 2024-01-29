@@ -964,7 +964,7 @@ class Generator(MixinMeta, ABC):
             # Paste status over profile ring
             # Adjust the status icon position if necessary
             blank = Image.new("RGBA", card.size, (255, 255, 255, 0))
-            blank.paste(status, (circle_x + 230, circle_y + 240))  # Adjust if needed
+            # blank.paste(status, (circle_x + 230, circle_y + 240))  # Adjust if needed
             final = Image.alpha_composite(final, blank)
 
         return final
