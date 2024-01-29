@@ -701,9 +701,9 @@ class Generator(MixinMeta, ABC):
             _("Experiencia: ")
             + f"{humanize_number(user_xp_progress)}/{humanize_number(next_xp_diff)} ({humanize_number(user_xp)} total)"
         )
-        messages = _("Mensajes: ") + str(messages)
-        voice = _("Tiempo en voz: ") + str(voice)
-        stars = str(stars)
+        message_count = _("Mensajes: ") + messages
+        voice = _("Tiempo en voz: ") + voice
+        stars = _("Ggs: ") + str(stars)
         bal = _("Balance: ") + f"{humanize_number(balance)} {currency}"
         prestige_str = _("Prestige ") + str(prestige)
 
