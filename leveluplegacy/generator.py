@@ -661,8 +661,8 @@ class Generator(MixinMeta, ABC):
         final = Image.alpha_composite(card, blank)
 
         # Make the level progress bar
-        progress_bar = Image.new("RGBA", (card.size[0] * 4, card.size[1] * 4), (255, 255, 255, 0))
-        progress_bar_draw = ImageDraw.Draw(progress_bar)
+        # progress_bar = Image.new("RGBA", (card.size[0] * 4, card.size[1] * 4), (255, 255, 255, 0))
+        # progress_bar_draw = ImageDraw.Draw(progress_bar)
         # Calculate data for level bar
         user_xp_progress = user_xp - prev_xp
         next_xp_diff = next_xp - prev_xp
@@ -671,28 +671,28 @@ class Generator(MixinMeta, ABC):
         # Rectangle 0:left x, 1:top y, 2:right x, 3:bottom y
         # Draw level bar outline
         thickness = 8
-        progress_bar_draw.rounded_rectangle(
-            (bar_start * 4, bar_top * 4, bar_end * 4, bar_bottom * 4),
-            fill=(255, 255, 255, 0),
-            outline=lvlbarcolor,
-            width=thickness,
-            radius=90,
-        )
+        # progress_bar_draw.rounded_rectangle(
+        #    (bar_start * 4, bar_top * 4, bar_end * 4, bar_bottom * 4),
+        #    fill=(255, 255, 255, 0),
+        #    outline=lvlbarcolor,
+        #    width=thickness,
+        #    radius=90,
+        #)
         # Draw inner level bar 1 pixel smaller on each side
-        if end_of_inner_bar > bar_start + 10:
-            progress_bar_draw.rounded_rectangle(
-                (
-                    bar_start * 4 + thickness,
-                    bar_top * 4 + thickness,
-                    end_of_inner_bar * 4 - thickness,
-                    bar_bottom * 4 - thickness,
-                ),
-                fill=lvlbarcolor,
-                radius=89,
-            )
-        progress_bar = progress_bar.resize(card.size, Image.Resampling.LANCZOS)
+        #if end_of_inner_bar > bar_start + 10:
+        #    progress_bar_draw.rounded_rectangle(
+        #        (
+        #            bar_start * 4 + thickness,
+        #            bar_top * 4 + thickness,
+        #            end_of_inner_bar * 4 - thickness,
+        #            bar_bottom * 4 - thickness,
+        #        ),
+        #        fill=lvlbarcolor,
+        #        radius=89,
+        #    )
+        # progress_bar = progress_bar.resize(card.size, Image.Resampling.LANCZOS)
         # Image with level bar and pfp on background
-        final = Image.alpha_composite(final, progress_bar)
+        # final = Image.alpha_composite(final, progress_bar)
 
         # Stat strings
         rank = _("Rango: ") + new_rank
