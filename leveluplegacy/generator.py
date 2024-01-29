@@ -605,7 +605,7 @@ class Generator(MixinMeta, ABC):
         star_icon_x = 900
         star_icon_y = 30
 
-        stroke_width = 2
+        stroke_width = 0
 
         iters = 0
 
@@ -712,12 +712,25 @@ class Generator(MixinMeta, ABC):
                 base_font = fontfile
         # base_font = self.get_random_font()
         # Setup font sizes
+        # Specify the SarabunSemiBold font for the username
+        sarabun_semi_bold_font_path = os.path.join(self.fonts, "SarabunSemiBold.ttf")  # Update the path if needed
         name_size = 65
-        name_font = ImageFont.truetype(base_font, name_size)
-        while (name_font.getlength(user_name) + bar_start + 20) > 900:
-            name_size -= 1
+        # Ensure the font file exists
+        if os.path.exists(sarabun_semi_bold_font_path):
+            name_font = ImageFont.truetype(sarabun_semi_bold_font_path, name_size)
+        else:
+            # Fallback to base font if SarabunSemiBold is not found
             name_font = ImageFont.truetype(base_font, name_size)
+
+        # Adjust name_x as required
+        name_x = bar_start + 20  # Modify this value as needed
+
+        # Check if the username fits in the specified area and adjust font size if it doesn't
+        while (name_font.getlength(user_name) + name_x) > 900:
+            name_size -= 1
+            name_font = ImageFont.truetype(sarabun_semi_bold_font_path, name_size)
             name_y += 0.1
+
         name_y = round(name_y)
         nameht = name_font.getbbox(user_name)
         name_y = name_y - int(nameht[1] * 0.6)
