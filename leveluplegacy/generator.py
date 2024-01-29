@@ -560,11 +560,13 @@ class Generator(MixinMeta, ABC):
         # Composite the overlay over the card
         card = Image.alpha_composite(card, overlay)
 
+        user_name = user_name.upper()
+        
         # Colors
         # Sample colors from profile pic to use for default colors
         rgbs = self.get_img_colors(profile, 8)
         base = (255, 255, 255)
-        namecolor = (255, 255, 255)
+        namecolor = (162, 74, 1)
         statcolor = (255, 255, 255)
         lvlbarcolor = (255, 255, 255)
         # Color distancing is more strict if user hasn't defined color
@@ -714,7 +716,7 @@ class Generator(MixinMeta, ABC):
         # Setup font sizes
         # Specify the SarabunSemiBold font for the username
         sarabun_semi_bold_font_path = os.path.join(self.fonts, "SarabunSemiBold.ttf")  # Update the path if needed
-        name_size = 40
+        name_size = 35
         # Ensure the font file exists
         if os.path.exists(sarabun_semi_bold_font_path):
             name_font = ImageFont.truetype(sarabun_semi_bold_font_path, name_size)
@@ -733,7 +735,7 @@ class Generator(MixinMeta, ABC):
 
         name_y = round(name_y)
         nameht = name_font.getbbox(user_name)
-        name_y = 465
+        name_y = 485
 
         emoji_scale = 1.2
         stats_size = 35
