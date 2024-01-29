@@ -695,15 +695,12 @@ class Generator(MixinMeta, ABC):
         # final = Image.alpha_composite(final, progress_bar)
 
         # Stat strings
-        rank = _("Rango: ") + new_rank
-        leveltxt = _("Nivel: ") + str(level)
-        exp = (
-            _("Experiencia: ")
-            + f"{humanize_number(user_xp_progress)}/{humanize_number(next_xp_diff)} ({humanize_number(user_xp)} total)"
-        )
-        message_count = _("Mensajes: ") + messages
-        voice = _("Tiempo en voz: ") + voice
-        stars = _("Ggs: ") + str(stars)
+        rank = _("Rango: ") + "\n" + new_rank
+        leveltxt = ""
+        exp = ""
+        message_count = _("Mensajes: ") + "\n" + messages
+        voice = _("Tiempo en voz: ") + "\n" + voice
+        stars = _("Ggs: ") + "\n" + str(stars)
         bal = _("Balance: ") + f"{humanize_number(balance)} {currency}"
         prestige_str = _("Prestige ") + str(prestige)
 
