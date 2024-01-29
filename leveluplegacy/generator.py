@@ -965,7 +965,7 @@ class Generator(MixinMeta, ABC):
 
             # Calculate the position to paste the resized profile image
             # Ensure it's centered within the circle
-            profile_position = (circle_x - mask_size[0] // 2, circle_y - mask_size[1] // 2)
+            profile_position = (155, 200)
             profile_pic_holder.paste(profile, profile_position, mask)  # Paste with mask for circular crop
 
             # Profile image is on the background tile now
