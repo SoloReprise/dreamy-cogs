@@ -737,7 +737,7 @@ class Generator(MixinMeta, ABC):
 
         emoji_scale = 1.2
         sarabun_regular_font_path = os.path.join(self.fonts, "SarabunRegular.ttf")  # Update the path if needed
-        stats_size = 25
+        stats_size = 30
 
         stat_offset = stats_size + 5
         # Ensure the font file exists
@@ -868,7 +868,7 @@ class Generator(MixinMeta, ABC):
         )
         # Messages
         draw.text(
-            (bar_start + 220, stats_y),
+            (450, 35),
             message_count,
             statcolor,
             font=stats_font,
