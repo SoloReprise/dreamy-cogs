@@ -868,7 +868,7 @@ class Generator(MixinMeta, ABC):
         )
         # Messages
         draw.text(
-            (450, 35),
+            (1000, 105),
             message_count,
             statcolor,
             font=stats_font,
