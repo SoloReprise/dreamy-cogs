@@ -743,9 +743,9 @@ class Generator(MixinMeta, ABC):
 
         # Get status and star image and paste to profile
         blank = Image.new("RGBA", card.size, (255, 255, 255, 0))
-        status = self.status[user_status] if user_status in self.status else self.status["offline"]
-        status_img = Image.open(status)
-        status = status_img.convert("RGBA").resize((60, 60), Image.Resampling.LANCZOS)
+        # status = self.status[user_status] if user_status in self.status else self.status["offline"]
+        # status_img = Image.open(status)
+        # status = status_img.convert("RGBA").resize((60, 60), Image.Resampling.LANCZOS)
         star = Image.open(self.star).resize((50, 50), Image.Resampling.LANCZOS)
         # Role icon
         role_bytes = self.get_image_content_from_url(role_icon) if role_icon else None
@@ -880,7 +880,7 @@ class Generator(MixinMeta, ABC):
         circle_img = Image.new("RGBA", (1600, 1600))
         pfp_border = ImageDraw.Draw(circle_img)
         pfp_border.ellipse([4, 4, 1596, 1596], fill=(255, 255, 255, 0), outline=base, width=20)
-        circle_img = circle_img.resize((330, 330), Image.Resampling.LANCZOS)
+        circle_img = circle_img.resize((500, 500), Image.Resampling.LANCZOS)
         final.paste(circle_img, (circle_x - 15, circle_y - 15), circle_img)
 
         # Handle profile pic image to paste to card
