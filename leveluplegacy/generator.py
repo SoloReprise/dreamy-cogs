@@ -877,7 +877,7 @@ class Generator(MixinMeta, ABC):
         )
         # Voice
         draw.text(
-            (835, 193),
+            (835, 243),
             voice,
             statcolor,
             font=stats_font,
