@@ -550,6 +550,16 @@ class Generator(MixinMeta, ABC):
             .resize((1200, 675), Image.Resampling.LANCZOS)
         )
 
+        # Load the overlay image
+        overlay_path = os.path.join(self.path, "overlay", "overlay.png")
+        overlay = Image.open(overlay_path).convert("RGBA")
+
+        # Resize overlay to match the card size
+        overlay = overlay.resize(card.size, Image.Resampling.LANCZOS)
+
+        # Composite the overlay over the card
+        card = Image.alpha_composite(card, overlay)
+
         # Colors
         # Sample colors from profile pic to use for default colors
         rgbs = self.get_img_colors(profile, 8)
