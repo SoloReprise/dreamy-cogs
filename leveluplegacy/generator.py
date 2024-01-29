@@ -736,15 +736,16 @@ class Generator(MixinMeta, ABC):
         name_y = 485
 
         emoji_scale = 1.2
-        sarabun_regular_font_path = os.path.join(self.fonts, "SarabunRegular.ttf")  # Update the path if needed
-        stats_size = 30
+        sarabun_regular_font_path = os.path.join(self.fonts, "SarabunRegular.ttf")
 
-        stat_offset = stats_size + 5
-        # Ensure the font file exists
-        if os.path.exists(sarabun_regular_font_path):
+        # Debugging: Print the font path
+        print("SarabunRegular font path:", sarabun_regular_font_path)
+
+        try:
             stats_font = ImageFont.truetype(sarabun_regular_font_path, stats_size)
-        else:
-            # Fallback to base font if SarabunRegular is not found
+        except Exception as e:
+            print("Error loading SarabunRegular font:", e)
+            # Fallback to base font if there's an error
             stats_font = ImageFont.truetype(base_font, stats_size)
         while (stats_font.getlength(leveltxt) + bar_start + 10) > bar_start + 210:
             stats_size -= 1
