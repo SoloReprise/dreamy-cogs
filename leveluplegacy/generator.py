@@ -737,6 +737,9 @@ class Generator(MixinMeta, ABC):
 
         emoji_scale = 1.2
         sarabun_regular_font_path = os.path.join(self.fonts, "SarabunRegular.ttf")
+        stats_size = 30
+
+        stat_offset = stats_size + 5
 
         # Debugging: Print the font path
         print("SarabunRegular font path:", sarabun_regular_font_path)
