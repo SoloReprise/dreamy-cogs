@@ -736,9 +736,16 @@ class Generator(MixinMeta, ABC):
         name_y = 485
 
         emoji_scale = 1.2
-        stats_size = 35
+        sarabun_regular_font_path = os.path.join(self.fonts, "SarabunRegular.ttf")  # Update the path if needed
+        stats_size = 25
+
         stat_offset = stats_size + 5
-        stats_font = ImageFont.truetype(base_font, stats_size)
+        # Ensure the font file exists
+        if os.path.exists(sarabun_regular_font_path):
+            stats_font = ImageFont.truetype(sarabun_regular_font_path, stats_size)
+        else:
+            # Fallback to base font if SarabunRegular is not found
+            stats_font = ImageFont.truetype(base_font, stats_size)
         while (stats_font.getlength(leveltxt) + bar_start + 10) > bar_start + 210:
             stats_size -= 1
             emoji_scale += 0.1
@@ -892,8 +899,8 @@ class Generator(MixinMeta, ABC):
         draw.text(
             (star_text_x, star_text_y),
             stars,
-            namecolor,
-            font=star_font,
+            statcolor,
+            font=stats_font,
             stroke_width=stroke_width,
             stroke_fill=namefill,
         )
