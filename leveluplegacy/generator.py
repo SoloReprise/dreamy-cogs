@@ -561,14 +561,11 @@ class Generator(MixinMeta, ABC):
         card = Image.alpha_composite(card, overlay)
 
         user_name = user_name.upper()
-        
+
         # Colors
         # Sample colors from profile pic to use for default colors
         rgbs = self.get_img_colors(profile, 8)
-        base = (255, 255, 255)
-        namecolor = (162, 74, 1)
-        statcolor = (255, 255, 255)
-        lvlbarcolor = (255, 255, 255)
+
         # Color distancing is more strict if user hasn't defined color
         namedistance = 200
         statdistance = 200
@@ -579,7 +576,6 @@ class Generator(MixinMeta, ABC):
             if colors["base"] != (0, 0, 0):
                 base = colors["base"]
             if colors["name"]:
-                namecolor = colors["name"]
                 namedistance = 100
             if colors["stat"]:
                 statcolor = colors["stat"]
@@ -590,6 +586,11 @@ class Generator(MixinMeta, ABC):
             else:
                 lvlbarcolor = base
 
+        base = (255, 255, 255)
+        namecolor = (162, 74, 1)
+        statcolor = (255, 255, 255)
+        lvlbarcolor = (255, 255, 255)
+        
         default_fill = (0, 0, 0)
 
         # Coord setup
