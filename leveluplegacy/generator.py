@@ -399,6 +399,7 @@ class Generator(MixinMeta, ABC):
             stars,
             namecolor,
             font=star_font,
+            anchor="lt",
             stroke_width=stroke_width,
             stroke_fill=namefill,
         )
@@ -893,7 +894,6 @@ class Generator(MixinMeta, ABC):
             stars,
             namecolor,
             font=star_font,
-            anchor="lt",
             stroke_width=stroke_width,
             stroke_fill=namefill,
         )
