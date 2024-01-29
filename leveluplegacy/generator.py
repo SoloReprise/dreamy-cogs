@@ -230,7 +230,7 @@ class Generator(MixinMeta, ABC):
                 base_font = fontfile
         # base_font = self.get_random_font()
         # Setup font sizes
-        name_size = 40
+        name_size = 65
         name_font = ImageFont.truetype(base_font, name_size)
         while (name_font.getlength(user_name) + bar_start + 20) > 900:
             name_size -= 1
@@ -714,7 +714,7 @@ class Generator(MixinMeta, ABC):
         # Setup font sizes
         # Specify the SarabunSemiBold font for the username
         sarabun_semi_bold_font_path = os.path.join(self.fonts, "SarabunSemiBold.ttf")  # Update the path if needed
-        name_size = 65
+        name_size = 40
         # Ensure the font file exists
         if os.path.exists(sarabun_semi_bold_font_path):
             name_font = ImageFont.truetype(sarabun_semi_bold_font_path, name_size)
@@ -804,7 +804,7 @@ class Generator(MixinMeta, ABC):
             name_bbox = name_font.getbbox(user_name)
             name_emoji_y = name_bbox[3] - name_size
             pilmoji.text(
-                (40, name_y),
+                (150, name_y),
                 user_name,
                 namecolor,
                 font=name_font,
