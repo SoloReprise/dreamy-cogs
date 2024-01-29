@@ -723,7 +723,7 @@ class Generator(MixinMeta, ABC):
             name_font = ImageFont.truetype(base_font, name_size)
 
         # Adjust name_x as required
-        name_x = 15  # Modify this value as needed
+        name_x = -150  # Modify this value as needed
 
         # Check if the username fits in the specified area and adjust font size if it doesn't
         while (name_font.getlength(user_name) + name_x) > 900:
@@ -733,7 +733,7 @@ class Generator(MixinMeta, ABC):
 
         name_y = round(name_y)
         nameht = name_font.getbbox(user_name)
-        name_y = 85
+        name_y = 450
 
         emoji_scale = 1.2
         stats_size = 35
