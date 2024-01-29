@@ -850,7 +850,7 @@ class Generator(MixinMeta, ABC):
         # Stats text
         # Rank
         draw.text(
-            (bar_start + 10, stats_y),  # Coordinates where the rank text is placed
+            (835, 543),  # Coordinates where the rank text is placed
             rank,  # Use the new rank
             statcolor,
             font=stats_font,
@@ -897,7 +897,7 @@ class Generator(MixinMeta, ABC):
 
         # Stars
         draw.text(
-            (star_text_x, star_text_y),
+            (835, 443),
             stars,
             statcolor,
             font=stats_font,
