@@ -919,7 +919,7 @@ class Generator(MixinMeta, ABC):
                 pre = Image.alpha_composite(final, pfp_composite_holder)
                 # Paste status over profile ring
                 blank = Image.new("RGBA", card.size, (255, 255, 255, 0))
-                blank.paste(status, (circle_x + 230, circle_y + 240))
+                # blank.paste(status, (circle_x + 230, circle_y + 240))
                 pre = Image.alpha_composite(pre, blank)
                 frames.append(pre)
 
