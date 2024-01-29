@@ -733,7 +733,7 @@ class Generator(MixinMeta, ABC):
 
         name_y = round(name_y)
         nameht = name_font.getbbox(user_name)
-        name_y = 450
+        name_y = 465
 
         emoji_scale = 1.2
         stats_size = 35
@@ -804,7 +804,7 @@ class Generator(MixinMeta, ABC):
             name_bbox = name_font.getbbox(user_name)
             name_emoji_y = name_bbox[3] - name_size
             pilmoji.text(
-                (150, name_y),
+                (185, name_y),
                 user_name,
                 namecolor,
                 font=name_font,
@@ -978,7 +978,7 @@ class Generator(MixinMeta, ABC):
 
             # Calculate the position to paste the resized profile image
             # Ensure it's centered within the circle
-            profile_position = (65, 465)
+            profile_position = (55, 465)
             profile_pic_holder.paste(profile, profile_position, mask)  # Paste with mask for circular crop
 
             # Profile image is on the background tile now
