@@ -1063,8 +1063,8 @@ class Generator(MixinMeta, ABC):
         namecolor = colors.get("name", (22, 39, 65))
 
         # Coord setup
-        name_y = 95  # Adjust if needed for visual appeal
-        name_x = 185  # Adjust if needed for visual appeal
+        name_y = 98  # Adjust if needed for visual appeal
+        name_x = 165  # Adjust if needed for visual appeal
 
         # Get base font
         base_font = self.font
