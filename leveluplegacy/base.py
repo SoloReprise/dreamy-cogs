@@ -1439,31 +1439,31 @@ class UserCommands(MixinMeta, ABC):
             badges_list = ", ".join(pokedex)
             await ctx.send(f"{user.display_name} has the following Pokémon badges: {badges_list}")
 
-@pfadmin.command(name="addpoke")
-async def addpoke(self, ctx, user: discord.Member, pokemon_name: str):
-    """Manually awards a Pokémon to a user."""
-    try:
-        # Ensure the Pokémon exists
-        pokemon_path = os.path.join(self.path, "pokedex", "sprites", f"{pokemon_name}.png")
-        if not os.path.exists(pokemon_path):
-            await ctx.send(f"The Pokémon {pokemon_name} does not exist.")
-            return
+    @pfadmin.command(name="addpoke")
+    async def addpoke(self, ctx, user: discord.Member, pokemon_name: str):
+        """Manually awards a Pokémon to a user."""
+        try:
+            # Ensure the Pokémon exists
+            pokemon_path = os.path.join(self.path, "pokedex", "sprites", f"{pokemon_name}.png")
+            if not os.path.exists(pokemon_path):
+                await ctx.send(f"The Pokémon {pokemon_name} does not exist.")
+                return
 
-        self.init_user(ctx.guild.id, str(user.id))
-        user_data = self.data[ctx.guild.id]["users"][str(user.id)]
+            self.init_user(ctx.guild.id, str(user.id))
+            user_data = self.data[ctx.guild.id]["users"][str(user.id)]
 
-        if "pokedex" not in user_data:
-            user_data["pokedex"] = []
+            if "pokedex" not in user_data:
+                user_data["pokedex"] = []
 
-        if pokemon_name not in user_data["pokedex"]:
-            user_data["pokedex"].append(pokemon_name)
-            # Ensure the update is directly reflected in self.data
-            self.data[ctx.guild.id]["users"][str(user.id)] = user_data
+            if pokemon_name not in user_data["pokedex"]:
+                user_data["pokedex"].append(pokemon_name)
+                # Ensure the update is directly reflected in self.data
+                self.data[ctx.guild.id]["users"][str(user.id)] = user_data
 
-            # Optionally, if using persistent storage, save the update here
+                # Optionally, if using persistent storage, save the update here
 
-            await ctx.send(f"{pokemon_name} has been successfully added to {user.display_name}'s pokedex.")
-        else:
-            await ctx.send(f"{user.display_name} already has the Pokémon {pokemon_name}.")
-    except Exception as e:
-        await ctx.send(f"Error occurred: {e}")
+                await ctx.send(f"{pokemon_name} has been successfully added to {user.display_name}'s pokedex.")
+            else:
+                await ctx.send(f"{user.display_name} already has the Pokémon {pokemon_name}.")
+        except Exception as e:
+            await ctx.send(f"Error occurred: {e}")
