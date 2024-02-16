@@ -1217,14 +1217,25 @@ async def new_get_profile_back(self, ctx: commands.Context, *, user: discord.Mem
             "blur": blur,
         }
 
-    # Here we assume generate_profile_back exists and works similarly to generate_profile_new
-    # but tailored for generating the back side of the profile.
-    file = await self.generate_profile_back(**args)
-    if not file:
-        return await ctx.send("Failed to generate the back of the profile image :( try again in a bit")
+    # Generate the back of the profile
+    profile_back_image = self.generate_profile_back(
+        bg_image=args["bg_image"],
+        profile_image=args["profile_image"],
+        user_name=args["user_name"],
+        colors=args["colors"],
+        font_name=args["font_name"],
+        render_gifs=args["render_gifs"],
+        blur=args["blur"]
+    )
 
-    # Send the generated back of the profile
-    await ctx.reply(file=file)
+    # Save the generated image to a BytesIO buffer
+    with BytesIO() as image_binary:
+        profile_back_image.save(image_binary, 'PNG')
+        image_binary.seek(0)
+        discord_file = discord.File(fp=image_binary, filename="profile_back.png")
+    
+        # Send the generated back of the profile
+        await ctx.reply(file=discord_file)
 
     @commands.command(name="prestige")
     @commands.guild_only()
