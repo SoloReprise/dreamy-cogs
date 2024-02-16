@@ -60,24 +60,30 @@ class ProfileSwitchView(discord.ui.View):
         self.children[0].label = "Ver perfil" if self.current_view == "back" else "Ver medallas"
         self.original_message = original_message
 
-    @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.primary, custom_id="profile_view_toggle")
+    @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.primary)
     async def toggle_view_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Determine the new view based on the current state
-        new_view = "back" if self.current_view == "front" else "front"
-        self.current_view = new_view  # Update the current view
+        # Initially defer the interaction
+        await interaction.response.defer()
 
-        # Correctly handle the interaction and generate/send the new profile image
-        if new_view == "back":
+        # Delete the original message
+        await self.original_message.delete()
+
+        # Prepare to invoke the corresponding command method
+        if self.current_view == "front":
+            # If the current view is the front, switch to back
+            self.current_view = "back"
+            button.label = "Ver perfil"
+            # Directly invoke the method for generating and sending the back profile
             await self.bot.new_get_profile_back_direct(interaction, self.user)
         else:
+            # If the current view is the back, switch to front
+            self.current_view = "front"
+            button.label = "Ver medallas"
+            # Directly invoke the method for generating and sending the front profile
             await self.bot.new_get_profile_direct(interaction, self.user)
 
-        # Re-enable the button and update its label accordingly
-        button.label = "Ver perfil" if new_view == "back" else "Ver medallas"
-        button.disabled = False
-
-        # Update the interaction message to reflect the changes
-        await interaction.response.edit_message(view=self)
+        # No need to edit the original message as it's been deleted
+        # The new profile view will be sent as a new message
 
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
