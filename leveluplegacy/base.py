@@ -1456,10 +1456,14 @@ class UserCommands(MixinMeta, ABC):
         user_data = self.data[ctx.guild.id]["users"][str(user.id)]
 
         # Add the Pokémon to the user's pokedex, avoiding duplicates
-        if "pokedex" not in user_data:
-            user_data["pokedex"] = []
-        if pokemon_name not in user_data["pokedex"]:
-            user_data["pokedex"].append(pokemon_name)
+        if pokemon_name not in user_data.get("pokedex", []):
+            user_data.setdefault("pokedex", []).append(pokemon_name)
+            # Update the main data structure
+            self.data[ctx.guild.id]["users"][str(user.id)] = user_data
+
+            # If using Config from Red, you should save the changes
+            # await self.config.member(user).pokedex.set(user_data["pokedex"])
+
             await ctx.send(f"{pokemon_name} has been successfully added to {user.display_name}'s pokedex.")
         else:
             await ctx.send(f"{user.display_name} already has the Pokémon {pokemon_name}.")
