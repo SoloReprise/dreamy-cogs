@@ -53,34 +53,34 @@ class ProfileSwitchView(discord.ui.View):
         self.user = user
         self.args = args
         self.bot = bot
-        self.front = True  # Start with the front of the profile
+        self.front = True  # Start with showing the front of the profile
 
-    @discord.ui.button(label="Switch Profile View", style=discord.ButtonStyle.primary, custom_id="switch_profile_view")
-    async def switch_view(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Toggle the view
+    async def switch_profile_image(self):
+        # Toggle the profile view
         self.front = not self.front
 
-        # Generate the new profile image based on the current view (front or back)
+        # Generate the appropriate profile image based on the current view
         if self.front:
             file = await self.bot.get_or_fetch_profile(self.user, self.args, full=True, use_new_generator=True)
         else:
-            # Assuming you have a similar function for generating the back of the profile
             file = await self.bot.generate_profile_back(**self.args)
+        
+        return file
+
+    @discord.ui.button(label="Switch Profile View", style=discord.ButtonStyle.primary, custom_id="switch_profile_view")
+    async def switch_view(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # Acknowledge the interaction first
+        await interaction.response.defer()
+
+        file = await self.switch_profile_image()
 
         if file:
-            # Instead of editing the message, send a new one with the file
-            await interaction.followup.send(file=file, ephemeral=False)  # Remove `ephemeral=False` if you want it to be visible to everyone
-            # Optional: delete the previous message to avoid clutter
-            # await interaction.message.delete()
+            # Send a new message with the updated profile view
+            await interaction.followup.send(file=file, ephemeral=False)  # Adjust visibility as needed
         else:
-            await interaction.response.send_message("Failed to switch profile view. Please try again.", ephemeral=True)
+            # Provide feedback if the profile switch failed
+            await interaction.followup.send("Failed to switch profile view. Please try again.", ephemeral=True)
 
-        # Disable the button after switching to avoid errors or confusion
-        for item in self.children:
-            if isinstance(item, discord.ui.Button):
-                item.disabled = True
-        await interaction.message.edit(view=self)
-        
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
     # Generate level up image
