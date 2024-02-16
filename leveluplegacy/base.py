@@ -82,7 +82,7 @@ class ProfileSwitchView(discord.ui.View):
             await self.bot.new_get_profile(interaction, user=self.user)
         else:
             # Assuming generate_profile_back is a method similar to new_get_profile but for generating the back of the profile
-            await self.bot.generate_profile_back(interaction, self.user, self.args)
+            await self.bot.new_get_profile_back(interaction, self.user)
                     
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
