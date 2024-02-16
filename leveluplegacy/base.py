@@ -65,23 +65,24 @@ class ProfileSwitchView(discord.ui.View):
 
     @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.primary)
     async def toggle_view(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # Determine the new view to generate based on the current view
         new_view = "back" if self.current_view == "front" else "front"
-        self.current_view = new_view  # Update the view state
+        self.current_view = new_view  # Update the current view
 
-        # Prepare to send the new profile based on the updated view
-        if self.current_view == "back":
-            # Generate and send the back profile, ensure the method exists and is correctly implemented
-            await self.bot.new_get_profile_back_direct(interaction, self.user)
+        # Delete the original message to avoid clutter
+        await self.original_message.delete()
+
+        # Depending on the new view, call the appropriate function to generate and send the new profile view
+        if new_view == "front":
+            # Simulate calling the command as if triggered by a user
+            ctx = await self.bot.get_context(interaction.message)
+            ctx.author = self.user
+            await self.bot.new_get_profile(ctx)
         else:
-            # Generate and send the front profile
-            await self.bot.new_get_profile_direct(interaction, self.user)
-
-        # Update button label according to the new view
-        button.label = "Ver perfil" if self.current_view == "back" else "Ver medallas"
-        button.disabled = False  # Re-enable the button for further interactions
-
-        # Acknowledge the interaction
-        await interaction.response.edit_message(view=self)
+            # Simulate calling the back profile command
+            ctx = await self.bot.get_context(interaction.message)
+            ctx.author = self.user
+            await self.bot.new_get_profile_back(ctx)
 
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
@@ -1193,10 +1194,16 @@ class UserCommands(MixinMeta, ABC):
             image_binary.seek(0)
             discord_file = discord.File(fp=image_binary, filename="profile_back.png")
             await ctx.reply(file=discord_file)
-
-        view = ProfileSwitchView(user, args, self, message, current_view="back")
-        await message.edit(view=view)
         
+        # Initialize the ProfileSwitchView with current_view set to "back"
+        view = ProfileSwitchView(user=user, args=args, bot=self, original_message=None, current_view="back")
+        # Note: We temporarily set original_message to None and will update it after sending the message
+
+        # Send the generated back of the profile with the view attached
+        message = await ctx.reply(file=discord_file, view=view)
+
+        # Now, update the original_message attribute in the view
+        view.original_message = message
 
     @commands.command(name="prestige")
     @commands.guild_only()
