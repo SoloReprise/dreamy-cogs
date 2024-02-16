@@ -1413,7 +1413,19 @@ class UserCommands(MixinMeta, ABC):
             self.data[guild_id]["users"][user_id]["pokedex"].append(pokemon_name)
             return True
         return False
+    
+    async def add_pokemon(self, user, pokemon_name):
+        member_config = self.config.member(user)
+        pokedex = await member_config.pokedex()
+            
+        if pokemon_name not in pokedex:
+            pokedex.append(pokemon_name)
+            await member_config.pokedex.set(pokedex)
 
+    async def get_pokedex(self, user):
+        pokedex = await self.config.member(user).pokedex()
+        return pokedex
+        
     @commands.group(name="pfadmin")
     @commands.has_permissions(administrator=True)  # Ensure only admins can use this command
     async def pfadmin(self, ctx):
