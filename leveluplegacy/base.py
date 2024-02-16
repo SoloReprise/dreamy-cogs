@@ -1148,6 +1148,7 @@ class UserCommands(MixinMeta, ABC):
                     "font_name": p.get("font"),
                     "render_gifs": p.get("render_gifs", False),
                     "blur": p.get("blur", False)
+                    "pokedex": p.get("pokedex", [])  # Assuming p["pokedex"] contains the list of Pokémon names
                 }
 
                 # Generate the profile back image
