@@ -1002,6 +1002,115 @@ class Generator(MixinMeta, ABC):
 
         return final
 
+    # PROFILE BACK
+    def generate_profile_back(
+        self,
+        bg_image: str = None,
+        profile_image: str = "https://i.imgur.com/sUYWCve.png",
+        user_name: str = "Unknown#0117",
+        colors: dict = None,
+        font_name: str = None,
+        render_gifs: bool = False,
+        blur: bool = False
+    ):
+        # Get profile pic
+        if profile_image:
+            pfp_image = self.get_image_content_from_url(str(profile_image))
+            profile_bytes = BytesIO(pfp_image)
+            profile = Image.open(profile_bytes)
+        else:
+            profile = Image.open(self.default_pfp)
+
+        # Get background
+        if bg_image and bg_image != "random":
+            bgpath = os.path.join(self.path, "backgrounds")
+            defaults = [i for i in os.listdir(bgpath)]
+            if bg_image in defaults:
+                card = Image.open(os.path.join(bgpath, bg_image))
+            else:
+                bg_bytes = self.get_image_content_from_url(bg_image)
+                try:
+                    card = Image.open(BytesIO(bg_bytes))
+                except UnidentifiedImageError:
+                    card = self.get_random_background()
+        else:
+            card = self.get_random_background()
+
+        card = (
+            self.force_aspect_ratio(card)
+            .convert("RGBA")
+            .resize((1200, 675), Image.Resampling.LANCZOS)
+        )
+
+        # Load the overlay image
+        overlay_path = os.path.join(self.path, "overlay", "overlay_back.png")  # Use overlay_back.png
+        overlay = Image.open(overlay_path).convert("RGBA")
+
+        # Resize overlay to match the card size
+        overlay = overlay.resize(card.size, Image.Resampling.LANCZOS)
+
+        # Composite the overlay over the card
+        card = Image.alpha_composite(card, overlay)
+
+        user_name = user_name.upper()
+
+        # Colors
+        if not colors:
+            colors = {
+                "base": (255, 255, 255),
+                "name": (22, 39, 65),
+            }
+        namecolor = colors.get("name", (22, 39, 65))
+
+        # Coord setup
+        name_y = 485  # Adjust if needed for visual appeal
+        name_x = 55  # Adjust if needed for visual appeal
+
+        # Get base font
+        base_font = self.font
+        if font_name:
+            fontfile = os.path.join(self.fonts, font_name)
+            if os.path.exists(fontfile):
+                base_font = fontfile
+
+        # Setup font sizes for username
+        name_size = 35
+        name_font = ImageFont.truetype(base_font, name_size)
+
+        # Resize the profile picture (avatar)
+        profile = profile.convert("RGBA").resize((125, 125), Image.Resampling.LANCZOS)
+
+        # Mask to crop profile pic image to a circle
+        mask_size = (125, 125)  # Same size as the resized avatar
+        mask = Image.new("RGBA", mask_size, 0)
+        mask_draw = ImageDraw.Draw(mask)
+        mask_draw.ellipse(
+            [0, 0, mask_size[0], mask_size[1]],
+            fill=(255, 255, 255, 255),
+        )
+
+        # Create a new Image to set up card-sized image for pfp layer and the circle mask for it
+        profile_pic_holder = Image.new("RGBA", card.size, (255, 255, 255, 0))
+
+        # Calculate the position to paste the resized profile image
+        # Ensure it's centered within the circle
+        profile_position = (55, 465)  # Adjust if needed
+        profile_pic_holder.paste(profile, profile_position, mask)  # Paste with mask for circular crop
+
+        # Profile image is on the background tile now
+        final = Image.alpha_composite(card, profile_pic_holder)
+
+        # Add username text
+        draw = ImageDraw.Draw(final)
+        draw.text(
+            (name_x, name_y),
+            user_name,
+            namecolor,
+            font=name_font
+        )
+
+        return final
+
     def generate_slim_profile(
         self,
         bg_image: str = None,

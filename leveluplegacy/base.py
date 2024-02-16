@@ -33,7 +33,7 @@ from leveluplegacy.utils.formatter import (
 from .abc import MixinMeta
 
 # from .generator import Generator
-
+        
 if version_info >= VersionInfo.from_str("3.5.0"):
     from .dpymenu import DEFAULT_CONTROLS, menu
 
@@ -47,6 +47,30 @@ else:
 log = logging.getLogger("red.vrt.levelup.commands")
 _ = Translator("LevelUp", __file__)
 
+class ProfileSwitchView(discord.ui.View):
+    def __init__(self, user: discord.Member, args: dict, bot):
+        super().__init__(timeout=180)  # Timeout in seconds, adjust as needed
+        self.user = user
+        self.args = args
+        self.bot = bot
+        self.front = True  # Start with the front of the profile
+
+    @discord.ui.button(label="Switch Profile View", style=discord.ButtonStyle.primary, custom_id="switch_profile_view")
+    async def switch_view(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # Toggle the view
+        self.front = not self.front
+
+        # Generate the new profile image based on the current view (front or back)
+        if self.front:
+            file = await self.bot.get_or_fetch_profile(self.user, self.args, full=True, use_new_generator=True)
+        else:
+            # Assuming you have a similar function for generating the back of the profile
+            file = await self.bot.generate_profile_back(**self.args)
+
+        if file:
+            await interaction.response.edit_message(content="", attachment=file)
+        else:
+            await interaction.response.send_message("Failed to switch profile view. Please try again.", ephemeral=True)
 
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
@@ -1098,19 +1122,18 @@ class UserCommands(MixinMeta, ABC):
                 "blur": blur,
             }
 
-            file = await self.get_or_fetch_profile(user, args, full=True, use_new_generator=True)
-            if not file:
-                return await ctx.send("Failed to generate profile image :( try again in a bit")
+        file = await self.get_or_fetch_profile(user, args, full=True, use_new_generator=True)
+        if not file:
+            return await ctx.send("Failed to generate profile image :( try again in a bit")
 
-            try:
-                await ctx.reply(file=file)
-            except Exception as e:
-                log.error(f"Failed to send profile pic: {e}")
-                try:
-                    file = await self.get_or_fetch_profile(user, args, full=True, use_new_generator=True)
-                    await ctx.send(file=file)
-                except Exception as e:
-                    log.error(f"Failed AGAIN to send profile pic: {e}")
+        # Create the view
+        view = ProfileSwitchView(user, args, self)
+
+        # Send the message with the view
+        try:
+            await ctx.reply(file=file, view=view)
+        except Exception as e:
+            log.error(f"Failed to send profile pic with view: {e}")
 
     @commands.command(name="prestige")
     @commands.guild_only()
