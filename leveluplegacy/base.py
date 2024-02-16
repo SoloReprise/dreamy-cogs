@@ -68,10 +68,19 @@ class ProfileSwitchView(discord.ui.View):
             file = await self.bot.generate_profile_back(**self.args)
 
         if file:
-            await interaction.response.edit_message(content="", attachment=file)
+            # Instead of editing the message, send a new one with the file
+            await interaction.followup.send(file=file, ephemeral=False)  # Remove `ephemeral=False` if you want it to be visible to everyone
+            # Optional: delete the previous message to avoid clutter
+            # await interaction.message.delete()
         else:
             await interaction.response.send_message("Failed to switch profile view. Please try again.", ephemeral=True)
 
+        # Disable the button after switching to avoid errors or confusion
+        for item in self.children:
+            if isinstance(item, discord.ui.Button):
+                item.disabled = True
+        await interaction.message.edit(view=self)
+        
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
     # Generate level up image
