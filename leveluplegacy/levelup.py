@@ -212,7 +212,9 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         self.stars = {}  # Keep track of star cooldowns
         self.first_run = True
         self.profiles = {}
-
+        default_member = {"pokedex": []}
+        self.config.register_member(**default_member)
+        
         self.looptimes = {
             "checkvoice": 0,
             "cachedump": 0,
