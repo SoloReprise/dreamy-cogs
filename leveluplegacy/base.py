@@ -1199,9 +1199,51 @@ class UserCommands(MixinMeta, ABC):
             view.original_message = message
 
     async def new_get_profile_direct(self, interaction: discord.Interaction, user: discord.Member):
-        pseudo_ctx = await get_pseudo_context(self, interaction, user)
-        # Assuming new_get_profile can accept a pseudo_ctx and work with it
-        await self.new_get_profile(pseudo_ctx, user=user)
+        # Simulate fetching user and guild data as in the command
+        gid = interaction.guild_id
+        if gid not in self.data:
+            await self.initialize()  # Make sure this is interaction-safe if asynchronous
+
+        conf = self.data[gid]
+        users = conf["users"]
+        user_id = str(user.id)
+        if user_id not in users:
+            await interaction.followup.send("No information available yet!")
+            return
+
+        p = users[user_id]
+        # Assume generate_profile_new is an existing method adapted for async usage
+        # and generates a profile image based on the user data
+        args = {
+            "user_name": user.name,
+            "bg_image": p.get("background"),
+            "profile_image": user.display_avatar.url,
+            "level": p["level"],
+            "messages": humanize_number(p["messages"]),
+            "voice": time_formatter(p["voice"]),
+            "new_rank": self.calculate_new_rank(p["level"]),  # Adapted for simplicity
+            "colors": {
+                "base": hex_to_rgb(str(user.colour)),
+                "name": hex_to_rgb(p["colors"]["name"]) if p["colors"] and "name" in p["colors"] else None,
+                "stat": hex_to_rgb(p["colors"]["stat"]) if p["colors"] and "stat" in p["colors"] else None,
+                "levelbar": hex_to_rgb(p["colors"]["levelbar"]) if p["colors"] and "levelbar" in p["colors"] else None,
+            },
+            "font_name": p.get("font"),
+            "render_gifs": p.get("render_gifs", False),
+            "blur": p.get("blur", False)
+        }
+
+        # Directly invoke the adapted profile image generation method for async context
+        profile_image = await self.generate_profile_image_direct(args)  # This needs to be an async method
+
+        # Prepare the image file to send
+        with BytesIO() as image_binary:
+            profile_image.save(image_binary, 'PNG')
+            image_binary.seek(0)
+            discord_file = discord.File(fp=image_binary, filename="profile.png")
+
+        # Send the file as a follow-up to the interaction
+        await interaction.followup.send(file=discord_file)
 
     async def new_get_profile_back_direct(self, interaction: discord.Interaction, user: discord.Member):
         pseudo_ctx = await get_pseudo_context(self, interaction, user)
