@@ -1466,4 +1466,4 @@ class UserCommands(MixinMeta, ABC):
             else:
                 await ctx.send(f"{user.display_name} already has the Pokémon {pokemon_name}.")
         except Exception as e:
-        await ctx.send(f"An error occurred: {e.__class__.__name__}: {str(e)}")
+            await ctx.send(f"An error occurred: {e.__class__.__name__}: {str(e)}")
