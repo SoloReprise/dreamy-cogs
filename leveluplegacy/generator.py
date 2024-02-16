@@ -1053,19 +1053,6 @@ class Generator(MixinMeta, ABC):
             .resize((1200, 675), Image.Resampling.LANCZOS)
         )
 
-        # Add Pokémon badges
-        if pokedex:
-            badge_start_x, badge_start_y = 62, 180  # Starting position for the first badge
-            badge_spacing_x, badge_spacing_y = 56, 21  # Spacing between badges
-            badge_size = (67, 67)  # Size of each badge
-            for index, pokemon in enumerate(pokedex):
-                badge_path = os.path.join(self.path, "pokedex", "sprites", f"{pokemon}.png")
-                if os.path.exists(badge_path):
-                    badge = Image.open(badge_path).resize(badge_size, Image.Resampling.LANCZOS)
-                    badge_x = badge_start_x + (index % 9) * (badge_size[0] + badge_spacing_x)
-                    badge_y = badge_start_y + (index // 9) * (badge_size[1] + badge_spacing_y)
-                    final.paste(badge, (badge_x, badge_y), badge)
-
         # Assuming 'card' is now your base image, prepare 'final' early
         final = card.copy()  # Use a copy of 'card' as the base for 'final'
 
@@ -1123,6 +1110,19 @@ class Generator(MixinMeta, ABC):
 
         # Profile image is on the background tile now
         final = Image.alpha_composite(card, profile_pic_holder)
+
+        # Add Pokémon badges
+        if pokedex:
+            badge_start_x, badge_start_y = 62, 180  # Starting position for the first badge
+            badge_spacing_x, badge_spacing_y = 56, 21  # Spacing between badges
+            badge_size = (67, 67)  # Size of each badge
+            for index, pokemon in enumerate(pokedex):
+                badge_path = os.path.join(self.path, "pokedex", "sprites", f"{pokemon}.png")
+                if os.path.exists(badge_path):
+                    badge = Image.open(badge_path).resize(badge_size, Image.Resampling.LANCZOS)
+                    badge_x = badge_start_x + (index % 9) * (badge_size[0] + badge_spacing_x)
+                    badge_y = badge_start_y + (index // 9) * (badge_size[1] + badge_spacing_y)
+                    final.paste(badge, (badge_x, badge_y), badge)
 
         # Add username text
         draw = ImageDraw.Draw(final)
