@@ -1147,95 +1147,84 @@ class UserCommands(MixinMeta, ABC):
         # Add the view to the message
         await message.edit(view=view)
 
-@commands.command(name="newpfback")
-@commands.guild_only()
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def new_get_profile_back(self, ctx: commands.Context, *, user: discord.Member = None):
-    """View the back of your profile"""
-    if not user:
-        user = ctx.author
-    if user.bot:
-        return await ctx.send("Bots can't have profiles!")
+    @commands.command(name="newpfback")
+    @commands.guild_only()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def new_get_profile_back(self, ctx: commands.Context, *, user: discord.Member = None):
+        """View the back of your profile"""
+        if not user:
+            user = ctx.author
+        if user.bot:
+            return await ctx.send("Bots can't have profiles!")
 
-    gid = ctx.guild.id
-    if gid not in self.data:
-        await self.initialize()
+        gid = ctx.guild.id
+        if gid not in self.data:
+            await self.initialize()
 
-    conf = self.data[gid]
-    users = conf["users"]
-    user_id = str(user.id)
-    if user_id not in users:
-        return await ctx.send("No information available yet!")
+        conf = self.data[gid]
+        users = conf["users"]
+        user_id = str(user.id)
+        if user_id not in users:
+            return await ctx.send("No information available yet!")
 
-    p = users[user_id]
-    level: int = p["level"]
-    stars: int = p["stars"]  # Int
-    messages: int = p["messages"]
-    voice: int = p["voice"]
-    bg = p["background"]
-    font = p["font"]
-    blur = p["blur"]
+        p = users[user_id]
+        level: int = p["level"]
+        stars: int = p["stars"]  # Int
+        messages: int = p["messages"]
+        voice: int = p["voice"]
+        bg = p["background"]
+        font = p["font"]
+        blur = p["blur"]
 
-    # The new_rank and colors setup is assumed to be the same for the back of the profile.
-    new_rank = "Desconocido"  # Default rank
-    if level == 0:
-        new_rank = "Desconocido"
-    elif 1 <= level <= 4:
-        new_rank = "Principiante"
-    elif 5 <= level <= 7:
-        new_rank = "Alto"
-    elif 8 <= level <= 14:
-        new_rank = "Avanzado"
-    elif 15 <= level <= 19:
-        new_rank = "Élite"
-    elif 20 <= level <= 24:
-        new_rank = "Experto"
-    elif level >= 25:
-        new_rank = "Maestro"
+        # The new_rank and colors setup is assumed to be the same for the back of the profile.
+        new_rank = "Desconocido"  # Default rank
+        if level == 0:
+            new_rank = "Desconocido"
+        elif 1 <= level <= 4:
+            new_rank = "Principiante"
+        elif 5 <= level <= 7:
+            new_rank = "Alto"
+        elif 8 <= level <= 14:
+            new_rank = "Avanzado"
+        elif 15 <= level <= 19:
+            new_rank = "Élite"
+        elif 20 <= level <= 24:
+            new_rank = "Experto"
+        elif level >= 25:
+            new_rank = "Maestro"
 
-    async with ctx.typing():
-        colors = users[user_id]["colors"]
-        usercolors = {
-            "base": hex_to_rgb(str(user.colour)),
-            "name": hex_to_rgb(colors["name"]) if colors["name"] else None,
-            "stat": hex_to_rgb(colors["stat"]) if colors["stat"] else None,
-            "levelbar": hex_to_rgb(colors["levelbar"]) if colors["levelbar"] else None,
-        }
+        async with ctx.typing():
+            colors = users[user_id]["colors"]
+            usercolors = {
+                "base": hex_to_rgb(str(user.colour)),
+                "name": hex_to_rgb(colors["name"]) if colors["name"] else None,
+                "stat": hex_to_rgb(colors["stat"]) if colors["stat"] else None,
+                "levelbar": hex_to_rgb(colors["levelbar"]) if colors["levelbar"] else None,
+            }
 
-        args = {
-            "user_name": user.name,  # username with discriminator
-            "bg_image": bg,
-            "stars": stars,
-            "profile_image": user.display_avatar.url if hasattr(user, 'display_avatar') else user.avatar_url,
-            "level": level,
-            "messages": humanize_number(messages),
-            "voice": time_formatter(voice),
-            "new_rank": new_rank,  # This is used for consistency but may not be necessary for the back profile
-            "colors": usercolors,
-            "font_name": font,
-            "render_gifs": self.render_gifs,
-            "blur": blur,
-        }
+            args = {
+                "user_name": user.name,  # username with discriminator
+                "bg_image": bg,
+                "stars": stars,
+                "profile_image": user.display_avatar.url if hasattr(user, 'display_avatar') else user.avatar_url,
+                "level": level,
+                "messages": humanize_number(messages),
+                "voice": time_formatter(voice),
+                "new_rank": new_rank,  # This is used for consistency but may not be necessary for the back profile
+                "colors": usercolors,
+                "font_name": font,
+                "render_gifs": self.render_gifs,
+                "blur": blur,
+            }
 
-    # Generate the back of the profile
-    profile_back_image = self.generate_profile_back(
-        bg_image=args["bg_image"],
-        profile_image=args["profile_image"],
-        user_name=args["user_name"],
-        colors=args["colors"],
-        font_name=args["font_name"],
-        render_gifs=args["render_gifs"],
-        blur=args["blur"]
-    )
+        # Here we assume generate_profile_back exists and works similarly to generate_profile_new
+        # but tailored for generating the back side of the profile.
+        file = await self.generate_profile_back(**args)
+        if not file:
+            return await ctx.send("Failed to generate the back of the profile image :( try again in a bit")
 
-    # Save the generated image to a BytesIO buffer
-    with BytesIO() as image_binary:
-        profile_back_image.save(image_binary, 'PNG')
-        image_binary.seek(0)
-        discord_file = discord.File(fp=image_binary, filename="profile_back.png")
-    
         # Send the generated back of the profile
-        await ctx.reply(file=discord_file)
+        await ctx.reply(file=file)
 
     @commands.command(name="prestige")
     @commands.guild_only()
