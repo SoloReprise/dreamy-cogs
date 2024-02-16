@@ -34,7 +34,11 @@ from leveluplegacy.utils.formatter import (
 from .abc import MixinMeta
 
 # from .generator import Generator
-        
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger('discord')
+logger.setLevel(logging.DEBUG)
+
 if version_info >= VersionInfo.from_str("3.5.0"):
     from .dpymenu import DEFAULT_CONTROLS, menu
 
@@ -1108,48 +1112,52 @@ class UserCommands(MixinMeta, ABC):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def new_get_profile_back(self, ctx: commands.Context, *, user: discord.Member = None):
         """View the back of your profile"""
-        if not user:
-            user = ctx.author
-        if user.bot:
-            return await ctx.send("Bots can't have profiles!")
+        try:
+            if not user:
+                user = ctx.author
+            if user.bot:
+                return await ctx.send("Bots can't have profiles!")
 
-        gid = ctx.guild.id
-        if gid not in self.data:
-            await self.initialize()
+            gid = ctx.guild.id
+            if gid not in self.data:
+                await self.initialize()
 
-        conf = self.data[gid]
-        users = conf["users"]
-        user_id = str(user.id)
-        if user_id not in users:
-            return await ctx.send("No information available yet!")
+            conf = self.data[gid]
+            users = conf["users"]
+            user_id = str(user.id)
+            if user_id not in users:
+                return await ctx.send("No information available yet!")
 
-        p = users[user_id]
-        async with ctx.typing():
-            args = {
-                "bg_image": p.get("background"),
-                "profile_image": user.display_avatar.url,
-                "user_name": user.name,
-                "colors": {
-                    "base": self.hex_to_rgb(str(user.colour)),
-                    "name": self.hex_to_rgb(p["colors"]["name"]) if p["colors"] and "name" in p["colors"] else None,
-                    "stat": self.hex_to_rgb(p["colors"]["stat"]) if p["colors"] and "stat" in p["colors"] else None,
-                    "levelbar": self.hex_to_rgb(p["colors"]["levelbar"]) if p["colors"] and "levelbar" in p["colors"] else None,
-                },
-                "font_name": p.get("font"),
-                "render_gifs": p.get("render_gifs", False),
-                "blur": p.get("blur", False)
-            }
+            p = users[user_id]
+            async with ctx.typing():
+                args = {
+                    "bg_image": p.get("background"),
+                    "profile_image": user.display_avatar.url,
+                    "user_name": user.name,
+                    "colors": {
+                        "base": self.hex_to_rgb(str(user.colour)),
+                        "name": self.hex_to_rgb(p["colors"]["name"]) if p["colors"] and "name" in p["colors"] else None,
+                        "stat": self.hex_to_rgb(p["colors"]["stat"]) if p["colors"] and "stat" in p["colors"] else None,
+                        "levelbar": self.hex_to_rgb(p["colors"]["levelbar"]) if p["colors"] and "levelbar" in p["colors"] else None,
+                    },
+                    "font_name": p.get("font"),
+                    "render_gifs": p.get("render_gifs", False),
+                    "blur": p.get("blur", False)
+                }
 
-            # Generate the profile back image
-            image = await asyncio.get_running_loop().run_in_executor(None, functools.partial(self.generate_profile_back, **args))
+                # Generate the profile back image
+                image = await asyncio.get_running_loop().run_in_executor(None, functools.partial(self.generate_profile_back, **args))
 
-            # Save and send the generated image
-            with BytesIO() as image_binary:
-                image.save(image_binary, 'PNG')
-                image_binary.seek(0)
-                discord_file = discord.File(fp=image_binary, filename="profile_back.png")
-                await ctx.send(file=discord_file)
-                
+                # Save and send the generated image
+                with BytesIO() as image_binary:
+                    image.save(image_binary, 'PNG')
+                    image_binary.seek(0)
+                    discord_file = discord.File(fp=image_binary, filename="profile_back.png")
+                    await ctx.send(file=discord_file)
+        except Exception as e:
+            logger.exception("An error occurred in the 'newpfback' command:", exc_info=e)
+            await ctx.send("An unexpected error occurred. Please contact the administrator.")
+            
     @commands.command(name="prestige")
     @commands.guild_only()
     @commands.bot_has_permissions(embed_links=True)
