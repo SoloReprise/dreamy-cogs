@@ -1397,3 +1397,31 @@ class UserCommands(MixinMeta, ABC):
         )
         embed.description = new_desc
         await ctx.send(embed=embed)
+
+    @commands.group(name="pfadmin")
+    @commands.has_permissions(administrator=True)  # Ensure only admins can use this command
+    async def pfadmin(self, ctx):
+        """Admin commands for profile management."""
+        if ctx.invoked_subcommand is None:
+            await ctx.send("Invalid pfadmin command passed.")
+
+    @pfadmin.command(name="pokelist")
+    async def pokelist(self, ctx, user: discord.Member = None):
+        """Displays the list of Pokémon badges a user has."""
+        if user is None:
+            await ctx.send("You need to specify a user.")
+            return
+        
+        # Assuming user data is stored in a way that each user has a 'pokedex' attribute
+        # Adjust this part based on how you store your data
+        gid = str(ctx.guild.id)
+        uid = str(user.id)
+        user_data = self.data.get(gid, {}).get("users", {}).get(uid, {})
+        pokedex = user_data.get("pokedex", [])
+        
+        if not pokedex:
+            await ctx.send(f"{user.display_name} has no Pokémon badges.")
+        else:
+            # Format the message with the list of Pokémon badges
+            badges_list = ", ".join(pokedex)
+            await ctx.send(f"{user.display_name} has the following Pokémon badges: {badges_list}")
