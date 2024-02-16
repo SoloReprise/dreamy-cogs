@@ -50,36 +50,28 @@ _ = Translator("LevelUp", __file__)
 
 
 class ProfileSwitchView(discord.ui.View):
-    def __init__(self, user: discord.Member, args: dict, bot, original_message: discord.Message, current_view="front"):
-        super().__init__()
-        self.user = user
-        self.args = args
-        self.bot = bot
-        self.original_message = original_message
-        self.current_view = current_view
-
-    @discord.ui.button(label="Ver perfil", style=discord.ButtonStyle.primary, custom_id="view_profile")
     async def view_profile(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Deleting the original message
-        await self.original_message.delete()
-        # Checking the current view and calling the appropriate method
-        if self.current_view == "back":
-            file = await self.bot.new_get_profile_direct(interaction, self.user)
-            self.current_view = "front"
-            button.label = "Ver medallas"
+        # Determine which button was pressed based on the button's label or custom_id (if set)
+        if button.label == "Ver medallas":
+            # Assuming `self.bot.new_get_profile_back_direct` is the method that corresponds to !newpfback functionality
+            file = await self.bot.new_get_profile_back(interaction.user)
+        elif button.label == "Ver perfil":
+            # Assuming `self.bot.new_get_profile_direct` is the method that corresponds to !newpf functionality
+            file = await self.bot.new_get_profile(interaction.user)
         else:
-            file = await self.bot.new_get_profile_back_direct(interaction, self.user)
-            self.current_view = "back"
-            button.label = "Ver perfil"
-        # Editing the message with the new view and sending the file
-        await interaction.response.send_message(file=file, view=self)
-        # Update button label dynamically if needed
-        await self.update_button_labels()
+            # If the button doesn't match the expected labels, you can log this or handle it as needed
+            return
+
+        # Delete the original message if possible
+        if interaction.message:
+            await interaction.message.delete()
+
+        # Send the new message with the image
+        await interaction.response.send_message(file=file, ephemeral=True)
 
     async def update_button_labels(self):
-        for child in self.children:
-            if isinstance(child, discord.ui.Button):
-                child.label = "Ver perfil" if self.current_view == "back" else "Ver medallas"
+        # This method can be used to dynamically update button labels if needed
+        pass
 
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
