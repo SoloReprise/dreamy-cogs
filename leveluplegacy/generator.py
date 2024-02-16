@@ -1066,15 +1066,15 @@ class Generator(MixinMeta, ABC):
                     badge_y = badge_start_y + (index // 9) * (badge_size[1] + badge_spacing_y)
                     final.paste(badge, (badge_x, badge_y), badge)
 
+        # Assuming 'card' is now your base image, prepare 'final' early
+        final = card.copy()  # Use a copy of 'card' as the base for 'final'
+
         # Load the overlay image
-        overlay_path = os.path.join(self.path, "overlay", "overlay_back.png")  # Use overlay_back.png
+        overlay_path = os.path.join(self.path, "overlay", "overlay_back.png")
         overlay = Image.open(overlay_path).convert("RGBA")
-
-        # Resize overlay to match the card size
         overlay = overlay.resize(card.size, Image.Resampling.LANCZOS)
-
-        # Composite the overlay over the card
-        card = Image.alpha_composite(card, overlay)
+        # Composite the overlay over the card to create the final base image
+        final = Image.alpha_composite(final, overlay)
 
         user_name = user_name.upper()
 
