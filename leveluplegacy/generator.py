@@ -1064,7 +1064,7 @@ class Generator(MixinMeta, ABC):
 
         # Coord setup
         name_y = 95  # Adjust if needed for visual appeal
-        name_x = 75  # Adjust if needed for visual appeal
+        name_x = 105  # Adjust if needed for visual appeal
 
         # Get base font
         base_font = self.font
