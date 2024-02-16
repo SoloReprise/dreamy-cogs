@@ -49,53 +49,36 @@ _ = Translator("LevelUp", __file__)
 
 
 class ProfileSwitchView(discord.ui.View):
-    def __init__(self, user: discord.Member, args: dict, bot, message: discord.Message):
-        super().__init__(timeout=180)  # Adjust the timeout as needed
+    def __init__(self, user: discord.Member, args: dict, bot, current_view="front"):
+        super().__init__()
         self.user = user
         self.args = args
         self.bot = bot
-        self.message = message
-        self.front = True  # Start with the front view of the profile
+        self.current_view = current_view  # Track the current view ("front" or "back")
 
-    @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.primary, custom_id="switch_profile_view")
-    async def switch_view(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Acknowledge the interaction to prevent "interaction failed" messages
-        await interaction.response.defer()
+    async def switch_profile_view(self):
+        # Toggle the current view and generate the appropriate profile
+        self.current_view = "back" if self.current_view == "front" else "front"
+        if self.current_view == "front":
+            file = await self.bot.get_or_fetch_profile(self.user, self.args, full=True, use_new_generator=True)
+        else:
+            file = await self.bot.generate_profile_back(**self.args)
+        return file
 
-        # Toggle the profile view
-        self.front = not self.front
-
-        # Generate the appropriate profile image based on the current view
+    @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.primary)
+    async def toggle_view(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
-            if self.front:
-                file = await self.bot.get_or_fetch_profile(self.user, self.args, full=True, use_new_generator=True)
+            file = await self.switch_profile_view()
+            if file:
+                # Update button label based on current view
+                button.label = "Ver perfil" if self.current_view == "back" else "Ver medallas"
+                # Respond to the interaction by updating the message
+                await interaction.response.edit_message(content="", attachments=[file], view=self)
             else:
-                file = await self.bot.generate_profile_back(**self.args)
-            
-            # Check if the file was generated successfully
-            if not file:
-                await interaction.followup.send("Failed to generate the profile image. Please try again.", ephemeral=True)
-                return
-            
-            # Delete the previous message to avoid clutter
-            await self.message.delete()
-
-            # Send a new message with the updated profile view
-            new_message = await interaction.followup.send(file=file, wait=True)
-            
-            # Update the button label based on the current view
-            button.label = "Ver perfil" if self.front else "Ver medallas"
-
-            # Update the message reference in the view to the new message
-            self.message = new_message
-
-            # Update the view to reflect the new button label
-            await new_message.edit(view=self)
-
+                await interaction.response.send_message("Failed to generate the profile image. Please try again.", ephemeral=True)
         except Exception as e:
-            # Log the error for debugging
-            print(f"Failed to switch profile view: {e}")
-            await interaction.followup.send("There was an error switching the profile view. Please try again.", ephemeral=True)
+            print(f"Error switching profile view: {e}")
+            await interaction.response.send_message("There was an error switching the profile view. Please try again.", ephemeral=True)
 
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
@@ -1147,18 +1130,9 @@ class UserCommands(MixinMeta, ABC):
                 "blur": blur,
             }
 
-        file = await self.get_or_fetch_profile(user, args, full=True, use_new_generator=True)
-        if not file:
-            return await ctx.send("Failed to generate profile image :( try again in a bit")
-
-        # Send the initial message with the profile view
-        message = await ctx.reply(file=file)
-
-        # Create the view and pass the message to it
-        view = ProfileSwitchView(user, args, self, message)
-
-        # Add the view to the message
-        await message.edit(view=view)
+        initial_file = await self.get_or_fetch_profile(user, args, full=True, use_new_generator=True)
+        view = ProfileSwitchView(user, args, self)
+        await ctx.send(file=initial_file, view=view)
 
     @commands.command(name="prestige")
     @commands.guild_only()
