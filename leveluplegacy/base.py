@@ -1162,7 +1162,7 @@ class UserCommands(MixinMeta, ABC):
                     await ctx.send(file=discord_file)
         except Exception as e:
             await ctx.send(f"Error: {str(e)}")  # For debugging purposes only; remove in production
-      
+            
     @commands.command(name="prestige")
     @commands.guild_only()
     @commands.bot_has_permissions(embed_links=True)

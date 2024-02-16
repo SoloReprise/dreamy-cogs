@@ -1014,6 +1014,16 @@ class Generator(MixinMeta, ABC):
         blur: bool = False,
         pokedex: list = None  # Add pokedex parameter
     ):
+            # Diagnostic prints to check the received arguments
+        print(f"Received pokedex: {pokedex}, Type: {type(pokedex)}")
+        
+        # Your existing code to generate the profile back...
+        
+        if pokedex:
+            print(f"Processing pokedex with length: {len(pokedex)}")
+            for index, pokemon in enumerate(pokedex):
+                print(f"Processing pokemon: {pokemon}, Index: {index}")
+                # Your existing code to process each pokemon...
         # Get profile pic
         if profile_image:
             pfp_image = self.get_image_content_from_url(str(profile_image))
