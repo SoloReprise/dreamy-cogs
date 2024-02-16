@@ -68,15 +68,34 @@ class ProfileSwitchView(discord.ui.View):
 
     @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.primary)
     async def toggle_view(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Your existing toggle_view logic...
+        # Determine the action based on the button label
+        if button.label == "Ver medallas":
+            # Set to display the back of the profile next
+            self.current_view = "back"
+            button.label = "Ver perfil"  # Update button label for the next view
+            # Simulate calling the back profile command
+            ctx = await self.bot.get_context(interaction.message)
+            ctx.author = self.user
+            await self.bot.new_get_profile_back(ctx, user=self.user)
+        else:
+            # Set to display the front of the profile next
+            self.current_view = "front"
+            button.label = "Ver medallas"  # Update button label for the next view
+            # Simulate calling the front profile command
+            ctx = await self.bot.get_context(interaction.message)
+            ctx.author = self.user
+            await self.bot.new_get_profile(ctx, user=self.user)
 
-        # Update the button label for the current state directly
-        button.label = "Ver perfil" if self.current_view == "back" else "Ver medallas"
-        self.original_message = None  # Reset original message reference
+        # Since we cannot directly delete the message within this interaction,
+        # we instruct to delete the original message through the follow-up action.
+        await interaction.followup.send("Updating profile view...", ephemeral=True)
+        await self.original_message.delete()
 
-        # Force view update to reflect the new label
-        await interaction.message.edit(view=self)
-        
+        # Disable further interactions to prevent issues with stale references
+        for item in self.children:
+            item.disabled = True
+        await interaction.message.edit(view=None)
+
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
     # Generate level up image
