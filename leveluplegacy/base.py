@@ -1156,7 +1156,7 @@ class UserCommands(MixinMeta, ABC):
 
         # Send the message with the view
         try:
-            await ctx.send(file=initial_file, view=view)
+            await ctx.reply(file=initial_file, view=view)
         except Exception as e:
             log.error(f"Failed to send profile pic with view: {e}")
 
