@@ -62,28 +62,20 @@ class ProfileSwitchView(discord.ui.View):
 
     @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.primary)
     async def toggle_view_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Initially defer the interaction
+        # Defer the interaction first
         await interaction.response.defer()
 
         # Delete the original message
-        await self.original_message.delete()
+        if self.original_message:
+            await self.original_message.delete()
 
-        # Prepare to invoke the corresponding command method
+        # Determine the new view and invoke the appropriate direct method
         if self.current_view == "front":
-            # If the current view is the front, switch to back
             self.current_view = "back"
-            button.label = "Ver perfil"
-            # Directly invoke the method for generating and sending the back profile
             await self.bot.new_get_profile_back_direct(interaction, self.user)
         else:
-            # If the current view is the back, switch to front
             self.current_view = "front"
-            button.label = "Ver medallas"
-            # Directly invoke the method for generating and sending the front profile
             await self.bot.new_get_profile_direct(interaction, self.user)
-
-        # No need to edit the original message as it's been deleted
-        # The new profile view will be sent as a new message
 
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
