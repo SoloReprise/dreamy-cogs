@@ -54,10 +54,10 @@ class ProfileSwitchView(discord.ui.View):
         # Determine which button was pressed based on the button's label or custom_id (if set)
         if button.label == "Ver medallas":
             # Assuming `self.bot.new_get_profile_back_direct` is the method that corresponds to !newpfback functionality
-            file = await self.bot.new_get_profile_back(interaction.user)
+            file = await self.bot.new_get_profile_back_direct(interaction.user)
         elif button.label == "Ver perfil":
             # Assuming `self.bot.new_get_profile_direct` is the method that corresponds to !newpf functionality
-            file = await self.bot.new_get_profile(interaction.user)
+            file = await self.bot.new_get_profile_direct(interaction.user)
         else:
             # If the button doesn't match the expected labels, you can log this or handle it as needed
             return
