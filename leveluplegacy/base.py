@@ -48,104 +48,6 @@ else:
 log = logging.getLogger("red.vrt.levelup.commands")
 _ = Translator("LevelUp", __file__)
 
-
-
-class MyView(View):
-    def __init__(self, ctx, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.ctx = ctx
-
-    # This method handles the "Ver medallas" button click
-    @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.grey)
-    async def ver_medallas_button_callback(self, button, interaction):
-        # Ensure the user clicking the button is the one who initiated the command
-        if interaction.user != self.ctx.author:
-            await interaction.response.send_message("No tienes permiso para usar este botón.", ephemeral=True)
-            return
-
-        await interaction.response.defer()
-        await interaction.message.delete()
-        await self.ver_medallas_logic(self.ctx)
-
-    # This method handles the "Ver perfil" button click
-    @discord.ui.button(label="Ver perfil", style=discord.ButtonStyle.grey)
-    async def ver_perfil_button_callback(self, button, interaction):
-        # Ensure the user clicking the button is the one who initiated the command
-        if interaction.user != self.ctx.author:
-            await interaction.response.send_message("No tienes permiso para usar este botón.", ephemeral=True)
-            return
-
-        await interaction.response.defer()
-        await interaction.message.delete()
-        await self.ver_perfil_logic(self.ctx)
-
-    async def ver_medallas_logic(self, ctx):
-        # Assuming self.data, self.initialize, hex_to_rgb, self.get_or_fetch_profile, and ProfileSwitchView are accessible
-        user = ctx.author  # Operate on the command invoker
-        gid = ctx.guild.id
-
-        if gid not in self.data:
-            await self.initialize()
-
-        conf = self.data[gid]
-        users = conf["users"]
-        user_id = str(user.id)
-        if user_id not in users:
-            await ctx.send("No information available yet!")
-            return
-
-        # Preparing arguments for profile back generation
-        p = users[user_id]
-        args = {
-            "bg_image": p.get("background"),
-            "profile_image": user.display_avatar.url,
-            "user_name": user.name,
-            "colors": {
-                "base": hex_to_rgb(str(user.colour)),
-                "name": hex_to_rgb(p["colors"]["name"]) if p["colors"] and "name" in p["colors"] else None,
-                "stat": hex_to_rgb(p["colors"]["stat"]) if p["colors"] and "stat" in p["colors"] else None,
-                "levelbar": hex_to_rgb(p["colors"]["levelbar"]) if p["colors"] and "levelbar" in p["colors"] else None,
-            },
-            "font_name": p.get("font"),
-            "render_gifs": p.get("render_gifs", False),
-            "blur": p.get("blur", False)
-        }
-
-        # Replace direct command logic with appropriate image generation and sending
-        # Assuming generate_profile_back is a method that generates the profile back image
-        profile_back_image = await self.generate_profile_back(**args)  # Ensure this method exists and is async
-
-        # Send the generated profile back image
-        await ctx.send(file=discord.File(fp=profile_back_image, filename="profile_back.png"))
-
-    async def ver_perfil_logic(self, ctx):
-        # Logic similar to newpf command with necessary modifications for direct use here
-        user = ctx.author  # Operate on the command invoker
-        gid = ctx.guild.id
-
-        if gid not in self.data:
-            await self.initialize()
-
-        conf = self.data[gid]
-        users = conf["users"]
-        user_id = str(user.id)
-        if user_id not in users:
-            await ctx.send("No information available yet!")
-            return
-
-        # Extract necessary data from users dict as in newpf command
-        # Preparing arguments for profile generation
-        p = users[user_id]
-        # ... (repeat the argument preparation as in newpf command)
-
-        # Generate and send the profile image directly
-        file = await self.get_or_fetch_profile(user, args, full=True, use_new_generator=True)
-        if not file:
-            await ctx.send("Failed to generate profile image :( try again in a bit")
-            return
-
-        await ctx.send(file=file)
-
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
     # Generate level up image
@@ -1204,7 +1106,7 @@ class UserCommands(MixinMeta, ABC):
         message = await ctx.reply(file=file)
 
         # Create the view and pass the message to it
-        view = ProfileSwitchView(user, args, self, message)
+        # view = ProfileSwitchView(user, args, self, message)
 
         # Add the view to the message
         await message.edit(view=view)
@@ -1257,7 +1159,7 @@ class UserCommands(MixinMeta, ABC):
             discord_file = discord.File(fp=image_binary, filename="profile_back.png")
 
             # Initialize the ProfileSwitchView with current_view set to "back"
-            view = ProfileSwitchView(user=user, args=args, bot=self, original_message=None, current_view="back")
+            # view = ProfileSwitchView(user=user, args=args, bot=self, original_message=None, current_view="back")
 
             # Send the generated back of the profile with the view attached
             message = await ctx.reply(file=discord_file, view=view)
