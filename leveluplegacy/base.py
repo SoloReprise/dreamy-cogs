@@ -66,23 +66,26 @@ class ProfileSwitchView(discord.ui.View):
     async def toggle_view(self, interaction: discord.Interaction, button: discord.ui.Button):
         # Determine the new view to generate based on the current view
         new_view = "back" if self.current_view == "front" else "front"
+        self.current_view = new_view  # Update the current view state
 
         # Update the button label accordingly
         button.label = "Ver perfil" if new_view == "back" else "Ver medallas"
-        
-        # Disable the button to prevent multiple clicks during processing
-        button.disabled = True
-        await interaction.response.edit_message(view=self)
+        button.disabled = False  # Re-enable the button after changing the label
 
-        # Delete the original message to avoid clutter
-        await self.original_message.delete()
+        # Acknowledge the interaction
+        await interaction.response.defer(edit_origin=True)
 
-        # Depending on the new view, call the appropriate function to generate and send the new profile view
+        # Generate and send the new profile view without deleting the original message
         if new_view == "front":
-            await self.bot.new_get_profile(interaction, user=self.user)
+            # Simulate the new_get_profile logic
+            file = await self.bot.get_or_fetch_profile(self.user, self.args, full=True, use_new_generator=True)
         else:
-            # Assuming generate_profile_back is a method similar to new_get_profile but for generating the back of the profile
-            await self.bot.new_get_profile_back(interaction, self.user)
+            # Simulate the new_get_profile_back logic
+            file = await self.bot.generate_profile_back(**self.args)
+        
+        # Since interaction.followup.send doesn't edit the original message to replace it,
+        # consider sending a new message if replacing the file directly doesn't work.
+        await interaction.followup.send(file=file, ephemeral=False)
                     
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
@@ -1235,7 +1238,8 @@ class UserCommands(MixinMeta, ABC):
             discord_file = discord.File(fp=image_binary, filename="profile_back.png")
         
             # Send the generated back of the profile
-            await ctx.reply(file=discord_file)
+            view = ProfileSwitchView(user, args, self, message, current_view="back")
+            await ctx.send(file=file, view=view)  # Send or edit the message with the back profile and updated view
 
     @commands.command(name="prestige")
     @commands.guild_only()
