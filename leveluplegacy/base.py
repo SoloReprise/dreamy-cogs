@@ -60,16 +60,21 @@ class ProfileSwitchView(discord.ui.View):
 
     @discord.ui.button(label="Ver perfil", style=discord.ButtonStyle.primary, custom_id="view_profile")
     async def view_profile(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer()
-        if self.current_view == "front":
-            await self.bot.new_get_profile_back_direct(interaction, self.user)
-            self.current_view = "back"
+        # Deleting the original message
+        await self.original_message.delete()
+        # Checking the current view and calling the appropriate method
+        if self.current_view == "back":
+            file = await self.bot.new_get_profile_direct(interaction, self.user)
+            self.current_view = "front"
             button.label = "Ver medallas"
         else:
-            await self.bot.new_get_profile_direct(interaction, self.user)
-            self.current_view = "front"
+            file = await self.bot.new_get_profile_back_direct(interaction, self.user)
+            self.current_view = "back"
             button.label = "Ver perfil"
-        await interaction.message.edit(view=self)
+        # Editing the message with the new view and sending the file
+        await interaction.response.send_message(file=file, view=self)
+        # Update button label dynamically if needed
+        await self.update_button_labels()
 
     async def update_button_labels(self):
         for child in self.children:
