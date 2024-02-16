@@ -50,28 +50,34 @@ _ = Translator("LevelUp", __file__)
 
 
 class ProfileSwitchView(discord.ui.View):
-    async def view_profile(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Determine which button was pressed based on the button's label or custom_id (if set)
-        if button.label == "Ver medallas":
-            # Assuming `self.bot.new_get_profile_back_direct` is the method that corresponds to !newpfback functionality
-            file = await self.bot.new_get_profile_back_direct(interaction.user)
-        elif button.label == "Ver perfil":
-            # Assuming `self.bot.new_get_profile_direct` is the method that corresponds to !newpf functionality
-            file = await self.bot.new_get_profile_direct(interaction.user)
+    def __init__(self, user: discord.Member, args: dict, bot, original_message: discord.Message, current_view="front"):
+        super().__init__()
+        self.user = user
+        self.args = args
+        self.bot = bot
+        self.current_view = current_view
+        # Set the initial label based on the current view.
+        self.children[0].label = "Ver perfil" if self.current_view == "back" else "Ver medallas"
+        self.original_message = original_message
+
+    @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.primary, custom_id="profile_view_toggle")
+    async def toggle_view_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # Determine the new view based on the current state
+        new_view = "back" if self.current_view == "front" else "front"
+        self.current_view = new_view  # Update the current view
+
+        # Correctly handle the interaction and generate/send the new profile image
+        if new_view == "back":
+            await self.bot.new_get_profile_back_direct(interaction, self.user)
         else:
-            # If the button doesn't match the expected labels, you can log this or handle it as needed
-            return
+            await self.bot.new_get_profile_direct(interaction, self.user)
 
-        # Delete the original message if possible
-        if interaction.message:
-            await interaction.message.delete()
+        # Re-enable the button and update its label accordingly
+        button.label = "Ver perfil" if new_view == "back" else "Ver medallas"
+        button.disabled = False
 
-        # Send the new message with the image
-        await interaction.response.send_message(file=file, ephemeral=True)
-
-    async def update_button_labels(self):
-        # This method can be used to dynamically update button labels if needed
-        pass
+        # Update the interaction message to reflect the changes
+        await interaction.response.edit_message(view=self)
 
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
@@ -1193,78 +1199,14 @@ class UserCommands(MixinMeta, ABC):
             view.original_message = message
 
     async def new_get_profile_direct(self, interaction: discord.Interaction, user: discord.Member):
-        # Ensure data is available
-        gid = interaction.guild_id
-        if gid not in self.data:
-            await self.initialize()
-
-        conf = self.data[gid]
-        users = conf["users"]
-        user_id = str(user.id)
-        if user_id not in users:
-            await interaction.followup.send("No information available yet!")
-            return
-
-        p = users[user_id]
-        args = {
-            "user_name": user.name,
-            "bg_image": p.get("background"),
-            "profile_image": user.display_avatar.url,
-            "level": p["level"],
-            "messages": humanize_number(p["messages"]),
-            "voice": time_formatter(p["voice"]),
-            "new_rank": self.calculate_new_rank(p["level"]),  # Adapted for simplicity
-            "colors": {
-                "base": hex_to_rgb(str(user.colour)),
-                "name": hex_to_rgb(p["colors"]["name"]) if p["colors"] and "name" in p["colors"] else None,
-                "stat": hex_to_rgb(p["colors"]["stat"]) if p["colors"] and "stat" in p["colors"] else None,
-                "levelbar": hex_to_rgb(p["colors"]["levelbar"]) if p["colors"] and "levelbar" in p["colors"] else None,
-            },
-            "font_name": p.get("font"),
-            "render_gifs": p.get("render_gifs", False),
-            "blur": p.get("blur", False)
-        }
-
-        # Generate profile image using existing method in an async context
-        img = await asyncio.to_thread(self.generate_profile, **args)
-
-        # Convert PIL image to Discord file and send
-        with BytesIO() as image_binary:
-            img.save(image_binary, 'PNG')
-            image_binary.seek(0)
-            discord_file = discord.File(fp=image_binary, filename="profile.png")
-            await interaction.followup.send(file=discord_file)
+        pseudo_ctx = await get_pseudo_context(self, interaction, user)
+        # Assuming new_get_profile can accept a pseudo_ctx and work with it
+        await self.new_get_profile(pseudo_ctx, user=user)
 
     async def new_get_profile_back_direct(self, interaction: discord.Interaction, user: discord.Member):
-        # Similar setup as new_get_profile_direct, but call generate_profile_back
-        gid = interaction.guild_id
-        # Ensure data and conf setup
-
-        p = users[user_id]
-        args = {
-            "bg_image": p.get("background"),
-            "profile_image": user.display_avatar.url,
-            "user_name": user.name,
-            "colors": {
-                "base": hex_to_rgb(str(user.colour)),
-                "name": hex_to_rgb(p["colors"]["name"]) if p["colors"] and "name" in p["colors"] else None,
-                "stat": hex_to_rgb(p["colors"]["stat"]) if p["colors"] and "stat" in p["colors"] else None,
-                "levelbar": hex_to_rgb(p["colors"]["levelbar"]) if p["colors"] and "levelbar" in p["colors"] else None,
-            },
-            "font_name": p.get("font"),
-            "render_gifs": p.get("render_gifs", False),
-            "blur": p.get("blur", False)
-        }
-
-        # Generate back profile image
-        img = await asyncio.to_thread(self.generate_profile_back, **args)
-
-        # Convert and send
-        with BytesIO() as image_binary:
-            img.save(image_binary, 'PNG')
-            image_binary.seek(0)
-            discord_file = discord.File(fp=image_binary, filename="profile_back.png")
-            await interaction.followup.send(file=discord_file)
+        pseudo_ctx = await get_pseudo_context(self, interaction, user)
+        # Assuming new_get_profile_back can accept a pseudo_ctx and work with it
+        await self.new_get_profile_back(pseudo_ctx, user=user)
 
     @commands.command(name="prestige")
     @commands.guild_only()
