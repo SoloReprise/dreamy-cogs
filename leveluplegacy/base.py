@@ -1398,6 +1398,22 @@ class UserCommands(MixinMeta, ABC):
         embed.description = new_desc
         await ctx.send(embed=embed)
 
+    #PFAMDIN Y POKÉMON-BADGES
+        
+    def add_pokemon_to_user(self, user_id: str, guild_id: str, pokemon_name: str):
+        """Adds a Pokémon to the specified user's pokedex."""
+        # Ensure the data structure exists
+        if guild_id not in self.data:
+            self.data[guild_id] = {"users": {}}
+        if user_id not in self.data[guild_id]["users"]:
+            self.data[guild_id]["users"][user_id] = {"pokedex": []}
+        
+        # Add the Pokémon if it's not already in the user's pokedex
+        if pokemon_name not in self.data[guild_id]["users"][user_id]["pokedex"]:
+            self.data[guild_id]["users"][user_id]["pokedex"].append(pokemon_name)
+            return True
+        return False
+
     @commands.group(name="pfadmin")
     @commands.has_permissions(administrator=True)  # Ensure only admins can use this command
     async def pfadmin(self, ctx):
@@ -1425,3 +1441,25 @@ class UserCommands(MixinMeta, ABC):
             # Format the message with the list of Pokémon badges
             badges_list = ", ".join(pokedex)
             await ctx.send(f"{user.display_name} has the following Pokémon badges: {badges_list}")
+
+    @pfadmin.command(name="addpoke")
+    async def addpoke(self, ctx, user: discord.Member, pokemon_name: str):
+        """Manually awards a Pokémon to a user."""
+        # Ensure the Pokémon exists
+        pokemon_path = os.path.join(self.path, "pokedex", "sprites", f"{pokemon_name}.png")
+        if not os.path.exists(pokemon_path):
+            await ctx.send(f"The Pokémon {pokemon_name} does not exist.")
+            return
+
+        # Ensure user profile is initialized and get their data
+        self.init_user(ctx.guild.id, str(user.id))
+        user_data = self.data[ctx.guild.id]["users"][str(user.id)]
+
+        # Add the Pokémon to the user's pokedex, avoiding duplicates
+        if "pokedex" not in user_data:
+            user_data["pokedex"] = []
+        if pokemon_name not in user_data["pokedex"]:
+            user_data["pokedex"].append(pokemon_name)
+            await ctx.send(f"{pokemon_name} has been successfully added to {user.display_name}'s pokedex.")
+        else:
+            await ctx.send(f"{user.display_name} already has the Pokémon {pokemon_name}.")

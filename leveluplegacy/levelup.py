@@ -3211,6 +3211,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         user_data = self.data[user.guild.id]["users"][str(user.id)].copy()
         if "pokedex" not in user_data:
             user_data["pokedex"] = []  # Initialize with an empty list or with default Pokémon as appropriate
+        self.data[user.guild.id]["users"][str(user.id)]["pokedex"] = user_data["pokedex"]
         txt = (
             f"Experience: {round(user_data['xp'])}\n"
             f"Voice time: {humanize_timedelta(seconds=int(user_data['voice']))}\n"
