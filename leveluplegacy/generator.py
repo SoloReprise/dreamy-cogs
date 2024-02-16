@@ -1059,11 +1059,11 @@ class Generator(MixinMeta, ABC):
         # Load the overlay image
         overlay_path = os.path.join(self.path, "overlay", "overlay_back.png")
         overlay = Image.open(overlay_path).convert("RGBA")
+        print("Overlay loaded successfully.")
         overlay = overlay.resize(card.size, Image.Resampling.LANCZOS)
         # Composite the overlay over the card to create the final base image
         final = Image.alpha_composite(final, overlay)
-        final.save("debug_immediately_after_overlay.png")  # Temporarily save to inspect
-
+        
         user_name = user_name.upper()
 
         # Colors
