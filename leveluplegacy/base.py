@@ -1101,15 +1101,7 @@ class UserCommands(MixinMeta, ABC):
         file = await self.get_or_fetch_profile(user, args, full=True, use_new_generator=True)
         if not file:
             return await ctx.send("Failed to generate profile image :( try again in a bit")
-
-        # Send the initial message with the profile view
-        message = await ctx.reply(file=file)
-
-        # Create the view and pass the message to it
-        # view = ProfileSwitchView(user, args, self, message)
-
-        # Add the view to the message
-        await message.edit(view=view)
+        await ctx.send(file=file)  # Send the file directly
 
     @commands.command(name="newpfback")
     @commands.guild_only()
@@ -1158,14 +1150,10 @@ class UserCommands(MixinMeta, ABC):
             image_binary.seek(0)
             discord_file = discord.File(fp=image_binary, filename="profile_back.png")
 
-            # Initialize the ProfileSwitchView with current_view set to "back"
-            # view = ProfileSwitchView(user=user, args=args, bot=self, original_message=None, current_view="back")
-
-            # Send the generated back of the profile with the view attached
-            message = await ctx.reply(file=discord_file, view=view)
-
-            # Now, update the original_message attribute in the view to associate it with the sent message
-            view.original_message = message
+        file = await self.generate_profile_back_image(user, args)
+        if not file:
+            return await ctx.send("Failed to generate profile back image :( try again in a bit")
+        await ctx.send(file=file)  # Send the file directly
 
     @commands.command(name="prestige")
     @commands.guild_only()
