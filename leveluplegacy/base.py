@@ -1439,9 +1439,10 @@ class UserCommands(MixinMeta, ABC):
             badges_list = ", ".join(pokedex)
             await ctx.send(f"{user.display_name} has the following Pokémon badges: {badges_list}")
 
-    @pfadmin.command(name="addpoke")
-    async def addpoke(self, ctx, user: discord.Member, pokemon_name: str):
-        """Manually awards a Pokémon to a user."""
+@pfadmin.command(name="addpoke")
+async def addpoke(self, ctx, user: discord.Member, pokemon_name: str):
+    """Manually awards a Pokémon to a user."""
+    try:
         # Ensure the Pokémon exists
         pokemon_path = os.path.join(self.path, "pokedex", "sprites", f"{pokemon_name}.png")
         if not os.path.exists(pokemon_path):
@@ -1464,3 +1465,5 @@ class UserCommands(MixinMeta, ABC):
             await ctx.send(f"{pokemon_name} has been successfully added to {user.display_name}'s pokedex.")
         else:
             await ctx.send(f"{user.display_name} already has the Pokémon {pokemon_name}.")
+    except Exception as e:
+        await ctx.send(f"Error occurred: {e}")
