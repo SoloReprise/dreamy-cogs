@@ -1062,6 +1062,7 @@ class Generator(MixinMeta, ABC):
         overlay = overlay.resize(card.size, Image.Resampling.LANCZOS)
         # Composite the overlay over the card to create the final base image
         final = Image.alpha_composite(final, overlay)
+        final.save("debug_immediately_after_overlay.png")  # Temporarily save to inspect
 
         user_name = user_name.upper()
 
