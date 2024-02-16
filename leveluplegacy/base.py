@@ -1184,7 +1184,7 @@ class UserCommands(MixinMeta, ABC):
                 "blur": p.get("blur", False)
             }
 
-        # Invoke the synchronous profile back generation in an async context
+        # Generate the profile back image
         loop = asyncio.get_running_loop()
         profile_back_image = await loop.run_in_executor(None, functools.partial(self.generate_profile_back, **args))
 
@@ -1193,17 +1193,15 @@ class UserCommands(MixinMeta, ABC):
             profile_back_image.save(image_binary, 'PNG')
             image_binary.seek(0)
             discord_file = discord.File(fp=image_binary, filename="profile_back.png")
-            await ctx.reply(file=discord_file)
-        
-        # Initialize the ProfileSwitchView with current_view set to "back"
-        view = ProfileSwitchView(user=user, args=args, bot=self, original_message=None, current_view="back")
-        # Note: We temporarily set original_message to None and will update it after sending the message
 
-        # Send the generated back of the profile with the view attached
-        message = await ctx.reply(file=discord_file, view=view)
+            # Initialize the ProfileSwitchView with current_view set to "back"
+            view = ProfileSwitchView(user=user, args=args, bot=self, original_message=None, current_view="back")
 
-        # Now, update the original_message attribute in the view
-        view.original_message = message
+            # Send the generated back of the profile with the view attached
+            message = await ctx.reply(file=discord_file, view=view)
+
+            # Now, update the original_message attribute in the view to associate it with the sent message
+            view.original_message = message
 
     @commands.command(name="prestige")
     @commands.guild_only()
