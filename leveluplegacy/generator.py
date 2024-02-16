@@ -1063,8 +1063,8 @@ class Generator(MixinMeta, ABC):
         namecolor = colors.get("name", (22, 39, 65))
 
         # Coord setup
-        name_y = 105  # Adjust if needed for visual appeal
-        name_x = 55  # Adjust if needed for visual appeal
+        name_y = 95  # Adjust if needed for visual appeal
+        name_x = 75  # Adjust if needed for visual appeal
 
         # Get base font
         base_font = self.font
@@ -1094,7 +1094,7 @@ class Generator(MixinMeta, ABC):
 
         # Calculate the position to paste the resized profile image
         # Ensure it's centered within the circle
-        profile_position = (55, 105)  # Adjust if needed
+        profile_position = (55, 85)  # Adjust if needed
         profile_pic_holder.paste(profile, profile_position, mask)  # Paste with mask for circular crop
 
         # Profile image is on the background tile now
