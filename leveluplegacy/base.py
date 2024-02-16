@@ -1238,8 +1238,7 @@ class UserCommands(MixinMeta, ABC):
             discord_file = discord.File(fp=image_binary, filename="profile_back.png")
         
             # Send the generated back of the profile
-            view = ProfileSwitchView(user, args, self, message, current_view="back")
-            await ctx.send(file=file, view=view)  # Send or edit the message with the back profile and updated view
+            await ctx.reply(file=discord_file)
 
     @commands.command(name="prestige")
     @commands.guild_only()
