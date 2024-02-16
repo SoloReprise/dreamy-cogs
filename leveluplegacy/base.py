@@ -59,30 +59,44 @@ class ProfileSwitchView(discord.ui.View):
 
     @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.primary, custom_id="switch_profile_view")
     async def switch_view(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # Acknowledge the interaction to prevent "interaction failed" messages
+        await interaction.response.defer()
+
         # Toggle the profile view
         self.front = not self.front
 
-        # Update the button label based on the current view
-        button.label = "Ver perfil" if self.front else "Ver medallas"
-
-        # Acknowledge the interaction
-        await interaction.response.defer()
-
-        # Delete the previous message to avoid clutter
-        await self.message.delete()
-
         # Generate the appropriate profile image based on the current view
-        if self.front:
-            file = await self.bot.get_or_fetch_profile(self.user, self.args, full=True, use_new_generator=True)
-        else:
-            file = await self.bot.generate_profile_back(**self.args)
+        try:
+            if self.front:
+                file = await self.bot.get_or_fetch_profile(self.user, self.args, full=True, use_new_generator=True)
+            else:
+                file = await self.bot.generate_profile_back(**self.args)
+            
+            # Check if the file was generated successfully
+            if not file:
+                await interaction.followup.send("Failed to generate the profile image. Please try again.", ephemeral=True)
+                return
+            
+            # Delete the previous message to avoid clutter
+            await self.message.delete()
 
-        # Send a new message with the updated profile view
-        new_message = await interaction.followup.send(file=file, view=self, wait=True)
+            # Send a new message with the updated profile view
+            new_message = await interaction.followup.send(file=file, wait=True)
+            
+            # Update the button label based on the current view
+            button.label = "Ver perfil" if self.front else "Ver medallas"
 
-        # Update the message reference in the view to the new message
-        self.message = new_message
-        
+            # Update the message reference in the view to the new message
+            self.message = new_message
+
+            # Update the view to reflect the new button label
+            await new_message.edit(view=self)
+
+        except Exception as e:
+            # Log the error for debugging
+            print(f"Failed to switch profile view: {e}")
+            await interaction.followup.send("There was an error switching the profile view. Please try again.", ephemeral=True)
+
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
     # Generate level up image
