@@ -524,22 +524,27 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                     conf[k] = v
 
     def init_user(self, guild_id: int, user_id: str):
-        if user_id in self.data[guild_id]["users"]:
-            return
-        self.data[guild_id]["users"][user_id] = {
-            "xp": 0,
-            "voice": 0,  # Seconds
-            "messages": 0,
-            "level": 0,
-            "prestige": 0,
-            "emoji": None,
-            "stars": 0,
-            "background": None,
-            "full": True,
-            "colors": {"name": "#FFFFFF", "stat": "#FFFFFF", "levelbar": "#FFFFFF"},
-            "font": None,
-            "blur": False,
-        }
+        # Ensure the guild exists in self.data
+        if guild_id not in self.data:
+            self.data[guild_id] = {"users": {}, "other_guild_data": {}}
+
+        # Check if the user already exists; if not, initialize their data
+        if user_id not in self.data[guild_id]["users"]:
+            self.data[guild_id]["users"][user_id] = {
+                "xp": 0,
+                "voice": 0,  # Seconds
+                "messages": 0,
+                "level": 0,
+                "prestige": 0,
+                "emoji": None,
+                "stars": 0,
+                "background": None,
+                "full": True,
+                "colors": {"name": "#FFFFFF", "stat": "#FFFFFF", "levelbar": "#FFFFFF"},
+                "font": None,
+                "blur": False,
+                "pokedex": []  # Initialize the pokedex as an empty list
+            }
 
     def init_user_weekly(self, guild_id: int, user_id: str):
         if user_id in self.data[guild_id]["weekly"]["users"]:
