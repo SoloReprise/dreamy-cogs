@@ -58,26 +58,23 @@ class ProfileSwitchView(discord.ui.View):
         self.original_message = original_message
         self.current_view = current_view
 
-    async def interaction_response(self, interaction: discord.Interaction, new_view: str):
-        # Delete the original message
-        await self.original_message.delete()
-
-        # Generate and send the new profile or back profile image
-        if new_view == "back":
-            file = await self.bot.new_get_profile_back_direct(interaction, self.user)
+    @discord.ui.button(label="Ver perfil", style=discord.ButtonStyle.primary, custom_id="view_profile")
+    async def view_profile(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        if self.current_view == "front":
+            await self.bot.new_get_profile_back_direct(interaction, self.user)
+            self.current_view = "back"
+            button.label = "Ver medallas"
         else:
-            file = await self.bot.new_get_profile_direct(interaction, self.user)
+            await self.bot.new_get_profile_direct(interaction, self.user)
+            self.current_view = "front"
+            button.label = "Ver perfil"
+        await interaction.message.edit(view=self)
 
-        # Send the image as a response to the interaction
-        await interaction.response.send_message(file=file, view=None)
-
-    @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.primary, custom_id="ver_medallas")
-    async def ver_medallas(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await self.interaction_response(interaction, "front")
-
-    @discord.ui.button(label="Ver perfil", style=discord.ButtonStyle.primary, custom_id="ver_perfil")
-    async def ver_perfil(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await self.interaction_response(interaction, "back")
+    async def update_button_labels(self):
+        for child in self.children:
+            if isinstance(child, discord.ui.Button):
+                child.label = "Ver perfil" if self.current_view == "back" else "Ver medallas"
 
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
