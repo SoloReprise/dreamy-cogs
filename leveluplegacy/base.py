@@ -49,37 +49,41 @@ _ = Translator("LevelUp", __file__)
 
 
 class ProfileSwitchView(discord.ui.View):
-    def __init__(self, user: discord.Member, args: dict, bot, current_view="front"):
+    def __init__(self, user: discord.Member, args: dict, bot, original_message: discord.Message, current_view="front"):
         super().__init__()
         self.user = user
         self.args = args
         self.bot = bot
-        self.current_view = current_view  # Track the current view ("front" or "back")
+        self.original_message = original_message
+        self.current_view = current_view
 
-    async def switch_profile_view(self):
-        # Toggle the current view and generate the appropriate profile
-        self.current_view = "back" if self.current_view == "front" else "front"
-        if self.current_view == "front":
-            file = await self.bot.get_or_fetch_profile(self.user, self.args, full=True, use_new_generator=True)
-        else:
-            file = await self.bot.generate_profile_back(**self.args)
-        return file
+    async def on_timeout(self):
+        for item in self.children:
+            item.disabled = True
+        await self.original_message.edit(view=self)
 
     @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.primary)
     async def toggle_view(self, interaction: discord.Interaction, button: discord.ui.Button):
-        try:
-            file = await self.switch_profile_view()
-            if file:
-                # Update button label based on current view
-                button.label = "Ver perfil" if self.current_view == "back" else "Ver medallas"
-                # Respond to the interaction by updating the message
-                await interaction.response.edit_message(content="", attachments=[file], view=self)
-            else:
-                await interaction.response.send_message("Failed to generate the profile image. Please try again.", ephemeral=True)
-        except Exception as e:
-            print(f"Error switching profile view: {e}")
-            await interaction.response.send_message("There was an error switching the profile view. Please try again.", ephemeral=True)
+        # Determine the new view to generate based on the current view
+        new_view = "back" if self.current_view == "front" else "front"
 
+        # Update the button label accordingly
+        button.label = "Ver perfil" if new_view == "back" else "Ver medallas"
+        
+        # Disable the button to prevent multiple clicks during processing
+        button.disabled = True
+        await interaction.response.edit_message(view=self)
+
+        # Delete the original message to avoid clutter
+        await self.original_message.delete()
+
+        # Depending on the new view, call the appropriate function to generate and send the new profile view
+        if new_view == "front":
+            await self.bot.new_get_profile(interaction, user=self.user)
+        else:
+            # Assuming generate_profile_back is a method similar to new_get_profile but for generating the back of the profile
+            await self.bot.generate_profile_back(interaction, self.user, self.args)
+                    
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
     # Generate level up image
@@ -1130,9 +1134,18 @@ class UserCommands(MixinMeta, ABC):
                 "blur": blur,
             }
 
-        initial_file = await self.get_or_fetch_profile(user, args, full=True, use_new_generator=True)
-        view = ProfileSwitchView(user, args, self)
-        await ctx.send(file=initial_file, view=view)
+        file = await self.get_or_fetch_profile(user, args, full=True, use_new_generator=True)
+        if not file:
+            return await ctx.send("Failed to generate profile image :( try again in a bit")
+
+        # Send the initial message with the profile view
+        message = await ctx.reply(file=file)
+
+        # Create the view and pass the message to it
+        view = ProfileSwitchView(user, args, self, message)
+
+        # Add the view to the message
+        await message.edit(view=view)
 
     @commands.command(name="prestige")
     @commands.guild_only()
