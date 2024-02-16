@@ -1130,31 +1130,26 @@ class UserCommands(MixinMeta, ABC):
                 "profile_image": user.display_avatar.url,
                 "user_name": user.name,
                 "colors": {
-                    "base": hex_to_rgb(str(user.colour)),
-                    "name": hex_to_rgb(p["colors"]["name"]) if p["colors"] and "name" in p["colors"] else None,
-                    "stat": hex_to_rgb(p["colors"]["stat"]) if p["colors"] and "stat" in p["colors"] else None,
-                    "levelbar": hex_to_rgb(p["colors"]["levelbar"]) if p["colors"] and "levelbar" in p["colors"] else None,
+                    "base": self.hex_to_rgb(str(user.colour)),
+                    "name": self.hex_to_rgb(p["colors"]["name"]) if p["colors"] and "name" in p["colors"] else None,
+                    "stat": self.hex_to_rgb(p["colors"]["stat"]) if p["colors"] and "stat" in p["colors"] else None,
+                    "levelbar": self.hex_to_rgb(p["colors"]["levelbar"]) if p["colors"] and "levelbar" in p["colors"] else None,
                 },
                 "font_name": p.get("font"),
                 "render_gifs": p.get("render_gifs", False),
                 "blur": p.get("blur", False)
             }
 
-        # Generate the profile back image
-        loop = asyncio.get_running_loop()
-        profile_back_image = await loop.run_in_executor(None, functools.partial(self.generate_profile_back, **args))
+            # Generate the profile back image
+            image = await asyncio.get_running_loop().run_in_executor(None, functools.partial(self.generate_profile_back, **args))
 
-        # Save and send the generated image
-        with BytesIO() as image_binary:
-            profile_back_image.save(image_binary, 'PNG')
-            image_binary.seek(0)
-            discord_file = discord.File(fp=image_binary, filename="profile_back.png")
-
-        file = await self.generate_profile_back_image(user, args)
-        if not file:
-            return await ctx.send("Failed to generate profile back image :( try again in a bit")
-        await ctx.send(file=file)  # Send the file directly
-
+            # Save and send the generated image
+            with BytesIO() as image_binary:
+                image.save(image_binary, 'PNG')
+                image_binary.seek(0)
+                discord_file = discord.File(fp=image_binary, filename="profile_back.png")
+                await ctx.send(file=discord_file)
+                
     @commands.command(name="prestige")
     @commands.guild_only()
     @commands.bot_has_permissions(embed_links=True)
