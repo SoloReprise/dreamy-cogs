@@ -55,47 +55,38 @@ class ProfileSwitchView(discord.ui.View):
         self.user = user
         self.args = args
         self.bot = bot
-        self.original_message = original_message
         self.current_view = current_view
-
-        # Dynamically set the button label based on the current view
+        # Set the initial label based on the current view.
         self.children[0].label = "Ver perfil" if self.current_view == "back" else "Ver medallas"
+        self.original_message = original_message
 
-    async def on_timeout(self):
+    @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.primary, custom_id="toggle_view")
+    async def toggle_view(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # Flip the current view state
+        self.current_view = "back" if self.current_view == "front" else "front"
+        
+        # Update button label based on the new current view
+        button.label = "Ver perfil" if self.current_view == "back" else "Ver medallas"
+        
+        # Delete the original message
+        await self.original_message.delete()
+        
+        # Generate and send the new profile view based on the current state
+        ctx = await self.bot.get_context(interaction.message)
+        ctx.author = self.user  # Ensure the user is set correctly for the context
+
+        if self.current_view == "back":
+            # Directly invoke new_get_profile_back functionality
+            await self.bot.new_get_profile_back(ctx, user=self.user)
+        else:
+            # Directly invoke new_get_profile functionality
+            await self.bot.new_get_profile(ctx, user=self.user)
+
+        # No need to edit the message as we're sending a new one. Disable further interaction.
         for item in self.children:
             item.disabled = True
-        await self.original_message.edit(view=self)
-
-    async def toggle_view(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Determine the action based on the current view
-        if self.current_view == "front":
-            self.current_view = "back"
-            # Generate the back profile image
-            profile_image = await self.bot.generate_profile_back_interaction(self.user, self.args)
-            button.label = "Ver perfil"
-        else:
-            self.current_view = "front"
-            # Generate the front profile image
-            profile_image = await self.bot.generate_profile_front_interaction(self.user, self.args)
-            button.label = "Ver medallas"
-
-        # Disable the button to prevent further clicks during processing
-        button.disabled = True
-        await interaction.response.edit_message(view=self)
-
-        # Delete the original message to avoid clutter
-        await self.original_message.delete()
-
-        # Send the new profile image
-        with BytesIO() as image_binary:
-            profile_image.save(image_binary, 'PNG')
-            image_binary.seek(0)
-            discord_file = discord.File(fp=image_binary, filename="profile.png")
-            new_message = await interaction.followup.send(file=discord_file, view=self)
-
-        # Update the original_message reference to the new message
-        self.original_message = new_message
-        
+        await interaction.response.edit_message(view=self)  # This updates the message to reflect the disabled state.
+                
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
     # Generate level up image
