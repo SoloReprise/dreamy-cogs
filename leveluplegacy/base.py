@@ -1134,18 +1134,25 @@ class UserCommands(MixinMeta, ABC):
                 "blur": blur,
             }
 
-        file = await self.get_or_fetch_profile(user, args, full=True, use_new_generator=True)
-        if not file:
-            return await ctx.send("Failed to generate profile image :( try again in a bit")
+        # Generate the back of the profile
+        profile_back_image = self.generate_profile_back(
+            bg_image=args["bg_image"],
+            profile_image=args["profile_image"],
+            user_name=args["user_name"],
+            colors=args["colors"],
+            font_name=args["font_name"],
+            render_gifs=args["render_gifs"],
+            blur=args["blur"]
+        )
 
-        # Send the initial message with the profile view
-        message = await ctx.reply(file=file)
-
-        # Create the view and pass the message to it
-        view = ProfileSwitchView(user, args, self, message)
-
-        # Add the view to the message
-        await message.edit(view=view)
+        # Save the generated image to a BytesIO buffer
+        with BytesIO() as image_binary:
+            profile_back_image.save(image_binary, 'PNG')
+            image_binary.seek(0)
+            discord_file = discord.File(fp=image_binary, filename="profile_back.png")
+        
+            # Send the generated back of the profile
+            await ctx.reply(file=discord_file)
 
     @commands.command(name="newpfback")
     @commands.guild_only()
