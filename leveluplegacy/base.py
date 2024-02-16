@@ -1155,9 +1155,7 @@ class UserCommands(MixinMeta, ABC):
                     discord_file = discord.File(fp=image_binary, filename="profile_back.png")
                     await ctx.send(file=discord_file)
         except Exception as e:
-            print(f"An error occurred in 'newpfback': {str(e)}")
-            logger.exception("An error occurred in the 'newpfback' command.")
-            await ctx.send("An unexpected error occurred. Please contact the administrator.")      
+            await ctx.send(f"Error: {str(e)}")  # For debugging purposes only; remove in production
       
     @commands.command(name="prestige")
     @commands.guild_only()
