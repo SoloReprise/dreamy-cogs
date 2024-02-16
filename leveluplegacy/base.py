@@ -1449,19 +1449,13 @@ class UserCommands(MixinMeta, ABC):
                 await ctx.send(f"The Pokémon {pokemon_name} does not exist.")
                 return
 
-            self.init_user(ctx.guild.id, str(user.id))
-            user_data = self.data[ctx.guild.id]["users"][str(user.id)]
+            # Using Red's Config to access and update the user's pokedex
+            member_config = self.config.member(user)
+            pokedex = await member_config.pokedex()
 
-            if "pokedex" not in user_data:
-                user_data["pokedex"] = []
-
-            if pokemon_name not in user_data["pokedex"]:
-                user_data["pokedex"].append(pokemon_name)
-                # Ensure the update is directly reflected in self.data
-                self.data[ctx.guild.id]["users"][str(user.id)] = user_data
-
-                # Optionally, if using persistent storage, save the update here
-
+            if pokemon_name not in pokedex:
+                pokedex.append(pokemon_name)
+                await member_config.pokedex.set(pokedex)
                 await ctx.send(f"{pokemon_name} has been successfully added to {user.display_name}'s pokedex.")
             else:
                 await ctx.send(f"{user.display_name} already has the Pokémon {pokemon_name}.")
