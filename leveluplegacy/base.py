@@ -1427,9 +1427,7 @@ class UserCommands(MixinMeta, ABC):
         if user is None:
             await ctx.send("You need to specify a user.")
             return
-        
-        # Assuming user data is stored in a way that each user has a 'pokedex' attribute
-        # Adjust this part based on how you store your data
+
         gid = str(ctx.guild.id)
         uid = str(user.id)
         user_data = self.data.get(gid, {}).get("users", {}).get(uid, {})
@@ -1438,7 +1436,6 @@ class UserCommands(MixinMeta, ABC):
         if not pokedex:
             await ctx.send(f"{user.display_name} has no Pokémon badges.")
         else:
-            # Format the message with the list of Pokémon badges
             badges_list = ", ".join(pokedex)
             await ctx.send(f"{user.display_name} has the following Pokémon badges: {badges_list}")
 
@@ -1451,18 +1448,18 @@ class UserCommands(MixinMeta, ABC):
             await ctx.send(f"The Pokémon {pokemon_name} does not exist.")
             return
 
-        # Ensure user profile is initialized and get their data
         self.init_user(ctx.guild.id, str(user.id))
         user_data = self.data[ctx.guild.id]["users"][str(user.id)]
 
-        # Add the Pokémon to the user's pokedex, avoiding duplicates
-        if pokemon_name not in user_data.get("pokedex", []):
-            user_data.setdefault("pokedex", []).append(pokemon_name)
-            # Update the main data structure
+        if "pokedex" not in user_data:
+            user_data["pokedex"] = []
+
+        if pokemon_name not in user_data["pokedex"]:
+            user_data["pokedex"].append(pokemon_name)
+            # Ensure the update is directly reflected in self.data
             self.data[ctx.guild.id]["users"][str(user.id)] = user_data
 
-            # If using Config from Red, you should save the changes
-            # await self.config.member(user).pokedex.set(user_data["pokedex"])
+            # Optionally, if using persistent storage, save the update here
 
             await ctx.send(f"{pokemon_name} has been successfully added to {user.display_name}'s pokedex.")
         else:
