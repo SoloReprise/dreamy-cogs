@@ -1440,11 +1440,13 @@ class UserCommands(MixinMeta, ABC):
             await ctx.send("You need to specify a user.")
             return
 
-        gid = str(ctx.guild.id)
-        uid = str(user.id)
-        user_data = self.data.get(gid, {}).get("users", {}).get(uid, {})
-        pokedex = user_data.get("pokedex", [])
-        
+        # Fetch the pokedex from Red's Config instead of self.data
+        try:
+            pokedex = await self.config.member(user).pokedex()
+        except Exception as e:
+            await ctx.send(f"An error occurred while fetching the pokedex: {e}")
+            return
+
         if not pokedex:
             await ctx.send(f"{user.display_name} has no Pokémon badges.")
         else:
