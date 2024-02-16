@@ -3209,6 +3209,8 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             return "The LevelUp cog has been loaded but doesnt have any data yet"
         self.init_user(user.guild.id, str(user.id))
         user_data = self.data[user.guild.id]["users"][str(user.id)].copy()
+        if "pokedex" not in user_data:
+            user_data["pokedex"] = []  # Initialize with an empty list or with default Pokémon as appropriate
         txt = (
             f"Experience: {round(user_data['xp'])}\n"
             f"Voice time: {humanize_timedelta(seconds=int(user_data['voice']))}\n"
