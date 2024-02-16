@@ -174,11 +174,11 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         }
         self.config.register_guild(**default_guild)
         self.config.register_global(**default_global)
-
         self.threadpool = ThreadPoolExecutor(thread_name_prefix="levelup")
 
         # Main cache (Guild ID keys are ints)
         self.data = {}
+        self.data_file_path = Path(bundled_data_path(self)) / "levelup_data.json"
 
         # Cog path
         self.path = bundled_data_path(self)
@@ -243,6 +243,33 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         self.cache_dumper.start()
         self.voice_checker.start()
         self.weekly_checker.start()
+
+    async def save_data(self):
+        """Saves the in-memory data to a file."""
+        async with aiofiles.open(self.data_file_path, 'w') as f:
+            await f.write(json.dumps(self.data, indent=4))
+
+    def cog_load(self):
+        self.data_save_loop.start()
+
+    def cog_unload(self):
+        self.data_save_loop.cancel()
+
+    @tasks.loop(minutes=30)  # Adjust the interval as needed
+    async def data_save_loop(self):
+        await self.save_data()
+
+    @data_save_loop.before_loop
+    async def before_data_save_loop(self):
+        await self.bot.wait_until_ready()
+
+    async def load_data(self):
+        """Loads the data from a file."""
+        try:
+            async with aiofiles.open(self.data_file_path, 'r') as f:
+                self.data = json.loads(await f.read())
+        except FileNotFoundError:
+            self.data = {}  # Initialize with an empty dict if the file doesn't exist
 
     def cog_unload(self):
         self.cache_dumper.cancel()
