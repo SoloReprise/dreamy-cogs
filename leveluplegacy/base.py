@@ -68,9 +68,9 @@ class ProfileSwitchView(discord.ui.View):
 
         # Correctly handle the interaction and generate/send the new profile image
         if new_view == "back":
-            await self.bot.new_get_profile_back_direct(interaction, self.user)
+            await self.bot.new_get_profile_back(interaction, self.user)
         else:
-            await self.bot.new_get_profile_direct(interaction, self.user)
+            await self.bot.new_get_profile(interaction, self.user)
 
         # Re-enable the button and update its label accordingly
         button.label = "Ver perfil" if new_view == "back" else "Ver medallas"
@@ -1197,16 +1197,6 @@ class UserCommands(MixinMeta, ABC):
 
             # Now, update the original_message attribute in the view to associate it with the sent message
             view.original_message = message
-
-    async def new_get_profile_direct(self, interaction: discord.Interaction, user: discord.Member):
-        pseudo_ctx = await get_pseudo_context(self, interaction, user)
-        # Assuming new_get_profile can accept a pseudo_ctx and work with it
-        await self.new_get_profile(pseudo_ctx, user=user)
-
-    async def new_get_profile_back_direct(self, interaction: discord.Interaction, user: discord.Member):
-        pseudo_ctx = await get_pseudo_context(self, interaction, user)
-        # Assuming new_get_profile_back can accept a pseudo_ctx and work with it
-        await self.new_get_profile_back(pseudo_ctx, user=user)
 
     @commands.command(name="prestige")
     @commands.guild_only()
