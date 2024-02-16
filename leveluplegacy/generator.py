@@ -1063,7 +1063,7 @@ class Generator(MixinMeta, ABC):
         namecolor = colors.get("name", (22, 39, 65))
 
         # Coord setup
-        name_y = 485  # Adjust if needed for visual appeal
+        name_y = 105  # Adjust if needed for visual appeal
         name_x = 55  # Adjust if needed for visual appeal
 
         # Get base font
@@ -1074,14 +1074,14 @@ class Generator(MixinMeta, ABC):
                 base_font = fontfile
 
         # Setup font sizes for username
-        name_size = 35
+        name_size = 30
         name_font = ImageFont.truetype(base_font, name_size)
 
         # Resize the profile picture (avatar)
-        profile = profile.convert("RGBA").resize((125, 125), Image.Resampling.LANCZOS)
+        profile = profile.convert("RGBA").resize((80, 80), Image.Resampling.LANCZOS)
 
         # Mask to crop profile pic image to a circle
-        mask_size = (125, 125)  # Same size as the resized avatar
+        mask_size = (80, 80)  # Same size as the resized avatar
         mask = Image.new("RGBA", mask_size, 0)
         mask_draw = ImageDraw.Draw(mask)
         mask_draw.ellipse(
@@ -1094,7 +1094,7 @@ class Generator(MixinMeta, ABC):
 
         # Calculate the position to paste the resized profile image
         # Ensure it's centered within the circle
-        profile_position = (55, 465)  # Adjust if needed
+        profile_position = (55, 105)  # Adjust if needed
         profile_pic_holder.paste(profile, profile_position, mask)  # Paste with mask for circular crop
 
         # Profile image is on the background tile now
