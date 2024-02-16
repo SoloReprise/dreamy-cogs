@@ -1111,8 +1111,8 @@ class UserCommands(MixinMeta, ABC):
     @commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def new_get_profile_back(self, ctx: commands.Context, *, user: discord.Member = None):
-        """View the back of your profile"""
         try:
+            """View the back of your profile"""
             if not user:
                 user = ctx.author
             if user.bot:
@@ -1130,15 +1130,20 @@ class UserCommands(MixinMeta, ABC):
 
             p = users[user_id]
             async with ctx.typing():
+                # Direct hex to RGB conversion within the command
+                def hex_to_rgb(hex_color):
+                    hex_color = hex_color.lstrip('#')
+                    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+
                 args = {
                     "bg_image": p.get("background"),
                     "profile_image": user.display_avatar.url,
                     "user_name": user.name,
                     "colors": {
-                        "base": self.hex_to_rgb(str(user.colour)),
-                        "name": self.hex_to_rgb(p["colors"]["name"]) if p["colors"] and "name" in p["colors"] else None,
-                        "stat": self.hex_to_rgb(p["colors"]["stat"]) if p["colors"] and "stat" in p["colors"] else None,
-                        "levelbar": self.hex_to_rgb(p["colors"]["levelbar"]) if p["colors"] and "levelbar" in p["colors"] else None,
+                        "base": hex_to_rgb(str(user.colour)[1:]) if user.colour else None,
+                        "name": hex_to_rgb(p["colors"]["name"][1:]) if p["colors"] and "name" in p["colors"] else None,
+                        "stat": hex_to_rgb(p["colors"]["stat"][1:]) if p["colors"] and "stat" in p["colors"] else None,
+                        "levelbar": hex_to_rgb(p["colors"]["levelbar"][1:]) if p["colors"] and "levelbar" in p["colors"] else None,
                     },
                     "font_name": p.get("font"),
                     "render_gifs": p.get("render_gifs", False),
@@ -1147,7 +1152,7 @@ class UserCommands(MixinMeta, ABC):
 
                 # Generate the profile back image
                 image = await asyncio.get_running_loop().run_in_executor(None, functools.partial(self.generate_profile_back, **args))
-
+                    
                 # Save and send the generated image
                 with BytesIO() as image_binary:
                     image.save(image_binary, 'PNG')
