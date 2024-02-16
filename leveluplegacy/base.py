@@ -49,35 +49,102 @@ log = logging.getLogger("red.vrt.levelup.commands")
 _ = Translator("LevelUp", __file__)
 
 
-class ProfileSwitchView(discord.ui.View):
-    def __init__(self, user: discord.Member, args: dict, bot, original_message: discord.Message, current_view="front"):
-        super().__init__()
-        self.user = user
-        self.args = args
-        self.bot = bot
-        self.current_view = current_view
-        # Set the initial label based on the current view.
-        self.children[0].label = "Ver perfil" if self.current_view == "back" else "Ver medallas"
-        self.original_message = original_message
 
-    @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.primary, custom_id="profile_view_toggle")
-    async def toggle_view_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Determine the new view based on the current state
-        new_view = "back" if self.current_view == "front" else "front"
-        self.current_view = new_view  # Update the current view
+class MyView(View):
+    def __init__(self, ctx, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.ctx = ctx
 
-        # Correctly handle the interaction and generate/send the new profile image
-        if new_view == "back":
-            await self.bot.new_get_profile_back(interaction, self.user)
-        else:
-            await self.bot.new_get_profile(interaction, self.user)
+    # This method handles the "Ver medallas" button click
+    @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.grey)
+    async def ver_medallas_button_callback(self, button, interaction):
+        # Ensure the user clicking the button is the one who initiated the command
+        if interaction.user != self.ctx.author:
+            await interaction.response.send_message("No tienes permiso para usar este botón.", ephemeral=True)
+            return
 
-        # Re-enable the button and update its label accordingly
-        button.label = "Ver perfil" if new_view == "back" else "Ver medallas"
-        button.disabled = False
+        await interaction.response.defer()
+        await interaction.message.delete()
+        await self.ver_medallas_logic(self.ctx)
 
-        # Update the interaction message to reflect the changes
-        await interaction.response.edit_message(view=self)
+    # This method handles the "Ver perfil" button click
+    @discord.ui.button(label="Ver perfil", style=discord.ButtonStyle.grey)
+    async def ver_perfil_button_callback(self, button, interaction):
+        # Ensure the user clicking the button is the one who initiated the command
+        if interaction.user != self.ctx.author:
+            await interaction.response.send_message("No tienes permiso para usar este botón.", ephemeral=True)
+            return
+
+        await interaction.response.defer()
+        await interaction.message.delete()
+        await self.ver_perfil_logic(self.ctx)
+
+    async def ver_medallas_logic(self, ctx):
+        # Assuming self.data, self.initialize, hex_to_rgb, self.get_or_fetch_profile, and ProfileSwitchView are accessible
+        user = ctx.author  # Operate on the command invoker
+        gid = ctx.guild.id
+
+        if gid not in self.data:
+            await self.initialize()
+
+        conf = self.data[gid]
+        users = conf["users"]
+        user_id = str(user.id)
+        if user_id not in users:
+            await ctx.send("No information available yet!")
+            return
+
+        # Preparing arguments for profile back generation
+        p = users[user_id]
+        args = {
+            "bg_image": p.get("background"),
+            "profile_image": user.display_avatar.url,
+            "user_name": user.name,
+            "colors": {
+                "base": hex_to_rgb(str(user.colour)),
+                "name": hex_to_rgb(p["colors"]["name"]) if p["colors"] and "name" in p["colors"] else None,
+                "stat": hex_to_rgb(p["colors"]["stat"]) if p["colors"] and "stat" in p["colors"] else None,
+                "levelbar": hex_to_rgb(p["colors"]["levelbar"]) if p["colors"] and "levelbar" in p["colors"] else None,
+            },
+            "font_name": p.get("font"),
+            "render_gifs": p.get("render_gifs", False),
+            "blur": p.get("blur", False)
+        }
+
+        # Replace direct command logic with appropriate image generation and sending
+        # Assuming generate_profile_back is a method that generates the profile back image
+        profile_back_image = await self.generate_profile_back(**args)  # Ensure this method exists and is async
+
+        # Send the generated profile back image
+        await ctx.send(file=discord.File(fp=profile_back_image, filename="profile_back.png"))
+
+    async def ver_perfil_logic(self, ctx):
+        # Logic similar to newpf command with necessary modifications for direct use here
+        user = ctx.author  # Operate on the command invoker
+        gid = ctx.guild.id
+
+        if gid not in self.data:
+            await self.initialize()
+
+        conf = self.data[gid]
+        users = conf["users"]
+        user_id = str(user.id)
+        if user_id not in users:
+            await ctx.send("No information available yet!")
+            return
+
+        # Extract necessary data from users dict as in newpf command
+        # Preparing arguments for profile generation
+        p = users[user_id]
+        # ... (repeat the argument preparation as in newpf command)
+
+        # Generate and send the profile image directly
+        file = await self.get_or_fetch_profile(user, args, full=True, use_new_generator=True)
+        if not file:
+            await ctx.send("Failed to generate profile image :( try again in a bit")
+            return
+
+        await ctx.send(file=file)
 
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
