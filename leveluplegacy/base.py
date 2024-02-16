@@ -58,6 +58,9 @@ class ProfileSwitchView(discord.ui.View):
         self.original_message = original_message
         self.current_view = current_view
 
+        # Update button label based on the current view
+        self.children[0].label = "Ver perfil" if self.current_view == "back" else "Ver medallas"
+
     async def on_timeout(self):
         for item in self.children:
             item.disabled = True
@@ -65,25 +68,15 @@ class ProfileSwitchView(discord.ui.View):
 
     @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.primary)
     async def toggle_view(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Determine the new view to generate based on the current view
-        new_view = "back" if self.current_view == "front" else "front"
-        self.current_view = new_view  # Update the current view
+        # Your existing toggle_view logic...
 
-        # Delete the original message to avoid clutter
-        await self.original_message.delete()
+        # Update the button label for the current state directly
+        button.label = "Ver perfil" if self.current_view == "back" else "Ver medallas"
+        self.original_message = None  # Reset original message reference
 
-        # Depending on the new view, call the appropriate function to generate and send the new profile view
-        if new_view == "front":
-            # Simulate calling the command as if triggered by a user
-            ctx = await self.bot.get_context(interaction.message)
-            ctx.author = self.user
-            await self.bot.new_get_profile(ctx)
-        else:
-            # Simulate calling the back profile command
-            ctx = await self.bot.get_context(interaction.message)
-            ctx.author = self.user
-            await self.bot.new_get_profile_back(ctx)
-
+        # Force view update to reflect the new label
+        await interaction.message.edit(view=self)
+        
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
     # Generate level up image
