@@ -57,36 +57,27 @@ class ProfileSwitchView(discord.ui.View):
         self.bot = bot
         self.original_message = original_message
         self.current_view = current_view
-        # Dynamically set the button label based on current_view
-        self.children[0].label = "Ver perfil" if self.current_view == "back" else "Ver medallas"
 
-    @discord.ui.button(label="Toggle View", style=discord.ButtonStyle.primary)
-    async def toggle_view_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Always defer the interaction first
-        await interaction.response.defer()
-        
-        # Determine the new view based on the current view
-        new_view = "back" if self.current_view == "front" else "front"
-        
-        # Call the appropriate method to generate and send the new profile or back profile image
+    async def interaction_response(self, interaction: discord.Interaction, new_view: str):
+        # Delete the original message
+        await self.original_message.delete()
+
+        # Generate and send the new profile or back profile image
         if new_view == "back":
-            await self.bot.new_get_profile_back_direct(interaction, self.user)
+            file = await self.bot.new_get_profile_back_direct(interaction, self.user)
         else:
-            await self.bot.new_get_profile_direct(interaction, self.user)
-        
-        # Update the current_view to reflect the new state
-        self.current_view = new_view
-        
-        # Update the button label to reflect the new state
-        button.label = "Ver perfil" if new_view == "back" else "Ver medallas"
-        
-        # You might need to edit the message to update the view, or simply rely on the interaction follow-up for response
-        try:
-            # Update the view for the message if necessary
-            await interaction.message.edit(view=self)
-        except Exception as e:
-            # Handle exceptions, e.g., if the original message cannot be edited
-            pass
+            file = await self.bot.new_get_profile_direct(interaction, self.user)
+
+        # Send the image as a response to the interaction
+        await interaction.response.send_message(file=file, view=None)
+
+    @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.primary, custom_id="ver_medallas")
+    async def ver_medallas(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.interaction_response(interaction, "front")
+
+    @discord.ui.button(label="Ver perfil", style=discord.ButtonStyle.primary, custom_id="ver_perfil")
+    async def ver_perfil(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.interaction_response(interaction, "back")
 
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
