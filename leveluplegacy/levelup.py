@@ -473,7 +473,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
             # Make sure all related stats are not strings
             for k, v in user.items():
-                skip = ["background", "emoji", "full", "colors", "font"]
+                skip = ["background", "emoji", "full", "colors", "font", "pokedex"]
                 if k in skip:
                     continue
                 if isinstance(v, int) or isinstance(v, float):
