@@ -48,39 +48,55 @@ log = logging.getLogger("red.vrt.levelup.commands")
 _ = Translator("LevelUp", __file__)
 
 class ProfileSwitchView(discord.ui.View):
-    def __init__(self, user: discord.Member, args: dict, bot):
-        super().__init__(timeout=180)  # Timeout in seconds, adjust as needed
+    def __init__(self, user: discord.Member, args: dict, bot, initial_front=True):
+        super().__init__(timeout=180)  # Adjust the timeout as needed
         self.user = user
         self.args = args
         self.bot = bot
-        self.front = True  # Start with showing the front of the profile
+        self.front = initial_front  # True if showing the front, False for back
 
-    async def switch_profile_image(self):
-        # Toggle the profile view
-        self.front = not self.front
+    @discord.ui.button(label="Ver medallas", style=discord.ButtonStyle.primary, custom_id="profile_view_medals")
+    async def switch_to_back(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not self.front:
+            # If already showing the back, don't switch
+            await interaction.response.defer()
+            return
 
-        # Generate the appropriate profile image based on the current view
-        if self.front:
-            file = await self.bot.get_or_fetch_profile(self.user, self.args, full=True, use_new_generator=True)
-        else:
-            file = await self.bot.generate_profile_back(**self.args)
-        
-        return file
+        self.front = False  # Switch to showing the back
+        file = await self.bot.generate_profile_back(**self.args)  # Generate the back of the profile
 
-    @discord.ui.button(label="Switch Profile View", style=discord.ButtonStyle.primary, custom_id="switch_profile_view")
-    async def switch_view(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Acknowledge the interaction first
-        await interaction.response.defer()
-
-        file = await self.switch_profile_image()
+        await interaction.message.delete()  # Delete the previous profile view message
 
         if file:
-            # Send a new message with the updated profile view
-            await interaction.followup.send(file=file, ephemeral=False)  # Adjust visibility as needed
-        else:
-            # Provide feedback if the profile switch failed
-            await interaction.followup.send("Failed to switch profile view. Please try again.", ephemeral=True)
+            await interaction.followup.send(file=file, ephemeral=False)  # Send the new profile view
+            self.update_button_labels()  # Update button labels based on the current view
 
+    @discord.ui.button(label="Ver perfil", style=discord.ButtonStyle.secondary, custom_id="profile_view_front", disabled=True)
+    async def switch_to_front(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if self.front:
+            # If already showing the front, don't switch
+            await interaction.response.defer()
+            return
+
+        self.front = True  # Switch to showing the front
+        file = await self.bot.get_or_fetch_profile(self.user, self.args, full=True, use_new_generator=True)  # Generate the front of the profile
+
+        await interaction.message.delete()  # Delete the previous profile view message
+
+        if file:
+            await interaction.followup.send(file=file, ephemeral=False)  # Send the new profile view
+            self.update_button_labels()  # Update button labels based on the current view
+
+    def update_button_labels(self):
+        # Update button labels and states based on the current view
+        for child in self.children:
+            if isinstance(child, discord.ui.Button):
+                if child.custom_id == "profile_view_medals":
+                    child.label = "Ver perfil" if self.front else "Ver medallas"
+                    child.disabled = not self.front
+                elif child.custom_id == "profile_view_front":
+                    child.label = "Ver medallas" if self.front else "Ver perfil"
+                    child.disabled = self.front
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
     # Generate level up image
@@ -1136,11 +1152,11 @@ class UserCommands(MixinMeta, ABC):
             return await ctx.send("Failed to generate profile image :( try again in a bit")
 
         # Create the view
-        view = ProfileSwitchView(user, args, self)
+        view = ProfileSwitchView(user, args, self, initial_front=True)
 
         # Send the message with the view
         try:
-            await ctx.reply(file=file, view=view)
+            await ctx.send(file=initial_file, view=view)
         except Exception as e:
             log.error(f"Failed to send profile pic with view: {e}")
 
