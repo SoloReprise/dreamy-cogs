@@ -66,27 +66,23 @@ class ProfileSwitchView(discord.ui.View):
     async def toggle_view(self, interaction: discord.Interaction, button: discord.ui.Button):
         # Determine the new view to generate based on the current view
         new_view = "back" if self.current_view == "front" else "front"
-        self.current_view = new_view  # Update the current view state
+        self.current_view = new_view  # Update the current view
 
-        # Update the button label accordingly
-        button.label = "Ver perfil" if new_view == "back" else "Ver medallas"
-        button.disabled = False  # Re-enable the button after changing the label
+        # Delete the original message to avoid clutter
+        await self.original_message.delete()
 
-        # Acknowledge the interaction
-        await interaction.response.defer(edit_origin=True)
-
-        # Generate and send the new profile view without deleting the original message
+        # Depending on the new view, call the appropriate function to generate and send the new profile view
         if new_view == "front":
-            # Simulate the new_get_profile logic
-            file = await self.bot.get_or_fetch_profile(self.user, self.args, full=True, use_new_generator=True)
+            # Simulate calling the command as if triggered by a user
+            ctx = await self.bot.get_context(interaction.message)
+            ctx.author = self.user
+            await self.bot.new_get_profile(ctx)
         else:
-            # Simulate the new_get_profile_back logic
-            file = await self.bot.generate_profile_back(**self.args)
-        
-        # Since interaction.followup.send doesn't edit the original message to replace it,
-        # consider sending a new message if replacing the file directly doesn't work.
-        await interaction.followup.send(file=file, ephemeral=False)
-                    
+            # Simulate calling the back profile command
+            ctx = await self.bot.get_context(interaction.message)
+            ctx.author = self.user
+            await self.bot.new_get_profile_back(ctx)
+
 @cog_i18n(_)
 class UserCommands(MixinMeta, ABC):
     # Generate level up image
@@ -1171,73 +1167,31 @@ class UserCommands(MixinMeta, ABC):
             return await ctx.send("No information available yet!")
 
         p = users[user_id]
-        level: int = p["level"]
-        stars: int = p["stars"]  # Int
-        messages: int = p["messages"]
-        voice: int = p["voice"]
-        bg = p["background"]
-        font = p["font"]
-        blur = p["blur"]
-
-        # The new_rank and colors setup is assumed to be the same for the back of the profile.
-        new_rank = "Desconocido"  # Default rank
-        if level == 0:
-            new_rank = "Desconocido"
-        elif 1 <= level <= 4:
-            new_rank = "Principiante"
-        elif 5 <= level <= 7:
-            new_rank = "Alto"
-        elif 8 <= level <= 14:
-            new_rank = "Avanzado"
-        elif 15 <= level <= 19:
-            new_rank = "Élite"
-        elif 20 <= level <= 24:
-            new_rank = "Experto"
-        elif level >= 25:
-            new_rank = "Maestro"
-
         async with ctx.typing():
-            colors = users[user_id]["colors"]
-            usercolors = {
-                "base": hex_to_rgb(str(user.colour)),
-                "name": hex_to_rgb(colors["name"]) if colors["name"] else None,
-                "stat": hex_to_rgb(colors["stat"]) if colors["stat"] else None,
-                "levelbar": hex_to_rgb(colors["levelbar"]) if colors["levelbar"] else None,
-            }
-
             args = {
-                "user_name": user.name,  # username with discriminator
-                "bg_image": bg,
-                "stars": stars,
-                "profile_image": user.display_avatar.url if hasattr(user, 'display_avatar') else user.avatar_url,
-                "level": level,
-                "messages": humanize_number(messages),
-                "voice": time_formatter(voice),
-                "new_rank": new_rank,  # This is used for consistency but may not be necessary for the back profile
-                "colors": usercolors,
-                "font_name": font,
-                "render_gifs": self.render_gifs,
-                "blur": blur,
+                "bg_image": p.get("background"),
+                "profile_image": user.display_avatar.url,
+                "user_name": user.name,
+                "colors": {
+                    "base": hex_to_rgb(str(user.colour)),
+                    "name": hex_to_rgb(p["colors"]["name"]) if p["colors"] and "name" in p["colors"] else None,
+                    "stat": hex_to_rgb(p["colors"]["stat"]) if p["colors"] and "stat" in p["colors"] else None,
+                    "levelbar": hex_to_rgb(p["colors"]["levelbar"]) if p["colors"] and "levelbar" in p["colors"] else None,
+                },
+                "font_name": p.get("font"),
+                "render_gifs": p.get("render_gifs", False),
+                "blur": p.get("blur", False)
             }
 
-        # Generate the back of the profile
-        profile_back_image = self.generate_profile_back(
-            bg_image=args["bg_image"],
-            profile_image=args["profile_image"],
-            user_name=args["user_name"],
-            colors=args["colors"],
-            font_name=args["font_name"],
-            render_gifs=args["render_gifs"],
-            blur=args["blur"]
-        )
+        # Invoke the synchronous profile back generation in an async context
+        loop = asyncio.get_running_loop()
+        profile_back_image = await loop.run_in_executor(None, functools.partial(self.generate_profile_back, **args))
 
-        # Save the generated image to a BytesIO buffer
+        # Save and send the generated image
         with BytesIO() as image_binary:
             profile_back_image.save(image_binary, 'PNG')
             image_binary.seek(0)
             discord_file = discord.File(fp=image_binary, filename="profile_back.png")
-        
-            # Send the generated back of the profile
             await ctx.reply(file=discord_file)
 
     @commands.command(name="prestige")
