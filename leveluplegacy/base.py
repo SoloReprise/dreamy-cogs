@@ -1485,12 +1485,10 @@ class UserCommands(MixinMeta, ABC):
     @commands.group(name="newpfset", invoke_without_command=True)
     async def new_profile_settings(self, ctx):
         """Configuraciones del perfil del usuario."""
-        await ctx.send("Usa `!newpfset bg list` para ver los fondos disponibles, `!newpfset bg preview [NombreDelFondo]` para previsualizar un fondo, o `!newpfset bg set [NombreDelFondo]` para establecer tu fondo.")
 
     @new_profile_settings.group(name="pokedex", invoke_without_command=True)
     async def pokedex(self, ctx):
         """Comandos para gestionar tu Pokedex."""
-        await ctx.send("Usa `!newpfset pokedex check [Nombre de la Insignia]` para revisar una insignia.")
 
     @pokedex.command(name="check")
     async def pokedex_check(self, ctx, *, badge_name: str):
