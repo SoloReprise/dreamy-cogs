@@ -580,15 +580,15 @@ class Generator(MixinMeta, ABC):
         message_count = "Mensajes: " + str(messages)
         voice_time = "Tiempo en voz: " + voice
         stars_text = "Ggs: " + str(stars)
-        balance_text = "Balance: " + str(balance) + " " + currency
+        #balance_text = "Balance: " + str(balance) + " " + currency
 
         draw = ImageDraw.Draw(final)
-        draw.text((100, 100), user_name, font=name_font, fill=namecolor)
-        draw.text((100, 140), rank, font=stats_font, fill=statcolor)
-        draw.text((100, 180), message_count, font=stats_font, fill=statcolor)
-        draw.text((100, 220), voice_time, font=stats_font, fill=statcolor)
-        draw.text((100, 260), stars_text, font=stats_font, fill=statcolor)
-        draw.text((100, 300), balance_text, font=stats_font, fill=statcolor)
+        draw.text((150, 485), user_name, font=name_font, fill=namecolor)
+        draw.text((835, 433), rank, font=stats_font, fill=statcolor)
+        draw.text((835, 143), message_count, font=stats_font, fill=statcolor)
+        draw.text((835, 241), voice_time, font=stats_font, fill=statcolor)
+        draw.text((835, 323), stars_text, font=stats_font, fill=statcolor)
+        #draw.text((100, 300), balance_text, font=stats_font, fill=statcolor)
 
         if render_gifs and hasattr(profile, "is_animated") and profile.is_animated:
             # Handle animated profile picture
@@ -598,7 +598,7 @@ class Generator(MixinMeta, ABC):
             mask = Image.new("L", profile_resized.size, 0)
             mask_draw = ImageDraw.Draw(mask)
             mask_draw.ellipse((0, 0) + profile_resized.size, fill=255)
-            final.paste(profile_resized, (50, 50), mask)
+            final.paste(profile_resized, (55, 465), mask)
 
         return final
 
