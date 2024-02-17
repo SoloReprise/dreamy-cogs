@@ -1486,17 +1486,34 @@ class UserCommands(MixinMeta, ABC):
         if subcommand == "list":
             uid = str(ctx.author.id)
             gid = ctx.guild.id
+            # Ensure there's a default entry for every user
+            default_background = {"name": "Default", "url": "default_bg_url"}  # Replace "default_bg_url" with the actual URL or identifier for your default background
+            available_backgrounds = [default_background]  # Start with the default background
+            
             if uid in self.data[gid]["users"]:
-                backgrounds = self.data[gid]["users"][uid].get("backgrounds", [])
-                bg_list = "\n".join([f"{bg['name']}" for bg in backgrounds])
-                await ctx.send(f"Available Backgrounds:\n{bg_list}")
-            else:
-                await ctx.send("You do not have any custom backgrounds.")
+                user_backgrounds = self.data[gid]["users"][uid].get("backgrounds", [])
+                available_backgrounds.extend(user_backgrounds)  # Add custom backgrounds to the list
+            
+            bg_list = "\n".join([bg["name"] for bg in available_backgrounds])
+            await ctx.send(f"Available Backgrounds:\n{bg_list}")
         elif subcommand == "preview" and bg_name:
-            # Implementation for preview command
-            pass
+            if bg_name.lower() == "default":
+                # Show the default background image
+                default_bg_url = "default_bg_url"  # Replace with actual URL or method to retrieve the default background
+                await ctx.send(f"Preview of Default Background: {default_bg_url}")
+            else:
+                # Logic to preview custom backgrounds
+                pass
+
         elif subcommand == "set" and bg_name:
-            # Implementation for set command
-            pass
-        else:
-            await ctx.send("Invalid command. Use `list`, `preview [BGName]`, or `set [BGName]`.")
+            uid = str(ctx.author.id)
+            gid = ctx.guild.id
+            if bg_name.lower() == "default":
+                # Reset to the default background
+                if "background" in self.data[gid]["users"][uid]:
+                    self.data[gid]["users"][uid]["background"] = "Default"
+                    # Save or update the data as needed
+                await ctx.send("Your background has been set to the default.")
+            else:
+                # Logic to set custom backgrounds
+                pass
