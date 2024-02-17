@@ -1488,7 +1488,7 @@ class UserCommands(MixinMeta, ABC):
     @new_profile_settings.group(name="pokedex", invoke_without_command=True)
     async def pokedex(self, ctx):
         """Comandos para gestionar tu Pokedex."""
-        await ctx.send_help(self.new_profile_settings.group)
+        await ctx.send_help(self.pokedex)
 
     @pokedex.command(name="check")
     async def pokedex_check(self, ctx, *, badge_name: str):
