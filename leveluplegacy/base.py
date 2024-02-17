@@ -1037,90 +1037,93 @@ class UserCommands(MixinMeta, ABC):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def new_get_profile(self, ctx: commands.Context, *, user: discord.Member = None):
         """View your new profile"""
-        if not user:
-            user = ctx.author
-        if user.bot:
-            return await ctx.send("Bots can't have profiles!")
+        try:
+            if not user:
+                user = ctx.author
+            if user.bot:
+                return await ctx.send("Bots can't have profiles!")
 
-        gid = ctx.guild.id
-        if gid not in self.data:
-            await self.initialize()
+            gid = ctx.guild.id
+            if gid not in self.data:
+                await self.initialize()
 
-        conf = self.data[gid]
-        users = conf["users"]
-        user_id = str(user.id)
-        if user_id not in users:
-            return await ctx.send(_("No information available yet!"))
+            conf = self.data[gid]
+            users = conf["users"]
+            user_id = str(user.id)
+            if user_id not in users:
+                return await ctx.send(_("No information available yet!"))
 
-        # Attempt to fetch the current background setting for the user
-        current_bg = await self.config.member(user).current_bg()
+            # Attempt to fetch the current background setting for the user
+            current_bg = await self.config.member(user).current_bg()
 
-        bg = None  # Initialize bg variable
+            bg = None  # Initialize bg variable
 
-        # Check if current_bg is set, otherwise fall back to p["background"]
-        if current_bg and current_bg != "Default":
-            # Fetch custom backgrounds and find the current one
-            backgrounds = await self.config.member(user).backgrounds()
-            bg_info = next((bg for bg in backgrounds if bg['name'] == current_bg), None)
-            if bg_info:
-                bg = bg_info['url']  # Use the URL or path from the background info
-        else:
-            # Use the default background logic
-            bg = os.path.join(self.path, "backgrounds", "bgdefault.webp")
+            # Check if current_bg is set, otherwise fall back to p["background"]
+            if current_bg and current_bg != "Default":
+                # Fetch custom backgrounds and find the current one
+                backgrounds = await self.config.member(user).backgrounds()
+                bg_info = next((bg for bg in backgrounds if bg['name'] == current_bg), None)
+                if bg_info:
+                    bg = bg_info['url']  # Use the URL or path from the background info
+            else:
+                # Use the default background logic
+                bg = os.path.join(self.path, "backgrounds", "bgdefault.webp")
 
-        p = users[user_id]
-        level: int = p["level"]
-        stars: int = p["stars"]  # Int
-        messages: int = p["messages"]
-        voice: int = p["voice"]
-        font = p["font"]
-        blur = p["blur"]
+            p = users[user_id]
+            level: int = p["level"]
+            stars: int = p["stars"]  # Int
+            messages: int = p["messages"]
+            voice: int = p["voice"]
+            font = p["font"]
+            blur = p["blur"]
 
-        # Calculate new_rank based on level
-        new_rank = "Desconocido"  # Default rank
-        if level == 0:
-            new_rank = "Desconocido"
-        elif 1 <= level <= 4:
-            new_rank = "Principiante"
-        elif 5 <= level <= 7:
-            new_rank = "Alto"
-        elif 8 <= level <= 14:
-            new_rank = "Avanzado"
-        elif 15 <= level <= 19:
-            new_rank = "Élite"
-        elif 20 <= level <= 24:
-            new_rank = "Experto"
-        elif level >= 25:
-            new_rank = "Maestro"
+            # Calculate new_rank based on level
+            new_rank = "Desconocido"  # Default rank
+            if level == 0:
+                new_rank = "Desconocido"
+            elif 1 <= level <= 4:
+                new_rank = "Principiante"
+            elif 5 <= level <= 7:
+                new_rank = "Alto"
+            elif 8 <= level <= 14:
+                new_rank = "Avanzado"
+            elif 15 <= level <= 19:
+                new_rank = "Élite"
+            elif 20 <= level <= 24:
+                new_rank = "Experto"
+            elif level >= 25:
+                new_rank = "Maestro"
 
-        async with ctx.typing():
-            colors = users[user_id]["colors"]
-            usercolors = {
-                "base": hex_to_rgb(str(user.colour)),
-                "name": hex_to_rgb(colors["name"]) if colors["name"] else None,
-                "stat": hex_to_rgb(colors["stat"]) if colors["stat"] else None,
-                "levelbar": hex_to_rgb(colors["levelbar"]) if colors["levelbar"] else None,
-            }
+            async with ctx.typing():
+                colors = users[user_id]["colors"]
+                usercolors = {
+                    "base": hex_to_rgb(str(user.colour)),
+                    "name": hex_to_rgb(colors["name"]) if colors["name"] else None,
+                    "stat": hex_to_rgb(colors["stat"]) if colors["stat"] else None,
+                    "levelbar": hex_to_rgb(colors["levelbar"]) if colors["levelbar"] else None,
+                }
 
-            args = {
-                "user_name": user.name,  # username with discriminator
-                "bg_image": bg,
-                "stars": stars,
-                "profile_image": user.display_avatar.url if DPY2 else user.avatar_url,
-                "level": level,
-                "messages": humanize_number(messages),
-                "voice": time_formatter(voice),
-                "new_rank": new_rank,  # Pass new_rank to the profile generator
-                "colors": usercolors,
-                "font_name": font,
-                "render_gifs": self.render_gifs,
-                "blur": blur,
-            }
+                args = {
+                    "user_name": user.name,  # username with discriminator
+                    "bg_image": bg,
+                    "stars": stars,
+                    "profile_image": user.display_avatar.url if DPY2 else user.avatar_url,
+                    "level": level,
+                    "messages": humanize_number(messages),
+                    "voice": time_formatter(voice),
+                    "new_rank": new_rank,  # Pass new_rank to the profile generator
+                    "colors": usercolors,
+                    "font_name": font,
+                    "render_gifs": self.render_gifs,
+                    "blur": blur,
+                }
 
-        file = await self.get_or_fetch_profile(user, args, full=True, use_new_generator=True)
-        if not file:
-            return await ctx.send("Failed to generate profile image :( try again in a bit")
-        await ctx.send(file=file)  # Send the file directly
+            file = await self.get_or_fetch_profile(user, args, full=True, use_new_generator=True)
+            if not file:
+                return await ctx.send("Failed to generate profile image :( try again in a bit")
+            await ctx.send(file=file)  # Send the file directly
+        except Exception as e:
+            await ctx.send(f"An error occurred: {e}")
 
     @commands.command(name="newpfback")
     @commands.guild_only()
