@@ -584,11 +584,11 @@ class Generator(MixinMeta, ABC):
         # balance_text = "Balance:\n" + str(balance) + " " + currency
 
         draw = ImageDraw.Draw(final)
-        draw.text((150, 485), user_name, font=name_font, fill=namecolor)
-        draw.text((830, 135), message_count, font=stats_font, fill=statcolor)
-        draw.text((830, 232), voice_time, font=stats_font, fill=statcolor)
+        draw.text((155, 485), user_name, font=name_font, fill=namecolor)
+        draw.text((830, 134), message_count, font=stats_font, fill=statcolor)
+        draw.text((830, 231), voice_time, font=stats_font, fill=statcolor)
         draw.text((830, 325), stars_text, font=stats_font, fill=statcolor)
-        draw.text((830, 426), rank, font=stats_font, fill=statcolor)
+        draw.text((830, 425), rank, font=stats_font, fill=statcolor)
         #draw.text((100, 300), balance_text, font=stats_font, fill=statcolor)
 
         if render_gifs and hasattr(profile, "is_animated") and profile.is_animated:
