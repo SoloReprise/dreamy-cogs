@@ -17,7 +17,7 @@ from .utils.core import Pilmoji
 
 log = logging.getLogger("red.vrt.levelup.generator")
 _ = Translator("LevelUp", __file__)
-ASPECT_RATIO = (21, 9)
+ASPECT_RATIO = (1200, 675)
 
 
 @cog_i18n(_)
@@ -1690,27 +1690,38 @@ class Generator(MixinMeta, ABC):
 
     @staticmethod
     def force_aspect_ratio(image: Image, aspect_ratio: tuple = ASPECT_RATIO) -> Image:
-        x, y = aspect_ratio
-        w, h = image.size
+        target_width, target_height = aspect_ratio
+        original_width, original_height = image.size
 
-        counter = 1
-        while True:
-            nw, nh = counter * x, counter * y
-            if (counter + 1) * x > w or (counter + 1) * y > h:
-                break
-            counter += 1
+        # Calculate the target and current aspect ratios
+        target_aspect = target_width / target_height
+        current_aspect = original_width / original_height
 
-        x_split = int((w - nw) / 2)
-        x1 = x_split
-        x2 = w - x_split
+        # If the image needs cropping to fit the target aspect ratio
+        if current_aspect > target_aspect:
+            # Image is too wide
+            new_width = int(original_height * target_aspect)
+            offset = (original_width - new_width) // 2
+            image = image.crop((offset, 0, offset + new_width, original_height))
+        elif current_aspect < target_aspect:
+            # Image is too tall
+            new_height = int(original_width / target_aspect)
+            offset = (original_height - new_height) // 2
+            image = image.crop((0, offset, original_width, offset + new_height))
 
-        y_split = int((h - nh) / 2)
-        y1 = y_split
-        y2 = h - y_split
+        # Check if the image needs to be resized to fit the exact target dimensions
+        if image.size != (target_width, target_height):
+            # Padding to maintain aspect ratio without stretching
+            # Calculate padding sizes
+            padding_width = (target_width - image.width) // 2
+            padding_height = (target_height - image.height) // 2
+            # Apply padding
+            image = ImageOps.expand(image, border=(padding_width, padding_height), fill='black')
 
-        box = (x1, y1, x2, y2)
-        cropped = image.crop(box)
-        return cropped
+            # Final resize in case of odd numbers causing a 1px difference
+            image = image.resize((target_width, target_height), Image.Resampling.LANCZOS)
+
+        return image
 
     def get_random_background(self) -> Image:
         bg_dir = os.path.join(self.path, "backgrounds")
