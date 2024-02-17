@@ -1012,18 +1012,11 @@ class Generator(MixinMeta, ABC):
         font_name: str = None,
         render_gifs: bool = False,
         blur: bool = False,
-        pokedex: list = None  # Add pokedex parameter
+        pokedex: list = None
     ):
-            # Diagnostic prints to check the received arguments
+        # Diagnostic prints to check the received arguments
         print(f"Received pokedex: {pokedex}, Type: {type(pokedex)}")
-        
-        # Your existing code to generate the profile back...
-        
-        if pokedex:
-            print(f"Processing pokedex with length: {len(pokedex)}")
-            for index, pokemon in enumerate(pokedex):
-                print(f"Processing pokemon: {pokemon}, Index: {index}")
-                # Your existing code to process each pokemon...
+
         # Get profile pic
         if profile_image:
             pfp_image = self.get_image_content_from_url(str(profile_image))
@@ -1056,14 +1049,6 @@ class Generator(MixinMeta, ABC):
         # Assuming 'card' is now your base image, prepare 'final' early
         final = card.copy()  # Use a copy of 'card' as the base for 'final'
 
-        # Load the overlay image
-        overlay_path = os.path.join(self.path, "overlay", "overlay_back.png")
-        overlay = Image.open(overlay_path).convert("RGBA")
-        print("Overlay loaded successfully.")
-        overlay = overlay.resize(card.size, Image.Resampling.LANCZOS)
-        # Composite the overlay over the card to create the final base image
-        final = Image.alpha_composite(final, overlay)
-        
         user_name = user_name.upper()
 
         # Colors
@@ -1101,16 +1086,9 @@ class Generator(MixinMeta, ABC):
             fill=(255, 255, 255, 255),
         )
 
-        # Create a new Image to set up card-sized image for pfp layer and the circle mask for it
-        profile_pic_holder = Image.new("RGBA", card.size, (255, 255, 255, 0))
-
         # Calculate the position to paste the resized profile image
-        # Ensure it's centered within the circle
         profile_position = (55, 85)  # Adjust if needed
-        profile_pic_holder.paste(profile, profile_position, mask)  # Paste with mask for circular crop
-
-        # Profile image is on the background tile now
-        final = Image.alpha_composite(card, profile_pic_holder)
+        final.paste(profile, profile_position, mask)  # Paste with mask for circular crop
 
         # Add Pokémon badges
         if pokedex:
@@ -1134,8 +1112,14 @@ class Generator(MixinMeta, ABC):
             font=name_font
         )
 
-        return final
+        # Load and apply the overlay after adding all other elements
+        overlay_path = os.path.join(self.path, "overlay", "overlay_back.png")
+        overlay = Image.open(overlay_path).convert("RGBA")
+        overlay = overlay.resize(card.size, Image.Resampling.LANCZOS)
+        final = Image.alpha_composite(final, overlay)
 
+        return final
+    
     def generate_slim_profile(
         self,
         bg_image: str = None,
