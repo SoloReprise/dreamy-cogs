@@ -1052,27 +1052,12 @@ class UserCommands(MixinMeta, ABC):
         if user_id not in users:
             return await ctx.send(_("No information available yet!"))
 
-        # Attempt to fetch the current background setting for the user
-        current_bg = await self.config.member(user).current_bg()
-
-        bg = None  # Initialize bg variable
-
-        # Check if current_bg is set, otherwise fall back to p["background"]
-        if current_bg and current_bg != "Default":
-            # Fetch custom backgrounds and find the current one
-            backgrounds = await self.config.member(user).backgrounds()
-            bg_info = next((bg for bg in backgrounds if bg['name'] == current_bg), None)
-            if bg_info:
-                bg = bg_info['url']  # Use the URL or path from the background info
-        else:
-            # Use the default background logic
-            bg = os.path.join(self.path, "backgrounds", "bgdefault.webp")
-
         p = users[user_id]
         level: int = p["level"]
         stars: int = p["stars"]  # Int
         messages: int = p["messages"]
         voice: int = p["voice"]
+        bg = p["background"]
         font = p["font"]
         blur = p["blur"]
 
