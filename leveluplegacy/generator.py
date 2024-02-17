@@ -750,24 +750,26 @@ class Generator(MixinMeta, ABC):
             print("Error loading SarabunRegular font:", e)
             # Fallback to base font if there's an error
             stats_font = ImageFont.truetype(base_font, stats_size)
+
+        # Adjust stats_font size dynamically based on the length of the text it needs to render
         while (stats_font.getlength(leveltxt) + bar_start + 10) > bar_start + 210:
             stats_size -= 1
-            emoji_scale += 0.1
-            stats_font = ImageFont.truetype(base_font, stats_size)
+            stats_font = ImageFont.truetype(sarabun_regular_font_path, stats_size)
+
         # Also check message box
         while (stats_font.getlength(message_count) + bar_start + 220) > final.width - 10:
             stats_size -= 1
-            emoji_scale += 0.1
-            stats_font = ImageFont.truetype(base_font, stats_size)
+            stats_font = ImageFont.truetype(sarabun_regular_font_path, stats_size)
+
         # And rank box
         while (stats_font.getlength(rank) + bar_start + 10) > bar_start + 210:
             stats_size -= 1
-            emoji_scale += 0.1
-            stats_font = ImageFont.truetype(base_font, stats_size)
+            stats_font = ImageFont.truetype(sarabun_regular_font_path, stats_size)
+
         # And exp text
         while (stats_font.getlength(exp) + bar_start + 10) > final.width - 10:
             stats_size -= 1
-            stats_font = ImageFont.truetype(base_font, stats_size)
+            stats_font = ImageFont.truetype(sarabun_regular_font_path, stats_size)
 
         star_fontsize = 65
         star_font = ImageFont.truetype(base_font, star_fontsize)
