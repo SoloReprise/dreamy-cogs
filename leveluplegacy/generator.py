@@ -706,6 +706,8 @@ class Generator(MixinMeta, ABC):
 
         # Get base font
         base_font = self.font
+        fontfile = None  # Initialize fontfile variable
+
         if font_name:
             fontfile = os.path.join(self.fonts, font_name)
             if os.path.exists(fontfile):
@@ -726,6 +728,7 @@ class Generator(MixinMeta, ABC):
             print("Error loading font:", e)
             # Fallback to base font if there's an error
             stats_font = ImageFont.truetype(base_font, stats_size)
+            
         # base_font = self.get_random_font()
         # Setup font sizes
         # Specify the SarabunSemiBold font for the username
