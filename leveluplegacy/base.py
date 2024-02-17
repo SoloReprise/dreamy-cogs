@@ -1524,10 +1524,12 @@ class UserCommands(MixinMeta, ABC):
 
     @new_profile_settings.group(name="bg", invoke_without_command=True)
     async def bg(self, ctx):
+        """Comandos para gestionar el fondo de tu perfil."""
         await ctx.send_help(self.bg)
 
     @bg.command(name="list")
     async def bg_list(self, ctx):
+        """Lista tus fondos disponibles."""
         uid = str(ctx.author.id)
         backgrounds = await self.config.member(ctx.author).backgrounds()
 
@@ -1539,6 +1541,7 @@ class UserCommands(MixinMeta, ABC):
 
     @bg.command(name="set")
     async def bg_set(self, ctx, *, bg_name: str):
+        """Selecciona el fondo que deseas."""
         try:
             # Attempt to set the background as before
             backgrounds = await self.config.member(ctx.author).backgrounds()
@@ -1558,6 +1561,7 @@ class UserCommands(MixinMeta, ABC):
 
     @bg.command(name="preview")
     async def bg_preview(self, ctx, *, bg_name: str):
+        """Previsualiza tus fondos."""
         # Path to the default background image
         default_bg_path = os.path.join(self.path, "backgrounds", "bgdefault.webp")
 
