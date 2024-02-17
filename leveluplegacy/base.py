@@ -1477,7 +1477,7 @@ class UserCommands(MixinMeta, ABC):
         except Exception as e:
             await ctx.send(f"An error occurred: {e.__class__.__name__}: {str(e)}")
 
-    @pfadmin.command(name="addbg") 
+    @pfadmin.command(name="addbg")
     @commands.has_permissions(administrator=True)
     async def add_background(self, ctx, target: typing.Union[discord.Role, discord.Member], bg_name: str, bg_url: str):
         """
