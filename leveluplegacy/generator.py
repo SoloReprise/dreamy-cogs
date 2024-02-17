@@ -713,14 +713,24 @@ class Generator(MixinMeta, ABC):
         # base_font = self.get_random_font()
         # Setup font sizes
         # Specify the SarabunSemiBold font for the username
-        sarabun_semi_bold_font_path = os.path.join(self.fonts, "SarabunSemiBold.ttf")  # Update the path if needed
-        name_size = 35
-        # Ensure the font file exists
+        # Setup font sizes and paths for Sarabun fonts
+        sarabun_semi_bold_font_path = os.path.join(self.fonts, "SarabunSemiBold.ttf")
+        sarabun_regular_font_path = os.path.join(self.fonts, "SarabunRegular.ttf")
+
+        name_size = 35  # Size for the username text
+        stats_size = 30  # Size for the stats text
+
+        # Load SarabunSemiBold for the username
         if os.path.exists(sarabun_semi_bold_font_path):
             name_font = ImageFont.truetype(sarabun_semi_bold_font_path, name_size)
         else:
-            # Fallback to base font if SarabunSemiBold is not found
-            name_font = ImageFont.truetype(base_font, name_size)
+            raise FileNotFoundError("SarabunSemiBold.ttf font file not found")
+
+        # Load SarabunRegular for stats
+        if os.path.exists(sarabun_regular_font_path):
+            stats_font = ImageFont.truetype(sarabun_regular_font_path, stats_size)
+        else:
+            raise FileNotFoundError("SarabunRegular.ttf font file not found")
 
         # Adjust name_x as required
         name_x = -150  # Modify this value as needed
