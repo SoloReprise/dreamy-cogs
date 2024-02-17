@@ -1151,6 +1151,7 @@ class UserCommands(MixinMeta, ABC):
                     "pokedex": p.get("pokedex", [])  # Assuming p["pokedex"] contains the list of Pokémon names
                 }
 
+                print(f"Args for generate_profile_back: {args}")  # Diagnostic print
                 # Generate the profile back image
                 image = await asyncio.get_running_loop().run_in_executor(None, functools.partial(self.generate_profile_back, **args))
                     
@@ -1475,3 +1476,27 @@ class UserCommands(MixinMeta, ABC):
                 await ctx.send(f"{user.display_name} already has the Pokémon {pokemon_name}.")
         except Exception as e:
             await ctx.send(f"An error occurred: {e.__class__.__name__}: {str(e)}")
+
+    @commands.group(name="newpfset", invoke_without_command=True)
+    async def new_profile_settings(self, ctx):
+        await ctx.send("Use `!newpfset bg list` to see available backgrounds, `!newpfset bg preview [BGName]` to preview a background, or `!newpfset bgset [BGName]` to set your background.")
+
+    @new_profile_settings.command(name="bg")
+    async def bg(self, ctx, subcommand: str = None, *, bg_name: str = None):
+        if subcommand == "list":
+            uid = str(ctx.author.id)
+            gid = ctx.guild.id
+            if uid in self.data[gid]["users"]:
+                backgrounds = self.data[gid]["users"][uid].get("backgrounds", [])
+                bg_list = "\n".join([f"{bg['name']}" for bg in backgrounds])
+                await ctx.send(f"Available Backgrounds:\n{bg_list}")
+            else:
+                await ctx.send("You do not have any custom backgrounds.")
+        elif subcommand == "preview" and bg_name:
+            # Implementation for preview command
+            pass
+        elif subcommand == "set" and bg_name:
+            # Implementation for set command
+            pass
+        else:
+            await ctx.send("Invalid command. Use `list`, `preview [BGName]`, or `set [BGName]`.")
