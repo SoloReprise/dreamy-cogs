@@ -585,10 +585,10 @@ class Generator(MixinMeta, ABC):
 
         draw = ImageDraw.Draw(final)
         draw.text((150, 485), user_name, font=name_font, fill=namecolor)
-        draw.text((830, 137), message_count, font=stats_font, fill=statcolor)
-        draw.text((830, 238), voice_time, font=stats_font, fill=statcolor)
+        draw.text((830, 135), message_count, font=stats_font, fill=statcolor)
+        draw.text((830, 232), voice_time, font=stats_font, fill=statcolor)
         draw.text((830, 325), stars_text, font=stats_font, fill=statcolor)
-        draw.text((830, 429), rank, font=stats_font, fill=statcolor)
+        draw.text((830, 426), rank, font=stats_font, fill=statcolor)
         #draw.text((100, 300), balance_text, font=stats_font, fill=statcolor)
 
         if render_gifs and hasattr(profile, "is_animated") and profile.is_animated:
@@ -599,7 +599,7 @@ class Generator(MixinMeta, ABC):
             mask = Image.new("L", profile_resized.size, 0)
             mask_draw = ImageDraw.Draw(mask)
             mask_draw.ellipse((0, 0) + profile_resized.size, fill=255)
-            final.paste(profile_resized, (40, 465), mask)
+            final.paste(profile_resized, (25, 465), mask)
 
         return final
 
