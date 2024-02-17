@@ -584,7 +584,7 @@ class Generator(MixinMeta, ABC):
         # balance_text = "Balance:\n" + str(balance) + " " + currency
 
         draw = ImageDraw.Draw(final)
-        draw.text((155, 485), user_name, font=name_font, fill=namecolor)
+        draw.text((158, 485), user_name, font=name_font, fill=namecolor)
         draw.text((830, 134), message_count, font=stats_font, fill=statcolor)
         draw.text((830, 231), voice_time, font=stats_font, fill=statcolor)
         draw.text((830, 325), stars_text, font=stats_font, fill=statcolor)
@@ -599,7 +599,7 @@ class Generator(MixinMeta, ABC):
             mask = Image.new("L", profile_resized.size, 0)
             mask_draw = ImageDraw.Draw(mask)
             mask_draw.ellipse((0, 0) + profile_resized.size, fill=255)
-            final.paste(profile_resized, (25, 465), mask)
+            final.paste(profile_resized, (23, 465), mask)
 
         return final
 
