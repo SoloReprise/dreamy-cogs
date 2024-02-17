@@ -706,33 +706,16 @@ class Generator(MixinMeta, ABC):
 
         # Get base font
         base_font = self.font
-        fontfile = None  # Initialize fontfile variable
-        stats_size = 30  # Default value for stats_size
-
         if font_name:
-            fontfile = os.path.join(self.fonts, font_name)
-            if os.path.exists(fontfile):
-                base_font = fontfile
-
-        # Check if the background is default or random
-        if not bg_image or bg_image == "random":
-            # Use Sarabun font
-            font_path = os.path.join(self.fonts, "SarabunSemiBold.ttf")
-            stats_font = ImageFont.truetype(font_path, stats_size)
-        else:
-            # Use the specified font or fallback to the base font
-            if font_name:
-                fontfile = os.path.join(self.fonts, font_name)
-            font_path = fontfile if fontfile and os.path.exists(fontfile) else base_font
-
-            # Load the font
-            try:
+            font_path = os.path.join(self.fonts, font_name)
+            if os.path.exists(font_path):
                 stats_font = ImageFont.truetype(font_path, stats_size)
-            except Exception as e:
-                print("Error loading font:", e)
-                # Fallback to base font if there's an error
+            else:
+                print(f"Font file {font_path} not found. Falling back to base font.")
                 stats_font = ImageFont.truetype(base_font, stats_size)
-
+        else:
+            # Fallback to the default font if font_name is not specified
+            stats_font = ImageFont.truetype(base_font, stats_size)
         # base_font = self.get_random_font()
         # Setup font sizes
         # Specify the SarabunSemiBold font for the username
