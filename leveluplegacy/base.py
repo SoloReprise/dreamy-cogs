@@ -1517,7 +1517,7 @@ class UserCommands(MixinMeta, ABC):
                 available_backgrounds.extend(backgrounds)
 
             bg_list = "\n".join([bg["name"] for bg in available_backgrounds])
-                await ctx.send(f"Available Backgrounds:\n{bg_list}")
+            await ctx.send(f"Available Backgrounds:\n{bg_list}")
         elif subcommand == "set" and bg_name:
             # Logic for setting a new background
             uid = str(ctx.author.id)
