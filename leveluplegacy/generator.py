@@ -1049,6 +1049,14 @@ class Generator(MixinMeta, ABC):
         # Assuming 'card' is now your base image, prepare 'final' early
         final = card.copy()  # Use a copy of 'card' as the base for 'final'
 
+        # Load the overlay image
+        overlay_path = os.path.join(self.path, "overlay", "overlay_back.png")
+        overlay = Image.open(overlay_path).convert("RGBA")
+        overlay = overlay.resize(card.size, Image.Resampling.LANCZOS)
+        # Composite the overlay over the card to create the final base image
+        final = Image.alpha_composite(final, overlay)
+        print("Overlay loaded successfully.")
+
         user_name = user_name.upper()
 
         # Colors
@@ -1086,16 +1094,24 @@ class Generator(MixinMeta, ABC):
             fill=(255, 255, 255, 255),
         )
 
-        # Calculate the position to paste the resized profile image
-        profile_position = (55, 85)  # Adjust if needed
-        final.paste(profile, profile_position, mask)  # Paste with mask for circular crop
+        # Create a new Image to set up card-sized image for pfp layer and the circle mask for it
+        profile_pic_holder = Image.new("RGBA", card.size, (255, 255, 255, 0))
 
-        # Add Pokémon badges
+        # Calculate the position to paste the resized profile image
+        # Ensure it's centered within the circle
+        profile_position = (55, 85)  # Adjust if needed
+        profile_pic_holder.paste(profile, profile_position, mask)  # Paste with mask for circular crop
+
+        # Composite profile image with the final base
+        final = Image.alpha_composite(final, profile_pic_holder)
+
         if pokedex:
+            print(f"Processing pokedex with length: {len(pokedex)}")
             badge_start_x, badge_start_y = 62, 180  # Starting position for the first badge
             badge_spacing_x, badge_spacing_y = 56, 21  # Spacing between badges
             badge_size = (67, 67)  # Size of each badge
             for index, pokemon in enumerate(pokedex):
+                print(f"Processing pokemon: {pokemon}, Index: {index}")
                 badge_path = os.path.join(self.path, "pokedex", "sprites", f"{pokemon}.png")
                 if os.path.exists(badge_path):
                     badge = Image.open(badge_path).resize(badge_size, Image.Resampling.LANCZOS)
@@ -1111,12 +1127,6 @@ class Generator(MixinMeta, ABC):
             namecolor,
             font=name_font
         )
-
-        # Load and apply the overlay after adding all other elements
-        overlay_path = os.path.join(self.path, "overlay", "overlay_back.png")
-        overlay = Image.open(overlay_path).convert("RGBA")
-        overlay = overlay.resize(card.size, Image.Resampling.LANCZOS)
-        final = Image.alpha_composite(final, overlay)
 
         return final
     
