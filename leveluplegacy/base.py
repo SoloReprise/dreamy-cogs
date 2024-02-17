@@ -1449,8 +1449,6 @@ class UserCommands(MixinMeta, ABC):
     @commands.has_permissions(administrator=True)
     async def pfadmin(self, ctx):
         """Comandos de administración para la gestión de perfiles."""
-        if ctx.invoked_subcommand is None:
-            await ctx.send("Comando pfadmin inválido.")
 
     @pfadmin.command(name="pokelist")
     async def pokelist(self, ctx, user: discord.Member = None):
