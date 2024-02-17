@@ -570,7 +570,8 @@ class Generator(MixinMeta, ABC):
 
         name_font = ImageFont.truetype(custom_font_path, 35)
         stats_font = ImageFont.truetype(sarabun_regular_font_path, 30)
-
+        api_font = ImageFont.truetype(sarabun_regular_font_path, 30)  
+        
         blank = Image.new("RGBA", card.size, (255, 255, 255, 0))
         if blur:
             blurred = card.filter(ImageFilter.GaussianBlur(3))
