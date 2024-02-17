@@ -1584,33 +1584,40 @@ class UserCommands(MixinMeta, ABC):
             else:
                 await ctx.send("Background not found. Please ensure you have access to this background.")
 
-    @new_profile_settings.group(name="pokedex")
-    async def badges(self, ctx):
-        """Commands for managing pokedex."""
-        if ctx.invoked_subcommand is None:
-            await ctx.send_help(str(ctx.command))
+    @new_profile_settings.group(name="pokedex", invoke_without_command=True)
+    async def pokedex(self, ctx):
+        await ctx.send("Use `!newpfset pokedex check [Badge name]` to check a badge.")
 
     @pokedex.command(name="check")
-    async def badges_check(self, ctx, *, badge_name: str):
-        """Check the details of a specific badge."""
-        # Normalize the badge name to match file naming conventions if needed
-        badge_name_lower = badge_name.lower()
-        badge_info_path = os.path.join(self.path, "pokedex", "functions", f"{badge_name_lower}.py")
-
-        if os.path.exists(badge_info_path):
-            # Dynamically import the badge info based on the file
-            badge_info = self.dynamic_import(badge_info_path)
-            if badge_info:
-                embed = discord.Embed(title=badge_info["name"], description=badge_info["description"], color=ctx.author.color)
-                # Path to the badge image
-                badge_image_path = os.path.join(self.path, "pokedex", "sprites", f"{badge_name_lower}.png")
-                if os.path.exists(badge_image_path):
-                    file = discord.File(badge_image_path, filename=f"{badge_name_lower}.png")
-                    embed.set_thumbnail(url=f"attachment://{badge_name_lower}.png")
-                    await ctx.send(embed=embed, file=file)
-                else:
-                    await ctx.send("Badge image not found.")
-            else:
-                await ctx.send("Badge information could not be loaded.")
-        else:
-            await ctx.send("Badge not found.")
+    async def pokedex_check(self, ctx, *, badge_name: str):
+        badge_name = badge_name.lower()  # Assuming badge names are stored in lowercase for consistency
+        badge_info_path = os.path.join(self.path, "pokedex", "functions", f"{badge_name}.py")
+        
+        try:
+            # Dynamically load the badge info
+            badge_info = {}
+            with open(badge_info_path) as file:
+                exec(file.read(), badge_info)
+            pokemon_info = badge_info.get("pokemon_info", {})
+            
+            # Path to the badge image
+            badge_image_path = os.path.join(self.path, "pokedex", "sprites", f"{badge_name}.png")
+            if not os.path.exists(badge_image_path):
+                await ctx.send("Badge image not found.")
+                return
+            
+            # Create the embed
+            embed = discord.Embed(
+                title=pokemon_info.get("name", "Unknown Badge").capitalize(), 
+                description=pokemon_info.get("description", "No description available."),
+                color=ctx.author.color
+            )
+            
+            file = discord.File(badge_image_path, filename=f"{badge_name}.png")
+            embed.set_thumbnail(url=f"attachment://{badge_name}.png")
+            await ctx.send(embed=embed, file=file)
+            
+        except FileNotFoundError:
+            await ctx.send(f"Badge `{badge_name}` not found.")
+        except Exception as e:
+            await ctx.send(f"An error occurred: {e}")
