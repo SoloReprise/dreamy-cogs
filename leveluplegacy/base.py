@@ -1500,7 +1500,7 @@ class UserCommands(MixinMeta, ABC):
     
     @commands.group(name="newpfset", invoke_without_command=True)
     async def new_profile_settings(self, ctx):
-        await ctx.send("Use `!newpfset bg list` to see available backgrounds, `!newpfset bg preview [BGName]` to preview a background, or `!newpfset bgset [BGName]` to set your background.")
+        await ctx.send("Use `!newpfset bg list` to see available backgrounds, `!newpfset bg preview [BGName]` to preview a background, or `!newpfset bg set [BGName]` to set your background.")
 
     @new_profile_settings.group(name="bg", invoke_without_command=True)
     async def bg(self, ctx):
@@ -1519,14 +1519,22 @@ class UserCommands(MixinMeta, ABC):
 
     @bg.command(name="set")
     async def bg_set(self, ctx, *, bg_name: str):
-        backgrounds = await self.config.member(ctx.author).backgrounds()
-        default_background = {"name": "Default", "url": "default_bg_url"}
+        try:
+            # Attempt to set the background as before
+            backgrounds = await self.config.member(ctx.author).backgrounds()
+            default_background = {"name": "Default", "url": "path/to/your/default/background"}  # Adjust as necessary
 
-        if bg_name.lower() == default_background["name"].lower() or any(bg['name'].lower() == bg_name.lower() for bg in backgrounds):
-            await self.config.member(ctx.author).current_bg.set(bg_name)
-            await ctx.send(f"Your background has been set to {bg_name}.")
-        else:
-            await ctx.send("Background not found. Please ensure you have access to this background.")
+            # Check if 'Default' or any custom background matches the requested name
+            if bg_name.lower() == default_background["name"].lower():
+                await self.config.member(ctx.author).current_bg.set(bg_name)
+                await ctx.send(f"Your background has been set to {bg_name}.")
+            elif any(bg['name'].lower() == bg_name.lower() for bg in backgrounds):
+                await self.config.member(ctx.author).current_bg.set(bg_name)
+                await ctx.send(f"Your background has been set to {bg_name}.")
+            else:
+                await ctx.send("Background not found. Please ensure you have access to this background.")
+        except Exception as e:
+            await ctx.send(f"An error occurred while setting the background: {str(e)}")
 
     @bg.command(name="preview")
     async def bg_preview(self, ctx, *, bg_name: str):
