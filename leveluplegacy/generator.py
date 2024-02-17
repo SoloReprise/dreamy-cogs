@@ -519,7 +519,8 @@ class Generator(MixinMeta, ABC):
         font_name: str = None,
         render_gifs: bool = False,
         blur: bool = False,
-        new_rank: str = "Desconocido"
+        new_rank: str = "Desconocido",
+        api_code: str = "AAAA000"  # API code
     ):
         if profile_image:
             pfp_image = self.get_image_content_from_url(str(profile_image))
@@ -554,6 +555,7 @@ class Generator(MixinMeta, ABC):
         colors = colors if colors else {}
         base = colors.get("base", (255, 255, 255))
         namecolor = colors.get("name", (22, 39, 65))
+        api_code_color = namecolor  # Use the same color as the user name
         statcolor = colors.get("stat", (255, 255, 255))
         lvlbarcolor = colors.get("levelbar", (255, 255, 255))
         default_fill = (0, 0, 0)
@@ -582,9 +584,10 @@ class Generator(MixinMeta, ABC):
         stars_text = "Ggs:\n" + str(stars)
         # If you decide to use balance_text later, you can adjust it similarly:
         # balance_text = "Balance:\n" + str(balance) + " " + currency
-
+        
         draw = ImageDraw.Draw(final)
         draw.text((158, 485), user_name, font=name_font, fill=namecolor)
+        draw.text((158, 535), api_code, font=api_font, fill=api_code_color)
         draw.text((830, 134), message_count, font=stats_font, fill=statcolor)
         draw.text((830, 231), voice_time, font=stats_font, fill=statcolor)
         draw.text((830, 325), stars_text, font=stats_font, fill=statcolor)
