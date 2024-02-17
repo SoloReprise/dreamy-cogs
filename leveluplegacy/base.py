@@ -1503,7 +1503,7 @@ class UserCommands(MixinMeta, ABC):
                 self.data[gid]["users"][uid]["backgrounds"].append({"name": bg_name, "url": bg_url})
                 # Save or update the data as needed
 
-        await ctx.send("Background added successfully.")
+        await ctx.send("Fondo añadido con éxito.")
         
     @commands.group(name="newpfset", invoke_without_command=True)
     async def new_profile_settings(self, ctx):
