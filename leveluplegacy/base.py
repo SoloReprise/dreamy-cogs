@@ -1502,33 +1502,58 @@ class UserCommands(MixinMeta, ABC):
     async def new_profile_settings(self, ctx):
         await ctx.send("Use `!newpfset bg list` to see available backgrounds, `!newpfset bg preview [BGName]` to preview a background, or `!newpfset bgset [BGName]` to set your background.")
 
-    @new_profile_settings.command(name="bg")
-    async def bg(self, ctx, subcommand: str = None, *, bg_name: str = None):
-        if subcommand == "list":
-            uid = str(ctx.author.id)
-            # Retrieve backgrounds from the user's configuration
-            backgrounds = await self.config.member(ctx.author).backgrounds()
+    @new_profile_settings.group(name="bg", invoke_without_command=True)
+    async def bg(self, ctx):
+        await ctx.send("Use `!newpfset bg list` to see available backgrounds, `!newpfset bg preview [BGName]` to preview a background, or `!newpfset bg set [BGName]` to set your background.")
 
-            # Ensure there's a default entry for every user
-            default_background = {"name": "Default", "url": "default_bg_url"}  # Replace "default_bg_url" with the actual URL or identifier for your default background
-            available_backgrounds = [default_background]  # Start with the default background
+    @bg.command(name="list")
+    async def bg_list(self, ctx):
+        uid = str(ctx.author.id)
+        backgrounds = await self.config.member(ctx.author).backgrounds()
 
-            if backgrounds:  # If there are additional backgrounds, add them to the list
-                available_backgrounds.extend(backgrounds)
+        default_background = {"name": "Default", "url": "default_bg_url"}
+        available_backgrounds = [default_background] + backgrounds
 
-            bg_list = "\n".join([bg["name"] for bg in available_backgrounds])
-            await ctx.send(f"Available Backgrounds:\n{bg_list}")
-        elif subcommand == "set" and bg_name:
-            # Logic for setting a new background
-            uid = str(ctx.author.id)
-            # Retrieve the user's current backgrounds from configuration
-            backgrounds = await self.config.member(ctx.author).backgrounds()
+        bg_list = "\n".join([bg["name"] for bg in available_backgrounds])
+        await ctx.send(f"Available Backgrounds:\n{bg_list}")
 
-            # Check if 'Default' or any custom background matches the requested name
-            default_background = {"name": "Default", "url": "default_bg_url"}  # Ensure to replace "default_bg_url" with the actual URL
-            if bg_name.lower() == default_background["name"].lower() or any(bg['name'].lower() == bg_name.lower() for bg in backgrounds):
-                # Update the user's current background setting
-                await self.config.member(ctx.author).current_bg.set(bg_name)
-                await ctx.send(f"Your background has been set to {bg_name}.")
+    @bg.command(name="set")
+    async def bg_set(self, ctx, *, bg_name: str):
+        backgrounds = await self.config.member(ctx.author).backgrounds()
+        default_background = {"name": "Default", "url": "default_bg_url"}
+
+        if bg_name.lower() == default_background["name"].lower() or any(bg['name'].lower() == bg_name.lower() for bg in backgrounds):
+            await self.config.member(ctx.author).current_bg.set(bg_name)
+            await ctx.send(f"Your background has been set to {bg_name}.")
+        else:
+            await ctx.send("Background not found. Please ensure you have access to this background.")
+
+    @bg.command(name="preview")
+    async def bg_preview(self, ctx, *, bg_name: str):
+        # Path to the default background image
+        default_bg_path = os.path.join(self.path, "backgrounds", "bgdefault.webp")
+
+        # Retrieve the user's custom backgrounds
+        backgrounds = await self.config.member(ctx.author).backgrounds()
+
+        if bg_name.lower() == "default":
+            # For the default background, use the local file
+            file = discord.File(default_bg_path, filename="default_bg.webp")
+            embed = discord.Embed(title="Preview: Default Background", color=ctx.author.color)
+            embed.set_image(url="attachment://default_bg.webp")
+            await ctx.send(embed=embed, file=file)
+        else:
+            # Search for the requested background in the user's custom backgrounds
+            bg_url = None
+            for bg in backgrounds:
+                if bg_name.lower() == bg['name'].lower():
+                    bg_url = bg['url']
+                    break
+            
+            if bg_url:
+                # For custom backgrounds, use the URL
+                embed = discord.Embed(title=f"Preview: {bg_name}", color=ctx.author.color)
+                embed.set_image(url=bg_url)
+                await ctx.send(embed=embed)
             else:
                 await ctx.send("Background not found. Please ensure you have access to this background.")
