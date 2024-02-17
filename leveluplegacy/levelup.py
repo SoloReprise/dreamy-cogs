@@ -214,7 +214,8 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         self.profiles = {}
         default_member = {
             "pokedex": [],
-            "backgrounds": []  # New line added to store user backgrounds
+            "backgrounds": [],  # New line added to store user backgrounds
+            "current_bg": None,  # Initialize current_bg for each member
         }
         self.config.register_member(**default_member)
         
