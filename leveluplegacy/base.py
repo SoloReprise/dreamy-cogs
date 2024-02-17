@@ -1477,6 +1477,34 @@ class UserCommands(MixinMeta, ABC):
         except Exception as e:
             await ctx.send(f"An error occurred: {e.__class__.__name__}: {str(e)}")
 
+    @pfadmin.command(name="addbg")
+    @commands.has_permissions(administrator=True)
+    async def add_background(self, ctx, target: typing.Union[discord.Role, discord.Member], bg_name: str, bg_url: str):
+        """
+        Add a new background to a specific user or all users in a role.
+        """
+        if isinstance(target, discord.Member):
+            targets = [target]  # Single member in a list for consistent processing
+        else:  # Target is a role
+            targets = target.members  # All members of the role
+
+        for member in targets:
+            uid = str(member.id)
+            gid = ctx.guild.id
+            # Ensure guild and user data structure exists
+            if gid not in self.data:
+                self.data[gid] = {"users": {}}
+            if "users" not in self.data[gid]:
+                self.data[gid]["users"] = {}
+            if uid not in self.data[gid]["users"]:
+                self.data[gid]["users"][uid] = {"backgrounds": []}
+            # Add the new background if it's not already present
+            if bg_name not in self.data[gid]["users"][uid]["backgrounds"]:
+                self.data[gid]["users"][uid]["backgrounds"].append({"name": bg_name, "url": bg_url})
+                # Save or update the data as needed
+
+        await ctx.send("Background added successfully.")
+        
     @commands.group(name="newpfset", invoke_without_command=True)
     async def new_profile_settings(self, ctx):
         await ctx.send("Use `!newpfset bg list` to see available backgrounds, `!newpfset bg preview [BGName]` to preview a background, or `!newpfset bgset [BGName]` to set your background.")
