@@ -1481,20 +1481,23 @@ class UserCommands(MixinMeta, ABC):
     async def addbg(self, ctx, user: discord.Member, bg_name: str, bg_url: str):
         """Adds a new background to a user's profile."""
         # Access the user's backgrounds
-        user_backgrounds = await self.config.member(user).backgrounds()
+        try:
+            user_backgrounds = await self.config.member(user).backgrounds()
 
-        # Check if the background already exists
-        if any(bg['name'] == bg_name for bg in user_backgrounds):
-            await ctx.send(f"{user.display_name} already has a background named {bg_name}.")
-            return
+            # Check if the background already exists
+            if any(bg['name'] == bg_name for bg in user_backgrounds):
+                await ctx.send(f"{user.display_name} already has a background named {bg_name}.")
+                return
 
-        # Add the new background
-        new_bg = {"name": bg_name, "url": bg_url}
-        user_backgrounds.append(new_bg)
-        await self.config.member(user).backgrounds.set(user_backgrounds)
+            # Add the new background
+            new_bg = {"name": bg_name, "url": bg_url}
+            user_backgrounds.append(new_bg)
+            await self.config.member(user).backgrounds.set(user_backgrounds)
 
-        await ctx.send(f"Background '{bg_name}' has been successfully added to {user.display_name}'s profile.")
-
+            await ctx.send(f"Background {bg_name} successfully added to {user.display_name}'s profile.")
+        except Exception as e:
+            await ctx.send(f"An error occurred while adding the background: {e}")
+    
     @commands.group(name="newpfset", invoke_without_command=True)
     async def new_profile_settings(self, ctx):
         await ctx.send("Use `!newpfset bg list` to see available backgrounds, `!newpfset bg preview [BGName]` to preview a background, or `!newpfset bgset [BGName]` to set your background.")
