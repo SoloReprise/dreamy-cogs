@@ -1498,22 +1498,39 @@ class UserCommands(MixinMeta, ABC):
             await ctx.send(f"Available Backgrounds:\n{bg_list}")
         elif subcommand == "preview" and bg_name:
             if bg_name.lower() == "default":
-                # Show the default background image
-                default_bg_url = "default_bg_url"  # Replace with actual URL or method to retrieve the default background
-                await ctx.send(f"Preview of Default Background: {default_bg_url}")
-            else:
-                # Logic to preview custom backgrounds
-                pass
-
+                # Path to the default background image
+                default_bg_path = os.path.join(self.path, "backgrounds", "bgdefault.webp")
+                file = discord.File(default_bg_path, filename="bgdefault.webp")
+                
+                # Create an embed with the default background as an attachment
+                em = discord.Embed(title="Preview: Default Background", color=ctx.author.color)
+                em.set_image(url="attachment://bgdefault.webp")  # Reference the attachment in the embed
+                await ctx.send(embed=em, file=file)  # Send both the embed and the file
         elif subcommand == "set" and bg_name:
             uid = str(ctx.author.id)
             gid = ctx.guild.id
-            if bg_name.lower() == "default":
-                # Reset to the default background
-                if "background" in self.data[gid]["users"][uid]:
-                    self.data[gid]["users"][uid]["background"] = "Default"
-                    # Save or update the data as needed
-                await ctx.send("Your background has been set to the default.")
+            # Ensure user data exists
+            if gid not in self.data:
+                self.data[gid] = {"users": {}}
+            if "users" not in self.data[gid]:
+                self.data[gid]["users"] = {}
+            if uid not in self.data[gid]["users"]:
+                self.data[gid]["users"][uid] = {"backgrounds": []}
+
+            # Check if the background name is in the user's available backgrounds
+            user_data = self.data[gid]["users"][uid]
+            user_backgrounds = user_data.get("backgrounds", [])
+            default_background = {"name": "Default", "url": "default_bg_url"}  # Ensure consistency with the listing part
+
+            # Include the default background in the search
+            all_backgrounds = [default_background] + user_backgrounds
+            selected_bg = next((bg for bg in all_backgrounds if bg_name.lower() == bg["name"].lower()), None)
+
+            if selected_bg:
+                # Update the user's current background setting
+                user_data["current_bg"] = selected_bg["name"]
+                # Save or update the data as needed
+
+                await ctx.send(f"Your background has been set to {selected_bg['name']}.")
             else:
-                # Logic to set custom backgrounds
-                pass
+                await ctx.send("Background not found. Please ensure you have access to this background.")
