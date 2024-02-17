@@ -749,11 +749,11 @@ class Generator(MixinMeta, ABC):
         except Exception as e:
             print("Error loading SarabunRegular font:", e)
             # Fallback to base font if there's an error
-            stats_font = ImageFont.truetype(sarabun_regular_font_path, stats_size)
+            stats_font = ImageFont.truetype(base_font, stats_size)
         while (stats_font.getlength(leveltxt) + bar_start + 10) > bar_start + 210:
             stats_size -= 1
             emoji_scale += 0.1
-            stats_font = ImageFont.truetype(sarabun_regular_font_path, stats_size)
+            stats_font = ImageFont.truetype(base_font, stats_size)
         # Also check message box
         while (stats_font.getlength(message_count) + bar_start + 220) > final.width - 10:
             stats_size -= 1
