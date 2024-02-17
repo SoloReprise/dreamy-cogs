@@ -1446,170 +1446,72 @@ class UserCommands(MixinMeta, ABC):
         return pokedex
         
     @commands.group(name="pfadmin")
-    @commands.has_permissions(administrator=True)  # Ensure only admins can use this command
+    @commands.has_permissions(administrator=True)
     async def pfadmin(self, ctx):
-        """Admin commands for profile management."""
+        """Comandos de administración para la gestión de perfiles."""
         if ctx.invoked_subcommand is None:
-            await ctx.send("Invalid pfadmin command passed.")
+            await ctx.send("Comando pfadmin inválido.")
 
     @pfadmin.command(name="pokelist")
     async def pokelist(self, ctx, user: discord.Member = None):
-        """Displays the list of Pokémon badges a user has."""
+        """Muestra la lista de insignias Pokémon que tiene un usuario."""
         if user is None:
-            await ctx.send("You need to specify a user.")
+            await ctx.send("Debes especificar un usuario.")
             return
 
-        # Fetch the pokedex from Red's Config instead of self.data
-        try:
-            pokedex = await self.config.member(user).pokedex()
-        except Exception as e:
-            await ctx.send(f"An error occurred while fetching the pokedex: {e}")
-            return
-
+        pokedex = await self.config.member(user).pokedex()
         if not pokedex:
-            await ctx.send(f"{user.display_name} has no Pokémon badges.")
+            await ctx.send(f"{user.display_name} no tiene ninguna insignia Pokémon.")
         else:
             badges_list = ", ".join(pokedex)
-            await ctx.send(f"{user.display_name} has the following Pokémon badges: {badges_list}")
+            await ctx.send(f"{user.display_name} tiene las siguientes insignias Pokémon: {badges_list}")
 
     @pfadmin.command(name="addpoke")
     async def addpoke(self, ctx, user: discord.Member, pokemon_name: str):
-        """Manually awards a Pokémon to a user."""
-        try:
-            # Ensure the Pokémon exists
-            pokemon_path = os.path.join(self.path, "pokedex", "sprites", f"{pokemon_name}.png")
-            if not os.path.exists(pokemon_path):
-                await ctx.send(f"The Pokémon {pokemon_name} does not exist.")
-                return
+        """Otorga manualmente una insignia Pokémon a un usuario."""
+        pokemon_path = os.path.join(self.path, "pokedex", "sprites", f"{pokemon_name}.png")
+        if not os.path.exists(pokemon_path):
+            await ctx.send(f"La insignia Pokémon {pokemon_name} no existe.")
+            return
 
-            # Using Red's Config to access and update the user's pokedex
-            member_config = self.config.member(user)
-            pokedex = await member_config.pokedex()
+        pokedex = await self.config.member(user).pokedex()
+        if pokemon_name not in pokedex:
+            pokedex.append(pokemon_name)
+            await self.config.member(user).pokedex.set(pokedex)
+            await ctx.send(f"La insignia {pokemon_name} ha sido agregada exitosamente al pokedex de {user.display_name}.")
+        else:
+            await ctx.send(f"{user.display_name} ya tiene la insignia Pokémon {pokemon_name}.")
 
-            if pokemon_name not in pokedex:
-                pokedex.append(pokemon_name)
-                await member_config.pokedex.set(pokedex)
-                await ctx.send(f"{pokemon_name} has been successfully added to {user.display_name}'s pokedex.")
-            else:
-                await ctx.send(f"{user.display_name} already has the Pokémon {pokemon_name}.")
-        except Exception as e:
-            await ctx.send(f"An error occurred: {e.__class__.__name__}: {str(e)}")
-
-    @pfadmin.command(name="addbg")
-    async def addbg(self, ctx, user: discord.Member, bg_name: str, bg_url: str):
-        """Adds a new background to a user's profile."""
-        # Access the user's backgrounds
-        try:
-            user_backgrounds = await self.config.member(user).backgrounds()
-
-            # Check if the background already exists
-            if any(bg['name'] == bg_name for bg in user_backgrounds):
-                await ctx.send(f"{user.display_name} already has a background named {bg_name}.")
-                return
-
-            # Add the new background
-            new_bg = {"name": bg_name, "url": bg_url}
-            user_backgrounds.append(new_bg)
-            await self.config.member(user).backgrounds.set(user_backgrounds)
-
-            await ctx.send(f"Background {bg_name} successfully added to {user.display_name}'s profile.")
-        except Exception as e:
-            await ctx.send(f"An error occurred while adding the background: {e}")
-    
     @commands.group(name="newpfset", invoke_without_command=True)
     async def new_profile_settings(self, ctx):
-        await ctx.send("Use `!newpfset bg list` to see available backgrounds, `!newpfset bg preview [BGName]` to preview a background, or `!newpfset bg set [BGName]` to set your background.")
-
-    @new_profile_settings.group(name="bg", invoke_without_command=True)
-    async def bg(self, ctx):
-        await ctx.send("Use `!newpfset bg list` to see available backgrounds, `!newpfset bg preview [BGName]` to preview a background, or `!newpfset bg set [BGName]` to set your background.")
-
-    @bg.command(name="list")
-    async def bg_list(self, ctx):
-        uid = str(ctx.author.id)
-        backgrounds = await self.config.member(ctx.author).backgrounds()
-
-        default_background = {"name": "Default", "url": "default_bg_url"}
-        available_backgrounds = [default_background] + backgrounds
-
-        bg_list = "\n".join([bg["name"] for bg in available_backgrounds])
-        await ctx.send(f"Available Backgrounds:\n{bg_list}")
-
-    @bg.command(name="set")
-    async def bg_set(self, ctx, *, bg_name: str):
-        try:
-            # Attempt to set the background as before
-            backgrounds = await self.config.member(ctx.author).backgrounds()
-            default_background = {"name": "Default", "url": "path/to/your/default/background"}  # Adjust as necessary
-
-            # Check if 'Default' or any custom background matches the requested name
-            if bg_name.lower() == default_background["name"].lower():
-                await self.config.member(ctx.author).current_bg.set(bg_name)
-                await ctx.send(f"Your background has been set to {bg_name}.")
-            elif any(bg['name'].lower() == bg_name.lower() for bg in backgrounds):
-                await self.config.member(ctx.author).current_bg.set(bg_name)
-                await ctx.send(f"Your background has been set to {bg_name}.")
-            else:
-                await ctx.send("Background not found. Please ensure you have access to this background.")
-        except Exception as e:
-            await ctx.send(f"An error occurred while setting the background: {str(e)}")
-
-    @bg.command(name="preview")
-    async def bg_preview(self, ctx, *, bg_name: str):
-        # Path to the default background image
-        default_bg_path = os.path.join(self.path, "backgrounds", "bgdefault.webp")
-
-        # Retrieve the user's custom backgrounds
-        backgrounds = await self.config.member(ctx.author).backgrounds()
-
-        if bg_name.lower() == "default":
-            # For the default background, use the local file
-            file = discord.File(default_bg_path, filename="default_bg.webp")
-            embed = discord.Embed(title="Preview: Default Background", color=ctx.author.color)
-            embed.set_image(url="attachment://default_bg.webp")
-            await ctx.send(embed=embed, file=file)
-        else:
-            # Search for the requested background in the user's custom backgrounds
-            bg_url = None
-            for bg in backgrounds:
-                if bg_name.lower() == bg['name'].lower():
-                    bg_url = bg['url']
-                    break
-            
-            if bg_url:
-                # For custom backgrounds, use the URL
-                embed = discord.Embed(title=f"Preview: {bg_name}", color=ctx.author.color)
-                embed.set_image(url=bg_url)
-                await ctx.send(embed=embed)
-            else:
-                await ctx.send("Background not found. Please ensure you have access to this background.")
+        """Configuraciones del perfil del usuario."""
+        await ctx.send("Usa `!newpfset bg list` para ver los fondos disponibles, `!newpfset bg preview [NombreDelFondo]` para previsualizar un fondo, o `!newpfset bg set [NombreDelFondo]` para establecer tu fondo.")
 
     @new_profile_settings.group(name="pokedex", invoke_without_command=True)
     async def pokedex(self, ctx):
-        await ctx.send("Use `!newpfset pokedex check [Badge name]` to check a badge.")
+        """Comandos para gestionar tu Pokedex."""
+        await ctx.send("Usa `!newpfset pokedex check [Nombre de la Insignia]` para revisar una insignia.")
 
     @pokedex.command(name="check")
     async def pokedex_check(self, ctx, *, badge_name: str):
-        badge_name = badge_name.lower()  # Assuming badge names are stored in lowercase for consistency
+        """Revisa la información de una insignia en tu Pokedex."""
+        badge_name = badge_name.lower()
         badge_info_path = os.path.join(self.path, "pokedex", "functions", f"{badge_name}.py")
-        
+
         try:
-            # Dynamically load the badge info
             badge_info = {}
             with open(badge_info_path) as file:
                 exec(file.read(), badge_info)
             pokemon_info = badge_info.get("pokemon_info", {})
             
-            # Path to the badge image
             badge_image_path = os.path.join(self.path, "pokedex", "sprites", f"{badge_name}.png")
             if not os.path.exists(badge_image_path):
-                await ctx.send("Badge image not found.")
+                await ctx.send("Imagen de la insignia no encontrada.")
                 return
             
-            # Create the embed
             embed = discord.Embed(
-                title=pokemon_info.get("name", "Unknown Badge").capitalize(), 
-                description=pokemon_info.get("description", "No description available."),
+                title=pokemon_info.get("name", "Insignia Desconocida").capitalize(), 
+                description=pokemon_info.get("description", "Sin descripción disponible."),
                 color=ctx.author.color
             )
             
@@ -1618,6 +1520,6 @@ class UserCommands(MixinMeta, ABC):
             await ctx.send(embed=embed, file=file)
             
         except FileNotFoundError:
-            await ctx.send(f"Badge `{badge_name}` not found.")
+            await ctx.send(f"La insignia `{badge_name}` no fue encontrada.")
         except Exception as e:
-            await ctx.send(f"An error occurred: {e}")
+            await ctx.send(f"Se produjo un error: {e}")
