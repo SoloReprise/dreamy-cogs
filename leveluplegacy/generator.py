@@ -8,7 +8,7 @@ from typing import Union
 
 import colorgram
 import requests
-from PIL import Image, ImageDraw, ImageFilter, ImageFont, UnidentifiedImageError
+from PIL import Image, ImageDraw, ImageFilter, ImageFont, UnidentifiedImageError, ImageOps
 from redbot.core.i18n import Translator, cog_i18n
 from redbot.core.utils.chat_formatting import humanize_number
 
