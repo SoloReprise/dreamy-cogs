@@ -576,11 +576,12 @@ class Generator(MixinMeta, ABC):
 
         final = Image.alpha_composite(card, blank)
 
-        rank = "Rango: " + new_rank
-        message_count = "Mensajes: " + str(messages)
-        voice_time = "Tiempo en voz: " + voice
-        stars_text = "Ggs: " + str(stars)
-        #balance_text = "Balance: " + str(balance) + " " + currency
+        rank = "Rango:\n" + new_rank
+        message_count = "Mensajes:\n" + str(messages)
+        voice_time = "Tiempo en voz:\n" + voice
+        stars_text = "Ggs:\n" + str(stars)
+        # If you decide to use balance_text later, you can adjust it similarly:
+        # balance_text = "Balance:\n" + str(balance) + " " + currency
 
         draw = ImageDraw.Draw(final)
         draw.text((150, 485), user_name, font=name_font, fill=namecolor)
