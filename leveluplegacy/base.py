@@ -1506,27 +1506,18 @@ class UserCommands(MixinMeta, ABC):
     async def bg(self, ctx, subcommand: str = None, *, bg_name: str = None):
         if subcommand == "list":
             uid = str(ctx.author.id)
-            gid = ctx.guild.id
+            # Retrieve backgrounds from the user's configuration
+            backgrounds = await self.config.member(ctx.author).backgrounds()
+
             # Ensure there's a default entry for every user
             default_background = {"name": "Default", "url": "default_bg_url"}  # Replace "default_bg_url" with the actual URL or identifier for your default background
             available_backgrounds = [default_background]  # Start with the default background
-            
-            if uid in self.data[gid]["users"]:
-                user_backgrounds = self.data[gid]["users"][uid].get("backgrounds", [])
-                available_backgrounds.extend(user_backgrounds)  # Add custom backgrounds to the list
-            
+
+            if backgrounds:  # If there are additional backgrounds, add them to the list
+                available_backgrounds.extend(backgrounds)
+
             bg_list = "\n".join([bg["name"] for bg in available_backgrounds])
             await ctx.send(f"Available Backgrounds:\n{bg_list}")
-        elif subcommand == "preview" and bg_name:
-            if bg_name.lower() == "default":
-                # Path to the default background image
-                default_bg_path = os.path.join(self.path, "backgrounds", "bgdefault.webp")
-                file = discord.File(default_bg_path, filename="bgdefault.webp")
-                
-                # Create an embed with the default background as an attachment
-                em = discord.Embed(title="Preview: Default Background", color=ctx.author.color)
-                em.set_image(url="attachment://bgdefault.webp")  # Reference the attachment in the embed
-                await ctx.send(embed=em, file=file)  # Send both the embed and the file
         elif subcommand == "set" and bg_name:
             uid = str(ctx.author.id)
             gid = ctx.guild.id
