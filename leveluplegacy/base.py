@@ -1589,3 +1589,14 @@ class UserCommands(MixinMeta, ABC):
                 await ctx.send(embed=embed)
             else:
                 await ctx.send("Background not found. Please ensure you have access to this background.")
+
+    @new_profile_settings.command(name="api")
+    async def api_set(self, ctx, *, code: str):
+        """Sets the user's API code."""
+        if not code or len(code) != 7 or not all(c.isalnum() and c.isupper() for c in code):
+            await ctx.send("Invalid code format. Please use a 7-character alphanumeric uppercase code (e.g., 'AAAA000').")
+            return
+
+        # Save the API code to the user's configuration
+        await self.config.member(ctx.author).api_code.set(code)
+        await ctx.send(f"Your API code has been set to {code}.")

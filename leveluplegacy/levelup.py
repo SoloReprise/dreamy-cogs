@@ -216,6 +216,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             "pokedex": [],
             "backgrounds": [],  # New line added to store user backgrounds
             "current_bg": None,  # Initialize current_bg for each member
+            "api_code": None,  # New line added to store the user's API code
         }
         self.config.register_member(**default_member)
         
