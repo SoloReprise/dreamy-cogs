@@ -1517,32 +1517,18 @@ class UserCommands(MixinMeta, ABC):
                 available_backgrounds.extend(backgrounds)
 
             bg_list = "\n".join([bg["name"] for bg in available_backgrounds])
-            await ctx.send(f"Available Backgrounds:\n{bg_list}")
+                await ctx.send(f"Available Backgrounds:\n{bg_list}")
         elif subcommand == "set" and bg_name:
+            # Logic for setting a new background
             uid = str(ctx.author.id)
-            gid = ctx.guild.id
-            # Ensure user data exists
-            if gid not in self.data:
-                self.data[gid] = {"users": {}}
-            if "users" not in self.data[gid]:
-                self.data[gid]["users"] = {}
-            if uid not in self.data[gid]["users"]:
-                self.data[gid]["users"][uid] = {"backgrounds": []}
+            # Retrieve the user's current backgrounds from configuration
+            backgrounds = await self.config.member(ctx.author).backgrounds()
 
-            # Check if the background name is in the user's available backgrounds
-            user_data = self.data[gid]["users"][uid]
-            user_backgrounds = user_data.get("backgrounds", [])
-            default_background = {"name": "Default", "url": "default_bg_url"}  # Ensure consistency with the listing part
-
-            # Include the default background in the search
-            all_backgrounds = [default_background] + user_backgrounds
-            selected_bg = next((bg for bg in all_backgrounds if bg_name.lower() == bg["name"].lower()), None)
-
-            if selected_bg:
+            # Check if 'Default' or any custom background matches the requested name
+            default_background = {"name": "Default", "url": "default_bg_url"}  # Ensure to replace "default_bg_url" with the actual URL
+            if bg_name.lower() == default_background["name"].lower() or any(bg['name'].lower() == bg_name.lower() for bg in backgrounds):
                 # Update the user's current background setting
-                user_data["current_bg"] = selected_bg["name"]
-                # Save or update the data as needed
-
-                await ctx.send(f"Your background has been set to {selected_bg['name']}.")
+                await self.config.member(ctx.author).current_bg.set(bg_name)
+                await ctx.send(f"Your background has been set to {bg_name}.")
             else:
                 await ctx.send("Background not found. Please ensure you have access to this background.")
