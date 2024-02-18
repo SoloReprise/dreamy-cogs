@@ -1593,10 +1593,14 @@ class UserCommands(MixinMeta, ABC):
     @new_profile_settings.command(name="api")
     async def api_set(self, ctx, *, code: str):
         """Sets the user's API code."""
-        if not code or len(code) != 7 or not all(c.isalnum() and c.isupper() for c in code):
-            await ctx.send("Invalid code format. Please use a 7-character alphanumeric uppercase code (e.g., 'AAAA000').")
+        # Adjusted validation: Check length and alphanumeric, but allow mixed case
+        if not code or len(code) != 7 or not code.isalnum():
+            await ctx.send("Invalid code format. Please use a 7-character alphanumeric code (e.g., 'Y0LPTHP').")
             return
 
-        # Save the API code to the user's configuration
-        await self.config.member(ctx.author).api_code.set(code)
-        await ctx.send(f"Your API code has been set to {code}.")
+        # Convert code to uppercase if you want to store it consistently
+        code_upper = code.upper()
+
+        # Save the API code to the user's configuration in uppercase
+        await self.config.member(ctx.author).api_code.set(code_upper)
+        await ctx.send(f"Your API code has been set to {code_upper}.")
