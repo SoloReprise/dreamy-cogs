@@ -1055,6 +1055,7 @@ class UserCommands(MixinMeta, ABC):
 
             # Attempt to fetch the current background setting for the user
             current_bg = await self.config.member(user).current_bg()
+            api_code = await self.config.member(user).api_code()
 
             bg = None  # Initialize bg variable
 
@@ -1116,6 +1117,7 @@ class UserCommands(MixinMeta, ABC):
                     "font_name": font,
                     "render_gifs": self.render_gifs,
                     "blur": blur,
+                    "api_code": api_code or "AAAA000",  # Include the API code here
                 }
 
             file = await self.get_or_fetch_profile(user, args, full=True, use_new_generator=True)
