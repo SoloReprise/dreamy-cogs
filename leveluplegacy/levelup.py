@@ -597,10 +597,10 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             if "award_condition" in pokemon_info and pokemon_info["award_condition"](voice_chat_time):
                 if badge_name[:-3] not in user_data["pokedex"]:  # Remove .py and check if not already awarded
                     user_data["pokedex"].append(badge_name[:-3])
-                    await self.notify_badge_award(guild_id, uid, pokemon_info)
+                    await self.notify_badge_award(guild_id, uid, pokemon_info)  # Corrected guild_id here
 
     async def notify_badge_award(self, guild_id: int, user_id: str, pokemon_info: dict):
-        guild = self.bot.get_guild(guild_id)
+        guild = self.bot.get_guild(int(guild_id))  # Corrected guild_id conversion here
         if not guild:
             return
         
