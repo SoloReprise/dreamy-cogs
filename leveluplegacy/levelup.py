@@ -602,7 +602,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
             pokemon_info = badge_info.get("pokemon_info", {})
             
-            voice_chat_time = user_data["voice"]  # Assuming this is how you get the voice chat time
+            voice_chat_time = self.data[gid]["users"][uid]["voice"]
             print(f"Voice chat time for user {user_id}: {voice_chat_time} seconds")
             if "award_condition" in pokemon_info and pokemon_info["award_condition"](voice_chat_time):
                 print(f"Awarding {pokemon_info['name']} to user {user_id}")
