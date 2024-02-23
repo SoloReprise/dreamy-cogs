@@ -1459,19 +1459,25 @@ class UserCommands(MixinMeta, ABC):
         If no user is specified, it will check for all users in the guild.
         """
         guild_id = ctx.guild.id
-        if user:
-            # Check and award badges for a specific user
-            await self.check_and_award_badges(guild_id, str(user.id))
-            await ctx.send(f"Badge check and award process completed for {user.display_name}.")
-        else:
-            # Check and award badges for all users in the guild
-            members = ctx.guild.members
-            for member in members:
-                if member.bot:
-                    continue  # Skip bots
-                await self.check_and_award_badges(guild_id, str(member.id))
-            await ctx.send("Badge check and award process completed for all users.")
-
+        try:
+            if user:
+                # Check and award badges for a specific user
+                await self.check_and_award_badges(guild_id, str(user.id))
+                await ctx.send(f"Badge check and award process completed for {user.display_name}.")
+            else:
+                # Check and award badges for all users in the guild
+                members = ctx.guild.members
+                for member in members:
+                    if member.bot:
+                        continue  # Skip bots
+                    await self.check_and_award_badges(guild_id, str(member.id))
+                await ctx.send("Badge check and award process completed for all users.")
+        except Exception as e:
+            # Sending the exception details directly can be risky (e.g., revealing internals, security issues)
+            # Instead, provide a user-friendly message or a generic error message
+            await ctx.send(f"An error occurred during the operation: {str(e)}")
+            # For debugging, consider logging the error details somewhere secure
+            
     @pfadmin.command(name="pokelist")
     async def pokelist(self, ctx, user: discord.Member = None):
         """Muestra la lista de insignias Pokémon que tiene un usuario."""
