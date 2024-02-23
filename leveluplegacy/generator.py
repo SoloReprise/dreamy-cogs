@@ -710,8 +710,16 @@ class Generator(MixinMeta, ABC):
         # Composite profile image with the final base
         final = Image.alpha_composite(final, profile_pic_holder)
 
+        # Define badge_size before using it to resize and paste the badges
+        badge_size = (67, 67)  # Example size, adjust as needed
+
         if pokedex:
+            print(f"Processing pokedex with length: {len(pokedex)}")
+            badge_start_x, badge_start_y = 62, 180  # Starting position for the first badge
+            badge_spacing_x, badge_spacing_y = 56, 21  # Spacing between badges
+            # badge_size is now defined and can be used
             for index, pokemon in enumerate(pokedex):
+                print(f"Processing pokemon: {pokemon}, Index: {index}")
                 badge_path = os.path.join(self.path, "pokedex", "sprites", f"{pokemon}.png")
                 if os.path.exists(badge_path):
                     badge = Image.open(badge_path).resize(badge_size, Image.Resampling.LANCZOS)
