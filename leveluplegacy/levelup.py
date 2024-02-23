@@ -577,6 +577,57 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         self.data[guild.id]["users"][str(user.id)]["stars"] += 1
         return True
 
+    async def check_and_award_badges(self, guild_id: int, user_id: str):
+        gid = str(guild_id)  # Ensure string usage for consistency
+        uid = str(user_id)
+        user_data = self.data[gid]["users"][uid]
+
+        for badge_name in os.listdir(os.path.join(self.path, "pokedex", "functions")):
+            if not badge_name.endswith('.py'):
+                continue
+            badge_info_path = os.path.join(self.path, "pokedex", "functions", badge_name)
+            badge_info = {}
+            with open(badge_info_path) as file:
+                exec(file.read(), badge_info)
+            pokemon_info = badge_info.get("pokemon_info", {})
+            
+            # Correctly access voice chat time from user_data
+            voice_chat_time = user_data["voice"]  # Voice chat time in seconds
+            
+            if "award_condition" in pokemon_info and pokemon_info["award_condition"](voice_chat_time):
+                if badge_name[:-3] not in user_data["pokedex"]:  # Remove .py and check if not already awarded
+                    user_data["pokedex"].append(badge_name[:-3])
+                    await self.notify_badge_award(guild_id, uid, pokemon_info)
+
+    async def notify_badge_award(self, guild_id: int, user_id: str, pokemon_info: dict):
+        guild = self.bot.get_guild(guild_id)
+        if not guild:
+            return
+        
+        # Retrieve the specific channel by its ID
+        channel = guild.get_channel(1127633857072611328)
+        if not channel:
+            # If the channel wasn't found, you might want to log this or handle it appropriately.
+            print(f"Channel with ID 1127633857072611328 not found in guild {guild_id}.")
+            return
+        
+        member = guild.get_member(int(user_id))
+        if not member:
+            return
+        
+        embed = discord.Embed(
+            title=f"Congratulations, {member.display_name}!",
+            description=f"You've captured a {pokemon_info['name']}!",
+            color=discord.Color.green()
+        )
+        badge_image_path = os.path.join(self.path, "pokedex", "sprites", f"{pokemon_info['name'].lower()}.png")
+        file = discord.File(badge_image_path, filename=f"{pokemon_info['name'].lower()}.png")
+        embed.set_thumbnail(url=f"attachment://{pokemon_info['name'].lower()}.png")
+        
+        # Send the message to the specified channel
+        await channel.send(embed=embed, file=file)
+
+    # Save or update user_data as necessary
     async def check_levelups(self, guild_id: int, user_id: str, message: discord.Message = None):
         base = self.data[guild_id]["base"]
         exp = self.data[guild_id]["exp"]

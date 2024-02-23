@@ -1469,8 +1469,12 @@ class UserCommands(MixinMeta, ABC):
     @pfadmin.command(name="addpoke")
     async def addpoke(self, ctx, user: discord.Member, pokemon_name: str):
         """Otorga manualmente una insignia Pokémon a un usuario."""
-        pokemon_path = os.path.join(self.path, "pokedex", "sprites", f"{pokemon_name}.png")
-        if not os.path.exists(pokemon_path):
+        # Check if the sprite and .py files for the Pokémon exist
+        pokemon_sprite_path = os.path.join(self.path, "pokedex", "sprites", f"{pokemon_name}.png")
+        pokemon_py_path = os.path.join(self.path, "pokedex", "functions", f"{pokemon_name}.py")
+        
+        # Check for existence of .py file to verify Pokémon exists
+        if not os.path.exists(pokemon_py_path) or not os.path.exists(pokemon_sprite_path):
             await ctx.send(f"La insignia Pokémon {pokemon_name} no existe.")
             return
 
@@ -1478,9 +1482,35 @@ class UserCommands(MixinMeta, ABC):
         if pokemon_name not in pokedex:
             pokedex.append(pokemon_name)
             await self.config.member(user).pokedex.set(pokedex)
+            
+            # If the Pokémon is successfully added, retrieve its info for notification
+            pokemon_info = {}
+            with open(pokemon_py_path) as file:
+                exec(file.read(), pokemon_info)
+            pokemon_info = pokemon_info.get("pokemon_info", {})
+
+            # Notify about the badge award
+            await self.notify_badge_award(ctx.guild.id, user.id, pokemon_info)
+            
             await ctx.send(f"La insignia {pokemon_name} ha sido agregada exitosamente al pokedex de {user.display_name}.")
         else:
             await ctx.send(f"{user.display_name} ya tiene la insignia Pokémon {pokemon_name}.")
+
+    @pfadmin.command(name="removepoke")
+    async def removepoke(self, ctx, user: discord.Member, pokemon_name: str):
+        """Elimina manualmente una insignia Pokémon de un usuario."""
+        pokedex = await self.config.member(user).pokedex()
+        if pokemon_name in pokedex:
+            pokedex.remove(pokemon_name)
+            await self.config.member(user).pokedex.set(pokedex)
+            
+            # Notify the admin and possibly the user
+            await ctx.send(f"La insignia {pokemon_name} ha sido eliminada exitosamente del pokedex de {user.display_name}.")
+            
+            # Optionally notify the user directly, you can customize this part
+            # await user.send(f"Una insignia ha sido eliminada de tu pokedex: {pokemon_name}.")
+        else:
+            await ctx.send(f"{user.display_name} no tiene la insignia Pokémon {pokemon_name}, por lo tanto, no se puede eliminar.")
 
     @commands.group(name="newpfset", invoke_without_command=True)
     async def new_profile_settings(self, ctx):
