@@ -580,6 +580,12 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
     async def check_and_award_badges(self, guild_id: int, user_id: str):
         gid = str(guild_id)  # Ensure string usage for consistency
         uid = str(user_id)
+        # Ensure self.data is properly initialized for the guild and user
+        if gid not in self.data:
+            self.data[gid] = {"users": {}}
+        if uid not in self.data[gid]["users"]:
+            self.data[gid]["users"][uid] = {"pokedex": [], "voice": 0}  # Adjust according to your structure
+
         user_data = self.data[gid]["users"][uid]
 
         for badge_name in os.listdir(os.path.join(self.path, "pokedex", "functions")):
@@ -587,17 +593,22 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 continue
             badge_info_path = os.path.join(self.path, "pokedex", "functions", badge_name)
             badge_info = {}
-            with open(badge_info_path) as file:
-                exec(file.read(), badge_info)
+            try:
+                with open(badge_info_path) as file:
+                    exec(file.read(), badge_info)
+            except Exception as e:
+                print(f"Error executing badge function {badge_name}: {e}")
+                continue  # Skip this badge on error
+
             pokemon_info = badge_info.get("pokemon_info", {})
             
-            # Correctly access voice chat time from user_data
-            voice_chat_time = user_data["voice"]  # Voice chat time in seconds
+            # Ensure voice_chat_time is properly handled
+            voice_chat_time = user_data.get("voice", 0)  # Default to 0 if not found
             
             if "award_condition" in pokemon_info and pokemon_info["award_condition"](voice_chat_time):
-                if badge_name[:-3] not in user_data["pokedex"]:  # Remove .py and check if not already awarded
+                if badge_name[:-3] not in user_data.get("pokedex", []):  # Use get to avoid KeyErrors
                     user_data["pokedex"].append(badge_name[:-3])
-                    await self.notify_badge_award(guild_id, uid, pokemon_info)  # Corrected guild_id here
+                    await self.notify_badge_award(guild_id, uid, pokemon_info)
 
     async def notify_badge_award(self, guild_id: int, user_id: str, pokemon_info: dict):
         guild = self.bot.get_guild(int(guild_id))  # Corrected guild_id conversion here
