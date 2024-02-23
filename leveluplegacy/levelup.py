@@ -973,8 +973,8 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             self.data[gid]["users"][uid]["voice"] += td
             if weekly_on:
                 self.data[gid]["weekly"]["users"][uid]["voice"] += td
-            await self.check_and_award_badges(gid, uid)
             self.voice[gid][uid] = now
+            jobs.append(self.check_and_award_badges(gid, uid))
             jobs.append(self.check_levelups(gid, uid))
         await asyncio.gather(*jobs)
 
