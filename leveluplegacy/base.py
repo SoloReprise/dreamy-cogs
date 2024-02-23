@@ -1138,6 +1138,12 @@ class UserCommands(MixinMeta, ABC):
             if user.bot:
                 return await ctx.send("Bots can't have profiles!")
 
+            # Fetch the pokedex information using the same method as in pokelist
+            pokedex = await self.config.member(user).pokedex()
+            if not pokedex:
+                await ctx.send(f"{user.display_name} does not have any Pokémon badges.")
+                return
+        
             gid = ctx.guild.id
             if gid not in self.data:
                 await self.initialize()
@@ -1168,10 +1174,12 @@ class UserCommands(MixinMeta, ABC):
                     "font_name": p.get("font"),
                     "render_gifs": p.get("render_gifs", False),
                     "blur": p.get("blur", False),
-                    "pokedex": p.get("pokedex", [])  # Assuming p["pokedex"] contains the list of Pokémon names
+                    "pokedex": pokedex  
                 }
 
-                print(f"Args for generate_profile_back: {args}")  # Diagnostic print
+                # Diagnostic print to check arguments
+                print(f"Args for generate_profile_back: {args}")
+
                 # Generate the profile back image
                 image = await asyncio.get_running_loop().run_in_executor(None, functools.partial(self.generate_profile_back, **args))
                     
@@ -1183,7 +1191,7 @@ class UserCommands(MixinMeta, ABC):
                     await ctx.send(file=discord_file)
         except Exception as e:
             await ctx.send(f"Error: {str(e)}")  # For debugging purposes only; remove in production
-            
+                
     @commands.command(name="prestige")
     @commands.guild_only()
     @commands.bot_has_permissions(embed_links=True)
@@ -1477,7 +1485,7 @@ class UserCommands(MixinMeta, ABC):
             # Instead, provide a user-friendly message or a generic error message
             await ctx.send(f"An error occurred during the operation: {str(e)}")
             # For debugging, consider logging the error details somewhere secure
-            
+
     @pfadmin.command(name="pokelist")
     async def pokelist(self, ctx, user: discord.Member = None):
         """Muestra la lista de insignias Pokémon que tiene un usuario."""
