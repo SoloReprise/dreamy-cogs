@@ -604,16 +604,12 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             
             voice_chat_time = self.data[gid]["users"][uid]["voice"]
             print(f"Voice chat time for user {user_id}: {voice_chat_time} seconds")
-            if "award_condition" in pokemon_info and pokemon_info["award_condition"](voice_chat_time):
+            if "award_condition" in pokemon_info and pokemon_info["award_condition"](voice_chat_time) and badge_name[:-3] not in user_data.get("pokedex", []):
                 print(f"Awarding {pokemon_info['name']} to user {user_id}")
-                # Badge awarding logic
+                user_data["pokedex"].append(badge_name[:-3])
+                await self.notify_badge_award(guild_id, uid, pokemon_info)
             else:
                 print(f"User {user_id} does not meet conditions for {pokemon_info['name']}")
-                            
-            if "award_condition" in pokemon_info and pokemon_info["award_condition"](voice_chat_time):
-                if badge_name[:-3] not in user_data.get("pokedex", []):  # Use get to avoid KeyErrors
-                    user_data["pokedex"].append(badge_name[:-3])
-                    await self.notify_badge_award(guild_id, uid, pokemon_info)
 
     async def notify_badge_award(self, guild_id: int, user_id: str, pokemon_info: dict):
         guild = self.bot.get_guild(int(guild_id))  # Corrected guild_id conversion here
