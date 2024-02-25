@@ -578,14 +578,21 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         return True
 
     async def check_and_award_badges(self, guild_id: int, user_id: str):
-        # Fetch the guild member object
         guild = self.bot.get_guild(guild_id)
+        if not guild:
+            print(f"Guild {guild_id} not found")
+            return []
+
         user = guild.get_member(int(user_id))
+        if not user:
+            print(f"User {user_id} not found in guild {guild_id}")
+            return []
 
         # Fetch user's current voice chat time
         voice_chat_time = self.data[str(guild_id)]["users"][str(user_id)]["voice"]
 
         awarded_badges = []
+        user_pokedex = await self.config.member(user).pokedex()  # Fetch the current pokedex
 
         badge_functions_dir = os.path.join(self.path, "pokedex", "functions")
         for badge_name in os.listdir(badge_functions_dir):
@@ -598,17 +605,17 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 with open(badge_info_path) as file:
                     exec(file.read(), badge_info)
             except Exception as e:
-                continue  # Skip on error
+                continue  # Skip on error due to execution failure
 
             pokemon_info = badge_info.get("pokemon_info", {})
-            badge_id = badge_name[:-3]  # Assuming the badge ID is the file name without '.py'
+            badge_id = badge_name[:-3]
 
-            # Now correctly pass the voice chat time to the award_condition
-            if badge_id not in (await self.config.member(user).pokedex()):
-                if "award_condition" in pokemon_info and pokemon_info["award_condition"](voice_chat_time):
-                    (await self.config.member(user).pokedex()).append(badge_id)
-                    await self.config.member(user).pokedex.set((await self.config.member(user).pokedex()))
-                    awarded_badges.append(pokemon_info['name'])  # Using the Pokémon's name for messaging
+            if badge_id not in user_pokedex and "award_condition" in pokemon_info and pokemon_info["award_condition"](voice_chat_time):
+                user_pokedex.append(badge_id)  # Modify the local copy of the pokedex
+                awarded_badges.append(pokemon_info['name'])
+
+        if awarded_badges:
+            await self.config.member(user).pokedex.set(user_pokedex)  # Update the pokedex in the config
 
         return awarded_badges
 
