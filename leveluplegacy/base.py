@@ -1462,29 +1462,27 @@ class UserCommands(MixinMeta, ABC):
 
     @pfadmin.command(name="forcecheck")
     async def force_award_check(self, ctx, user: discord.Member = None):
-        """
-        Manually triggers the badge checking and awarding process for a specific user or all users in the guild.
-        If no user is specified, it will check for all users in the guild.
-        """
         guild_id = ctx.guild.id
         try:
             if user:
-                # Check and award badges for a specific user
-                await self.check_and_award_badges(guild_id, str(user.id))
-                await ctx.send(f"Badge check and award process completed for {user.display_name}.")
+                awarded_badges = await self.check_and_award_badges(guild_id, str(user.id))
+                if awarded_badges:
+                    for badge in awarded_badges:
+                        await ctx.send(f"{user.display_name} has been awarded the {badge} badge!")
+                else:
+                    await ctx.send(f"No new badges awarded to {user.display_name}.")
             else:
-                # Check and award badges for all users in the guild
                 members = ctx.guild.members
                 for member in members:
                     if member.bot:
-                        continue  # Skip bots
-                    await self.check_and_award_badges(guild_id, str(member.id))
-                await ctx.send("Badge check and award process completed for all users.")
+                        continue
+                    awarded_badges = await self.check_and_award_badges(guild_id, str(member.id))
+                    if awarded_badges:
+                        for badge in awarded_badges:
+                            await ctx.send(f"{member.display_name} has been awarded the {badge} badge!")
+                await ctx.send("Badge check and award process completed for all eligible users.")
         except Exception as e:
-            # Sending the exception details directly can be risky (e.g., revealing internals, security issues)
-            # Instead, provide a user-friendly message or a generic error message
             await ctx.send(f"An error occurred during the operation: {str(e)}")
-            # For debugging, consider logging the error details somewhere secure
 
     @pfadmin.command(name="pokelist")
     async def pokelist(self, ctx, user: discord.Member = None):

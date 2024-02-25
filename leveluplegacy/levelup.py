@@ -577,40 +577,36 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         self.data[guild.id]["users"][str(user.id)]["stars"] += 1
         return True
 
-    async def check_and_award_badges(self, ctx, user: discord.Member):
-        # Access the user's pokedex
+    async def check_and_award_badges(self, guild_id: int, user_id: str):
+        user = self.bot.get_guild(guild_id).get_member(int(user_id))
+        awarded_badges = []  # To keep track of awarded badges
+
+        # Assuming this part remains the same - getting the user's pokedex
         user_pokedex = await self.config.member(user).pokedex()
 
-        # Path to the directory containing badge (Pokémon) functions
         badge_functions_dir = os.path.join(self.path, "pokedex", "functions")
-
         for badge_name in os.listdir(badge_functions_dir):
             if not badge_name.endswith('.py'):
-                continue  # Skip non-Python files
-            
+                continue
+
             badge_info_path = os.path.join(badge_functions_dir, badge_name)
             badge_info = {}
-            
             try:
-                # Execute the badge function to get the `pokemon_info` dictionary
                 with open(badge_info_path) as file:
                     exec(file.read(), badge_info)
             except Exception as e:
-                print(f"Error executing badge function {badge_name}: {e}")
-                continue  # Skip this badge on error
+                continue  # Skip on error
 
             pokemon_info = badge_info.get("pokemon_info", {})
-            badge_id = badge_name[:-3]  # Remove '.py' from badge_name to get the badge ID
+            badge_id = badge_name[:-3]  # Assuming the badge ID is the file name without '.py'
 
-            # Check if the user already has this badge
             if badge_id not in user_pokedex:
-                # Check if the user meets the award condition for this badge
                 if "award_condition" in pokemon_info and pokemon_info["award_condition"](user):
-                    # Award the badge
                     user_pokedex.append(badge_id)
                     await self.config.member(user).pokedex.set(user_pokedex)
-                    await self.notify_badge_award(ctx.guild.id, user.id, pokemon_info)
-                    print(f"Awarded {badge_id} to {user.display_name}")
+                    awarded_badges.append(pokemon_info['name'])  # Using the Pokémon's name for messaging
+
+        return awarded_badges
 
     async def notify_badge_award(self, guild_id: int, user_id: str, pokemon_info: dict):
         guild = self.bot.get_guild(int(guild_id))  # Corrected guild_id conversion here
