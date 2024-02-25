@@ -577,23 +577,22 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         self.data[guild.id]["users"][str(user.id)]["stars"] += 1
         return True
 
-    async def check_and_award_badges(self, guild_id: int, user_id: str):
-        gid = str(guild_id)  # Ensure string usage for consistency
-        uid = str(user_id)
-        # Ensure self.data is properly initialized for the guild and user
-        if gid not in self.data:
-            self.data[gid] = {"users": {}}
-        if uid not in self.data[gid]["users"]:
-            self.data[gid]["users"][uid] = {"pokedex": [], "voice": 0}  # Adjust according to your structure
+    async def check_and_award_badges(self, ctx, user: discord.Member):
+        # Access the user's pokedex
+        user_pokedex = await self.config.member(user).pokedex()
 
-        user_data = self.data[gid]["users"][uid]
+        # Path to the directory containing badge (Pokémon) functions
+        badge_functions_dir = os.path.join(self.path, "pokedex", "functions")
 
-        for badge_name in os.listdir(os.path.join(self.path, "pokedex", "functions")):
+        for badge_name in os.listdir(badge_functions_dir):
             if not badge_name.endswith('.py'):
-                continue
-            badge_info_path = os.path.join(self.path, "pokedex", "functions", badge_name)
+                continue  # Skip non-Python files
+            
+            badge_info_path = os.path.join(badge_functions_dir, badge_name)
             badge_info = {}
+            
             try:
+                # Execute the badge function to get the `pokemon_info` dictionary
                 with open(badge_info_path) as file:
                     exec(file.read(), badge_info)
             except Exception as e:
@@ -601,15 +600,17 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 continue  # Skip this badge on error
 
             pokemon_info = badge_info.get("pokemon_info", {})
-            
-            voice_chat_time = self.data[gid]["users"][uid]["voice"]
-            print(f"Voice chat time for user {user_id}: {voice_chat_time} seconds")
-            if "award_condition" in pokemon_info and pokemon_info["award_condition"](voice_chat_time) and badge_name[:-3] not in user_data.get("pokedex", []):
-                print(f"Awarding {pokemon_info['name']} to user {user_id}")
-                user_data["pokedex"].append(badge_name[:-3])
-                await self.notify_badge_award(guild_id, uid, pokemon_info)
-            else:
-                print(f"User {user_id} does not meet conditions for {pokemon_info['name']}")
+            badge_id = badge_name[:-3]  # Remove '.py' from badge_name to get the badge ID
+
+            # Check if the user already has this badge
+            if badge_id not in user_pokedex:
+                # Check if the user meets the award condition for this badge
+                if "award_condition" in pokemon_info and pokemon_info["award_condition"](user):
+                    # Award the badge
+                    user_pokedex.append(badge_id)
+                    await self.config.member(user).pokedex.set(user_pokedex)
+                    await self.notify_badge_award(ctx.guild.id, user.id, pokemon_info)
+                    print(f"Awarded {badge_id} to {user.display_name}")
 
     async def notify_badge_award(self, guild_id: int, user_id: str, pokemon_info: dict):
         guild = self.bot.get_guild(int(guild_id))  # Corrected guild_id conversion here
