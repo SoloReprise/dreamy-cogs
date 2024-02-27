@@ -588,7 +588,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             print(f"User {user_id} not found in guild {guild_id}")
             return []
 
-        # Fetch user's current voice chat time
+        # Fetch user's current voice chat time from your data structure
         voice_chat_time = self.data[str(guild_id)]["users"][str(user_id)]["voice"]
 
         awarded_badges = []
