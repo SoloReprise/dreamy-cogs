@@ -578,11 +578,15 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         return True
 
     async def check_and_award_badges(self, guild_id: int, user_id: str):
-        guild_id = int(guild_id)  # Ensure guild_id is always an integer
-        guild = self.bot.get_guild(guild_id)
-        if not guild:
-            print(f"Guild {guild_id} not found")
-            return []
+        try:
+            guild_id = int(guild_id)  # Ensure guild_id is always treated as an integer
+            guild = self.bot.get_guild(guild_id)
+            if not guild:
+                print(f"Guild {guild_id} not found or bot does not have access.")
+                return
+            # Additional operations here...
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
 
         user = guild.get_member(int(user_id))
         if not user:
