@@ -1460,30 +1460,6 @@ class UserCommands(MixinMeta, ABC):
     async def pfadmin(self, ctx):
         """Comandos de administración para la gestión de perfiles."""
 
-    @pfadmin.command(name="forcecheck")
-    async def force_award_check(self, ctx, user: discord.Member = None):
-        guild_id = ctx.guild.id
-        try:
-            if user:
-                awarded_badges = await self.check_and_award_badges(guild_id, str(user.id))
-                if awarded_badges:
-                    for badge in awarded_badges:
-                        await ctx.send(f"{user.display_name} has been awarded the {badge} badge!")
-                else:
-                    await ctx.send(f"No new badges awarded to {user.display_name}.")
-            else:
-                members = ctx.guild.members
-                for member in members:
-                    if member.bot:
-                        continue
-                    awarded_badges = await self.check_and_award_badges(guild_id, str(member.id))
-                    if awarded_badges:
-                        for badge in awarded_badges:
-                            await ctx.send(f"{member.display_name} has been awarded the {badge} badge!")
-                await ctx.send("Badge check and award process completed for all eligible users.")
-        except Exception as e:
-            await ctx.send(f"An error occurred during the operation: {str(e)}")
-
     @pfadmin.command(name="pokelist")
     async def pokelist(self, ctx, user: discord.Member = None):
         """Muestra la lista de insignias Pokémon que tiene un usuario."""
@@ -1498,6 +1474,15 @@ class UserCommands(MixinMeta, ABC):
             badges_list = ", ".join(pokedex)
             await ctx.send(f"{user.display_name} tiene las siguientes insignias Pokémon: {badges_list}")
 
+    @pfadmin.command(name="forcecheck")
+    @commands.is_owner()
+    async def forcecheck(self, ctx):
+        """Manually force the voice dex award check across all guilds."""
+        await ctx.send("Initiating manual voice dex award check...")
+        for guild in self.bot.guilds:
+            await self.award_voice_dex(guild)
+        await ctx.send("Voice dex award check complete.")
+        
     @pfadmin.command(name="addpoke")
     async def addpoke(self, ctx, user: discord.Member, pokemon_name: str):
         """Otorga manualmente una insignia Pokémon a un usuario."""
@@ -1522,7 +1507,7 @@ class UserCommands(MixinMeta, ABC):
             pokemon_info = pokemon_info.get("pokemon_info", {})
 
             # Notify about the badge award
-            await self.notify_badge_award(ctx.guild.id, user.id, pokemon_info)
+            await self.notify_dex_award(ctx.guild.id, user.id, pokemon_info)
             
             await ctx.send(f"La insignia {pokemon_name} ha sido agregada exitosamente al pokedex de {user.display_name}.")
         else:

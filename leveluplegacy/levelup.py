@@ -248,11 +248,13 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         # Loopies
         self.cache_dumper.start()
         self.voice_checker.start()
+        self.voice_checker_with_awards.start()
         self.weekly_checker.start()
 
     def cog_unload(self):
         self.cache_dumper.cancel()
         self.voice_checker.cancel()
+        self.voice_checker_with_awards.cancel()
         self.weekly_checker.cancel()
         asyncio.create_task(self.save_cache())
 
@@ -577,7 +579,8 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         self.data[guild.id]["users"][str(user.id)]["stars"] += 1
         return True
 
-    async def notify_badge_award(self, guild_id: int, user_id: str, pokemon_info: dict):
+    #TODO LO RELACIONADO CON LA POKEDEX
+    async def notify_dex_award(self, guild_id: int, user_id: str, pokemon_info: dict):
         guild = self.bot.get_guild(int(guild_id))  # Corrected guild_id conversion here
         if not guild:
             return
@@ -604,6 +607,49 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         
         # Send the message to the specified channel
         await channel.send(embed=embed, file=file)
+
+    async def award_voice_dex(self, guild):
+        """Check voice activity and award voice-based Pokémon badges to eligible users."""
+        gid = guild.id
+        if gid not in self.data or str(gid) in self.ignored_guilds:
+            return
+
+        # Define Pokémon badges and their voice time thresholds in minutes
+        voice_prizes = {
+            "whismur": 240 * 60,
+            #"squawkabilly": 900 * 60,
+            #"chatot": 4320 * 60,
+            #"meloetta": 14400 * 60,
+        }
+
+        for uid, user_data in self.data[gid]["users"].items():
+            voice_time = user_data.get("voice", 0)
+            member = guild.get_member(int(uid))
+            if not member:
+                continue
+
+            pokedex = await self.config.member(member).pokedex()
+
+            for pokemon_name, threshold in voice_prizes.items():
+                if voice_time >= threshold and pokemon_name not in pokedex:
+                    await self.addpoke_internal(member, pokemon_name)
+                    print(f"Awarded {pokemon_name} badge to {member.display_name}")
+
+    async def addpoke_internal(self, member, pokemon_name):
+        """A simplified internal method to add a Pokémon badge without checks."""
+        pokedex = await self.config.member(member).pokedex()
+        if pokemon_name not in pokedex:
+            pokedex.append(pokemon_name)
+            await self.config.member(member).pokedex.set(pokedex)
+            # Assume the notify_dex_award method exists as you mentioned
+            pokemon_info = {"name": pokemon_name}  # Simplified info, adjust as needed
+            await self.notify_dex_award(member.guild.id, member.id, pokemon_info)
+
+    @tasks.loop(seconds=20)
+    async def voice_checker_with_awards(self):
+        """Enhanced voice checker loop that also awards voice-based Pokémon badges."""
+        for guild in self.bot.guilds:
+            await self.award_voice_dex(guild)
 
     # Save or update user_data as necessary
     async def check_levelups(self, guild_id: int, user_id: str, message: discord.Message = None):
