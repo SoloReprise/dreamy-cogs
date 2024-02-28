@@ -7,7 +7,7 @@ import os
 import random
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
+from datetime import datetime, time
 from io import BytesIO
 from time import monotonic
 from typing import Dict, List, Set, Tuple, Union
@@ -217,7 +217,9 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             "backgrounds": [],  # New line added to store user backgrounds
             "current_bg": None,  # Initialize current_bg for each member
             "api_code": None,  # New line added to store the user's API code
-        }
+            "mvp_wins": 0,  # Track the number of times a user wins MVP
+            "song_plays": 0,  # Track the number of songs played        
+            }
         self.config.register_member(**default_member)
         
         self.looptimes = {
@@ -248,13 +250,13 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         # Loopies
         self.cache_dumper.start()
         self.voice_checker.start()
-        self.voice_checker_with_awards.start()
+        self.generalized_checker.start()
         self.weekly_checker.start()
 
     def cog_unload(self):
         self.cache_dumper.cancel()
         self.voice_checker.cancel()
-        self.voice_checker_with_awards.cancel()
+        self.generalized_checker.cancel()
         self.weekly_checker.cancel()
         asyncio.create_task(self.save_cache())
 
@@ -366,6 +368,27 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             else:
                 await chan.send(star_giver + _("just gave a star to") + star_reciever)
 
+    async def check_song_play_awards(self, member):
+        song_plays = await self.config.member(member).song_plays()
+        badges_to_award = {
+            50: "kricketune",
+            200: "toxtricity",
+            500: "primarina",
+        }
+
+        pokedex = await self.config.member(member).pokedex()
+        for plays, badge_name in badges_to_award.items():
+            if song_plays >= plays and badge_name not in pokedex:
+                await self.addpoke_internal(member, badge_name)
+
+    async def on_play_message(self, message: discord.Message):
+        user_id = str(message.author.id)
+        guild_id = str(message.guild.id)
+        # Increment the song_plays count
+        async with self.config.member_from_ids(guild_id, user_id).song_plays() as song_plays:
+            song_plays += 1
+            await self.check_song_play_awards(message.author)
+            
     @commands.Cog.listener("on_message")
     async def messages(self, message: discord.Message):
         # If message object is None for some reason
@@ -397,6 +420,8 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         if message.channel.id in self.data[gid]["ignoredchannels"]:
             return
         await self.message_handler(message)
+        if message.content.startswith('$play'):
+            await self.on_play_message(message)  # Assumes you've defined this method
 
     async def initialize(self):
         self.ignored_guilds = await self.config.ignored_guilds()
@@ -608,8 +633,8 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         # Send the message to the specified channel
         await channel.send(embed=embed, file=file)
 
-    async def award_voice_dex(self, guild):
-        """Check voice activity and award voice-based Pokémon badges to eligible users."""
+    async def award_dex_info(self, guild):
+        """Generalized method to check and award various dex achievements."""
         gid = guild.id
         if gid not in self.data or str(gid) in self.ignored_guilds:
             return
@@ -617,24 +642,95 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         # Define Pokémon badges and their voice time thresholds in minutes
         voice_prizes = {
             "whismur": 240 * 60,
-            #"squawkabilly": 900 * 60,
-            #"chatot": 4320 * 60,
-            #"meloetta": 14400 * 60,
+            "squawkabilly": 900 * 60,
+            "chatot": 4320 * 60,
+            "meloetta": 14400 * 60,
         }
 
+        # Define ggs distribution milestones
+        ggs_prizes = {
+            "glameow": 20,
+            "arcanine": 100,
+            "kingambit": 500,
+            "calyrex": 2000,
+        }
+
+        # Time-based VC connection conditions
+        time_based_prizes = {
+            "komala": (time(3, 0), time(5, 0)),  # Between 3:00 and 5:00 AM
+            "sunflora": (time(7, 0), time(9, 0)),  # Between 7:00 and 9:00 AM
+        }
+
+        now = datetime.now()
+
         for uid, user_data in self.data[gid]["users"].items():
-            voice_time = user_data.get("voice", 0)
             member = guild.get_member(int(uid))
             if not member:
                 continue
 
             pokedex = await self.config.member(member).pokedex()
 
+        for uid, user_data in self.data[gid]["users"].items():
+            voice_time = user_data.get("voice", 0)
+            ggs_distributed = user_data.get("stars", 0)
+            member = guild.get_member(int(uid))
+            if not member:
+                continue
+
+            pokedex = await self.config.member(member).pokedex()
+
+            # Check voice time achievements
             for pokemon_name, threshold in voice_prizes.items():
                 if voice_time >= threshold and pokemon_name not in pokedex:
                     await self.addpoke_internal(member, pokemon_name)
                     print(f"Awarded {pokemon_name} badge to {member.display_name}")
 
+            # Check ggs distribution achievements
+            for pokemon_name, ggs_threshold in ggs_prizes.items():
+                if ggs_distributed >= ggs_threshold and pokemon_name not in pokedex:
+                    await self.addpoke_internal(member, pokemon_name)
+                    print(f"Awarded {pokemon_name} badge for distributing {ggs_threshold} ggs to {member.display_name}")
+
+            # Time-based VC connection checks
+            for pokemon_name, (start_time, end_time) in time_based_prizes.items():
+                # Check if the current time is within the specified window
+                if start_time <= now.time() <= end_time:
+                    voice_state = member.voice
+                    if voice_state and pokemon_name not in pokedex:
+                        await self.addpoke_internal(member, pokemon_name)
+                        print(f"Awarded {pokemon_name} badge for connecting to VC during specified time to {member.display_name}")
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        """Award badges for joining VC during specific times."""
+        if member.bot:
+            return  # Ignore bots
+
+        # Ensure the user has joined a voice channel (not just updated their state in the same channel)
+        if before.channel is None and after.channel is not None:
+            await self.check_time_based_awards(member)
+
+    async def check_time_based_awards(self, member):
+        """Check and award Komala and Sunflora badges based on the time of VC join."""
+        now = datetime.now()
+        current_time = now.time()
+
+        # Define time windows for Komala and Sunflora
+        komala_start, komala_end = time(3, 0), time(5, 0)
+        sunflora_start, sunflora_end = time(7, 0), time(9, 0)
+
+        pokedex = await self.config.member(member).pokedex()
+
+        # Award Komala if connected between 3 and 5 AM
+        if komala_start <= current_time <= komala_end and "komala" not in pokedex:
+            await self.addpoke_internal(member, "komala")
+            print(f"Awarded 'komala' badge to {member.display_name} for connecting to VC between 3 and 5 AM.")
+
+        # Award Sunflora if connected between 7 and 9 AM
+        if sunflora_start <= current_time <= sunflora_end and "sunflora" not in pokedex:
+            await self.addpoke_internal(member, "sunflora")
+            print(f"Awarded 'sunflora' badge to {member.display_name} for connecting to VC between 7 and 9 AM.")
+                                    
     async def addpoke_internal(self, member, pokemon_name):
         """A simplified internal method to add a Pokémon badge without checks."""
         pokedex = await self.config.member(member).pokedex()
@@ -646,11 +742,11 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             await self.notify_dex_award(member.guild.id, member.id, pokemon_info)
 
     @tasks.loop(seconds=20)
-    async def voice_checker_with_awards(self):
-        """Enhanced voice checker loop that also awards voice-based Pokémon badges."""
+    async def generalized_checker(self):
+        """Enhanced checker loop that awards various Pokémon badges based on different achievements."""
         for guild in self.bot.guilds:
-            await self.award_voice_dex(guild)
-
+            await self.award_dex_info(guild)
+            
     # Save or update user_data as necessary
     async def check_levelups(self, guild_id: int, user_id: str, message: discord.Message = None):
         base = self.data[guild_id]["base"]
@@ -1191,7 +1287,12 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             # Give new winner or winners the role
             with contextlib.suppress(*ignore):
                 for win in winners:
+                    mvp_wins = await self.config.member(win).mvp_wins()
+                    mvp_wins += 1
+                    await self.config.member(win).mvp_wins.set(mvp_wins)
+                    await self.check_mvp_awards(win)
                     await win.add_roles(role)
+
         # Set new last winner
         new_winners = [win.id for win in winners]
         self.data[guild.id]["weekly"]["last_winners"] = new_winners
@@ -1205,6 +1306,20 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         self.data[guild.id]["weekly"]["users"].clear()
         self.data[guild.id]["weekly"]["last_embed"] = em.to_dict()
         await self.save_cache(guild)
+
+    async def check_mvp_awards(self, member):
+        mvp_wins = await self.config.member(member).mvp_wins()
+        badges_to_award = {
+            1: "mankey",
+            5: "scrafty",
+            10: "hariyama",
+            30: "marshadow",
+        }
+
+        pokedex = await self.config.member(member).pokedex()
+        for wins, badge_name in badges_to_award.items():
+            if mvp_wins >= wins and badge_name not in pokedex:
+                await self.addpoke_internal(member, badge_name)
 
     @commands.group(name="lvlset", aliases=["lset", "levelup"])
     @commands.has_permissions(manage_messages=True)
