@@ -577,53 +577,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         self.data[guild.id]["users"][str(user.id)]["stars"] += 1
         return True
 
-    async def check_and_award_badges(self, guild_id: int, user_id: str):
-        try:
-            guild_id = int(guild_id)  # Ensure guild_id is always treated as an integer
-            guild = self.bot.get_guild(guild_id)
-            if not guild:
-                print(f"Guild {guild_id} not found or bot does not have access.")
-                return
-            # Additional operations here...
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
-
-        user = guild.get_member(int(user_id))
-        if not user:
-            print(f"User {user_id} not found in guild {guild_id}")
-            return []
-
-        # Fetch user's current voice chat time from your data structure
-        voice_chat_time = self.data[str(guild_id)]["users"][str(user_id)]["voice"]
-
-        awarded_badges = []
-        user_pokedex = await self.config.member(user).pokedex()  # Fetch the current pokedex
-
-        badge_functions_dir = os.path.join(self.path, "pokedex", "functions")
-        for badge_name in os.listdir(badge_functions_dir):
-            if not badge_name.endswith('.py'):
-                continue
-
-            badge_info_path = os.path.join(badge_functions_dir, badge_name)
-            badge_info = {}
-            try:
-                with open(badge_info_path) as file:
-                    exec(file.read(), badge_info)
-            except Exception as e:
-                continue  # Skip on error due to execution failure
-
-            pokemon_info = badge_info.get("pokemon_info", {})
-            badge_id = badge_name[:-3]
-
-            if badge_id not in user_pokedex and "award_condition" in pokemon_info and pokemon_info["award_condition"](voice_chat_time):
-                user_pokedex.append(badge_id)  # Modify the local copy of the pokedex
-                awarded_badges.append(pokemon_info['name'])
-
-        if awarded_badges:
-            await self.config.member(user).pokedex.set(user_pokedex)  # Update the pokedex in the config
-
-        return awarded_badges
-
     async def notify_badge_award(self, guild_id: int, user_id: str, pokemon_info: dict):
         guild = self.bot.get_guild(int(guild_id))  # Corrected guild_id conversion here
         if not guild:
@@ -999,7 +952,6 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
             if weekly_on:
                 self.data[gid]["weekly"]["users"][uid]["voice"] += td
             self.voice[gid][uid] = now
-            jobs.append(self.check_and_award_badges(gid, uid))
             jobs.append(self.check_levelups(gid, uid))
         await asyncio.gather(*jobs)
 
