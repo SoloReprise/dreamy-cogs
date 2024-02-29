@@ -1464,9 +1464,9 @@ class UserCommands(MixinMeta, ABC):
     @commands.has_permissions(administrator=True)  # Ensure only administrators can use this
     async def check_plays(self, ctx, member: discord.Member):
         """Check the number of song plays for a user."""
-        play_count = await self.config.member(member).play_count() or 0
+        play_count = await self.config.member(member).song_plays() or 0
         await ctx.send(f"{member.display_name} has played {play_count} songs.")
-        
+
     @pfadmin.command(name="pokelist")
     async def pokelist(self, ctx, user: discord.Member = None):
         """Muestra la lista de insignias Pokémon que tiene un usuario."""
