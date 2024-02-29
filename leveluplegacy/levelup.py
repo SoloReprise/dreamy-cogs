@@ -382,13 +382,15 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 await self.addpoke_internal(member, badge_name)
 
     async def on_play_message(self, message: discord.Message):
-        print(f"Processing $play message from {message.author.name}")
         guild_id = message.guild.id
         user_id = message.author.id
 
-        async with self.config.member_from_ids(guild_id, user_id).song_plays() as song_plays:
-            song_plays += 1
-            print(f"Updated song plays for {message.author.name}: {song_plays}")
+        # Fetch the current song_plays count
+        current_plays = await self.config.member_from_ids(guild_id, user_id).song_plays() or 0
+        # Increment the count
+        new_plays = current_plays + 1
+        # Update the configuration with the new count
+        await self.config.member_from_ids(guild_id, user_id).song_plays.set(new_plays)
 
         await self.check_song_play_awards(message.author)
 
@@ -423,9 +425,13 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         if message.channel.id in self.data[gid]["ignoredchannels"]:
             return
         await self.message_handler(message)
-        if message.content.startswith('$play ') or message.content == '$play':
-            await self.on_play_message(message)
-            
+        if message.author.bot:  # Ignore messages from bots
+            return
+        if not message.content.startswith('$play '):  # Check for the play command
+            return
+
+        await self.on_play_message(message)
+
     async def initialize(self):
         self.ignored_guilds = await self.config.ignored_guilds()
         self.cache_seconds = await self.config.cache_seconds()
