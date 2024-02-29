@@ -1536,6 +1536,20 @@ class UserCommands(MixinMeta, ABC):
         else:
             await ctx.send(f"{user.display_name} no tiene la insignia Pokémon {pokemon_name}, por lo tanto, no se puede eliminar.")
 
+    @pfadmin.command(name="resetdexes")
+    @commands.is_owner()  # Ensures only the bot owner can use this command for safety
+    async def resetdexes(self, ctx):
+        """Resetea el pokedex de todos los usuarios."""
+        all_members = await self.config.all_members()  # Fetches all member configurations
+
+        # Iterate through all guilds and members to reset their pokedex
+        for guild_id, members in all_members.items():
+            for member_id in members:
+                # Reset the pokedex for each member
+                await self.config.member_from_ids(guild_id, member_id).pokedex.set([])
+
+        await ctx.send("Todos los pokedexes han sido reseteados exitosamente.")
+
     @commands.group(name="newpfset", invoke_without_command=True)
     async def new_profile_settings(self, ctx):
         """Configuraciones del perfil del usuario."""
