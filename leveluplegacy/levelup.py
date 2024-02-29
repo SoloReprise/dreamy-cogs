@@ -371,7 +371,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
     async def check_song_play_awards(self, member):
         song_plays = await self.config.member(member).song_plays()
         badges_to_award = {
-            50: "kricketune",
+            2: "kricketune",
             200: "toxtricity",
             500: "primarina",
         }
@@ -384,10 +384,18 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
     async def on_play_message(self, message: discord.Message):
         user_id = str(message.author.id)
         guild_id = str(message.guild.id)
-        # Increment the song_plays count
-        async with self.config.member_from_ids(guild_id, user_id).song_plays() as song_plays:
-            song_plays += 1
-            await self.check_song_play_awards(message.author)
+        
+        # Fetch the current song_plays count
+        current_plays = await self.config.member_from_ids(guild_id, user_id).song_plays() or 0
+        
+        # Increment the count
+        new_plays = current_plays + 1
+        
+        # Update the configuration with the new count
+        await self.config.member_from_ids(guild_id, user_id).song_plays.set(new_plays)
+        
+        # Check for badge awards
+        await self.check_song_play_awards(message.author)
             
     @commands.Cog.listener("on_message")
     async def messages(self, message: discord.Message):
@@ -730,7 +738,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         if sunflora_start <= current_time <= sunflora_end and "sunflora" not in pokedex:
             await self.addpoke_internal(member, "sunflora")
             print(f"Awarded 'sunflora' badge to {member.display_name} for connecting to VC between 7 and 9 AM.")
-                                    
+
     async def addpoke_internal(self, member, pokemon_name):
         """A simplified internal method to add a Pokémon badge without checks."""
         pokedex = await self.config.member(member).pokedex()
