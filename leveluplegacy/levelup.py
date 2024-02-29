@@ -382,21 +382,16 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 await self.addpoke_internal(member, badge_name)
 
     async def on_play_message(self, message: discord.Message):
-        user_id = str(message.author.id)
-        guild_id = str(message.guild.id)
-        
-        # Fetch the current song_plays count
-        current_plays = await self.config.member_from_ids(guild_id, user_id).song_plays() or 0
-        
-        # Increment the count
-        new_plays = current_plays + 1
-        
-        # Update the configuration with the new count
-        await self.config.member_from_ids(guild_id, user_id).song_plays.set(new_plays)
-        
-        # Check for badge awards
+        print(f"Processing $play message from {message.author.name}")
+        guild_id = message.guild.id
+        user_id = message.author.id
+
+        async with self.config.member_from_ids(guild_id, user_id).song_plays() as song_plays:
+            song_plays += 1
+            print(f"Updated song plays for {message.author.name}: {song_plays}")
+
         await self.check_song_play_awards(message.author)
-            
+
     @commands.Cog.listener("on_message")
     async def messages(self, message: discord.Message):
         # If message object is None for some reason
@@ -428,9 +423,9 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         if message.channel.id in self.data[gid]["ignoredchannels"]:
             return
         await self.message_handler(message)
-        if message.content.startswith('$play'):
-            await self.on_play_message(message)  # Assumes you've defined this method
-
+        if message.content.startswith('$play ') or message.content == '$play':
+            await self.on_play_message(message)
+            
     async def initialize(self):
         self.ignored_guilds = await self.config.ignored_guilds()
         self.cache_seconds = await self.config.cache_seconds()
