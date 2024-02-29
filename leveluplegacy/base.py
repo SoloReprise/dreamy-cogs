@@ -1460,6 +1460,13 @@ class UserCommands(MixinMeta, ABC):
     async def pfadmin(self, ctx):
         """Comandos de administración para la gestión de perfiles."""
 
+    @pfadmin.command(name="checkplays")
+    @commands.has_permissions(administrator=True)  # Ensure only administrators can use this
+    async def check_plays(self, ctx, member: discord.Member):
+        """Check the number of song plays for a user."""
+        play_count = await self.config.member(member).play_count() or 0
+        await ctx.send(f"{member.display_name} has played {play_count} songs.")
+        
     @pfadmin.command(name="pokelist")
     async def pokelist(self, ctx, user: discord.Member = None):
         """Muestra la lista de insignias Pokémon que tiene un usuario."""
@@ -1482,7 +1489,7 @@ class UserCommands(MixinMeta, ABC):
         for guild in self.bot.guilds:
             await self.award_voice_dex(guild)
         await ctx.send("Voice dex award check complete.")
-        
+
     @pfadmin.command(name="addpoke")
     async def addpoke(self, ctx, user: discord.Member, pokemon_name: str):
         """Otorga manualmente una insignia Pokémon a un usuario."""
