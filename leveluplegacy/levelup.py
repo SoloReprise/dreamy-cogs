@@ -371,8 +371,8 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
     async def check_song_play_awards(self, member):
         song_plays = await self.config.member(member).song_plays()
         badges_to_award = {
-            2: "kricketune",
-            200: "toxtricity",
+            30: "kricketune",
+            150: "toxtricity",
             500: "primarina",
         }
 
