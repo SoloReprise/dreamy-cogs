@@ -1032,7 +1032,7 @@ class UserCommands(MixinMeta, ABC):
                         f"Send Time: {humanize_number(mtime)}ms"
                     )
 
-    @commands.command(name="newpf")
+    @commands.command(name="pf")
     @commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def new_get_profile(self, ctx: commands.Context, *, user: discord.Member = None):
@@ -1127,7 +1127,7 @@ class UserCommands(MixinMeta, ABC):
         except Exception as e:
             await ctx.send(f"An error occurred: {e}")
 
-    @commands.command(name="newpfback")
+    @commands.command(name="pokedex")
     @commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def new_get_profile_back(self, ctx: commands.Context, *, user: discord.Member = None):
