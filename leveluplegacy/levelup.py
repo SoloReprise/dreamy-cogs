@@ -614,7 +614,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         return True
 
     #TODO LO RELACIONADO CON LA POKEDEX
-    async def notify_dex_award(self, guild_id: int, user_id: str, pokemon_info: dict):
+    async def notify_dex_award(self, guild_id: int, user_id: str, pokemon_name: str):
         guild = self.bot.get_guild(int(guild_id))
         if not guild:
             return
@@ -628,12 +628,24 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         if not member:
             return
         
-        # Formatting the message to include user mention
-        initial_message = f"¡Enhorabuena, {member.mention}! ¡Has capturado un {pokemon_info['name']}!"
+        # Load pokemon_info from the corresponding Python file
+        pokemon_info = {}
+        pokemon_script_path = os.path.join(self.path, "pokedex", "functions", f"{pokemon_name.lower()}.py")
+        try:
+            with open(pokemon_script_path) as file:
+                exec(file.read(), pokemon_info)
+            pokemon_info = pokemon_info.get('pokemon_info', {})
+        except FileNotFoundError:
+            await channel.send(f"La información de {pokemon_name.capitalize()} no fue encontrada.")
+            return
+        except Exception as e:
+            await channel.send(f"Se produjo un error al cargar la información de {pokemon_name.capitalize()}: {e}")
+            return
 
-        # Attempting to fetch the badge information similar to how it's done in pokedex_check
-        pokemon_name = pokemon_info['name'].lower()
-        badge_image_path = os.path.join(self.path, "pokedex", "sprites", f"{pokemon_name}.png")
+        # Formatting the message to include user mention and capitalize the first letter of the Pokémon's name
+        initial_message = f"¡Enhorabuena, {member.mention}! ¡Has capturado un {pokemon_info.get('name', 'Pokémon desconocido').capitalize()}!"
+
+        badge_image_path = os.path.join(self.path, "pokedex", "sprites", f"{pokemon_name.lower()}.png")
         if not os.path.exists(badge_image_path):
             await channel.send(f"{initial_message}\nImagen de la insignia no encontrada.")
             return
@@ -641,14 +653,15 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         embed = discord.Embed(
             title=pokemon_info.get("name", "Insignia Desconocida").capitalize(), 
             description=pokemon_info.get("description", "Sin descripción disponible."),
-            color=discord.Color.green()  # Assuming you want to keep the embed color green or you could use member.color for user's role color
+            color=discord.Color.green()  # Or use member.color
         )
         
-        file = discord.File(badge_image_path, filename=f"{pokemon_name}.png")
-        embed.set_thumbnail(url=f"attachment://{pokemon_name}.png")
+        file = discord.File(badge_image_path, filename=f"{pokemon_name.lower()}.png")
+        embed.set_thumbnail(url=f"attachment://{pokemon_name.lower()}.png")
 
         # Sending the initial message and the embed as separate messages
-        await channel.send(initial_message, embed=embed, file=file)
+        await channel.send(initial_message)
+        await channel.send(embed=embed, file=file)
 
     async def award_dex_info(self, guild):
         """Generalized method to check and award various dex achievements."""
