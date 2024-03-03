@@ -226,7 +226,7 @@ class GeneralMixin(MixinMeta):
 
     @commands.command()
     @commands.max_concurrency(1, commands.BucketType.user)
-    async def pokedex(self, ctx):
+    async def pcdex(self, ctx):
         """Check your caught pokémon!"""
         async with ctx.typing():
             pokemons = await self.config.user(ctx.author).pokeids()

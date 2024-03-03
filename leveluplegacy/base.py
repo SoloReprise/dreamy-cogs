@@ -347,7 +347,7 @@ class UserCommands(MixinMeta, ABC):
         file = discord.File(temp)
         await ctx.send(file=file)
 
-    @commands.group(name="myprofile", aliases=["mypf", "pfset"])
+    @commands.group(name="oldmyprofile", aliases=["oldmypf", "oldpfset"])
     @commands.guild_only()
     @commands.bot_has_permissions(embed_links=True)
     async def set_profile(self, ctx: commands.Context):
@@ -872,7 +872,7 @@ class UserCommands(MixinMeta, ABC):
         self.data[ctx.guild.id]["users"][user_id]["blur"] = not current
         await ctx.send(_("Your profile background blur has been set to ") + str(not current))
 
-    @commands.command(name="pf")
+    @commands.command(name="oldpf")
     @commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def get_profile(self, ctx: commands.Context, *, user: discord.Member = None):
@@ -1473,7 +1473,7 @@ class UserCommands(MixinMeta, ABC):
             await ctx.send("Pokémon Dex notifications have been enabled.")
         else:
             await ctx.send("Pokémon Dex notifications have been disabled.")
-            
+
     @pfadmin.command(name="checkplays")
     @commands.has_permissions(administrator=True)  # Ensure only administrators can use this
     async def check_plays(self, ctx, member: discord.Member):
@@ -1564,7 +1564,7 @@ class UserCommands(MixinMeta, ABC):
 
         await ctx.send("Todos los pokedexes han sido reseteados exitosamente.")
 
-    @commands.group(name="newpfset", invoke_without_command=True)
+    @commands.group(name="pfset", invoke_without_command=True)
     async def new_profile_settings(self, ctx):
         """Configuraciones del perfil del usuario."""
         await ctx.send_help(self.new_profile_settings)
