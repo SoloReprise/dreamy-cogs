@@ -1139,8 +1139,6 @@ class UserCommands(MixinMeta, ABC):
 
             # Fetch the pokedex information using the same method as in pokelist
             pokedex = await self.config.member(user).pokedex() or []
-            if not pokedex:
-                await ctx.send(f"{user.display_name} does not have any Pokémon badges, showing empty Pokedex.")
 
             gid = ctx.guild.id
             if gid not in self.data:
