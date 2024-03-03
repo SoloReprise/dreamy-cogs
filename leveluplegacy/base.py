@@ -1460,6 +1460,20 @@ class UserCommands(MixinMeta, ABC):
     async def pfadmin(self, ctx):
         """Comandos de administración para la gestión de perfiles."""
 
+    @pfadmin.command(name="dexnotify")
+    @commands.has_permissions(administrator=True)
+    async def dex_notify(self, ctx, setting: str):
+        """Enable or disable Pokémon Dex notifications."""
+        if setting.lower() not in ["yes", "no"]:
+            await ctx.send("Please specify 'yes' to enable or 'no' to disable Dex notifications.")
+            return
+
+        await self.config.guild(ctx.guild).dex_notifications_enabled.set(setting.lower() == "yes")
+        if setting.lower() == "yes":
+            await ctx.send("Pokémon Dex notifications have been enabled.")
+        else:
+            await ctx.send("Pokémon Dex notifications have been disabled.")
+            
     @pfadmin.command(name="checkplays")
     @commands.has_permissions(administrator=True)  # Ensure only administrators can use this
     async def check_plays(self, ctx, member: discord.Member):

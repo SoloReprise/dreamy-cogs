@@ -166,6 +166,7 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
                 "bonus": 0,  # Bonus exp to award the top X winners
                 "last_embed": {},  # Dict repr of last winner embed
             },
+            "dex_notifications_enabled": True,
         }
         default_global = {
             "ignored_guilds": [],
@@ -618,6 +619,11 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         guild = self.bot.get_guild(int(guild_id))
         if not guild:
             return
+
+        # Check if Dex notifications are enabled for this guild
+        dex_notifications_enabled = await self.config.guild(guild).dex_notifications_enabled()
+        if not dex_notifications_enabled:
+            return 
         
         channel = guild.get_channel(1127633857072611328)
         if not channel:
