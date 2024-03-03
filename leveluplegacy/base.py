@@ -1138,9 +1138,8 @@ class UserCommands(MixinMeta, ABC):
                 return await ctx.send("Bots can't have profiles!")
 
             # Fetch the pokedex information using the same method as in pokelist
-            pokedex = await self.config.member(user).pokedex()
+            pokedex = await self.config.member(user).pokedex() or []
             if not pokedex:
-                pokedex = []  # Initialize pokedex to an empty list if no badges are found
                 await ctx.send(f"{user.display_name} does not have any Pokémon badges, showing empty Pokedex.")
 
             gid = ctx.guild.id
@@ -1148,36 +1147,31 @@ class UserCommands(MixinMeta, ABC):
                 await self.initialize()
 
             conf = self.data[gid]
-            users = conf["users"]
+            users = conf.get("users", {})
             user_id = str(user.id)
+            
+            # Ensure there is a basic user entry if not present
             if user_id not in users:
-                return await ctx.send("No information available yet!")
+                users[user_id] = {"pokedex": []}  # This is a placeholder; adjust according to your data structure
 
-            p = users[user_id]
+            p = users.get(user_id, {})
             async with ctx.typing():
-                # Direct hex to RGB conversion within the command
-                def hex_to_rgb(hex_color):
-                    hex_color = hex_color.lstrip('#')
-                    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
-
+                # Initialize args with defaults in case any info is missing
                 args = {
-                    "bg_image": p.get("background"),
+                    "bg_image": p.get("background", "default_background.png"),
                     "profile_image": user.display_avatar.url,
                     "user_name": user.name,
                     "colors": {
-                        "base": hex_to_rgb(str(user.colour)[1:]) if user.colour else None,
-                        "name": hex_to_rgb(p["colors"]["name"][1:]) if p["colors"] and "name" in p["colors"] else None,
-                        "stat": hex_to_rgb(p["colors"]["stat"][1:]) if p["colors"] and "stat" in p["colors"] else None,
-                        "levelbar": hex_to_rgb(p["colors"]["levelbar"][1:]) if p["colors"] and "levelbar" in p["colors"] else None,
+                        "base": (255, 255, 255),  # Default white color if not set
+                        "name": (255, 255, 255),  # Default white color if not set
+                        "stat": (255, 255, 255),  # Default white color if not set
+                        "levelbar": (255, 255, 255),  # Default white color if not set
                     },
-                    "font_name": p.get("font"),
+                    "font_name": p.get("font", "default_font.ttf"),
                     "render_gifs": p.get("render_gifs", False),
                     "blur": p.get("blur", False),
                     "pokedex": pokedex  
                 }
-
-                # Diagnostic print to check arguments
-                print(f"Args for generate_profile_back: {args}")
 
                 # Generate the profile back image
                 image = await asyncio.get_running_loop().run_in_executor(None, functools.partial(self.generate_profile_back, **args))
