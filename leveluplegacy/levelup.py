@@ -615,14 +615,12 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
 
     #TODO LO RELACIONADO CON LA POKEDEX
     async def notify_dex_award(self, guild_id: int, user_id: str, pokemon_info: dict):
-        guild = self.bot.get_guild(int(guild_id))  # Corrected guild_id conversion here
+        guild = self.bot.get_guild(int(guild_id))
         if not guild:
             return
         
-        # Retrieve the specific channel by its ID
         channel = guild.get_channel(1127633857072611328)
         if not channel:
-            # If the channel wasn't found, you might want to log this or handle it appropriately.
             print(f"Channel with ID 1127633857072611328 not found in guild {guild_id}.")
             return
         
@@ -630,17 +628,27 @@ class LevelUp(UserCommands, Generator, commands.Cog, metaclass=CompositeMetaClas
         if not member:
             return
         
+        # Formatting the message to include user mention
+        initial_message = f"¡Enhorabuena, {member.mention}! ¡Has capturado un {pokemon_info['name']}!"
+
+        # Attempting to fetch the badge information similar to how it's done in pokedex_check
+        pokemon_name = pokemon_info['name'].lower()
+        badge_image_path = os.path.join(self.path, "pokedex", "sprites", f"{pokemon_name}.png")
+        if not os.path.exists(badge_image_path):
+            await channel.send(f"{initial_message}\nImagen de la insignia no encontrada.")
+            return
+
         embed = discord.Embed(
-            title=f"Congratulations, {member.display_name}!",
-            description=f"You've captured a {pokemon_info['name']}!",
-            color=discord.Color.green()
+            title=pokemon_info.get("name", "Insignia Desconocida").capitalize(), 
+            description=pokemon_info.get("description", "Sin descripción disponible."),
+            color=discord.Color.green()  # Assuming you want to keep the embed color green or you could use member.color for user's role color
         )
-        badge_image_path = os.path.join(self.path, "pokedex", "sprites", f"{pokemon_info['name'].lower()}.png")
-        file = discord.File(badge_image_path, filename=f"{pokemon_info['name'].lower()}.png")
-        embed.set_thumbnail(url=f"attachment://{pokemon_info['name'].lower()}.png")
         
-        # Send the message to the specified channel
-        await channel.send(embed=embed, file=file)
+        file = discord.File(badge_image_path, filename=f"{pokemon_name}.png")
+        embed.set_thumbnail(url=f"attachment://{pokemon_name}.png")
+
+        # Sending the initial message and the embed as separate messages
+        await channel.send(initial_message, embed=embed, file=file)
 
     async def award_dex_info(self, guild):
         """Generalized method to check and award various dex achievements."""
