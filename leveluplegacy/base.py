@@ -1132,7 +1132,6 @@ class UserCommands(MixinMeta, ABC):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def new_get_profile_back(self, ctx: commands.Context, *, user: discord.Member = None):
         try:
-            """View the back of your profile"""
             if not user:
                 user = ctx.author
             if user.bot:
@@ -1141,9 +1140,9 @@ class UserCommands(MixinMeta, ABC):
             # Fetch the pokedex information using the same method as in pokelist
             pokedex = await self.config.member(user).pokedex()
             if not pokedex:
-                await ctx.send(f"{user.display_name} does not have any Pokémon badges.")
-                return
-        
+                pokedex = []  # Initialize pokedex to an empty list if no badges are found
+                await ctx.send(f"{user.display_name} does not have any Pokémon badges, showing empty Pokedex.")
+
             gid = ctx.guild.id
             if gid not in self.data:
                 await self.initialize()
@@ -1191,7 +1190,7 @@ class UserCommands(MixinMeta, ABC):
                     await ctx.send(file=discord_file)
         except Exception as e:
             await ctx.send(f"Error: {str(e)}")  # For debugging purposes only; remove in production
-                
+
     @commands.command(name="prestige")
     @commands.guild_only()
     @commands.bot_has_permissions(embed_links=True)
