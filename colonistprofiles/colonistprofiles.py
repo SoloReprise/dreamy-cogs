@@ -2,7 +2,7 @@ import random
 from urllib.parse import quote
 
 import discord
-from redbot.core import commands
+from redbot.core import app_commands, commands
 
 
 class ColonistProfiles(commands.Cog):
@@ -23,8 +23,13 @@ class ColonistProfiles(commands.Cog):
         """Nothing to delete."""
         return
 
-    @commands.command(name="profile", aliases=["colonistprofile", "colonist"])
-    async def profile(self, ctx: commands.Context, *, username: str):
+    @commands.hybrid_command(
+        name="profile",
+        aliases=["colonistprofile", "colonist"],
+        description="Show a mocked Colonist.io profile.",
+    )
+    @app_commands.describe(username="Colonist.io username to look up.")
+    async def profile(self, ctx: commands.Context, username: str):
         """Show a mocked Colonist.io profile for testing."""
 
         username = username.strip()
