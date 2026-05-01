@@ -4,7 +4,7 @@ from abc import ABC
 from typing import Any
 
 import discord
-from redbot.core import commands
+from redbot.core import app_commands, commands
 from redbot.core.utils.chat_formatting import error, humanize_timedelta
 
 from .abc import MixinMeta
@@ -18,12 +18,17 @@ def is_admin_or_mod(ctx):
 class AutoRoomCommands(MixinMeta, ABC):
     """The autoroom command."""
 
-    @commands.group()
+    @commands.hybrid_group(description="Change your voice room settings.")
+    @app_commands.guild_only()
     @commands.guild_only()
     async def room(self, ctx: commands.Context) -> None:
         """Change your voice room settings."""
 
-    @room.command(name="settings", aliases=["about", "info"])
+    @room.command(
+        name="settings",
+        aliases=["about", "info"],
+        description="Display the current room settings.",
+    )
     async def autoroom_settings(self, ctx: commands.Context) -> None:
         """Display the current room settings."""
         if not ctx.guild:
@@ -195,7 +200,7 @@ class AutoRoomCommands(MixinMeta, ABC):
 #        await ctx.tick()
 #        await delete(ctx.message, delay=5)
 
-    @room.command()
+    @room.command(description="Claim ownership of the room.")
     async def claim(self, ctx: commands.Context) -> None:
         """Claim ownership of the room."""
         if not ctx.guild:
@@ -249,7 +254,8 @@ class AutoRoomCommands(MixinMeta, ABC):
         await ctx.tick()
         await delete(ctx.message, delay=5)
 
-    @room.command()
+    @room.command(description="Move a member from the waiting room into your room.")
+    @app_commands.describe(member="The member to move into your room.")
     async def move(self, ctx: commands.Context, member: discord.Member) -> None:
         """Move a person to your room if they are in the specific room."""
         if not ctx.guild:
@@ -289,7 +295,9 @@ class AutoRoomCommands(MixinMeta, ABC):
         except discord.HTTPException:
             await ctx.send("There was an error while moving the member.")
 
-    @room.command()
+    @room.command(description="Change the name of your voice room.")
+    @app_commands.rename(new_name="name")
+    @app_commands.describe(new_name="The new room name, without the ◇║ prefix.")
     async def name(self, ctx: commands.Context, *, new_name: str) -> None:
         """Change the name of your voice room."""
         if not ctx.guild:
@@ -312,7 +320,8 @@ class AutoRoomCommands(MixinMeta, ABC):
         except discord.HTTPException:
             await ctx.send("Oops! There was an error while changing the room name.")
 
-    @room.command()
+    @room.command(description="Change the user limit of your voice room.")
+    @app_commands.describe(size="The new user limit. Use 0 to remove the limit.")
     async def size(self, ctx: commands.Context, size: int) -> None:
         """Change the user limit of your voice room."""
         if not ctx.guild:
@@ -344,17 +353,17 @@ class AutoRoomCommands(MixinMeta, ABC):
         except discord.HTTPException:
             await ctx.send("There was an error while changing the room user limit.")
 
-    @room.command()
+    @room.command(description="Make your room public.")
     async def public(self, ctx: commands.Context) -> None:
         """Make your room public."""
         await self._process_allow_deny(ctx, self.perms_public)
 
-    @room.command()
+    @room.command(description="Lock your room so others can see it, but nobody can join.")
     async def locked(self, ctx: commands.Context) -> None:
         """Lock your room so others can see it, but nobody can join."""
         await self._process_allow_deny(ctx, self.perms_locked)
 
-    @room.command()
+    @room.command(description="Make your room private.")
     async def private(self, ctx: commands.Context) -> None:
         """Make your room private."""
         await self._process_allow_deny(ctx, self.perms_private)
@@ -368,7 +377,12 @@ class AutoRoomCommands(MixinMeta, ABC):
 #            ctx, self.perms_public, member_or_role=member_or_role
 #        )
 
-    @room.command(aliases=["ban", "block"])
+    @room.command(
+        aliases=["ban", "block"],
+        description="Block a member or role from entering your room.",
+    )
+    @app_commands.rename(member_or_role="target")
+    @app_commands.describe(member_or_role="The member or role to block from your room.")
     async def deny(
         self, ctx: commands.Context, member_or_role: discord.Role | discord.Member
     ) -> None:
