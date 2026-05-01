@@ -1,6 +1,7 @@
 """The autoroom command."""
 import datetime
 from abc import ABC
+from contextlib import suppress
 from typing import Any
 
 import discord
@@ -205,6 +206,7 @@ class AutoRoomCommands(MixinMeta, ABC):
         """Claim ownership of the room."""
         if not ctx.guild:
             return
+        await self._defer_slash(ctx)
         new_owner = ctx.message.author
         if not isinstance(new_owner, discord.Member):
             return
@@ -251,8 +253,7 @@ class AutoRoomCommands(MixinMeta, ABC):
         await self.config.channel(autoroom_channel).owner.set(new_owner.id)
         if bucket:
             bucket.reset()
-        await ctx.tick()
-        await delete(ctx.message, delay=5)
+        await self._confirm_or_tick(ctx, "You are now the owner of this room.")
 
     @room.command(description="Move a member from the waiting room into your room.")
     @app_commands.describe(member="The member to move into your room.")
@@ -260,6 +261,7 @@ class AutoRoomCommands(MixinMeta, ABC):
         """Move a person to your room if they are in the specific room."""
         if not ctx.guild:
             return
+        await self._defer_slash(ctx)
 
         # Check if the command author is the owner of the AutoRoom
         autoroom_channel, autoroom_info = await self._get_autoroom_channel_and_info(
@@ -302,6 +304,7 @@ class AutoRoomCommands(MixinMeta, ABC):
         """Change the name of your voice room."""
         if not ctx.guild:
             return
+        await self._defer_slash(ctx)
 
         # Check if the command author is the owner of the AutoRoom
         autoroom_channel, autoroom_info = await self._get_autoroom_channel_and_info(
@@ -326,6 +329,7 @@ class AutoRoomCommands(MixinMeta, ABC):
         """Change the user limit of your voice room."""
         if not ctx.guild:
             return
+        await self._defer_slash(ctx)
 
         # Check if the command author is the owner of the AutoRoom
         autoroom_channel, autoroom_info = await self._get_autoroom_channel_and_info(
@@ -356,17 +360,23 @@ class AutoRoomCommands(MixinMeta, ABC):
     @room.command(description="Make your room public.")
     async def public(self, ctx: commands.Context) -> None:
         """Make your room public."""
-        await self._process_allow_deny(ctx, self.perms_public)
+        await self._process_allow_deny(
+            ctx, self.perms_public, success_message="Your room is now public."
+        )
 
     @room.command(description="Lock your room so others can see it, but nobody can join.")
     async def locked(self, ctx: commands.Context) -> None:
         """Lock your room so others can see it, but nobody can join."""
-        await self._process_allow_deny(ctx, self.perms_locked)
+        await self._process_allow_deny(
+            ctx, self.perms_locked, success_message="Your room is now locked."
+        )
 
     @room.command(description="Make your room private.")
     async def private(self, ctx: commands.Context) -> None:
         """Make your room private."""
-        await self._process_allow_deny(ctx, self.perms_private)
+        await self._process_allow_deny(
+            ctx, self.perms_private, success_message="Your room is now private."
+        )
 
 #    @room.command(aliases=["add"])
 #    async def allow(
@@ -393,7 +403,10 @@ class AutoRoomCommands(MixinMeta, ABC):
         if not ctx.guild:
             return
         if await self._process_allow_deny(
-            ctx, self.perms_private, member_or_role=member_or_role
+            ctx,
+            self.perms_private,
+            member_or_role=member_or_role,
+            success_message="That target has been blocked from your room.",
         ):
             channel = self._get_current_voice_channel(ctx.message.author)
             if not channel or not channel.permissions_for(ctx.guild.me).move_members:
@@ -408,10 +421,12 @@ class AutoRoomCommands(MixinMeta, ABC):
         perm_overwrite: dict[str, bool],
         *,
         member_or_role: discord.Role | discord.Member | None = None,
+        success_message: str = "Room permissions updated.",
     ) -> bool:
         """Actually do channel edit for allow/deny."""
         if not ctx.guild:
             return False
+        await self._defer_slash(ctx)
         autoroom_channel, autoroom_info = await self._get_autoroom_channel_and_info(ctx)
         if not autoroom_channel or not autoroom_info:
             return False
@@ -518,9 +533,25 @@ class AutoRoomCommands(MixinMeta, ABC):
                 overwrites=perms.overwrites if perms.overwrites else {},
                 reason="AutoRoom: Permissions changed",
             )
+        await self._confirm_or_tick(ctx, success_message)
+        return True
+
+    @staticmethod
+    async def _defer_slash(ctx: commands.Context) -> None:
+        """Acknowledge slash invocations before doing slower voice channel edits."""
+        interaction = getattr(ctx, "interaction", None)
+        if interaction and not interaction.response.is_done():
+            with suppress(discord.HTTPException, discord.InteractionResponded):
+                await ctx.defer()
+
+    @staticmethod
+    async def _confirm_or_tick(ctx: commands.Context, message: str) -> None:
+        """Send a slash response, while keeping the old tick behavior for text commands."""
+        if getattr(ctx, "interaction", None):
+            await ctx.send(message)
+            return
         await ctx.tick()
         await delete(ctx.message, delay=5)
-        return True
 
     @staticmethod
     def _get_current_voice_channel(
