@@ -1,0 +1,22 @@
+{
+    "name": "colonist-profiles",
+    "short": "Mocked Colonist.io profile embeds.",
+    "description": "Creates mocked Colonist.io profile embeds for testing profile display features.",
+    "end_user_data_statement": "This cog does not persistently store data or metadata about users.",
+    "install_msg": "Thank you for installing colonist-profiles. Use `[p]profile <username>` to generate a mocked Colonist.io profile.",
+    "author": [
+        "Dreamy"
+    ],
+    "required_cogs": {},
+    "requirements": [],
+    "tags": [
+        "colonist",
+        "colonist-profiles",
+        "profile",
+        "mock"
+    ],
+    "min_bot_version": "3.5.0",
+    "hidden": false,
+    "disabled": false,
+    "type": "COG"
+}
