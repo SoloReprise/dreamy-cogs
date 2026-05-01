@@ -13,8 +13,8 @@ from .abc import MixinMeta
 from .pcx_lib import SettingDisplay
 
 channel_name_template = {
-    "username": "{{username}}'s Room{% if dupenum > 1 %} ({{dupenum}}){% endif %}",
-    "game": "{{game}}{% if not game %}{{username}}'s Room{% endif %}{% if dupenum > 1 %} ({{dupenum}}){% endif %}",
+    "username": "◇║{{username}}'s Room{% if dupenum > 1 %} ({{dupenum}}){% endif %}",
+    "game": "◇║{{game}}{% if not game %}{{username}}'s Room{% endif %}{% if dupenum > 1 %} ({{dupenum}}){% endif %}",
 }
 
 
@@ -357,7 +357,7 @@ class AutoRoomSetCommands(MixinMeta, ABC):
             "\n"
             "When an AutoRoom is created, a name will be generated for it. How would you like that name to be generated?"
             "\n\n"
-            f'`username` - Shows up as "{ctx.author.display_name}\'s Room"\n'
+            f'`username` - Shows up as "◇║{ctx.author.display_name}\'s Room"\n'
             "`game    ` - AutoRoom Owner's playing game, otherwise `username`"
         )
         answer = None
@@ -507,10 +507,10 @@ class AutoRoomSetCommands(MixinMeta, ABC):
     async def modify_name_username(
         self, ctx: commands.Context, autoroom_source: discord.VoiceChannel
     ) -> None:
-        """Default format: PhasecoreX's Room.
+        """Default format: ◇║PhasecoreX's Room.
 
         Custom format example:
-        `{{username}}'s Room{% if dupenum > 1 %} ({{dupenum}}){% endif %}`
+        `◇║{{username}}'s Room{% if dupenum > 1 %} ({{dupenum}}){% endif %}`
         """  # noqa: D401
         await self._save_room_name(ctx, autoroom_source, "username")
 
@@ -521,7 +521,7 @@ class AutoRoomSetCommands(MixinMeta, ABC):
         """The users current playing game, otherwise the username format.
 
         Custom format example:
-        `{{game}}{% if not game %}{{username}}'s Room{% endif %}{% if dupenum > 1 %} ({{dupenum}}){% endif %}`
+        `◇║{{game}}{% if not game %}{{username}}'s Room{% endif %}{% if dupenum > 1 %} ({{dupenum}}){% endif %}`
         """  # noqa: D401
         await self._save_room_name(ctx, autoroom_source, "game")
 

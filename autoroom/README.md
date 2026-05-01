@@ -45,10 +45,10 @@ The default AutoRoom name format is based on the AutoRoom Owners username. Using
 
 You are also able to use `if`/`elif`/`else`/`endif` statements in order to conditionally show or hide parts of your template. Here are the templates for the two default formats included:
 
--   `username` - `{{username}}'s Room{% if dupenum > 1 %} ({{dupenum}}){% endif %}`
--   `game` - `{{game}}{% if not game %}{{username}}'s Room{% endif %}{% if dupenum > 1 %} ({{dupenum}}){% endif %}`
+-   `username` - `◇║{{username}}'s Room{% if dupenum > 1 %} ({{dupenum}}){% endif %}`
+-   `game` - `◇║{{game}}{% if not game %}{{username}}'s Room{% endif %}{% if dupenum > 1 %} ({{dupenum}}){% endif %}`
 
-The username format is pretty self-explanatory: put the username, along with "'s Room" after it. For the game format, we put the game name, and then if there isn't a game, show `{{username}}'s Room` instead. Remember, if no game is being played, `{{game}}` won't return anything.
+The username format is pretty self-explanatory: put the username, along with "'s Room" after it, prefixed by `◇║`. For the game format, we put the game name after the prefix, and then if there isn't a game, show `{{username}}'s Room` instead. Remember, if no game is being played, `{{game}}` won't return anything.
 
 The last bit of both of these is `{% if dupenum > 1 %} ({{dupenum}}){% endif %}`. With this, we are checking if `dupenum` is greater than 1. If it is, we display ` ({{dupenum}})` at the end of our room name. This way, only duplicate named rooms will ever get a ` (2)`, ` (3)`, etc. appended to them, no ` (1)` will be shown.
 
