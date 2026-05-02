@@ -1,0 +1,21 @@
+{
+    "name": "CheckIn",
+    "short": "Reaction based check-in role assignment.",
+    "description": "Publishes a check-in message and assigns the configured role when members react with the checkmark emoji.",
+    "end_user_data_statement": "This cog does not persistently store data or metadata about users. It stores guild role IDs, channel IDs, and message IDs for configured check-in posts.",
+    "install_msg": "Use `[p]checkin rol @Checked-in` and then `[p]checkin mensaje #canal`.",
+    "author": [
+        "dreamy-cogs"
+    ],
+    "required_cogs": {},
+    "requirements": [],
+    "tags": [
+        "checkin",
+        "roles",
+        "reaction"
+    ],
+    "min_bot_version": "3.5.0",
+    "hidden": false,
+    "disabled": false,
+    "type": "COG"
+}
